@@ -32,10 +32,50 @@
             HeightRequest="424"
             WidthRequest="342"
         />
-        <abpc:PlaybackControlPanel
+        <StackLayout
+            Grid.Row="2"
+            Orientation="Vertical"
+            HorizontalOptions="FillAndExpand"
+            VerticalOptions="StartAndExpand">
+            <Label Text="SAMPLE" />
+            <StackLayout
+                Orientation="Horizontal"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="Center">
+                <Button
+                    BorderColor="White"
+                    BorderWidth="1"
+                    CornerRadius="24"
+                    BackgroundColor="Transparent"
+                    Margin="0,8,12,8"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                />
+                <Button
+                    BorderColor="White"
+                    BorderWidth="1"
+                    CornerRadius="32"
+                    Command="{Binding Path=Play, Mode=OneWay}"
+                    BackgroundColor="Transparent"
+                    Margin="12,0"
+                    WidthRequest="64"
+                    HeightRequest="64"
+                />
+                <Button
+                    BorderColor="White"
+                    BorderWidth="1"
+                    CornerRadius="24"
+                    BackgroundColor="Transparent"
+                    Margin="12,8,0,8"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                />
+            </StackLayout>
+        </StackLayout>
+        <!-- abpc:PlaybackControl
             Grid.Row="2"
             Play="{Binding Path=Play, Mode=OneWay}">
             
-        </abpc:PlaybackControlPanel>
+        </ -->
     </Grid>
 </ContentPage>

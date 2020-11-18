@@ -6,9 +6,13 @@ using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Controls
 {
-    public class PlaybackControl : TemplatedView
+    public class PlaybackControl : TemplatedControl
     {
+        private const string PlayButtonPartName = "PlayButton";
+
         public static readonly BindableProperty PlayProperty;
+
+        private Button play;
 
         public ICommand Play
         {
@@ -21,10 +25,17 @@ namespace AudioBookPlayer.App.Controls
             PlayProperty = BindableProperty.Create(
                 nameof(Play),
                 typeof(ICommand),
-                typeof(PlaybackControlPanel),
+                typeof(PlaybackControl),
                 defaultBindingMode: BindingMode.OneWay,
                 propertyChanged: OnPlayPropertyChanged
             );
+        }
+
+        protected override void OnApplyTemplate()
+        {
+            play = GetTemplatePart<Button>(PlayButtonPartName);
+
+            base.OnApplyTemplate();
         }
 
         private void OnPlayChanged(ICommand oldValue, ICommand newValue)

@@ -55,14 +55,18 @@ namespace AudioBookPlayer.App.ViewModels
                 Debug.WriteLine($"Drive: '{drive}'");
             }
 
-            var directories = Directory.EnumerateDirectories("/storage/0F1A-3D0D");
+            /*var directories = Directory.EnumerateDirectories("/storage/0F1A-3D0D");
             
             foreach (var directory in directories)
             {
                 Debug.WriteLine($"Directory: '{directory}'");
-            }
+            }*/
 
-            using (var stream = File.OpenRead("/storage/0F1A-3D0D/Audio/Books/book.m4b"))
+            // /storage/emulated/0/Download/book.m4b
+            // /storage/0F1A-3D0D/Audio/Books/book.m4b
+            // FileSystem.CacheDirectory
+            var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            using (var stream = File.OpenRead("Music/book.m4b"))
             {
                 using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
                 {

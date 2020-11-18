@@ -3,6 +3,7 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:prism="http://prismlibrary.com"
+    xmlns:ownc="clr-namespace:AudioBookPlayer.App.Controls"
     x:Class="AudioBookPlayer.App.App"
     UserAppTheme="Dark">
   <Application.Resources>
@@ -53,5 +54,41 @@
             Value="{AppThemeBinding Light={StaticResource Key=LightPrimaryButtonBackgroundColor}, Dark={StaticResource Key=DarkPrimaryButtonBackgroundColor}}"
         />
     </Style>
+
+        <Style TargetType="ownc:PlaybackControl">
+            <Setter Property="ControlTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <StackLayout
+                            Orientation="Vertical"
+                            HorizontalOptions="FillAndExpand"
+                            VerticalOptions="CenterAndExpand">
+                            <StackLayout
+                                Orientation="Horizontal"
+                                HorizontalOptions="CenterAndExpand"
+                                VerticalOptions="StartAndExpand">
+                                <Frame
+                                    CornerRadius="24"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                />
+                                <Button
+                                    Command="{TemplateBinding Path=Play}"
+                                    CornerRadius="32"
+                                    WidthRequest="64"
+                                    HeightRequest="64"
+                                />
+                                <Frame
+                                    CornerRadius="24"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                />
+                            </StackLayout>
+                        </StackLayout>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+          
   </Application.Resources>
 </prism:PrismApplication>
