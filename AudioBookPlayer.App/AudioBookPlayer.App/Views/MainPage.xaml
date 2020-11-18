@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:prism="http://prismlibrary.com"
+    xmlns:abpc="clr-namespace:AudioBookPlayer.App.Controls"
+    x:Class="AudioBookPlayer.App.Views.MainPage"
+    prism:ViewModelLocator.AutowireViewModel="True"
+    Title="{Binding Title, Mode=OneTime}"
+    Style="{StaticResource Key=ContentPageStyle}">
+    <ContentPage.Resources>
+    </ContentPage.Resources>
+    <Grid
+        HorizontalOptions="CenterAndExpand"
+        VerticalOptions="StartAndExpand">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="92" />
+        </Grid.RowDefinitions>
+        <Label
+            Grid.Row="0"
+            Text="Sample"
+        />
+        <Image
+            Grid.Row="1"
+            BackgroundColor="DimGray"
+            Source="{Binding Path=ImageSource, Mode=TwoWay}"
+            Aspect="AspectFill"
+            HorizontalOptions="FillAndExpand"
+            VerticalOptions="FillAndExpand"
+            HeightRequest="424"
+            WidthRequest="342"
+        />
+        <abpc:PlaybackControlPanel
+            Grid.Row="2"
+            Play="{Binding Path=Play, Mode=OneWay}">
+            
+        </abpc:PlaybackControlPanel>
+    </Grid>
+</ContentPage>

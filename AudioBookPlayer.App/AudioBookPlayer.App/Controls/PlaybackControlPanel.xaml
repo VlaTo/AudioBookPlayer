@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="AudioBookPlayer.App.Controls.PlaybackControlPanel">
+    <StackLayout
+        BackgroundColor="{TemplateBinding Path=BackgroundColor}"
+        Orientation="Vertical"
+        HorizontalOptions="FillAndExpand"
+        VerticalOptions="FillAndExpand">
+        <Label Text="Play" />
+        <StackLayout
+            Orientation="Horizontal"
+            HorizontalOptions="CenterAndExpand"
+            VerticalOptions="StartAndExpand">
+            <Frame
+                BackgroundColor="Gray"
+                WidthRequest="48"
+                HeightRequest="48"
+            />
+            <Button
+                CornerRadius="32"
+                BorderColor="White"
+                Command="{TemplateBinding Path=Play}"
+                Text="Play"
+                WidthRequest="64"
+                HeightRequest="64"
+            />
+            <Frame
+                BackgroundColor="Gray"
+                WidthRequest="48"
+                HeightRequest="48"
+            />
+        </StackLayout>
+    </StackLayout>
+</ContentView>
