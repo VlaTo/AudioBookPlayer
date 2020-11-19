@@ -5,6 +5,8 @@ namespace AudioBookPlayer.App.Core.Services
 {
     public interface ISourceStreamProvider
     {
+        string GetBookPath();
+
         Task<Stream> GetStreamAsync(); 
     }
 }

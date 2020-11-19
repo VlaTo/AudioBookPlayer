@@ -9,6 +9,7 @@ using Prism.Ioc;
 [assembly: UsesPermission(Android.Manifest.Permission.AccessMediaLocation)]
 [assembly: UsesPermission(Android.Manifest.Permission.MediaContentControl)]
 [assembly: UsesPermission(Android.Manifest.Permission.ReadExternalStorage)]
+[assembly: UsesPermission(Android.Manifest.Permission.ManageDocuments)]
 
 namespace AudioBookPlayer.App.Droid
 {
@@ -27,7 +28,7 @@ namespace AudioBookPlayer.App.Droid
             LoadApplication(new App(new AndroidInitializer()));
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 

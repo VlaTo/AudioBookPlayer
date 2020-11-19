@@ -10,9 +10,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using static Xamarin.Essentials.Permissions;
 
 namespace AudioBookPlayer.App.ViewModels
 {
@@ -64,9 +66,21 @@ namespace AudioBookPlayer.App.ViewModels
 
             // /storage/emulated/0/Download/book.m4b
             // /storage/0F1A-3D0D/Audio/Books/book.m4b
+            // content://com.android.providers.downloads.documents/document/1
             // FileSystem.CacheDirectory
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            using (var stream = File.OpenRead("Music/book.m4b"))
+
+            //var path= Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
+
+            var status = await CheckAndRequestPermissionAsync(new Permissions.StorageRead());
+
+            if (PermissionStatus.Denied == status)
+            {
+                return;
+            }
+
+            var path1 = Path.Combine(streamProvider.GetBookPath(), "book.m4b");
+
+            using (var stream = File.OpenRead("/storage/emulated/0/Download/book.m4b"))
             {
                 using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
                 {
@@ -89,6 +103,26 @@ namespace AudioBookPlayer.App.ViewModels
                     }
                 }
             }
+        }
+
+        private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)
+            where T : BasePermission
+        {
+            var status = await permission.CheckStatusAsync();
+
+            if (PermissionStatus.Granted == status)
+            {
+                return status;
+            }
+
+            if (PermissionStatus.Denied == status && DevicePlatform.iOS == DeviceInfo.Platform)
+            {
+                return status;
+            }
+
+            status = await permission.RequestAsync();
+
+            return status;
         }
     }
 }
