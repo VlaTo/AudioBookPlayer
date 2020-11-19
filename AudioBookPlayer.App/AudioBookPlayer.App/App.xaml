@@ -55,40 +55,51 @@
         />
     </Style>
 
-        <Style TargetType="ownc:PlaybackControl">
-            <Setter Property="ControlTemplate">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <StackLayout
-                            Orientation="Vertical"
-                            HorizontalOptions="FillAndExpand"
-                            VerticalOptions="CenterAndExpand">
-                            <StackLayout
-                                Orientation="Horizontal"
-                                HorizontalOptions="CenterAndExpand"
-                                VerticalOptions="StartAndExpand">
-                                <Frame
-                                    CornerRadius="24"
-                                    WidthRequest="48"
-                                    HeightRequest="48"
-                                />
-                                <Button
-                                    Command="{TemplateBinding Path=Play}"
-                                    CornerRadius="32"
-                                    WidthRequest="64"
-                                    HeightRequest="64"
-                                />
-                                <Frame
-                                    CornerRadius="24"
-                                    WidthRequest="48"
-                                    HeightRequest="48"
-                                />
-                            </StackLayout>
-                        </StackLayout>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+    <Style
+        x:Key="PlayPauseButtonStyle"
+        TargetType="Button">
+        <Setter
+            Property="BackgroundColor"
+            Value="{AppThemeBinding Light={StaticResource Key=LightPrimaryButtonBackgroundColor}, Dark={StaticResource Key=DarkPrimaryButtonBackgroundColor}}"
+        />
+        <Setter Property="CornerRadius" Value="32" />
+        <Setter Property="BorderColor" Value="White" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="WidthRequest" Value="64" />
+        <Setter Property="HeightRequest" Value="64" />
+    </Style>
+
+    <ControlTemplate x:Key="PlaybackControlTemplate">
+        <StackLayout
+            Orientation="Vertical"
+            HorizontalOptions="FillAndExpand"
+            VerticalOptions="Center">
+            <StackLayout
+                Orientation="Horizontal"
+                HorizontalOptions="CenterAndExpand"
+                VerticalOptions="Center">
+                <Frame
+                    CornerRadius="24"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                />
+                <Button
+                    x:Name="PlayButton"
+                    Command="{TemplateBinding Path=Play, Mode=OneWay}"
+                    Style="{StaticResource Key=PlayPauseButtonStyle}"
+                />
+                <Frame
+                    CornerRadius="24"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                />
+            </StackLayout>
+        </StackLayout>
+    </ControlTemplate>
+
+    <Style TargetType="ownc:PlaybackControl">
+        <Setter Property="ControlTemplate" Value="{StaticResource Key=PlaybackControlTemplate}" />
+    </Style>
           
   </Application.Resources>
 </prism:PrismApplication>

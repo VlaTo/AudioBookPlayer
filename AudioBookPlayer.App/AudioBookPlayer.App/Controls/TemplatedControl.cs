@@ -10,7 +10,6 @@ namespace AudioBookPlayer.App.Controls
         protected TPart GetTemplatePart<TPart>(string name, bool throwException = true)
             where TPart : VisualElement
         {
-            //this.ControlTemplate
             var element = GetTemplateChild(name) as TPart;
 
             if (null == element && throwException)
