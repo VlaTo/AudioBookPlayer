@@ -94,7 +94,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 case 0:
                 {
                     var value = StreamHelper.ReadUInt32(atom.Stream);
-                    created = DateTimeOffset.FromUnixTimeSeconds(value).ToUniversalTime().DateTime;
+                    
+                    created = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(value);
 
                     value = StreamHelper.ReadUInt32(atom.Stream);
                     modified = DateTime.UtcNow;
