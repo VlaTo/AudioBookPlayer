@@ -2,14 +2,9 @@
 using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
 using Prism.Commands;
-using Prism.Mvvm;
 using Prism.Navigation;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
@@ -22,6 +17,8 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly ISourceStreamProvider streamProvider;
         private ImageSource imageSource;
+        private string bookTitle;
+        private string bookSubtitle;
 
         public ImageSource ImageSource
         {
@@ -29,7 +26,24 @@ namespace AudioBookPlayer.App.ViewModels
             private set => SetProperty(ref imageSource, value);
         }
 
+        public string BookTitle
+        {
+            get => bookTitle;
+            set => SetProperty(ref bookTitle, value);
+        }
+
+        public string BookSubtitle
+        {
+            get => bookSubtitle;
+            set => SetProperty(ref bookSubtitle, value);
+        }
+
         public ICommand Play
+        {
+            get;
+        }
+
+        public ICommand ChangeCover
         {
             get;
         }
@@ -41,6 +55,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             Title = "Main Page";
             Play = new DelegateCommand(DoPlayCommand);
+            ChangeCover = new DelegateCommand(DoChangeCoverCommand);
             //ImageSource = new ImageSource();
         }
 
@@ -92,9 +107,23 @@ namespace AudioBookPlayer.App.ViewModels
                         {
                             case MetaInformationStreamItem streamItem:
                             {
-                                if (WellKnownMetaItemNames.Cover.Equals(item.Key))
+                                if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
                                 {
                                     ImageSource = ImageSource.FromStream(() => streamItem.Stream);
+                                }
+
+                                break;
+                            }
+
+                            case MetaInformationTextItem textItem:
+                            {
+                                if (WellKnownMetaItemNames.Title.Equals(textItem.Key))
+                                {
+                                    BookTitle = textItem.Text;
+                                }
+                                else if (WellKnownMetaItemNames.Subtitle.Equals(textItem.Key))
+                                {
+                                    BookSubtitle = textItem.Text;
                                 }
 
                                 break;
@@ -103,6 +132,11 @@ namespace AudioBookPlayer.App.ViewModels
                     }
                 }
             }
+        }
+
+        private void DoChangeCoverCommand()
+        {
+            Debug.WriteLine("[MainPageViewModel] [DoChangeCoverCommand]");
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)

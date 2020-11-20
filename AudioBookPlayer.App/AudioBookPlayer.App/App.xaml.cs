@@ -5,6 +5,8 @@ using Prism.Ioc;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
+[assembly: ExportFont("fontello.ttf", Alias = "IconsFont")]
+
 namespace AudioBookPlayer.App
 {
     public partial class App

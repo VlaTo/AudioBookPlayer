@@ -6,31 +6,68 @@
     xmlns:ownc="clr-namespace:AudioBookPlayer.App.Controls"
     x:Class="AudioBookPlayer.App.Views.MainPage"
     prism:ViewModelLocator.AutowireViewModel="True"
-    Title="{Binding Title, Mode=OneTime}"
+    NavigationPage.HasNavigationBar="False"
     Style="{StaticResource Key=ContentPageStyle}">
     <StackLayout
         Orientation="Vertical"
         HorizontalOptions="Fill"
         VerticalOptions="Fill">
-        <Label
-            Text="Sample"
+        <StackLayout
+            Orientation="Vertical"
             HorizontalOptions="Fill"
-            VerticalOptions="Start"
-        />
-        <Grid
-                BackgroundColor="DimGray"
-            HorizontalOptions="CenterAndExpand"
-            VerticalOptions="FillAndExpand">
-            <Image
-                BackgroundColor="AliceBlue"
-                Source="{Binding Path=ImageSource, Mode=TwoWay}"
-                Aspect="AspectFill"
-                WidthRequest="140"
-                HeightRequest="140"
+            VerticalOptions="Start">
+            <Label
+                Style="{StaticResource Key=BookTitleLabelStyle}"
+                Text="{Binding Path=BookTitle, Mode=OneWay}"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Margin="4,12,4,0"
+                HorizontalOptions="Fill"
+                VerticalOptions="Start"
             />
+            <Label
+                Style="{StaticResource Key=BookSubtitleLabelStyle}"
+                Text="{Binding Path=BookSubtitle, Mode=OneWay}"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                Margin="4,0,4,8"
+                HorizontalOptions="Fill"
+                VerticalOptions="Start"
+            />
+        </StackLayout>
+        <Grid
+            HorizontalOptions="Fill"
+            VerticalOptions="FillAndExpand">
+            <Grid.HeightRequest>
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="Android" Value="324" />
+                    <On Platform="iOS" Value="348" />
+                </OnPlatform>
+            </Grid.HeightRequest>
+            <Grid.Padding>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="12" />
+                    <On Platform="iOS" Value="12" />
+                </OnPlatform>
+            </Grid.Padding>
+            <Grid.Margin>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="48,12" />
+                    <On Platform="iOS" Value="48,12" />
+                </OnPlatform>
+            </Grid.Margin>
+            <Image
+                Source="{Binding Path=ImageSource, Mode=OneWay}"
+                Aspect="AspectFit"
+                MinimumHeightRequest="600"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Path=ChangeCover, Mode=OneWay}" />
+                </Image.GestureRecognizers>
+            </Image>
         </Grid>
         <ownc:PlaybackControl
-            BackgroundColor="AliceBlue"
             Play="{Binding Path=Play, Mode=OneWay}"
             HorizontalOptions="FillAndExpand"
             VerticalOptions="End">

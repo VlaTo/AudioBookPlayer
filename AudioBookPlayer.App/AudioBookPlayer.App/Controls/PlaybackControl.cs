@@ -8,11 +8,11 @@ namespace AudioBookPlayer.App.Controls
 {
     public class PlaybackControl : TemplatedControl
     {
-        private const string PlayButtonPartName = "PlayButton";
+        private const string PlayButtonPartName = "PART_PlayButton";
 
         public static readonly BindableProperty PlayProperty;
 
-        private Button play;
+        private ImageButton play;
 
         public ICommand Play
         {
@@ -33,7 +33,7 @@ namespace AudioBookPlayer.App.Controls
 
         protected override void OnApplyTemplate()
         {
-            play = GetTemplatePart<Button>(PlayButtonPartName);
+            play = GetTemplatePart<ImageButton>(PlayButtonPartName);
 
             base.OnApplyTemplate();
         }

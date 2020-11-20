@@ -1,5 +1,7 @@
 ﻿using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime.Chunks;
+using LibraProgramming.Media.QuickTime.Lists;
+using System.Diagnostics;
 using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Visitors
@@ -21,12 +23,52 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 {
                     case AtomTypes.Covr:
                     {
-                        var stream = new MemoryStream(meta.DataChunk.Data);
-
-                        information.Add(MetaInformationItem.FromStream(WellKnownMetaItemNames.Cover, stream));
+                        if (DataType.Binary == meta.DataChunk.DataType)
+                        {
+                            var stream = new MemoryStream(meta.DataChunk.Data);
+                            information.Add(MetaInformationItem.FromStream(WellKnownMetaItemNames.Cover, stream));
+                        }
 
                         break;
                     }
+
+                    case AtomTypes.Alb:
+                    {
+                        if (DataType.Text == meta.DataChunk.DataType)
+                        {
+                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Title, meta.DataChunk.Text);
+                            information.Add(info);
+                        }
+
+                        break;
+                    }
+
+                    case AtomTypes.Art:
+                    {
+                        if (DataType.Text == meta.DataChunk.DataType)
+                        {
+                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Subtitle, meta.DataChunk.Text);
+                            information.Add(info);
+                        }
+
+                        break;
+                    }
+
+                    default:
+                        {
+                            if (DataType.Binary == meta.DataChunk.DataType)
+                            {
+                                Debug.WriteLine($"");
+                            }
+                            else if (DataType.Text == meta.DataChunk.DataType)
+                            {
+                                meta.Debug(0);
+
+                                Debug.WriteLine($"Text: '{meta.DataChunk.Text}'");
+                            }
+
+                            break;
+                        }
                 }
             }
         }
