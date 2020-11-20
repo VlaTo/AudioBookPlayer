@@ -1,36 +1,77 @@
-﻿namespace LibraProgramming.QuickTime.Container.Chunks
+﻿using LibraProgramming.Media.QuickTime.Components;
+using LibraProgramming.Media.QuickTime.Extensions;
+using System;
+using System.IO;
+using System.Text;
+
+namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    /*
     [Chunk(AtomTypes.Mvhd)]
-    public sealed class MvhdChunk : Chunk
+    internal sealed class MvhdChunk : Chunk
     {
         public uint Version
         {
             get;
+            private set;
+        }
+
+        public uint PlaybackSpeed
+        {
+            get;
+            private set;
+        }
+
+        public ushort Volume
+        {
+            get;
+            private set;
+        }
+
+        public ulong PreviewIndex
+        {
+            get;
+            private set;
+        }
+
+        public uint PosterIndex
+        {
+            get;
+            private set;
+        }
+
+        public int NextId
+        {
+            get;
+            private set;
+        }
+
+        public TimeSpan SelectionTime
+        {
+            get;
+            private set;
         }
 
         public DateTime Created
         {
             get;
+            private set;
         }
 
         public DateTime Modified
         {
             get;
+            private set;
         }
 
         public TimeSpan Duration
         {
             get;
+            private set;
         }
 
-        private MvhdChunk(uint version, DateTime created, DateTime modified, TimeSpan duration)
+        private MvhdChunk()
             : base(AtomTypes.Mvhd)
         {
-            Version = version;
-            Created = created;
-            Modified = modified;
-            Duration = duration;
         }
 
         public static MvhdChunk ReadFrom(Atom atom)
@@ -78,7 +119,7 @@
                 }
             }
 
-            var timeScale= StreamHelper.ReadUInt32(atom.Stream);
+            var timeScale = StreamHelper.ReadUInt32(atom.Stream);
 
             switch (version)
             {
@@ -86,7 +127,7 @@
                 {
                     var value = StreamHelper.ReadUInt32(atom.Stream);
 
-                    duration = TimeSpan.FromSeconds(value);
+                    duration = TimeSpan.FromMilliseconds(value);
 
                     break;
                 }
@@ -95,7 +136,7 @@
                 {
                     var value = StreamHelper.ReadUInt64(atom.Stream);
 
-                    duration = TimeSpan.FromSeconds(value);
+                    duration = TimeSpan.FromMilliseconds(value);
 
                     break;
                 }
@@ -116,7 +157,19 @@
             var currentTime = StreamHelper.ReadInt64(atom.Stream);
             var nextId = StreamHelper.ReadInt32(atom.Stream);
 
-            return new MvhdChunk(version, created, modified, duration);
+            return new MvhdChunk
+            {
+                Version = version,
+                PlaybackSpeed = playbackSpeed,
+                Volume = volume,
+                Duration = duration,
+                PreviewIndex = preview,
+                PosterIndex = poster,
+                NextId = nextId,
+                SelectionTime = TimeSpan.FromMilliseconds(selectionTime),
+                Created = created,
+                Modified = modified
+            };
         }
 
         public override void Debug(int level)
@@ -207,5 +260,4 @@
             }
         }
     }
-    */
 }

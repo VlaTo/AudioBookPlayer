@@ -2,7 +2,7 @@
   "profiles": {
     "ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "book.m4b"
+      "commandLineArgs": "D:\\Temp\\book.m4b"
     }
   }
 }

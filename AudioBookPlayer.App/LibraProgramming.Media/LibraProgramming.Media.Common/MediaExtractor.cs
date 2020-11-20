@@ -16,6 +16,8 @@ namespace LibraProgramming.Media.Common
 
         public abstract MediaTrack GetTrack(int index);
 
+        public abstract MediaTrack[] GetTracks();
+
         public abstract MetaInformation GetMeta();
 
         public void Dispose()

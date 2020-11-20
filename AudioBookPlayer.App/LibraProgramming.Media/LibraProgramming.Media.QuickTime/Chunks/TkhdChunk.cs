@@ -1,68 +1,65 @@
-﻿namespace LibraProgramming.QuickTime.Container.Chunks
+﻿using LibraProgramming.Media.QuickTime;
+using LibraProgramming.Media.QuickTime.Components;
+using LibraProgramming.Media.QuickTime.Extensions;
+using System;
+using System.Text;
+
+namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    /*
     [Chunk(AtomTypes.Tkhd)]
-    public sealed class TkhdChunk : Chunk
+    internal sealed class TkhdChunk : Chunk
     {
-        public bool Poster
+        public bool IsPoster
         {
             get;
+            private set;
         }
 
-        public bool Preview
+        public bool IsPreview
         {
             get;
+            private set;
         }
 
-        public bool Movie
+        public bool IsMovie
         {
             get;
+            private set;
         }
 
-        public bool Enabled
+        public bool IsEnabled
         {
             get;
+            private set;
         }
 
         public DateTime Created
         {
             get;
+            private set;
         }
 
         public DateTime Modified
         {
             get;
+            private set;
         }
 
         public TimeSpan Duration
         {
             get;
+            private set;
         }
 
         public int TrackId
         {
             get;
+            private set;
         }
 
-        private TkhdChunk(
-            bool poster,
-            bool preview,
-            bool movie,
-            bool enabled,
-            DateTime created,
-            DateTime modified,
-            TimeSpan duration,
-            int trackId)
+        private TkhdChunk()
             : base(AtomTypes.Tkhd)
         {
-            Poster = poster;
-            Preview = preview;
-            Movie = movie;
-            Enabled = enabled;
-            Created = created;
-            Modified = modified;
-            Duration = duration;
-            TrackId = trackId;
         }
 
         public static TkhdChunk ReadFrom(Atom atom)
@@ -72,20 +69,18 @@
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            //var bytes = StreamHelper.ReadBytes(atom.Stream, (uint) atom.Stream.Length);
-            //Print.WriteDump(bytes);
-
             var bits = StreamHelper.ReadUInt32(atom.Stream);
             var version = (byte) ((bits & Flag.VersionMask) >> 24);
             var poster = (bits & Flag.Poster) == Flag.Poster;
             var preview = (bits & Flag.Preview) == Flag.Preview;
             var movie = (bits & Flag.Movie) == Flag.Movie;
             var enabled = (bits & Flag.Enabled) == Flag.Enabled;
-            DateTime created;
-            DateTime modified;
-            TimeSpan duration;
+            DateTime created = ReadUtcDateTime(atom.Stream, version);
+            DateTime modified = ReadUtcDateTime(atom.Stream, version);
+            var trackId = StreamHelper.ReadInt32(atom.Stream);
+            var reserved0 = StreamHelper.ReadUInt64(atom.Stream);
 
-            switch (version)
+            /*switch (version)
             {
                 case 0:
                 {
@@ -113,10 +108,12 @@
                 {
                     throw new NotSupportedException();
                 }
-            }
+            }*/
 
-            var trackId = StreamHelper.ReadInt32(atom.Stream);
-            var reserved0 = StreamHelper.ReadUInt64(atom.Stream);
+            //var trackId = StreamHelper.ReadInt32(atom.Stream);
+            //var reserved0 = StreamHelper.ReadUInt64(atom.Stream);
+
+            TimeSpan duration;
 
             switch (version)
             {
@@ -147,7 +144,17 @@
             var reserved1 = StreamHelper.ReadUInt32(atom.Stream);
             var videoLayer = StreamHelper.ReadUInt16(atom.Stream);
 
-            return new TkhdChunk(poster, preview, movie, enabled, created, modified, duration, trackId);
+            return new TkhdChunk
+            {
+                TrackId = trackId,
+                IsEnabled = enabled,
+                IsPoster = poster,
+                IsPreview = preview,
+                IsMovie = movie,
+                Duration = duration,
+                Created = created,
+                Modified = modified
+            };
         }
 
         public override void Debug(int level)
@@ -168,5 +175,4 @@
             public const uint Enabled = 0x0000_0001;
         }
     }
-    */
 }

@@ -1,5 +1,4 @@
-﻿using LibraProgramming.Media.Common;
-using LibraProgramming.Media.QuickTime;
+﻿using LibraProgramming.Media.QuickTime;
 using System.IO;
 
 namespace ConsoleApp
@@ -14,21 +13,22 @@ namespace ConsoleApp
             {
                 extractor.Debug();
 
-                var meta = extractor.GetMeta();
+                var tracks = extractor.GetTracks();
+
+                foreach(var track in tracks)
+                {
+                    ;
+                }
+
+                /*var meta = extractor.GetMeta();
 
                 foreach (var item in meta.Items)
                 {
-                    if (item.Key == "Cover")
+                    if (WellKnownMetaItemNames.Cover.Equals(item.Key))
                     {
-                        const string outputFilename = "d:/Temp/cover.jpg";
                         var source = (MetaInformationStreamItem)item;
-                        using(var target = File.OpenWrite(outputFilename))
-                        {
-                            source.Stream.CopyTo(target);
-                            System.Console.WriteLine($"File: '{outputFilename}' saved.");
-                        }
                     }
-                }
+                }*/
 
                 //var cover = meta.Items.Find(item => item.Key == "");
 

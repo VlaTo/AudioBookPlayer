@@ -84,6 +84,18 @@ namespace LibraProgramming.Media.QuickTime
             return 0;
         }
 
+        public override MediaTrack[] GetTracks()
+        {
+            EnsureNotDisposed();
+
+            var tracks = new List<MediaTrack>();
+            var visitor = new MediaTrackVisitor(tracks);
+
+            visitor.Visit(root);
+
+            return tracks.ToArray();
+        }
+
         public override MediaTrack GetTrack(int index)
         {
             EnsureNotDisposed();

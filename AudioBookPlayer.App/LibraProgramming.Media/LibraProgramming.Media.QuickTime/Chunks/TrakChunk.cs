@@ -1,8 +1,12 @@
-﻿namespace LibraProgramming.QuickTime.Container.Chunks
+﻿using LibraProgramming.Media.QuickTime.Components;
+using LibraProgramming.QuickTime.Container.Chunks;
+using System;
+using System.Collections.Generic;
+
+namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    /*
     [Chunk(AtomTypes.Trak)]
-    public sealed class TrakChunk : ContainerChunk
+    internal sealed class TrakChunk : ContainerChunk
     {
         public TrakChunk(Chunk[] chunks)
             : base(AtomTypes.Trak, chunks)
@@ -17,45 +21,31 @@
             }
 
             var chunks = new List<Chunk>();
+            var extractor = new AtomExtractor(atom.Stream);
 
-            using (var extractor = new AtomExtractor(atom.Stream))
+            foreach (var child in extractor)
             {
-                var factory = ChunkFactory.Instance;
+                var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                foreach (var chuld in extractor)
+                switch (chunk)
                 {
-                    var chunk = factory.CreateFrom(chuld);
-
-                    switch (chunk)
+                    case TkhdChunk tkhd:
                     {
-                        case TkhdChunk tkhd:
-                        {
-                            break;
-                        }
 
-                        case MdiaChunk mdia:
-                        {
-                            break;
-                        }
+                        break;
                     }
 
-                    chunks.Add(chunk);
+                    case MdiaChunk mdia:
+                    {
+
+                        break;
+                    }
                 }
+
+                chunks.Add(chunk);
             }
 
             return new TrakChunk(chunks.ToArray());
         }
-
-        public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }
     }
-    */
 }
