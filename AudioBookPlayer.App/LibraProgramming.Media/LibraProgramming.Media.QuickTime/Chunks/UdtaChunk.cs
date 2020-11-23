@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The User data atom.
+    /// </summary>
     [Chunk(AtomTypes.Udta)]
     internal class UdtaChunk : ContainerChunk
     {

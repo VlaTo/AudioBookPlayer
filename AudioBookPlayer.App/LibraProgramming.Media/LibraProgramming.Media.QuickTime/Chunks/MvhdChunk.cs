@@ -15,7 +15,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             private set;
         }
 
-        public uint PlaybackSpeed
+        public decimal PlaybackSpeed
         {
             get;
             private set;
@@ -81,93 +81,37 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadFlags32(atom.Stream);
-            var version = (bits & 0xFF00_0000) >> 24;
-            var flags = bits & 0x00FF_FFFF;
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
 
-            DateTime created;
-            DateTime modified;
-            TimeSpan duration;
-
-            switch (version)
-            {
-                case 0:
-                {
-                    var value = StreamHelper.ReadUInt32(atom.Stream);
-                    
-                    created = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc) + TimeSpan.FromSeconds(value);
-
-                    value = StreamHelper.ReadUInt32(atom.Stream);
-                    modified = DateTime.UtcNow;
-
-                    break;
-                }
-
-                case 1:
-                {
-                    var value = StreamHelper.ReadInt64(atom.Stream);
-                    created = DateTimeOffset.FromUnixTimeMilliseconds(value).ToUniversalTime().DateTime;
-
-                    value = StreamHelper.ReadInt64(atom.Stream);
-                    modified = DateTime.UtcNow;
-
-                    break;
-                }
-
-                default:
-                {
-                    throw new NotSupportedException();
-                }
-            }
-
+            DateTime created = ReadUtcDateTime(atom.Stream, version);
+            DateTime modified = ReadUtcDateTime(atom.Stream, version);
             var timeScale = StreamHelper.ReadUInt32(atom.Stream);
-
-            switch (version)
-            {
-                case 0:
-                {
-                    var value = StreamHelper.ReadUInt32(atom.Stream);
-
-                    duration = TimeSpan.FromMilliseconds(value);
-
-                    break;
-                }
-
-                case 1:
-                {
-                    var value = StreamHelper.ReadUInt64(atom.Stream);
-
-                    duration = TimeSpan.FromMilliseconds(value);
-
-                    break;
-                }
-
-                default:
-                {
-                    throw new NotSupportedException();
-                }
-            }
-
-            var playbackSpeed = StreamHelper.ReadUInt32(atom.Stream);
+            TimeSpan duration = ReadDuration(atom.Stream, timeScale, version);
+            //var playbackSpeed = StreamHelper.ReadBytes(atom.Stream, 4);
+            var playbackSpeed = StreamHelper.ReadInt32(atom.Stream);
             var volume = StreamHelper.ReadUInt16(atom.Stream);
             var reserved1 = StreamHelper.ReadUInt16(atom.Stream);
-            var wgm = Wgm.Read(atom.Stream);
-            var preview = StreamHelper.ReadUInt64(atom.Stream);
-            var poster = StreamHelper.ReadUInt32(atom.Stream);
-            var selectionTime = StreamHelper.ReadInt64(atom.Stream);
-            var currentTime = StreamHelper.ReadInt64(atom.Stream);
+            //var wgm = Wgm.Read(atom.Stream);
+            var wgm = StreamHelper.ReadBytes(atom.Stream, 36);
+            var previewTime = StreamHelper.ReadUInt32(atom.Stream);
+            var previewDuration = StreamHelper.ReadUInt32(atom.Stream);
+            var posterTime = StreamHelper.ReadUInt32(atom.Stream);
+            var selectionTime = StreamHelper.ReadInt32(atom.Stream);
+            var selectionDuration = StreamHelper.ReadInt32(atom.Stream);
+            var currentTime = StreamHelper.ReadInt32(atom.Stream);
             var nextId = StreamHelper.ReadInt32(atom.Stream);
 
             return new MvhdChunk
             {
                 Version = version,
-                PlaybackSpeed = playbackSpeed,
+                //PlaybackSpeed = BitConverter.ToSingle(playbackSpeed,0),
+                PlaybackSpeed = new Decimal(playbackSpeed),
                 Volume = volume,
                 Duration = duration,
-                PreviewIndex = preview,
-                PosterIndex = poster,
+                //PreviewIndex = 0UL,
+                //PosterIndex = poster,
                 NextId = nextId,
-                SelectionTime = TimeSpan.FromMilliseconds(selectionTime),
+                //SelectionTime = TimeSpan.FromMilliseconds(selectionTime),
                 Created = created,
                 Modified = modified
             };
@@ -180,6 +124,29 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type} duration: '{Duration:g}'");
+        }
+
+        private static TimeSpan ReadDuration(Stream stream, uint scale, byte version)
+        {
+            switch (version)
+            {
+                case 0:
+                {
+                    var value = StreamHelper.ReadUInt32(stream);
+                    return TimeSpan.FromSeconds(value / scale);
+                }
+
+                case 1:
+                {
+                    var value = StreamHelper.ReadUInt64(stream);
+                    return TimeSpan.FromSeconds(value / scale);
+                }
+
+                default:
+                {
+                    throw new NotSupportedException();
+                }
+            }
         }
 
         /// <summary>

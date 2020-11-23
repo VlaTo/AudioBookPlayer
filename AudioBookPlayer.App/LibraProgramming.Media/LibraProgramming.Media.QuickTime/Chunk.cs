@@ -5,6 +5,8 @@ namespace LibraProgramming.Media.QuickTime
 {
     public abstract class Chunk
     {
+        protected static readonly DateTime QuickTimeEpoch;
+
         public uint Type
         {
             get;
@@ -13,6 +15,11 @@ namespace LibraProgramming.Media.QuickTime
         protected Chunk(uint type)
         {
             Type = type;
+        }
+
+        static Chunk()
+        {
+            QuickTimeEpoch = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
         public abstract void Debug(int level);
@@ -33,13 +40,13 @@ namespace LibraProgramming.Media.QuickTime
                 case 0:
                 {
                     var seconds = StreamHelper.ReadUInt32(stream);
-                    return DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
+                    return QuickTimeEpoch + TimeSpan.FromSeconds(seconds);
                 }
 
                 case 1:
                 {
-                    var milliseconds = StreamHelper.ReadInt64(stream);
-                    return DateTimeOffset.FromUnixTimeSeconds(milliseconds).UtcDateTime;
+                    var seconds = StreamHelper.ReadInt64(stream);
+                    return QuickTimeEpoch + TimeSpan.FromSeconds(seconds);
                 }
 
                 default:
