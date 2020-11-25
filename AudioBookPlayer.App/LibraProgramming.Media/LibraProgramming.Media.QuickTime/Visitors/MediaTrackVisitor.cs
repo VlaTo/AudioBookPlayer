@@ -14,6 +14,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         private readonly Stream stream;
         private readonly IList<MediaTrack> tracks;
         private readonly Stack<TrackInfo> trackInfos;
+        private TrackInfo primaryTrack;
         private uint timeScale;
 
         public MediaTrackVisitor(
@@ -26,12 +27,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             this.tracks = tracks;
 
             trackInfos = new Stack<TrackInfo>();
+            primaryTrack = null;
         }
 
         public override void Visit(RootChunk chunk)
         {
 
             base.Visit(chunk);
+
 
         }
 
@@ -62,16 +65,34 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 throw new Exception();
             }
 
+            if (0 < last.Descriptions.Length)
+            {
+                primaryTrack = last;
+            }
+            else
+            {
+                if (null != primaryTrack)
+                {
+                    var index = Array.FindIndex(primaryTrack.Descriptions, chapter => chapter == last.TrackId);
+
+                    if (-1 < index)
+                    {
+                        //load chapters from 'last'
+                    }
+                }
+            }
+
             Console.WriteLine("[TRAK] End");
         }
 
         public override void VisitTkhd(TkhdChunk chunk)
         {
-            var track = (QuickTimeMediaTrack)tracks[tracks.Count - 1];
+            var info = trackInfos.Peek();
 
-            track.SetId(chunk.TrackId);
-            track.SetDuration(TimeSpan.FromSeconds(chunk.Duration / timeScale));
-            
+            info.TrackId = chunk.TrackId;
+            info.Duration = chunk.Duration;
+            //info.Duration = (TimeSpan.FromSeconds(chunk.Duration / timeScale));
+
             Console.WriteLine($"[TKHD] Track id: {chunk.TrackId}");
             Console.WriteLine($"[TKHD] Duration: {chunk.Duration:d8}");
             Console.WriteLine();
@@ -81,9 +102,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitTref(TrefChunk chunk)
         {
-            var track = (QuickTimeMediaTrack)tracks[tracks.Count - 1];
-
-            track.HasReference = true;
+            var info = trackInfos.Peek();
 
             base.VisitTref(chunk);
         }
@@ -91,6 +110,12 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         public override void VisitChap(ChapChunk chunk)
         {
             var count = chunk.Scenes.Length;
+
+            if (0 < chunk.Scenes.Length)
+            {
+                var info = trackInfos.Peek();
+                info.Descriptions = chunk.Scenes;
+            }
 
             Console.WriteLine($"[CHAP] scenes: {count}");
             Console.WriteLine(" -index-   scene");
@@ -225,7 +250,28 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         private sealed class TrackInfo
         {
+            public uint TrackId
+            {
+                get;
+                set;
+            }
 
+            public ulong Duration
+            {
+                get;
+                set;
+            }
+
+            public uint[] Descriptions
+            {
+                get;
+                set;
+            }
+
+            public TrackInfo()
+            {
+                Descriptions = Array.Empty<uint>();
+            }
         }
     }
 }

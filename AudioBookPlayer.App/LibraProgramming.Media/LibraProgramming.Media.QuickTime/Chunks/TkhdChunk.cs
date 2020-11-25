@@ -52,7 +52,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             private set;
         }
 
-        public int TrackId
+        public uint TrackId
         {
             get;
             private set;
@@ -77,7 +77,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var enabled = (flags & Flag.Enabled) == Flag.Enabled;
             DateTime created = ReadUtcDateTime(atom.Stream, version);
             DateTime modified = ReadUtcDateTime(atom.Stream, version);
-            var trackId = StreamHelper.ReadInt32(atom.Stream);
+            var trackId = StreamHelper.ReadUInt32(atom.Stream);
             var reserved0 = StreamHelper.ReadUInt32(atom.Stream);
             var duration = ReadDuration(atom.Stream, version);
 
