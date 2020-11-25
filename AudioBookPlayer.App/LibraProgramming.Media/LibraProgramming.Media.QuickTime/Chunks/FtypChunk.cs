@@ -6,7 +6,7 @@ using System.Text;
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
     [Chunk(AtomTypes.Ftyp)]
-    internal sealed class MediaTypeChunk : Chunk
+    internal sealed class FtypChunk : Chunk
     {
         public string Brand
         {
@@ -23,7 +23,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             get;
         }
 
-        public MediaTypeChunk(string brand, uint version, string compatibleBrand, Span<byte> data)
+        public FtypChunk(string brand, uint version, string compatibleBrand, Span<byte> data)
             : base(AtomTypes.Ftyp)
         {
             Brand = brand;
@@ -31,7 +31,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             CompatibleBrand = compatibleBrand;
         }
 
-        public static MediaTypeChunk ReadFrom(Atom atom)
+        public static FtypChunk ReadFrom(Atom atom)
         {
             if (null == atom)
             {
@@ -43,7 +43,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var compatibleBrand = StreamHelper.ReadString(atom.Stream, 4);
             var data = StreamHelper.ReadBytes(atom.Stream, 4);
 
-            return new MediaTypeChunk(brand, version, compatibleBrand, data);
+            return new FtypChunk(brand, version, compatibleBrand, data);
         }
 
         public override void Debug(int level)

@@ -5,18 +5,27 @@ using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The sample size atom.
+    /// </summary>
     [Chunk(AtomTypes.Stsz)]
     internal sealed class StszChunk : Chunk
     {
-        public uint[] BlockSizes
+        public uint SampleSize
         {
             get;
         }
 
-        public StszChunk(uint[] blockSizes)
+        public uint[] SampleSizes
+        {
+            get;
+        }
+
+        public StszChunk(uint sampleSize, uint[] sampleSizes)
             : base(AtomTypes.Stsz)
         {
-            BlockSizes = blockSizes ?? Array.Empty<uint>();
+            SampleSize = sampleSize;
+            SampleSizes = sampleSizes ?? Array.Empty<uint>();
         }
 
         public static StszChunk ReadFrom(Atom atom)
@@ -26,30 +35,18 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
-            var numberOfBlocks = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
+            var sampleSize = StreamHelper.ReadUInt32(atom.Stream);
+            var numberOfSizes = StreamHelper.ReadUInt32(atom.Stream);
+            var sampleSizes = new uint[numberOfSizes];
 
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
-
-            var blockSizes = new uint[numberOfBlocks];
-
-            for (var index = 0; index < numberOfBlocks; index++)
+            for (var index = 0; index < numberOfSizes; index++)
             {
                 var blockSize = StreamHelper.ReadUInt32(atom.Stream);
-                blockSizes[index] = blockSize;
+                sampleSizes[index] = blockSize;
             }
 
-            return new StszChunk(blockSizes);
-        }
-
-        public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} block sizes: {BlockSizes.Length}");
+            return new StszChunk(sampleSize, sampleSizes);
         }
     }
 }

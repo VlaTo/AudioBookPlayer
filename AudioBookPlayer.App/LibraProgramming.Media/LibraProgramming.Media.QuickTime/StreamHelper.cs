@@ -1,5 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Extensions;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -23,6 +24,8 @@ namespace LibraProgramming.Media.QuickTime
                 {
                     buffer[index] = data[data.Length - index - 1];
                 }
+
+                data = buffer;
             }
 
             return BitConverter.ToUInt16(data, 0);
@@ -41,6 +44,8 @@ namespace LibraProgramming.Media.QuickTime
                 {
                     buffer[index] = data[data.Length - index - 1];
                 }
+
+                data = buffer;
             }
 
             return BitConverter.ToInt32(data, 0);
@@ -59,6 +64,8 @@ namespace LibraProgramming.Media.QuickTime
                 {
                     buffer[index] = data[data.Length - index - 1];
                 }
+
+                data = buffer;
             }
 
             return BitConverter.ToInt64(data, 0);
@@ -118,6 +125,21 @@ namespace LibraProgramming.Media.QuickTime
             var count = stream.Read(data, 0, data.Length);
 
             return Encoding.ASCII.GetString(data, 0, count);
+        }
+
+        public static string ReadPascalString(Stream stream)
+        {
+            var length = ReadUInt16(stream);
+
+            if (0 == length)
+            {
+                return String.Empty;
+            }
+
+            var bytes = ReadBytes(stream, length);
+            var text = Encoding.Unicode.GetString(bytes);
+
+            return text;
         }
 
         public static byte[] ReadBytes(Stream stream, uint length)

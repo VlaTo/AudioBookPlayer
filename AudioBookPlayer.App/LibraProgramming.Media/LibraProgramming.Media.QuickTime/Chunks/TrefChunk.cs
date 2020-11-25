@@ -4,15 +4,15 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    [Chunk(AtomTypes.Trak)]
-    internal sealed class TrakChunk : ContainerChunk
+    [Chunk(AtomTypes.Tref)]
+    internal sealed class TrefChunk : ContainerChunk
     {
-        public TrakChunk(Chunk[] chunks)
-            : base(AtomTypes.Trak, chunks)
+        public TrefChunk(Chunk[] chunks)
+            : base(AtomTypes.Tref, chunks)
         {
         }
 
-        public new static TrakChunk ReadFrom(Atom atom)
+        public new static TrefChunk ReadFrom(Atom atom)
         {
             if (null == atom)
             {
@@ -29,32 +29,32 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 {
                     var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                    switch (chunk)
+                    /*switch (chunk)
                     {
                         case TkhdChunk tkhd:
-                        {
+                            {
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case MdiaChunk mdia:
-                        {
+                            {
 
-                            break;
-                        }
+                                break;
+                            }
 
                         case UdtaChunk udta:
-                        {
+                            {
 
-                            break;
-                        }
-                    }
+                                break;
+                            }
+                    }*/
 
                     chunks.Add(chunk);
                 }
             }
 
-            return new TrakChunk(chunks.ToArray());
+            return new TrefChunk(chunks.ToArray());
         }
     }
 }

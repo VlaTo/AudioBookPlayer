@@ -24,6 +24,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
     }
 
+    /// <summary>
+    /// The time-to-sample atom.
+    /// </summary>
     [Chunk(AtomTypes.Stts)]
     internal sealed class SttsChunk : Chunk
     {
@@ -45,32 +48,51 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
             var numberOfTimes = StreamHelper.ReadUInt32(atom.Stream);
-
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
-
             var frameDescriptions = new FrameDescription[numberOfTimes];
+            var position = atom.Stream.Position;
 
-            for (var index = 0; index < numberOfTimes; index++)
+            using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
             {
-                var frameCount = StreamHelper.ReadUInt32(atom.Stream);
-                var duration = StreamHelper.ReadUInt32(atom.Stream);
+                for (var index = 0; index < numberOfTimes; index++)
+                {
+                    var frameCount = StreamHelper.ReadUInt32(atom.Stream);
+                    var duration = StreamHelper.ReadUInt32(atom.Stream);
 
-                frameDescriptions[index] = new FrameDescription(frameCount, duration);
+                    frameDescriptions[index] = new FrameDescription(frameCount, duration);
+                }
             }
 
             return new SttsChunk(frameDescriptions);
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type).ToBigEndian();
             var type = Encoding.ASCII.GetString(bytes);
 
-            Console.WriteLine($"{tabs}{type} frame descriptions: {FrameDescriptions.Length}");
-        }
+            Console.WriteLine($"{tabs}{type} (descriptions: {FrameDescriptions.Length})");
+
+            var count = FrameDescriptions.Length;
+
+            Console.WriteLine($"{tabs} index   frames  duration");
+
+            for (var index = 0; index < Math.Min(3, count); index++)
+            {
+                var description = FrameDescriptions[index];
+                Console.WriteLine($"{tabs}[{index:d6}] {description.FrameCount:d6} {description.Duration:d8}");
+            }
+
+            if (3 < count)
+            {
+                var description = FrameDescriptions[count - 1];
+                Console.WriteLine($"{tabs}...");
+                Console.WriteLine($"{tabs}[{(count-1):d6}] {description.FrameCount:d6} {description.Duration:d8}");
+            }
+
+            Console.WriteLine();
+        }*/
     }
 }

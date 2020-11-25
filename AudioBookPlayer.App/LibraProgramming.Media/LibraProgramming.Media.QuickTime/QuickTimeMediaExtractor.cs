@@ -89,7 +89,7 @@ namespace LibraProgramming.Media.QuickTime
             EnsureNotDisposed();
 
             var tracks = new List<MediaTrack>();
-            var visitor = new MediaTrackVisitor(tracks);
+            var visitor = new MediaTrackVisitor(this, stream, tracks);
 
             visitor.Visit(root);
 

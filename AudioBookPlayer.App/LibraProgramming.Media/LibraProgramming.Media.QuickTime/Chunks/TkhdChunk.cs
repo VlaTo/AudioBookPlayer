@@ -94,14 +94,14 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             };
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type);
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type} track ID: '{TrackId}'");
-        }
+        }*/
 
         private static ulong ReadDuration(Stream stream, byte version)
         {

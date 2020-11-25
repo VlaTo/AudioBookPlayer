@@ -1,7 +1,14 @@
-﻿namespace LibraProgramming.QuickTime.Container.Chunks
+﻿using LibraProgramming.Media.QuickTime.Components;
+using System;
+using System.Collections.Generic;
+
+namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    /*[Chunk(AtomTypes.Dinf)]
-    public class DinfChunk : ContainerChunk
+    /// <summary>
+    /// The data information atom.
+    /// </summary>
+    [Chunk(AtomTypes.Dinf)]
+    internal sealed class DinfChunk : ContainerChunk
     {
         public DinfChunk(Chunk[] chunks)
             : base(AtomTypes.Dinf, chunks)
@@ -17,23 +24,25 @@
 
             var chunks = new List<Chunk>();
 
-            using (var extractor = new AtomExtractor(atom.Stream))
+            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
             {
-                var factory = ChunkFactory.Instance;
+                var extractor = new AtomExtractor(atom.Stream);
 
                 foreach (var chuld in extractor)
                 {
-                    var chunk = factory.CreateFrom(chuld);
+                    var chunk = ChunkFactory.Instance.CreateFrom(chuld);
 
                     switch (chunk)
                     {
                         case TkhdChunk tkhd:
                         {
+
                             break;
                         }
 
                         case MdiaChunk mdia:
                         {
+
                             break;
                         }
                     }
@@ -44,16 +53,5 @@
 
             return new DinfChunk(chunks.ToArray());
         }
-
-        public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }
-    }*/
+    }
 }

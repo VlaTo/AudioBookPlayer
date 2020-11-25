@@ -15,6 +15,12 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             private set;
         }
 
+        public uint TimeScale
+        {
+            get;
+            private set;
+        }
+
         public decimal PlaybackSpeed
         {
             get;
@@ -104,6 +110,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             return new MvhdChunk
             {
                 Version = version,
+                TimeScale = timeScale,
                 //PlaybackSpeed = BitConverter.ToSingle(playbackSpeed,0),
                 PlaybackSpeed = new Decimal(playbackSpeed),
                 Volume = volume,
@@ -117,14 +124,14 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             };
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type);
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type} duration: '{Duration:g}'");
-        }
+        }*/
 
         private static TimeSpan ReadDuration(Stream stream, uint scale, byte version)
         {
