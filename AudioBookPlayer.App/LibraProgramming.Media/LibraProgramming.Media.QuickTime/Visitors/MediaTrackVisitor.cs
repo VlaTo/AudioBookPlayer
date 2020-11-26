@@ -15,7 +15,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         private readonly IList<MediaTrack> tracks;
         private readonly Stack<TrackInfo> trackInfos;
         private TrackInfo primaryTrack;
-        private uint timeScale;
+        
+        private uint? timeScale;
 
         public MediaTrackVisitor(
             QuickTimeMediaExtractor extractor,
@@ -47,14 +48,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitTrak(TrakChunk chunk)
         {
-            //var actual = new QuickTimeMediaTrack(extractor);
-            var actual = new TrackInfo();
+            var actual = new TrackInfo
+            {
+                TimeScale = timeScale.GetValueOrDefault(600)
+            };
 
-            //tracks.Add(actual);
             trackInfos.Push(actual);
             
             Console.WriteLine("[TRAK] Begin");
-            //Console.WriteLine();
 
             base.VisitTrak(chunk);
 
@@ -65,24 +66,44 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 throw new Exception();
             }
 
-            if (0 < last.Descriptions.Length)
+            if (0 < last.Chapters.Length)
             {
                 primaryTrack = last;
+                Console.WriteLine("[TRAK] //set primary track");
             }
             else
             {
                 if (null != primaryTrack)
                 {
-                    var index = Array.FindIndex(primaryTrack.Descriptions, chapter => chapter == last.TrackId);
+                    var index = Array.FindIndex(primaryTrack.Chapters, chapter => chapter == last.TrackId);
 
                     if (-1 < index)
                     {
-                        //load chapters from 'last'
+                        // TrackInfo primaryTrack 
+                        // TrackInfo last
+                        // TrakChunk chunk
+
+                        Console.WriteLine("[TRAK] //handle description track");
+
+                        foreach(var offset in last.Offsets)
+                        {
+                            var track = new QuickTimeMediaTrack(extractor);
+                            var position = stream.Seek(offset, SeekOrigin.Begin);
+                            var text = StreamHelper.ReadPascalString(stream);
+
+                            track.SetTitle(text);
+                            track.SetDuration(TimeSpan.FromSeconds(last.Duration / last.TimeScale));
+
+                            tracks.Add(track);
+
+                            //Console.WriteLine($"[TRAK] //track: '{text}'");
+                        }
                     }
                 }
             }
 
             Console.WriteLine("[TRAK] End");
+            Console.WriteLine();
         }
 
         public override void VisitTkhd(TkhdChunk chunk)
@@ -93,8 +114,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             info.Duration = chunk.Duration;
             //info.Duration = (TimeSpan.FromSeconds(chunk.Duration / timeScale));
 
-            Console.WriteLine($"[TKHD] Track id: {chunk.TrackId}");
-            Console.WriteLine($"[TKHD] Duration: {chunk.Duration:d8}");
+            Console.WriteLine($"[TKHD] //track id: {chunk.TrackId}");
+            Console.WriteLine($"[TKHD] //duration: {chunk.Duration:d8}");
             Console.WriteLine();
 
             base.VisitTkhd(chunk);
@@ -114,10 +135,10 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             if (0 < chunk.Scenes.Length)
             {
                 var info = trackInfos.Peek();
-                info.Descriptions = chunk.Scenes;
+                info.Chapters = chunk.Scenes;
             }
 
-            Console.WriteLine($"[CHAP] scenes: {count}");
+            Console.WriteLine($"[CHAP] //scenes: {count}");
             Console.WriteLine(" -index-   scene");
 
             for (var index = 0; index < Math.Min(3, count); index++)
@@ -140,7 +161,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitStts(SttsChunk chunk)
         {
-            Console.WriteLine($"[STTS] descriptions: {chunk.FrameDescriptions.Length}");
+            Console.WriteLine($"[STTS] //descriptions: {chunk.FrameDescriptions.Length}");
 
             var count = chunk.FrameDescriptions.Length;
 
@@ -170,7 +191,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             if (0 < sampleSize)
             {
-                Console.WriteLine($"[STSZ] common sample size: {sampleSize})");
+                Console.WriteLine($"[STSZ] //common sample size: {sampleSize})");
                 return;
             }
 
@@ -199,9 +220,13 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitStco(StcoChunk chunk)
         {
+            var info = trackInfos.Peek();
+
+            info.Offsets = chunk.Offsets;
+
             var count = chunk.Offsets.Length;
 
-            Console.WriteLine($"[STCO] offsets: {count}");
+            Console.WriteLine($"[STCO] //offsets: {count}");
             Console.WriteLine(" -index-   offsets");
 
             for (var index = 0; index < Math.Min(3, count); index++)
@@ -256,13 +281,25 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 set;
             }
 
+            public uint TimeScale
+            {
+                get;
+                set;
+            }
+
             public ulong Duration
             {
                 get;
                 set;
             }
 
-            public uint[] Descriptions
+            public uint[] Chapters
+            {
+                get;
+                set;
+            }
+
+            public uint[] Offsets
             {
                 get;
                 set;
@@ -270,7 +307,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             public TrackInfo()
             {
-                Descriptions = Array.Empty<uint>();
+                Chapters = Array.Empty<uint>();
+                Offsets = Array.Empty<uint>();
             }
         }
     }

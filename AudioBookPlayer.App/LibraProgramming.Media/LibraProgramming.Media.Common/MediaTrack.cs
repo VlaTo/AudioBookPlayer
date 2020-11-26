@@ -5,7 +5,7 @@ namespace LibraProgramming.Media.Common
 {
     public abstract class MediaTrack
     {
-        public int Id
+        public string Title
         {
             get;
             protected set;

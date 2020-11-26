@@ -49,7 +49,7 @@ namespace ConsoleApp
 
                 foreach(var track in tracks)
                 {
-                    Console.WriteLine($"[Track] id: {track.Id} = {track.Duration}");
+                    Console.WriteLine($"[Track] '{track.Title}' {track.Duration:G}");
                 }
 
 

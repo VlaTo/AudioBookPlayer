@@ -8,12 +8,6 @@ namespace LibraProgramming.Media.QuickTime
     {
         private readonly QuickTimeMediaExtractor extractor;
 
-        public bool HasReference
-        {
-            get;
-            internal set;
-        }
-
         internal QuickTimeMediaTrack(QuickTimeMediaExtractor extractor)
         {
             this.extractor = extractor;
@@ -24,14 +18,14 @@ namespace LibraProgramming.Media.QuickTime
             return null;
         }
 
-        internal void SetId(int value)
-        {
-            Id = value;
-        }
-
         internal void SetDuration(TimeSpan value)
         {
             Duration = value;
+        }
+
+        internal void SetTitle(string value)
+        {
+            Title = value;
         }
     }
 }

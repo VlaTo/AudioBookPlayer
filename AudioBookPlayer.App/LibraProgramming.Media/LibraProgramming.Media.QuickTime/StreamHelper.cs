@@ -10,10 +10,19 @@ namespace LibraProgramming.Media.QuickTime
     {
         // should be same as extended length field size
         public const int PrefixSize = 8;
+        
+        public static readonly Encoding Encoding = System.Text.Encoding.Unicode;
 
         public static UInt16 ReadUInt16(Stream stream)
         {
-            var data = new byte[sizeof(UInt16)];
+            if (false == TryReadBytesFromStream(stream, sizeof(UInt16), out var bytes))
+            {
+                throw new Exception();
+            }
+
+            return BitConverter.ToUInt16(bytes, 0);
+
+            /*var data = new byte[sizeof(UInt16)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             if (BitConverter.IsLittleEndian)
@@ -28,12 +37,17 @@ namespace LibraProgramming.Media.QuickTime
                 data = buffer;
             }
 
-            return BitConverter.ToUInt16(data, 0);
+            return BitConverter.ToUInt16(data, 0);*/
         }
 
         public static int ReadInt32(Stream stream)
         {
-            var data = new byte[sizeof(int)];
+            if (false == TryReadBytesFromStream(stream, sizeof(int), out var bytes))
+            {
+                throw new Exception();
+            }
+
+            /*var data = new byte[sizeof(int)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             if (BitConverter.IsLittleEndian)
@@ -46,14 +60,19 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 data = buffer;
-            }
+            }*/
 
-            return BitConverter.ToInt32(data, 0);
+            return BitConverter.ToInt32(bytes, 0);
         }
 
         public static long ReadInt64(Stream stream)
         {
-            var data = new byte[sizeof(long)];
+            if (false == TryReadBytesFromStream(stream, sizeof(long), out var bytes))
+            {
+                throw new Exception();
+            }
+
+            /*var data = new byte[sizeof(long)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             if (BitConverter.IsLittleEndian)
@@ -66,14 +85,19 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 data = buffer;
-            }
+            }*/
 
-            return BitConverter.ToInt64(data, 0);
+            return BitConverter.ToInt64(bytes, 0);
         }
 
         public static uint ReadUInt32(Stream stream)
         {
-            var data = new byte[sizeof(uint)];
+            if (false == TryReadBytesFromStream(stream, sizeof(uint), out var bytes))
+            {
+                throw new Exception();
+            }
+
+            /*var data = new byte[sizeof(uint)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             if (BitConverter.IsLittleEndian)
@@ -86,14 +110,19 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 data = buffer;
-            }
+            }*/
 
-            return BitConverter.ToUInt32(data, 0);
+            return BitConverter.ToUInt32(bytes, 0);
         }
 
         public static ulong ReadUInt64(Stream stream)
         {
-            var data = new byte[sizeof(ulong)];
+            if (false == TryReadBytesFromStream(stream, sizeof(ulong), out var bytes))
+            {
+                throw new Exception();
+            }
+
+            /*var data = new byte[sizeof(ulong)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             if (BitConverter.IsLittleEndian)
@@ -106,18 +135,23 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 data = buffer;
-            }
+            }*/
 
-            return BitConverter.ToUInt64(data, 0);
+            return BitConverter.ToUInt64(bytes, 0);
         }
 
-        public static uint ReadFlags32(Stream stream)
+        /*public static uint ReadFlags32(Stream stream)
         {
+            if (false == TryReadBytesFromStream(stream, sizeof(ulong), out var bytes))
+            {
+                throw new Exception();
+            }
+
             var data = new byte[sizeof(uint)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
 
             return BitConverter.ToUInt32(data, 0);
-        }
+        }*/
 
         public static string ReadString(Stream stream, int length)
         {
@@ -137,7 +171,23 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var bytes = ReadBytes(stream, length);
-            var text = Encoding.Unicode.GetString(bytes);
+            var offset = 0;
+            //var encoding = new UnicodeEncoding(false, false);
+            var preamble = Encoding.GetPreamble();
+
+            if (true)
+            {
+                for (var index = 0; index < preamble.Length; index++)
+                {
+                    if (preamble[index] == bytes[index])
+                    {
+                        offset = index + 1;
+                        length--;
+                    }
+                }
+            }
+
+            var text = Encoding.GetString(bytes, offset, length);
 
             return text;
         }
@@ -145,7 +195,7 @@ namespace LibraProgramming.Media.QuickTime
         public static byte[] ReadBytes(Stream stream, uint length)
         {
             var data = new byte[length];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
+            var actualCount = ReadBytesFromStream(stream, data, true);
 
             return data;
         }
@@ -153,7 +203,7 @@ namespace LibraProgramming.Media.QuickTime
         public static byte ReadByte(Stream stream)
         {
             var data = new byte[1];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
+            var actualCount = ReadBytesFromStream(stream, data, true);
 
             return data[0];
         }
@@ -169,7 +219,7 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var data = new byte[size];
-            var count = ReadBytesFromStreamInternal(stream, data);
+            var count = ReadBytesFromStream(stream, data);
 
             var length = (long)BitConverter.ToUInt32(data.Slice(0, 4).ToBigEndian(), 0);
             var atomType = BitConverter.ToUInt32(data.Slice(4).ToBigEndian(), 0);
@@ -178,7 +228,7 @@ namespace LibraProgramming.Media.QuickTime
             {
                 size += PrefixSize;
 
-                var extra = ReadBytesFromStreamInternal(stream, data);
+                var extra = ReadBytesFromStream(stream, data, true);
 
                 length = BitConverter.ToInt64(data.ToBigEndian(), 0);
             }
@@ -186,17 +236,50 @@ namespace LibraProgramming.Media.QuickTime
             return (atomType, size, length);
         }
 
-        private static int ReadBytesFromStreamInternal(Stream stream, byte[] bytes)
+        private static int ReadBytesFromStream(Stream stream, byte[] bytes, bool throwException = false)
         {
             var bufferLength = bytes.Length;
             var actualCount = stream.Read(bytes, 0, bufferLength);
 
-            if (bufferLength != actualCount)
+            if ((bufferLength != actualCount) && throwException)
             {
                 throw new InvalidOperationException();
             }
 
             return actualCount;
+        }
+
+        private static bool TryReadBytesFromStream(Stream stream, int count, out byte[] bytes)
+        {
+            var buffer = new byte[count];
+            //var actualCount = stream.Read(buffer, 0, count);
+            var actualCount = ReadBytesFromStream(stream, buffer);
+
+            bytes = null;
+
+            if (count != actualCount)
+            {
+                return false;
+            }
+
+            if (BitConverter.IsLittleEndian)
+            {
+                var iterations = actualCount >> 1;
+                int start = 0;
+                int end = actualCount - 1;
+
+                for (var index = 0; index < iterations; index++)
+                {
+                    var place = buffer[start];
+
+                    buffer[start++] = buffer[end];
+                    buffer[end--] = place;
+                }
+            }
+
+            bytes = buffer;
+
+            return true;
         }
     }
 }
