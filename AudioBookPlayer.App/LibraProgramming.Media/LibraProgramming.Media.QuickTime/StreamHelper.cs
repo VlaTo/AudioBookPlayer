@@ -140,19 +140,6 @@ namespace LibraProgramming.Media.QuickTime
             return BitConverter.ToUInt64(bytes, 0);
         }
 
-        /*public static uint ReadFlags32(Stream stream)
-        {
-            if (false == TryReadBytesFromStream(stream, sizeof(ulong), out var bytes))
-            {
-                throw new Exception();
-            }
-
-            var data = new byte[sizeof(uint)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
-
-            return BitConverter.ToUInt32(data, 0);
-        }*/
-
         public static string ReadString(Stream stream, int length)
         {
             var data = new byte[length];
@@ -172,7 +159,6 @@ namespace LibraProgramming.Media.QuickTime
 
             var bytes = ReadBytes(stream, length);
             var offset = 0;
-            //var encoding = new UnicodeEncoding(false, false);
             var preamble = Encoding.GetPreamble();
 
             if (true)
@@ -187,9 +173,7 @@ namespace LibraProgramming.Media.QuickTime
                 }
             }
 
-            var text = Encoding.GetString(bytes, offset, length);
-
-            return text;
+            return Encoding.GetString(bytes, offset, length);
         }
 
         public static byte[] ReadBytes(Stream stream, uint length)

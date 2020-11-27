@@ -17,8 +17,10 @@ namespace ConsoleApp
 
                 // Metadata
                 var meta = extractor.GetMeta();
+                var tracks = extractor.GetTracks();
 
                 Console.WriteLine();
+                Console.WriteLine(" *** Info ***");
 
                 foreach (var item in meta.Items)
                 {
@@ -26,7 +28,7 @@ namespace ConsoleApp
                     {
                         case MetaInformationTextItem textItem:
                         {
-                            Console.WriteLine($"[META] key: {textItem.Key} = '{textItem.Text}'");
+                            Console.WriteLine($"[Meta] {textItem.Key} = '{textItem.Text}'");
 
                             if (WellKnownMetaItemNames.Cover.Equals(item.Key))
                             {
@@ -37,7 +39,7 @@ namespace ConsoleApp
 
                         case MetaInformationStreamItem streamItem:
                         {
-                            Console.WriteLine($"[META] key: {streamItem.Key}:{streamItem.Stream.Length}");
+                            Console.WriteLine($"[Meta] {streamItem.Key} = binary {streamItem.Stream.Length:N} byte(s)");
                             break;
                         }
                     }
@@ -45,27 +47,11 @@ namespace ConsoleApp
 
                 Console.WriteLine();
 
-                var tracks = extractor.GetTracks();
-
                 foreach(var track in tracks)
                 {
                     Console.WriteLine($"[Track] '{track.Title}' {track.Duration:G}");
                 }
-
-
-                //var cover = meta.Items.Find(item => item.Key == "");
-
-                //var tracksCount = extractor.GetTracksCount();
-                //var buffer = new byte[4096];
-
-                //for (var index = 0; index < tracksCount; index++)
-                //{
-                    //var track = extractor.GetTrack(index);
-                    //var sampleSize = track.ReadSampleData(buffer);
-                //}
             }
-
-            //System.Console.ReadLine();
         }
     }
 }

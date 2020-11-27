@@ -1,13 +1,12 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
+using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    internal sealed class FrameDescription
+    internal sealed class TimeToSample
     {
-        public uint FrameCount
+        public uint SampleCount
         {
             get;
         }
@@ -17,10 +16,18 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             get;
         }
 
-        public FrameDescription(uint frameCount, uint duration)
+        public TimeToSample(uint sampleCount, uint duration)
         {
-            FrameCount = frameCount;
+            SampleCount = sampleCount;
             Duration = duration;
+        }
+
+        public static TimeToSample ReadFromStream(Stream stream)
+        {
+            var frameCount = StreamHelper.ReadUInt32(stream);
+            var duration = StreamHelper.ReadUInt32(stream);
+
+            return new TimeToSample(frameCount, duration);
         }
     }
 
@@ -30,15 +37,15 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Stts)]
     internal sealed class SttsChunk : Chunk
     {
-        public FrameDescription[] FrameDescriptions
+        public TimeToSample[] Entries
         {
             get;
         }
 
-        public SttsChunk(FrameDescription[] frameDescriptions)
+        public SttsChunk(TimeToSample[] entries)
             : base(AtomTypes.Stts)
         {
-            FrameDescriptions = frameDescriptions ?? Array.Empty<FrameDescription>();
+            Entries = entries ?? Array.Empty<TimeToSample>();
         }
 
         public static SttsChunk ReadFrom(Atom atom)
@@ -50,49 +57,19 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             var (version, flags) = ReadFlagAndVersion(atom.Stream);
             var numberOfTimes = StreamHelper.ReadUInt32(atom.Stream);
-            var frameDescriptions = new FrameDescription[numberOfTimes];
+            var entries = new TimeToSample[numberOfTimes];
             var position = atom.Stream.Position;
 
             using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
             {
                 for (var index = 0; index < numberOfTimes; index++)
                 {
-                    var frameCount = StreamHelper.ReadUInt32(atom.Stream);
-                    var duration = StreamHelper.ReadUInt32(atom.Stream);
-
-                    frameDescriptions[index] = new FrameDescription(frameCount, duration);
+                    var entry = TimeToSample.ReadFromStream(atom.Stream);
+                    entries[index] = entry;
                 }
             }
 
-            return new SttsChunk(frameDescriptions);
+            return new SttsChunk(entries);
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} (descriptions: {FrameDescriptions.Length})");
-
-            var count = FrameDescriptions.Length;
-
-            Console.WriteLine($"{tabs} index   frames  duration");
-
-            for (var index = 0; index < Math.Min(3, count); index++)
-            {
-                var description = FrameDescriptions[index];
-                Console.WriteLine($"{tabs}[{index:d6}] {description.FrameCount:d6} {description.Duration:d8}");
-            }
-
-            if (3 < count)
-            {
-                var description = FrameDescriptions[count - 1];
-                Console.WriteLine($"{tabs}...");
-                Console.WriteLine($"{tabs}[{(count-1):d6}] {description.FrameCount:d6} {description.Duration:d8}");
-            }
-
-            Console.WriteLine();
-        }*/
     }
 }

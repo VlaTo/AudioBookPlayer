@@ -80,6 +80,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var trackId = StreamHelper.ReadUInt32(atom.Stream);
             var reserved0 = StreamHelper.ReadUInt32(atom.Stream);
             var duration = ReadDuration(atom.Stream, version);
+            var reserved1 = StreamHelper.ReadBytes(atom.Stream, 8);
+            var layer = StreamHelper.ReadUInt16(atom.Stream);
+            var alternateGroup = StreamHelper.ReadUInt16(atom.Stream);
 
             return new TkhdChunk
             {

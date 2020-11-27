@@ -25,11 +25,11 @@ namespace LibraProgramming.Media.QuickTime
             Stream = new ReadOnlyAtomStream(stream, header.Offset + header.Length, header.ChunkLength - header.Length);
         }
 
-        [Conditional("DEBUG")]
+        /*[Conditional("DEBUG")]
         public void Print()
         {
             System.Console.WriteLine($"[{Stream.Start:X8}:{Stream.Length:X8}] Chunk: '{Type}'");
-        }
+        }*/
 
         private sealed class DisplayProxy
         {

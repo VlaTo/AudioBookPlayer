@@ -46,7 +46,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             return new FtypChunk(brand, version, compatibleBrand, data);
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type).ToBigEndian();
@@ -55,6 +55,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Console.WriteLine($"{tabs}{type} brand: '{Brand}'");
 
             //Console.WriteLine($"[Ftyp] Brand: '{Brand}', Version: '{Version}', Compatible: '{CompatibleBrand}'");
-        }
+        }*/
     }
 }

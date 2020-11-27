@@ -2,9 +2,7 @@
 using LibraProgramming.Media.QuickTime.Chunks;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Visitors
 {
@@ -33,10 +31,11 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void Visit(RootChunk chunk)
         {
+            Console.WriteLine();
 
             base.Visit(chunk);
 
-
+            ;
         }
 
         public override void VisitMvhd(MvhdChunk chunk)
@@ -69,35 +68,43 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             if (0 < last.Chapters.Length)
             {
                 primaryTrack = last;
-                Console.WriteLine("[TRAK] //set primary track");
             }
             else
             {
                 if (null != primaryTrack)
                 {
-                    var index = Array.FindIndex(primaryTrack.Chapters, chapter => chapter == last.TrackId);
+                    var chapterIndex = Array.FindIndex(primaryTrack.Chapters, chapter => chapter == last.TrackId);
 
-                    if (-1 < index)
+                    if (-1 < chapterIndex)
                     {
                         // TrackInfo primaryTrack 
                         // TrackInfo last
                         // TrakChunk chunk
 
-                        Console.WriteLine("[TRAK] //handle description track");
+                        //Console.WriteLine($"[TRAK] //primary track time scale: {primaryTrack.TimeScale}");
+                        //Console.WriteLine($"[TRAK] //last track time scale: {last.TimeScale}");
 
-                        foreach(var offset in last.Offsets)
+                        var samplesCount = 0u;
+                        var samplesDuration = 0u;
+
+                        for (var index = 0; index < last.Offsets.Length; index++)
                         {
                             var track = new QuickTimeMediaTrack(extractor);
+                            var offset = last.Offsets[index];
+                            var timeToSample = last.Entries[index];
                             var position = stream.Seek(offset, SeekOrigin.Begin);
                             var text = StreamHelper.ReadPascalString(stream);
 
                             track.SetTitle(text);
-                            track.SetDuration(TimeSpan.FromSeconds(last.Duration / last.TimeScale));
+                            track.SetDuration(TimeSpan.FromSeconds(timeToSample.Duration / last.TimeScale));
 
                             tracks.Add(track);
 
-                            //Console.WriteLine($"[TRAK] //track: '{text}'");
+                            samplesCount += timeToSample.SampleCount;
+                            samplesDuration += timeToSample.Duration;
                         }
+
+                        Console.WriteLine($"{TimeSpan.FromSeconds(samplesDuration / last.TimeScale)}");
                     }
                 }
             }
@@ -116,6 +123,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             Console.WriteLine($"[TKHD] //track id: {chunk.TrackId}");
             Console.WriteLine($"[TKHD] //duration: {chunk.Duration:d8}");
+            Console.WriteLine($"[TKHD] //created: {chunk.Created}");
+            Console.WriteLine($"[TKHD] //modified: {chunk.Modified}");
             Console.WriteLine();
 
             base.VisitTkhd(chunk);
@@ -161,23 +170,27 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitStts(SttsChunk chunk)
         {
-            Console.WriteLine($"[STTS] //descriptions: {chunk.FrameDescriptions.Length}");
+            var info = trackInfos.Peek();
 
-            var count = chunk.FrameDescriptions.Length;
+            info.Entries = chunk.Entries;
 
-            Console.WriteLine(" -index-   frames   duration");
+            Console.WriteLine($"[STTS] //entries: {chunk.Entries.Length}");
+
+            var count = chunk.Entries.Length;
+
+            Console.WriteLine(" -index-   samples   duration");
 
             for (var index = 0; index < Math.Min(3, count); index++)
             {
-                var description = chunk.FrameDescriptions[index];
-                Console.WriteLine($"[{index:d8}] {description.FrameCount:d8} {description.Duration:d8}");
+                var description = chunk.Entries[index];
+                Console.WriteLine($"[{index:d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
             if (3 < count)
             {
-                var description = chunk.FrameDescriptions[count - 1];
+                var description = chunk.Entries[count - 1];
                 Console.WriteLine("...");
-                Console.WriteLine($"[{(count - 1):d8}] {description.FrameCount:d8} {description.Duration:d8}");
+                Console.WriteLine($"[{(count - 1):d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
             Console.WriteLine();
@@ -197,20 +210,20 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             var sampleSizes = chunk.SampleSizes.Length;
 
-            Console.WriteLine($"[STSZ] sample sizes: {sampleSizes}");
-            Console.WriteLine(" -index-   samp/sizes");
+            Console.WriteLine($"[STSZ] //sample sizes: {sampleSizes}");
+            //Console.WriteLine(" -index-   samp/sizes");
 
             for (var index = 0; index < Math.Min(3, sampleSizes); index++)
             {
                 var size = chunk.SampleSizes[index];
-                Console.WriteLine($"[{index:d8}] {size:d8}");
+                Console.WriteLine($"[{index:d8}] {size:d8} byte(s)");
             }
 
             if (3 < sampleSizes)
             {
                 var size = chunk.SampleSizes[sampleSizes - 1];
                 Console.WriteLine("...");
-                Console.WriteLine($"[{(sampleSizes - 1):d8}] {size:d8}");
+                Console.WriteLine($"[{(sampleSizes - 1):d8}] {size:d8} byte(s)");
             }
 
             Console.WriteLine();
@@ -252,7 +265,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         {
             var count = chunk.BlockDescriptions.Length;
 
-            Console.WriteLine($"[STSC] blocks: {count}");
+            Console.WriteLine($"[STSC] //blocks: {count}");
             Console.WriteLine(" -index-   f/chnk   samples  id");
 
             for (var index = 0; index < Math.Min(3, count); index++)
@@ -273,6 +286,9 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             base.VisitStsc(chunk);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private sealed class TrackInfo
         {
             public uint TrackId
@@ -305,10 +321,17 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 set;
             }
 
+            public TimeToSample[] Entries
+            {
+                get;
+                set;
+            }
+
             public TrackInfo()
             {
                 Chapters = Array.Empty<uint>();
                 Offsets = Array.Empty<uint>();
+                Entries = Array.Empty<TimeToSample>();
             }
         }
     }

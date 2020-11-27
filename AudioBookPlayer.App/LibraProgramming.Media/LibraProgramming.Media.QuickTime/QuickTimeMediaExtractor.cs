@@ -41,8 +41,6 @@ namespace LibraProgramming.Media.QuickTime
 
             foreach (var atom in extractor)
             {
-                atom.Print();
-
                 var chunk = ChunkFactory.Instance.CreateFrom(atom);
 
                 chunks.Add(chunk);
