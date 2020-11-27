@@ -70,7 +70,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagAndVersion(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var poster = (flags & Flag.Poster) == Flag.Poster;
             var preview = (flags & Flag.Preview) == Flag.Preview;
             var movie = (flags & Flag.Movie) == Flag.Movie;

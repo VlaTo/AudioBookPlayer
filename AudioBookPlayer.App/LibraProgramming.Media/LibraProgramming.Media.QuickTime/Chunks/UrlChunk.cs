@@ -1,10 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using System;
-using System.Collections.Generic;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using LibraProgramming.Media.QuickTime.Extensions;
+using System;
+using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {

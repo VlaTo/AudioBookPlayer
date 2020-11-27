@@ -35,7 +35,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagAndVersion(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var sampleSize = StreamHelper.ReadUInt32(atom.Stream);
             var numberOfSizes = StreamHelper.ReadUInt32(atom.Stream);
             var sampleSizes = new uint[numberOfSizes];

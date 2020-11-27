@@ -29,7 +29,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagAndVersion(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var numberOfOffsets = StreamHelper.ReadUInt32(atom.Stream);
             var offsets = new uint[numberOfOffsets];
 
