@@ -4,8 +4,11 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The data reference atom.
+    /// </summary>
     [Chunk(AtomTypes.Dref)]
-    internal class DataReferenceChunk : ContainerChunk
+    internal class DrefChunk : ContainerChunk
     {
         private readonly uint flags;
 
@@ -14,7 +17,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             get;
         }
 
-        public DataReferenceChunk(byte version, uint flags, Chunk[] chunks)
+        public DrefChunk(byte version, uint flags, Chunk[] chunks)
             : base(AtomTypes.Dref, chunks)
         {
             this.flags = flags;
@@ -22,19 +25,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Version = version;
         }
 
-        public new static DataReferenceChunk ReadFrom(Atom atom)
+        public new static DrefChunk ReadFrom(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
             var position = atom.Stream.Position;
-
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
 
             var chunks = new List<Chunk>();
 
@@ -54,7 +54,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 }
             }
 
-            return new DataReferenceChunk(version,flags, chunks.ToArray());
+            return new DrefChunk(version,flags, chunks.ToArray());
         }
     }
 }

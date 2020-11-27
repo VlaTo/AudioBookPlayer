@@ -56,7 +56,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagAndVersion(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var created = ReadUtcDateTime(atom.Stream, version);
             var modified = ReadUtcDateTime(atom.Stream, version);
             var sampleRate = StreamHelper.ReadUInt32(atom.Stream);

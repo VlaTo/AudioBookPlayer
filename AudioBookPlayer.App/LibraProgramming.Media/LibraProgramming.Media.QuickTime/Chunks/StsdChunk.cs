@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The sample description atom.
+    /// </summary>
     [Chunk(AtomTypes.Stsd)]
     internal class StsdChunk : ContainerChunk
     {
@@ -28,12 +31,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
             var position = atom.Stream.Position;
-
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
 
             var chunks = new List<Chunk>();
 

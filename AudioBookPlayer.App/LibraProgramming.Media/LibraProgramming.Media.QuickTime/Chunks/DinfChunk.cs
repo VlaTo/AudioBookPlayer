@@ -1,7 +1,16 @@
-﻿namespace LibraProgramming.QuickTime.Container.Chunks
+﻿using LibraProgramming.Media.QuickTime.Components;
+using LibraProgramming.Media.QuickTime.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    /*[Chunk(AtomTypes.Dinf)]
-    public class DinfChunk : ContainerChunk
+    /// <summary>
+    /// The data information atom.
+    /// </summary>
+    [Chunk(AtomTypes.Dinf)]
+    internal sealed class DinfChunk : ContainerChunk
     {
         public DinfChunk(Chunk[] chunks)
             : base(AtomTypes.Dinf, chunks)
@@ -15,24 +24,20 @@
                 throw new ArgumentNullException(nameof(atom));
             }
 
+            var position = atom.Stream.Position;
             var chunks = new List<Chunk>();
 
-            using (var extractor = new AtomExtractor(atom.Stream))
+            using (var source = new ReadOnlyAtomStream(atom.Stream, position, atom.Stream.Length - position))
             {
-                var factory = ChunkFactory.Instance;
+                var extractor = new AtomExtractor(source);
 
-                foreach (var chuld in extractor)
+                foreach (var child in extractor)
                 {
-                    var chunk = factory.CreateFrom(chuld);
+                    var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                    switch (chunk)
+                    switch (chunk.Type)
                     {
-                        case TkhdChunk tkhd:
-                        {
-                            break;
-                        }
-
-                        case MdiaChunk mdia:
+                        case AtomTypes.Url:
                         {
                             break;
                         }
@@ -45,7 +50,7 @@
             return new DinfChunk(chunks.ToArray());
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type).ToBigEndian();
@@ -54,6 +59,6 @@
             Console.WriteLine($"{tabs}{type}");
 
             base.Debug(level);
-        }
-    }*/
+        }*/
+    }
 }

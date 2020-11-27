@@ -6,7 +6,6 @@ using System.Text;
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
     [Chunk(AtomTypes.Wide)]
-    [Chunk(AtomTypes.Text)]
     [Chunk(AtomTypes.Iods)]
     [Chunk(AtomTypes.Tref)]
     [Chunk(AtomTypes.Smhd)]
@@ -21,7 +20,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Sgpd)]
     [Chunk(AtomTypes.Sbgp)]
     [Chunk(AtomTypes.Chpl)]
-    [Chunk(AtomTypes.Url)]
     [Chunk(AtomTypes.Esds)]
     [Chunk(AtomTypes.Alis)]
     [Chunk(AtomTypes.Rtp)]

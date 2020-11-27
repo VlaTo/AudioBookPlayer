@@ -81,15 +81,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadFlags32(atom.Stream);
-            var version = (bits & 0xFF00_0000) >> 24;
-            var flags = bits & 0x00FF_FFFF;
+            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            //var bits = StreamHelper.ReadFlags32(atom.Stream);
+            //var version = (bits & 0xFF00_0000) >> 24;
+            //var flags = bits & 0x00FF_FFFF;
 
-            DateTime created;
-            DateTime modified;
+            DateTime created = ReadUtcDateTime(atom.Stream, version);
+            DateTime modified = ReadUtcDateTime(atom.Stream, version);
             TimeSpan duration;
 
-            switch (version)
+            /*switch (version)
             {
                 case 0:
                 {
@@ -118,7 +119,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 {
                     throw new NotSupportedException();
                 }
-            }
+            }*/
 
             var timeScale = StreamHelper.ReadUInt32(atom.Stream);
 
@@ -128,7 +129,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 {
                     var value = StreamHelper.ReadUInt32(atom.Stream);
 
-                    duration = TimeSpan.FromMilliseconds(value);
+                    duration = TimeSpan.FromSeconds(value / timeScale);
 
                     break;
                 }
@@ -137,7 +138,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 {
                     var value = StreamHelper.ReadUInt64(atom.Stream);
 
-                    duration = TimeSpan.FromMilliseconds(value);
+                    duration = TimeSpan.FromSeconds(value / timeScale);
 
                     break;
                 }
@@ -155,7 +156,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var preview = StreamHelper.ReadUInt64(atom.Stream);
             var poster = StreamHelper.ReadUInt32(atom.Stream);
             var selectionTime = StreamHelper.ReadInt64(atom.Stream);
-            var currentTime = StreamHelper.ReadInt64(atom.Stream);
+            var currentTime = ReadUtcDateTime(atom.Stream, 1); //StreamHelper.ReadInt64(atom.Stream);
             var nextId = StreamHelper.ReadInt32(atom.Stream);
 
             return new MvhdChunk

@@ -1,5 +1,4 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.QuickTime.Container.Chunks;
 using System;
 using System.Collections.Generic;
 
