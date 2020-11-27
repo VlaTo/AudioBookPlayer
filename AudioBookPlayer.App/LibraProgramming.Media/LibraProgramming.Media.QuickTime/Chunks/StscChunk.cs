@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
+using System.IO;
 using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
@@ -28,8 +29,20 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             SamplesPerChunk = samplesPerChunk;
             SampleDurationIndex = sampleDurationIndex;
         }
+
+        public static BlockDescription ReadFrom(Stream stream)
+        {
+            var firstChunk = StreamHelper.ReadUInt32(stream);
+            var samplesPerChunk = StreamHelper.ReadUInt32(stream);
+            var sampleDurationIndex = StreamHelper.ReadUInt32(stream);
+
+            return new BlockDescription(firstChunk, samplesPerChunk, sampleDurationIndex);
+        }
     }
 
+    /// <summary>
+    /// The sample-to-chunk atom.
+    /// </summary>
     [Chunk(AtomTypes.Stsc)]
     internal sealed class StscChunk : Chunk
     {
@@ -51,33 +64,21 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
             var numberOfBlocks = StreamHelper.ReadUInt32(atom.Stream);
-
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
-
             var blockSizes = new BlockDescription[numberOfBlocks];
+            var position = atom.Stream.Position;
 
-            for (var index = 0; index < numberOfBlocks; index++)
+            using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
             {
-                var firstChunk = StreamHelper.ReadUInt32(atom.Stream);
-                var samplesPerChunk = StreamHelper.ReadUInt32(atom.Stream);
-                var sampleDurationIndex = StreamHelper.ReadUInt32(atom.Stream);
-
-                blockSizes[index] = new BlockDescription(firstChunk, samplesPerChunk, sampleDurationIndex);
+                for (var index = 0; index < numberOfBlocks; index++)
+                {
+                    var block = BlockDescription.ReadFrom(atom.Stream);
+                    blockSizes[index] = block;
+                }
             }
 
             return new StscChunk(blockSizes);
-        }
-
-        public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} blocks: {BlockDescriptions.Length}");
         }
     }
 }

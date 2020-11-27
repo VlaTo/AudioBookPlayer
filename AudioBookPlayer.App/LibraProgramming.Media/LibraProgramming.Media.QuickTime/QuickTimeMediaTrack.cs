@@ -1,4 +1,5 @@
 ﻿using LibraProgramming.Media.Common;
+using System;
 using System.IO;
 
 namespace LibraProgramming.Media.QuickTime
@@ -15,6 +16,16 @@ namespace LibraProgramming.Media.QuickTime
         public override Stream GetSampleStream()
         {
             return null;
+        }
+
+        internal void SetDuration(TimeSpan value)
+        {
+            Duration = value;
+        }
+
+        internal void SetTitle(string value)
+        {
+            Title = value;
         }
     }
 }

@@ -55,20 +55,20 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     }
 
                     default:
+                    {
+                        if (DataType.Binary == meta.DataChunk.DataType)
                         {
-                            if (DataType.Binary == meta.DataChunk.DataType)
-                            {
-                                Debug.WriteLine($"");
-                            }
-                            else if (DataType.Text == meta.DataChunk.DataType)
-                            {
-                                meta.Debug(0);
-
-                                Debug.WriteLine($"Text: '{meta.DataChunk.Text}'");
-                            }
-
-                            break;
+                            //Debug.WriteLine($"");
                         }
+                        else if (DataType.Text == meta.DataChunk.DataType)
+                        {
+                            //meta.Debug(0);
+
+                            //Debug.WriteLine($"Text: '{meta.DataChunk.Text}'");
+                        }
+
+                        break;
+                    }
                 }
             }
         }

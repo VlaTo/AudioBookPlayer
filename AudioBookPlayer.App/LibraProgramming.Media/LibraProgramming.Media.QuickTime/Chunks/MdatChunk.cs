@@ -2,6 +2,9 @@
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The media data atom.
+    /// </summary>
     [Chunk(AtomTypes.Mdat)]
     internal sealed class MdatChunk : ContentChunk
     {

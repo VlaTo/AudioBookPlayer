@@ -13,8 +13,7 @@ using Prism.Ioc;
 
 namespace AudioBookPlayer.App.Droid
 {
-    [Activity(Theme = "@style/MainTheme",
-              ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
+    [Activity(Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -26,6 +25,20 @@ namespace AudioBookPlayer.App.Droid
 
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             LoadApplication(new App(new AndroidInitializer()));
+
+            /*var intent = PendingIntent.GetActivity(this, 0, Intent, PendingIntentFlags.UpdateCurrent);
+
+            var notification = new NotificationCompat.Builder(this)
+                .SetStyle(new NotificationCompat.BigTextStyle())
+                .SetContentTitle("Sample Title")
+                .SetContentText("Sample content text")
+                .SetSmallIcon(Resource.Drawable.icon)
+                .SetContentIntent(intent)
+                .Build();
+
+            var manager = NotificationManagerCompat.From(this);
+
+            manager.Notify(0, notification);*/
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

@@ -41,8 +41,6 @@ namespace LibraProgramming.Media.QuickTime
 
             foreach (var atom in extractor)
             {
-                atom.Print();
-
                 var chunk = ChunkFactory.Instance.CreateFrom(atom);
 
                 chunks.Add(chunk);
@@ -89,7 +87,7 @@ namespace LibraProgramming.Media.QuickTime
             EnsureNotDisposed();
 
             var tracks = new List<MediaTrack>();
-            var visitor = new MediaTrackVisitor(tracks);
+            var visitor = new MediaTrackVisitor(this, stream, tracks);
 
             visitor.Visit(root);
 

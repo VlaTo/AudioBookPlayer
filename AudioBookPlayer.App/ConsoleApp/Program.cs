@@ -1,4 +1,6 @@
-﻿using LibraProgramming.Media.QuickTime;
+﻿using LibraProgramming.Media.Common;
+using LibraProgramming.Media.QuickTime;
+using System;
 using System.IO;
 
 namespace ConsoleApp
@@ -13,36 +15,43 @@ namespace ConsoleApp
             {
                 extractor.Debug();
 
+                // Metadata
+                var meta = extractor.GetMeta();
                 var tracks = extractor.GetTracks();
 
-                foreach(var track in tracks)
-                {
-                    ;
-                }
-
-                /*var meta = extractor.GetMeta();
+                Console.WriteLine();
+                Console.WriteLine(" *** Info ***");
 
                 foreach (var item in meta.Items)
                 {
-                    if (WellKnownMetaItemNames.Cover.Equals(item.Key))
+                    switch (item)
                     {
-                        var source = (MetaInformationStreamItem)item;
+                        case MetaInformationTextItem textItem:
+                        {
+                            Console.WriteLine($"[Meta] {textItem.Key} = '{textItem.Text}'");
+
+                            if (WellKnownMetaItemNames.Cover.Equals(item.Key))
+                            {
+                            }
+
+                            break;
+                        }
+
+                        case MetaInformationStreamItem streamItem:
+                        {
+                            Console.WriteLine($"[Meta] {streamItem.Key} = binary {streamItem.Stream.Length:N} byte(s)");
+                            break;
+                        }
                     }
-                }*/
+                }
 
-                //var cover = meta.Items.Find(item => item.Key == "");
+                Console.WriteLine();
 
-                //var tracksCount = extractor.GetTracksCount();
-                //var buffer = new byte[4096];
-
-                //for (var index = 0; index < tracksCount; index++)
-                //{
-                    //var track = extractor.GetTrack(index);
-                    //var sampleSize = track.ReadSampleData(buffer);
-                //}
+                foreach(var track in tracks)
+                {
+                    Console.WriteLine($"[Track] '{track.Title}' {track.Duration:G}");
+                }
             }
-
-            System.Console.ReadLine();
         }
     }
 }

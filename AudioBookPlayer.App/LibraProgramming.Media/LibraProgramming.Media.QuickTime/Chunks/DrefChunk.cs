@@ -10,19 +10,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Dref)]
     internal class DrefChunk : ContainerChunk
     {
-        private readonly uint flags;
-
-        public byte Version
-        {
-            get;
-        }
-
-        public DrefChunk(byte version, uint flags, Chunk[] chunks)
+        public DrefChunk(Chunk[] chunks)
             : base(AtomTypes.Dref, chunks)
         {
-            this.flags = flags;
-
-            Version = version;
         }
 
         public new static DrefChunk ReadFrom(Atom atom)
@@ -32,7 +22,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
             var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
             var position = atom.Stream.Position;
 
@@ -54,7 +44,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 }
             }
 
-            return new DrefChunk(version,flags, chunks.ToArray());
+            return new DrefChunk(chunks.ToArray());
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -35,10 +33,17 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 {
                     var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                    switch (chunk.Type)
+                    switch (chunk)
                     {
-                        case AtomTypes.Url:
+                        case TkhdChunk tkhd:
                         {
+
+                            break;
+                        }
+
+                        case MdiaChunk mdia:
+                        {
+
                             break;
                         }
                     }
@@ -49,16 +54,5 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             return new DinfChunk(chunks.ToArray());
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }*/
     }
 }

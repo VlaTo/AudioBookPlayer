@@ -5,6 +5,9 @@ using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The chunk offset atom.
+    /// </summary>
     [Chunk(AtomTypes.Stco)]
     internal sealed class StcoChunk : Chunk
     {
@@ -26,12 +29,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var bits = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, flags) = ReadFlagAndVersion(atom.Stream);
             var numberOfOffsets = StreamHelper.ReadUInt32(atom.Stream);
-            
-            var version = (byte)((bits & 0xFF00_0000) >> 24);
-            var flags = bits & 0x00FF_FFFF;
-
             var offsets = new uint[numberOfOffsets];
 
             for (var index = 0; index < numberOfOffsets; index++)
@@ -42,14 +41,33 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             return new StcoChunk(offsets);
         }
-
-        public override void Debug(int level)
+        
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type).ToBigEndian();
             var type = Encoding.ASCII.GetString(bytes);
 
-            Console.WriteLine($"{tabs}{type} offsets: {Offsets.Length}");
-        }
+            Console.WriteLine($"{tabs}{type} (offsets: {Offsets.Length})");
+
+            var count = Offsets.Length;
+
+            Console.WriteLine($"{tabs} index     offsets");
+
+            for (var index = 0; index < Math.Min(3, count); index++)
+            {
+                var offset = Offsets[index];
+                Console.WriteLine($"{tabs}[{index:d8}] {offset:d8}");
+            }
+
+            if (3 < count)
+            {
+                var offset = Offsets[count - 1];
+                Console.WriteLine($"{tabs}...");
+                Console.WriteLine($"{tabs}[{(count - 1):d8}] {offset:d8}");
+            }
+
+            Console.WriteLine();
+        }*/
     }
 }

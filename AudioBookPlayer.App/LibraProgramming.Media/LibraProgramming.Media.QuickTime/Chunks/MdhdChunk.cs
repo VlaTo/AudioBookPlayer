@@ -1,10 +1,11 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The media header atom.
+    /// </summary>
     [Chunk(AtomTypes.Mdhd)]
     internal sealed class MdhdChunk : Chunk
     {
@@ -75,13 +76,13 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             };
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type).ToBigEndian();
             var type = Encoding.ASCII.GetString(bytes);
 
             Console.WriteLine($"{tabs}{type} [track length: {TrackLength}, sample rate: {SampleRate}, quality: {Quality}]");
-        }
+        }*/
     }
 }

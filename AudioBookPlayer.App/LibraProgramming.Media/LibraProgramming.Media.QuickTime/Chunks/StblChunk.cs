@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
+    /// <summary>
+    /// The sample table atom.
+    /// </summary>
     [Chunk(AtomTypes.Stbl)]
     internal sealed class StblChunk : ContainerChunk
     {
@@ -20,36 +23,65 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             }
 
             var chunks = new List<Chunk>();
-            var extractor = new AtomExtractor(atom.Stream);
 
-            foreach (var child in extractor)
+            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(child);
-                
-                switch (chunk)
+                var extractor = new AtomExtractor(atom.Stream);
+
+                foreach (var child in extractor)
                 {
-                    case StsdChunk stsd:
+                    var chunk = ChunkFactory.Instance.CreateFrom(child);
+
+                    switch (chunk)
                     {
+                        case StsdChunk stsd:
+                        {
 
-                        break;
+                            break;
+                        }
+
+                        case SttsChunk stts:
+                        {
+
+                            break;
+                        }
+
+                        case StszChunk stsz:
+                        {
+
+                            break;
+                        }
+
+                        case StscChunk stsc:
+                        {
+
+                            break;
+                        }
+
+                        case StcoChunk stco:
+                        {
+
+                            break;
+                        }
+
+                        /*case CttsChunk:
+                        {
+
+                            break;
+                        }*/
+
+                        default:
+                        {
+
+                            break;
+                        }
                     }
-                }
 
-                chunks.Add(chunk);
+                    chunks.Add(chunk);
+                }
             }
 
             return new StblChunk(chunks.ToArray());
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }*/
     }
 }

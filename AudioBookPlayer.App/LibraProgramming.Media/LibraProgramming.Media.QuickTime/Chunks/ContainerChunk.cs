@@ -6,11 +6,6 @@ using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
-    //[Chunk(AtomTypes.Dinf)]
-    //[Chunk(AtomTypes.Mdia)]
-    //[Chunk(AtomTypes.Minf)]
-    //[Chunk(AtomTypes.Stbl)]
-    //[Chunk(AtomTypes.Trak)]
     [Chunk(AtomTypes.Edts)]
     internal class ContainerChunk : Chunk
     {

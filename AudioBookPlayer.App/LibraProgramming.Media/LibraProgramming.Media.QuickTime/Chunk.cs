@@ -1,5 +1,7 @@
-﻿using System;
+﻿using LibraProgramming.Media.QuickTime.Extensions;
+using System;
 using System.IO;
+using System.Text;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -22,8 +24,6 @@ namespace LibraProgramming.Media.QuickTime
             QuickTimeEpoch = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
-        public abstract void Debug(int level);
-
         protected static (byte version, uint flags) ReadFlagsAndVersion(Stream stream)
         {
             var bits = StreamHelper.ReadUInt32(stream);
@@ -31,6 +31,15 @@ namespace LibraProgramming.Media.QuickTime
             var flags = bits & 0x00FF_FFFF;
 
             return (version, flags);
+        }
+
+        public virtual void Debug(int level)
+        {
+            var tabs = new String(' ', level);
+            var bytes = BitConverter.GetBytes(Type);
+            var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
+
+            Console.WriteLine($"{tabs}{type}");
         }
 
         protected static DateTime ReadUtcDateTime(Stream stream, byte version)
