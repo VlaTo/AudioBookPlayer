@@ -47,10 +47,15 @@ namespace ConsoleApp
 
                 Console.WriteLine();
 
+                var total = TimeSpan.Zero;
+
                 foreach(var track in tracks)
                 {
-                    Console.WriteLine($"[Track] '{track.Title}' {track.Duration:G}");
+                    Console.WriteLine($"[Track] '{track.Title}' {track.Duration:c}");
+                    total += track.Duration;
                 }
+
+                Console.WriteLine($"Total length: {total:c}");
             }
         }
     }

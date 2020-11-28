@@ -96,15 +96,13 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                             var text = StreamHelper.ReadPascalString(stream);
 
                             track.SetTitle(text);
-                            track.SetDuration(TimeSpan.FromSeconds(timeToSample.Duration / last.TimeScale));
+                            track.SetDuration(TimeSpan.FromMilliseconds(timeToSample.Duration));
 
                             tracks.Add(track);
 
                             samplesCount += timeToSample.SampleCount;
                             samplesDuration += timeToSample.Duration;
                         }
-
-                        Console.WriteLine($"{TimeSpan.FromSeconds(samplesDuration / last.TimeScale)}");
                     }
                 }
             }
@@ -119,12 +117,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             info.TrackId = chunk.TrackId;
             info.Duration = chunk.Duration;
-            //info.Duration = (TimeSpan.FromSeconds(chunk.Duration / timeScale));
+            
+            var length = TimeSpan.FromSeconds(chunk.Duration / info.TimeScale);
 
             Console.WriteLine($"[TKHD] //track id: {chunk.TrackId}");
             Console.WriteLine($"[TKHD] //duration: {chunk.Duration:d8}");
             Console.WriteLine($"[TKHD] //created: {chunk.Created}");
             Console.WriteLine($"[TKHD] //modified: {chunk.Modified}");
+            Console.WriteLine($"[TKHD] //length: {length:c}");
             Console.WriteLine();
 
             base.VisitTkhd(chunk);
@@ -178,21 +178,37 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             var count = chunk.Entries.Length;
 
-            Console.WriteLine(" -index-   samples   duration");
+            Console.WriteLine(" -index-   samples  duration");
+
+            var total = 0U;
+            //var lengths = new TimeSpan[count];
+
+            for(var index = 0; index < count; index++)
+            {
+                var description = chunk.Entries[index];
+                //var length = TimeSpan.FromMilliseconds(description.Duration);
+
+                //lengths[index] = length;
+
+                total += (description.Duration * description.SampleCount);
+            }
 
             for (var index = 0; index < Math.Min(3, count); index++)
             {
                 var description = chunk.Entries[index];
+                //var length = lengths[index] * description.SampleCount;
                 Console.WriteLine($"[{index:d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
             if (3 < count)
             {
                 var description = chunk.Entries[count - 1];
+                //var length = lengths[count - 1];
                 Console.WriteLine("...");
                 Console.WriteLine($"[{(count - 1):d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
+            Console.WriteLine($"Total: {TimeSpan.FromMilliseconds(total):G}");
             Console.WriteLine();
 
             base.VisitStts(chunk);
