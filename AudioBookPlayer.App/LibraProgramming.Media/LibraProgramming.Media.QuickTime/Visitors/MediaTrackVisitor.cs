@@ -15,6 +15,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         private TrackInfo primaryTrack;
         
         private uint? timeScale;
+        private uint? sampleScale;
 
         public MediaTrackVisitor(
             QuickTimeMediaExtractor extractor,
@@ -40,25 +41,41 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitMvhd(MvhdChunk chunk)
         {
+            Console.WriteLine($"[MVHD] //time scale: {chunk.TimeScale}");
+            Console.WriteLine();
+
             timeScale = chunk.TimeScale;
 
             base.VisitMvhd(chunk);
+        }
+
+        public override void VisitMdhd(MdhdChunk chunk)
+        {
+            Console.WriteLine($"[MDHD] //sample rate: {chunk.SampleRate}");
+            Console.WriteLine();
+
+            sampleScale = chunk.SampleRate;
+
+            base.VisitMdhd(chunk);
         }
 
         public override void VisitTrak(TrakChunk chunk)
         {
             var actual = new TrackInfo
             {
-                TimeScale = timeScale.GetValueOrDefault(600)
+                TimeScale = timeScale.GetValueOrDefault()
             };
 
-            trackInfos.Push(actual);
+        trackInfos.Push(actual);
             
             Console.WriteLine("[TRAK] Begin");
 
             base.VisitTrak(chunk);
 
             var last = trackInfos.Pop();
+
+            //last.TimeScale = timeScale.GetValueOrDefault();
+            last.SampleScale = sampleScale.GetValueOrDefault(600);
 
             if (false == ReferenceEquals(last, actual))
             {
@@ -85,7 +102,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         //Console.WriteLine($"[TRAK] //last track time scale: {last.TimeScale}");
 
                         var samplesCount = 0u;
-                        var samplesDuration = 0u;
+                        var duration = TimeSpan.Zero;
 
                         for (var index = 0; index < last.Offsets.Length; index++)
                         {
@@ -94,14 +111,15 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                             var timeToSample = last.Entries[index];
                             var position = stream.Seek(offset, SeekOrigin.Begin);
                             var text = StreamHelper.ReadPascalString(stream);
+                            var temp = TimeSpan.FromSeconds(((double)timeToSample.Duration) / last.SampleScale);
 
                             track.SetTitle(text);
-                            track.SetDuration(TimeSpan.FromMilliseconds(timeToSample.Duration));
+                            track.SetDuration(temp);
 
                             tracks.Add(track);
 
                             samplesCount += timeToSample.SampleCount;
-                            samplesDuration += timeToSample.Duration;
+                            duration += temp;
                         }
                     }
                 }
@@ -180,19 +198,6 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             Console.WriteLine(" -index-   samples  duration");
 
-            var total = 0U;
-            //var lengths = new TimeSpan[count];
-
-            for(var index = 0; index < count; index++)
-            {
-                var description = chunk.Entries[index];
-                //var length = TimeSpan.FromMilliseconds(description.Duration);
-
-                //lengths[index] = length;
-
-                total += (description.Duration * description.SampleCount);
-            }
-
             for (var index = 0; index < Math.Min(3, count); index++)
             {
                 var description = chunk.Entries[index];
@@ -203,12 +208,10 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             if (3 < count)
             {
                 var description = chunk.Entries[count - 1];
-                //var length = lengths[count - 1];
                 Console.WriteLine("...");
                 Console.WriteLine($"[{(count - 1):d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
-            Console.WriteLine($"Total: {TimeSpan.FromMilliseconds(total):G}");
             Console.WriteLine();
 
             base.VisitStts(chunk);
@@ -227,7 +230,6 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             var sampleSizes = chunk.SampleSizes.Length;
 
             Console.WriteLine($"[STSZ] //sample sizes: {sampleSizes}");
-            //Console.WriteLine(" -index-   samp/sizes");
 
             for (var index = 0; index < Math.Min(3, sampleSizes); index++)
             {
@@ -314,6 +316,11 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             }
 
             public uint TimeScale
+            {
+                get;
+                set;
+            }
+            public uint SampleScale
             {
                 get;
                 set;

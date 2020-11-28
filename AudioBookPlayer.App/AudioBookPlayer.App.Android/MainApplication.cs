@@ -4,9 +4,7 @@ using Android.Runtime;
 
 namespace AudioBookPlayer.App.Droid
 {
-    [Application(
-        Theme = "@style/MainTheme"
-        )]
+    [Application(Theme = "@style/MainTheme")]
     public class MainApplication : Application
     {
         public MainApplication(IntPtr javaReference, JniHandleOwnership transfer)
@@ -17,6 +15,7 @@ namespace AudioBookPlayer.App.Droid
         public override void OnCreate()
         {
             base.OnCreate();
+
             Xamarin.Essentials.Platform.Init(this);
         }
     }

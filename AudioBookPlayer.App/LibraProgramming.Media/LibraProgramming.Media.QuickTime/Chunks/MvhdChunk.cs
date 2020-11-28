@@ -93,11 +93,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             DateTime modified = ReadUtcDateTime(atom.Stream, version);
             var timeScale = StreamHelper.ReadUInt32(atom.Stream);
             TimeSpan duration = ReadDuration(atom.Stream, timeScale, version);
-            //var playbackSpeed = StreamHelper.ReadBytes(atom.Stream, 4);
             var playbackSpeed = StreamHelper.ReadInt32(atom.Stream);
             var volume = StreamHelper.ReadUInt16(atom.Stream);
             var reserved1 = StreamHelper.ReadUInt16(atom.Stream);
-            //var wgm = Wgm.Read(atom.Stream);
             var wgm = StreamHelper.ReadBytes(atom.Stream, 36);
             var previewTime = StreamHelper.ReadUInt32(atom.Stream);
             var previewDuration = StreamHelper.ReadUInt32(atom.Stream);
@@ -123,15 +121,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 Modified = modified
             };
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type);
-            var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
-
-            Console.WriteLine($"{tabs}{type} duration: '{Duration:g}'");
-        }*/
 
         private static TimeSpan ReadDuration(Stream stream, uint scale, byte version)
         {

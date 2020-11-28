@@ -1,5 +1,4 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Text;
 
@@ -58,15 +57,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             }
 
             return new UrlChunk(url);
-        }
-
-        public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} [ulr: '{Url}']");
         }
     }
 }

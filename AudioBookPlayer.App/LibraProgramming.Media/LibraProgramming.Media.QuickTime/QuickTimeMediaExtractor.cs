@@ -37,13 +37,17 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var chunks = new List<Chunk>();
-            var extractor = new AtomExtractor(stream);
 
-            foreach (var atom in extractor)
+            using (var temp = new ReadOnlySharedStream(stream))
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(atom);
+                var extractor = new AtomExtractor(temp);
 
-                chunks.Add(chunk);
+                foreach (var atom in extractor)
+                {
+                    var chunk = ChunkFactory.Instance.CreateFrom(atom);
+
+                    chunks.Add(chunk);
+                }
             }
 
             var root = new RootChunk(chunks.ToArray());

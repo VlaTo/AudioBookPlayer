@@ -22,36 +22,47 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             }
 
             var chunks = new List<Chunk>();
-            var extractor = new AtomExtractor(atom.Stream);
 
-            foreach (var chuld in extractor)
+            using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(chuld);
+                var extractor = new AtomExtractor(stream);
 
-                switch (chunk)
+                foreach (var chuld in extractor)
                 {
-                    case TkhdChunk tkhd:
+                    var chunk = ChunkFactory.Instance.CreateFrom(chuld);
+
+                    switch (chunk)
                     {
+                        case MdhdChunk mdhd:
+                        {
 
-                        break;
+                            break;
+                        }
+
+                        case HdlrChunk hdlr:
+                        {
+
+                            break;
+                        }
+
+                        case MinfChunk minf:
+                        {
+
+                            break;
+                        }
+
+                        default:
+                        {
+
+                            break;
+                        }
                     }
-                }
 
-                chunks.Add(chunk);
+                    chunks.Add(chunk);
+                }
             }
 
             return new MdiaChunk(chunks.ToArray());
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }*/
     }
 }

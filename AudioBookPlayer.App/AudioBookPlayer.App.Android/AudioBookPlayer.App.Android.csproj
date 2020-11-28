@@ -70,7 +70,9 @@
   <ItemGroup>
     <Compile Include="MainApplication.cs" />
     <Compile Include="MainActivity.cs" />
+    <Compile Include="PlaybackActivity.cs" />
     <Compile Include="Services\AssetStreamProvider.cs" />
+    <Compile Include="Services\AndroidPlaybackService.cs" />
     <Compile Include="SplashActivity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <LinkDescription Include="LinkerSettings.xml" />

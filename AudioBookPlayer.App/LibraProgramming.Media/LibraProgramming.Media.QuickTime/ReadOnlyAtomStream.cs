@@ -41,6 +41,7 @@ namespace LibraProgramming.Media.QuickTime
 
         public override void Flush()
         {
+            throw new NotImplementedException();
         }
 
         public override int Read(byte[] buffer, int offset, int count)
@@ -55,25 +56,47 @@ namespace LibraProgramming.Media.QuickTime
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            EnsureOffsetValid(offset, origin);
+            //EnsureOffsetValid(offset, origin);
 
             switch (origin)
             {
                 case SeekOrigin.Begin:
                 {
+                    if (0L > offset || Length < offset)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(offset), offset, "");
+                    }
+
                     position = offset;
+
                     break;
                 }
 
                 case SeekOrigin.Current:
                 {
+                    var current = position + offset;
+
+                    if (current < Start || current > Length)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(offset), offset, "");
+                    }
+
                     position += offset;
+
                     break;
                 }
 
                 case SeekOrigin.End:
                 {
+                    var current = stream.Position + offset;
+
+                    if (current < Start || current > Length)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(offset), offset, "");
+                    }
+
                     position = Length - offset;
+
                     break;
                 }
             }

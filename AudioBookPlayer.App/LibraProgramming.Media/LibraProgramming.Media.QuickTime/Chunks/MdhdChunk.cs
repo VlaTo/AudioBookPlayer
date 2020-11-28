@@ -75,14 +75,5 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 Modified = modified
             };
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} [track length: {TrackLength}, sample rate: {SampleRate}, quality: {Quality}]");
-        }*/
     }
 }

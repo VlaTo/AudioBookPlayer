@@ -16,6 +16,7 @@ namespace AudioBookPlayer.App.ViewModels
     public class MainPageViewModel : ViewModelBase
     {
         private readonly ISourceStreamProvider streamProvider;
+        private readonly IPlaybackService playbackService;
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
@@ -48,10 +49,14 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public MainPageViewModel(INavigationService navigationService, ISourceStreamProvider streamProvider)
+        public MainPageViewModel(
+            INavigationService navigationService,
+            ISourceStreamProvider streamProvider,
+            IPlaybackService playbackService)
             : base(navigationService)
         {
             this.streamProvider = streamProvider;
+            this.playbackService = playbackService;
 
             Title = "Main Page";
             Play = new DelegateCommand(DoPlayCommand);
@@ -99,6 +104,7 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
                 {
+                    // get meta
                     var meta = extractor.GetMeta();
 
                     foreach (var item in meta.Items)
@@ -130,8 +136,21 @@ namespace AudioBookPlayer.App.ViewModels
                             }
                         }
                     }
+
+                    // get tracks
+                    var tracks = extractor.GetTracks();
+
+                    for (var index = 0; index < tracks.Length; index++)
+                    {
+                        var track = tracks[index];
+
+
+                    }
                 }
             }
+
+            // notification
+            playbackService.ShowNotification();
         }
 
         private void DoChangeCoverCommand()
