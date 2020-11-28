@@ -3,6 +3,7 @@ using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -20,7 +21,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Chunks = chunks;
         }
 
-        public static ContainerChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<ContainerChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -32,7 +34,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             foreach (var child in extractor)
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(child);
+                var chunk = await ChunkFactory.Instance.CreateFromAsync(child);
                 chunks.Add(chunk);
             }
 

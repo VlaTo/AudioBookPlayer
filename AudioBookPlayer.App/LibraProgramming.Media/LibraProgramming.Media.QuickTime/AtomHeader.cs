@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -33,7 +34,7 @@ namespace LibraProgramming.Media.QuickTime
             ChunkLength = chunkLength;
         }
 
-        public static AtomHeader ReadFrom(Stream stream, long offset)
+        public static async Task<AtomHeader> ReadFromAsync(Stream stream, long offset)
         {
             if (null == stream)
             {
@@ -45,7 +46,7 @@ namespace LibraProgramming.Media.QuickTime
                 throw new InvalidOperationException();
             }
 
-            var (type, size, length) = StreamHelper.ReadChunkPrefix(stream);
+            var (type, size, length) = await StreamHelper.ReadChunkPrefixAsync(stream);
 
             if (AtomTypes.Empty == type)
             {

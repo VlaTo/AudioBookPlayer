@@ -1,8 +1,7 @@
-﻿using LibraProgramming.Media.QuickTime.Extensions;
-using System;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -11,16 +10,18 @@ namespace LibraProgramming.Media.QuickTime
         // should be same as extended length field size
         public const int PrefixSize = 8;
         
-        public static readonly Encoding Encoding = System.Text.Encoding.Unicode;
+        public static readonly Encoding Encoding = Encoding.Unicode;
 
-        public static UInt16 ReadUInt16(Stream stream)
+        public static async Task<UInt16> ReadUInt16Async(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(UInt16), out var bytes))
+            var data = new byte[sizeof(UInt16)];
+
+            /*if (false == TryReadBytesFromStream(stream, sizeof(UInt16), out var bytes))
             {
                 throw new Exception();
-            }
+            }*/
 
-            return BitConverter.ToUInt16(bytes, 0);
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
 
             /*var data = new byte[sizeof(UInt16)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
@@ -35,17 +36,21 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 data = buffer;
-            }
+            }*/
 
-            return BitConverter.ToUInt16(data, 0);*/
+            return BitConverter.ToUInt16(data, 0);
         }
 
-        public static int ReadInt32(Stream stream)
+        public static async Task<int> ReadInt32Async(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(int), out var bytes))
+            var data = new byte[sizeof(int)];
+
+            /*if (false == TryReadBytesFromStream(stream, sizeof(int), out var bytes))
             {
                 throw new Exception();
-            }
+            }*/
+
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
 
             /*var data = new byte[sizeof(int)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
@@ -62,15 +67,19 @@ namespace LibraProgramming.Media.QuickTime
                 data = buffer;
             }*/
 
-            return BitConverter.ToInt32(bytes, 0);
+            return BitConverter.ToInt32(data, 0);
         }
 
-        public static long ReadInt64(Stream stream)
+        public static async Task<long> ReadInt64Async(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(long), out var bytes))
+            var data = new byte[sizeof(long)];
+
+            /*if (false == TryReadBytesFromStream(stream, sizeof(long), out var bytes))
             {
                 throw new Exception();
-            }
+            }*/
+
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
 
             /*var data = new byte[sizeof(long)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
@@ -87,15 +96,19 @@ namespace LibraProgramming.Media.QuickTime
                 data = buffer;
             }*/
 
-            return BitConverter.ToInt64(bytes, 0);
+            return BitConverter.ToInt64(data, 0);
         }
 
-        public static uint ReadUInt32(Stream stream)
+        public static async Task<uint> ReadUInt32Async(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(uint), out var bytes))
+            var data = new byte[sizeof(uint)];
+
+            /*if (false == TryReadBytesFromStream(stream, sizeof(uint), out var bytes))
             {
                 throw new Exception();
-            }
+            }*/
+
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
 
             /*var data = new byte[sizeof(uint)];
             var actualCount = ReadBytesFromStreamInternal(stream, data);
@@ -112,53 +125,45 @@ namespace LibraProgramming.Media.QuickTime
                 data = buffer;
             }*/
 
-            return BitConverter.ToUInt32(bytes, 0);
+            return BitConverter.ToUInt32(data, 0);
         }
 
-        public static ulong ReadUInt64(Stream stream)
+        public static async Task<ulong> ReadUInt64Async(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(ulong), out var bytes))
+            var data = new byte[sizeof(ulong)];
+
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
+
+            /*var bytes = await ReadBytesFromStreamAsync(stream, sizeof(ulong), true);
             {
                 throw new Exception();
-            }
-
-            /*var data = new byte[sizeof(ulong)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
-
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
-                {
-                    buffer[index] = data[data.Length - index - 1];
-                }
-
-                data = buffer;
             }*/
 
-            return BitConverter.ToUInt64(bytes, 0);
+            return BitConverter.ToUInt64(data, 0);
         }
 
-        public static string ReadString(Stream stream, int length)
+        public static async Task<string> ReadStringAsync(Stream stream, int length)
         {
             var data = new byte[length];
-            var count = stream.Read(data, 0, data.Length);
+            
+            await ReadBytesFromStreamAsync(stream, data, 0, length);
 
-            return Encoding.ASCII.GetString(data, 0, count);
+            //var count = await stream.ReadAsync(data, 0, data.Length);
+
+            return Encoding.ASCII.GetString(data, 0, length);
         }
 
-        public static string ReadPascalString(Stream stream)
+        public static async Task<string> ReadPascalStringAsync(Stream stream)
         {
-            var length = ReadUInt16(stream);
+            var length = await ReadUInt16Async(stream);
 
             if (0 == length)
             {
                 return String.Empty;
             }
 
-            var bytes = ReadBytes(stream, length);
             var offset = 0;
+            var bytes = await ReadBytesAsync(stream, length);
             var preamble = Encoding.GetPreamble();
 
             if (true)
@@ -176,23 +181,27 @@ namespace LibraProgramming.Media.QuickTime
             return Encoding.GetString(bytes, offset, length);
         }
 
-        public static byte[] ReadBytes(Stream stream, uint length)
+        public static async Task<byte[]> ReadBytesAsync(Stream stream, uint length)
         {
             var data = new byte[length];
-            var actualCount = ReadBytesFromStream(stream, data, true);
+
+            //await ReadBytesFromStreamAsync(stream, data, true);
+            await ReadBytesFromStreamAsync(stream, data, 0, data.Length);
 
             return data;
         }
 
-        public static byte ReadByte(Stream stream)
+        public static async Task<byte> ReadByteAsync(Stream stream)
         {
             var data = new byte[1];
-            var actualCount = ReadBytesFromStream(stream, data, true);
+
+            //await ReadBytesFromStreamAsync(stream, data, true);
+            await ReadBytesFromStreamAsync(stream, data, 0, 1);
 
             return data[0];
         }
 
-        public static (uint type, int size, long length) ReadChunkPrefix(Stream stream)
+        public static async Task<(uint type, int size, long length)> ReadChunkPrefixAsync(Stream stream)
         {
             var size = PrefixSize;
             var available = stream.Length - stream.Position;
@@ -203,54 +212,97 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var data = new byte[size];
-            var count = ReadBytesFromStream(stream, data);
 
-            var length = (long)BitConverter.ToUInt32(data.Slice(0, 4).ToBigEndian(), 0);
-            var atomType = BitConverter.ToUInt32(data.Slice(4).ToBigEndian(), 0);
+            //await ReadBytesFromStreamAsync(stream, data, true);
+            await ReadBytesFromStreamAsync(stream, data, 0, 4, true);
+            await ReadBytesFromStreamAsync(stream, data, 4, 4, true);
+
+            //var length = (long)BitConverter.ToUInt32(data.Slice(0, 4).ToBigEndian(), 0);
+            var length = (long)BitConverter.ToUInt32(data, 0);
+            //var atomType = BitConverter.ToUInt32(data.Slice(4).ToBigEndian(), 0);
+            var atomType = BitConverter.ToUInt32(data, 4);
 
             if (1U == length)
             {
                 size += PrefixSize;
 
-                var extra = ReadBytesFromStream(stream, data, true);
+                //await ReadBytesFromStreamAsync(stream, data, true);
+                await ReadBytesFromStreamAsync(stream, data, 0, 8, true);
 
-                length = BitConverter.ToInt64(data.ToBigEndian(), 0);
+                length = BitConverter.ToInt64(data, 0);
             }
 
             return (atomType, size, length);
         }
 
-        private static int ReadBytesFromStream(Stream stream, byte[] bytes, bool throwException = false)
+        private static async Task ReadBytesFromStreamAsync(Stream stream, byte[] bytes, bool throwException = false)
         {
             var bufferLength = bytes.Length;
-            var actualCount = stream.Read(bytes, 0, bufferLength);
+            var actualCount = await stream.ReadAsync(bytes, 0, bufferLength);
 
             if ((bufferLength != actualCount) && throwException)
             {
                 throw new InvalidOperationException();
             }
-
-            return actualCount;
         }
 
-        private static bool TryReadBytesFromStream(Stream stream, int count, out byte[] bytes)
+        private static async Task ReadBytesFromStreamAsync(Stream stream, byte[] buffer, int offset, int count)
+        {
+            var actual = await stream.ReadAsync(buffer, offset, count);
+
+            if (actual != count)
+            {
+                throw new Exception();
+            }
+        }
+
+        private static async Task ReadBytesFromStreamAsync(Stream stream, byte[] buffer, int offset, int count, bool forceEndian)
+        {
+            var actual = await stream.ReadAsync(buffer, offset, count);
+
+            if (actual != count)
+            {
+                throw new Exception();
+            }
+
+            if (forceEndian)
+            {
+                ToBigEndian(buffer, offset, count);
+            }
+        }
+
+        private static void ToBigEndian(byte[] buffer, int offset, int count)
+        {
+            if (false == BitConverter.IsLittleEndian)
+            {
+                return;
+            }
+
+            var iterations = count >> 1;
+            int start = offset;
+            int end = offset + count - 1;
+
+            for (var index = 0; index < iterations; index++)
+            {
+                var temp = buffer[start];
+
+                buffer[start++] = buffer[end];
+                buffer[end--] = temp;
+            }
+        }
+
+        private static async Task<byte[]> ReadBytesFromStreamBigEndianAsync(Stream stream, int count)
         {
             var buffer = new byte[count];
-            //var actualCount = stream.Read(buffer, 0, count);
-            var actualCount = ReadBytesFromStream(stream, buffer);
 
-            bytes = null;
-
-            if (count != actualCount)
-            {
-                return false;
-            }
+            await ReadBytesFromStreamAsync(stream, buffer, true);
 
             if (BitConverter.IsLittleEndian)
             {
-                var iterations = actualCount >> 1;
+                var length = buffer.Length;
+                var iterations = length >> 1;
                 int start = 0;
-                int end = actualCount - 1;
+                int end = length - 1;
 
                 for (var index = 0; index < iterations; index++)
                 {
@@ -261,9 +313,7 @@ namespace LibraProgramming.Media.QuickTime
                 }
             }
 
-            bytes = buffer;
-
-            return true;
+            return buffer;
         }
     }
 }

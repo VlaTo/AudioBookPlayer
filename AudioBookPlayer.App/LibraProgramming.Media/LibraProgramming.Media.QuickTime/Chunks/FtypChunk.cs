@@ -1,7 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -31,30 +30,20 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             CompatibleBrand = compatibleBrand;
         }
 
-        public static FtypChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<FtypChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var brand = StreamHelper.ReadString(atom.Stream, 4);
-            var version = StreamHelper.ReadUInt32(atom.Stream);
-            var compatibleBrand = StreamHelper.ReadString(atom.Stream, 4);
-            var data = StreamHelper.ReadBytes(atom.Stream, 4);
+            var brand = await StreamHelper.ReadStringAsync(atom.Stream, 4);
+            var version = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var compatibleBrand = await StreamHelper.ReadStringAsync(atom.Stream, 4);
+            var data = await StreamHelper.ReadBytesAsync(atom.Stream, 4);
 
             return new FtypChunk(brand, version, compatibleBrand, data);
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type} brand: '{Brand}'");
-
-            //Console.WriteLine($"[Ftyp] Brand: '{Brand}', Version: '{Version}', Compatible: '{CompatibleBrand}'");
-        }*/
     }
 }

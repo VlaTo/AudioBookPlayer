@@ -2,18 +2,19 @@
 using LibraProgramming.Media.QuickTime;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var filename = args[0];
 
             using (var stream = new BufferedStream(File.OpenRead(filename), 409600))
             {
-                using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
+                using (var extractor = await QuickTimeMediaExtractor.CreateFromAsync(stream))
                 {
                     extractor.Debug();
 

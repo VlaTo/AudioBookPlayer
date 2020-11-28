@@ -4,19 +4,21 @@ using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
     public sealed class ChunkFactory
     {
-        private readonly IDictionary<uint, Func<Atom, Chunk>> cache;
+        private readonly IDictionary<uint, Func<Atom, Task<Chunk>>> cache;
 
         public static readonly ChunkFactory Instance;
 
-        private ChunkFactory(IDictionary<uint, Func<Atom, Chunk>> cache)
+        private ChunkFactory(IDictionary<uint, Func<Atom, Task<Chunk>>> cache)
         {
             this.cache = cache;
         }
@@ -24,7 +26,7 @@ namespace LibraProgramming.Media.QuickTime
         static ChunkFactory()
         {
             var @namespace = typeof(Chunk).Namespace + ".Chunks";
-            var dict = new Dictionary<uint, Func<Atom, Chunk>>();
+            var dict = new Dictionary<uint, Func<Atom, Task<Chunk>>>();
             var types = typeof(ChunkFactory).Assembly
                 .GetTypes()
                 .Where(type => type.Namespace.StartsWith(@namespace))
@@ -44,11 +46,11 @@ namespace LibraProgramming.Media.QuickTime
             Instance = new ChunkFactory(dict);
         }
 
-        public Chunk CreateFrom(Atom atom)
+        public async Task<Chunk> CreateFromAsync(Atom atom)
         {
             if (cache.TryGetValue(atom.Type, out var creator))
             {
-                return creator.Invoke(atom);
+                return await creator.Invoke(atom);
             }
 
             var bytes = BitConverter.GetBytes(atom.Type);
@@ -56,14 +58,37 @@ namespace LibraProgramming.Media.QuickTime
 
             Debug.WriteLine($"public const uint {type.ToVariableName()} = 0x{atom.Type:X08};\t// chunk factory");
 
-            return ContentChunk.ReadFrom(atom);
-            //throw new ArgumentNullException(nameof(atom));
+            return await ContentChunk.ReadFromAsync(atom);
         }
 
-        private static Func<Atom, Chunk> GetCreator(Type type)
+        private static Func<Atom, Task<Chunk>> GetCreator(Type type)
         {
-            var method = type.GetMethod("ReadFrom", BindingFlags.Static | BindingFlags.Public);
-            return method.CreateDelegate<Func<Atom, Chunk>>();
+            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+
+            foreach(var method in methods)
+            {
+                var attribute = method.GetCustomAttribute<ChunkCreatorAttribute>();
+
+                if (null == attribute)
+                {
+                    continue;
+                }
+
+                if (typeof(Task<>).IsAssignableFrom(method.ReturnType))
+                {
+                    var parameters = method.GetParameters();
+
+                    if (1 == parameters.Length && parameters[0].ParameterType.IsAssignableFrom(typeof(Atom)))
+                    {
+                        return method.CreateDelegate<Func<Atom, Task<Chunk>>>();
+                    }
+                }
+            }
+
+            //var method = type.GetMethod("ReadFrom", BindingFlags.Static | BindingFlags.Public);
+            //return method.CreateDelegate<Func<Atom, Chunk>>();
+
+            throw new NotImplementedException();
         }
     }
 }

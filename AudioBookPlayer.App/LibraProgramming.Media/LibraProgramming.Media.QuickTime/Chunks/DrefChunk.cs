@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -15,15 +16,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static DrefChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static new async Task<DrefChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
+            var (_, _) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var numberOfReferences = await StreamHelper.ReadUInt32Async(atom.Stream);
             var position = atom.Stream.Position;
 
             var chunks = new List<Chunk>();
@@ -38,7 +40,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 for (var index = 0; index < numberOfReferences && enumerator.MoveNext(); index++)
                 {
                     var current = enumerator.Current;
-                    var chunk = ChunkFactory.Instance.CreateFrom(current);
+                    var chunk = await ChunkFactory.Instance.CreateFromAsync(current);
 
                     chunks.Add(chunk);
                 }

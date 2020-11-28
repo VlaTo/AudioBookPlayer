@@ -1,5 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -17,7 +18,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Scenes = scenes ?? Array.Empty<uint>();
         }
 
-        public static ChapChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<ChapChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -31,7 +33,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 for (var index = 0; index < numberOfEntries; index++)
                 {
-                    var blockSize = StreamHelper.ReadUInt32(atom.Stream);
+                    var blockSize = await StreamHelper.ReadUInt32Async(atom.Stream);
                     scenes[index] = blockSize;
                 }
             }

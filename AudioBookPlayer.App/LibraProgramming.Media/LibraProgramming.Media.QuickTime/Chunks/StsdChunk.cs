@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -10,29 +11,27 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Stsd)]
     internal class StsdChunk : ContainerChunk
     {
-        private readonly uint flags;
-
         public byte Version
         {
             get;
         }
 
-        public StsdChunk(byte version, uint flags, Chunk[] chunks)
+        public StsdChunk(byte version, Chunk[] chunks)
             : base(AtomTypes.Stsd, chunks)
         {
-            this.flags = flags;
             Version = version;
         }
 
-        public new static StsdChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<StsdChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
+            var (version, _) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var numberOfReferences = await StreamHelper.ReadUInt32Async(atom.Stream);
             var position = atom.Stream.Position;
 
             var chunks = new List<Chunk>();
@@ -47,13 +46,13 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 for (var index = 0; index < numberOfReferences && enumerator.MoveNext(); index++)
                 {
                     var current = enumerator.Current;
-                    var chunk = ChunkFactory.Instance.CreateFrom(current);
+                    var chunk = await ChunkFactory.Instance.CreateFromAsync(current);
 
                     chunks.Add(chunk);
                 }
             }
 
-            return new StsdChunk(version, flags, chunks.ToArray());
+            return new StsdChunk(version, chunks.ToArray());
         }
     }
 }

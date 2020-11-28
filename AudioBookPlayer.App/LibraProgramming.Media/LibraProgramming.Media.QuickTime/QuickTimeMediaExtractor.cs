@@ -4,6 +4,7 @@ using LibraProgramming.Media.QuickTime.Visitors;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -19,7 +20,7 @@ namespace LibraProgramming.Media.QuickTime
             this.root = root;
         }
 
-        public static QuickTimeMediaExtractor CreateFrom(Stream stream)
+        public static async Task<QuickTimeMediaExtractor> CreateFromAsync(Stream stream)
         {
             if (null == stream)
             {
@@ -44,7 +45,7 @@ namespace LibraProgramming.Media.QuickTime
 
                 foreach (var atom in extractor)
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(atom);
+                    var chunk = await ChunkFactory.Instance.CreateFromAsync(atom);
 
                     chunks.Add(chunk);
                 }
@@ -106,7 +107,7 @@ namespace LibraProgramming.Media.QuickTime
 
             foreach (var atom in extractor)
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(atom);
+                var chunk = ChunkFactory.Instance.CreateFromAsync(atom);
             }
 
             return null;

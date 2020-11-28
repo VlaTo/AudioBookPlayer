@@ -2,6 +2,7 @@
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -36,7 +37,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Length = length;
         }
 
-        public static ContentChunk ReadFrom(Atom atom)
+        public static Task<ContentChunk> ReadFromAsync(Atom atom)
         {
             /*if (AtomTypes.Stsd == atom.Type)
             {
@@ -44,7 +45,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 Print.WriteDump(bytes,"STSD");
             }*/
 
-            return new ContentChunk(atom.Type, atom.Stream.Length);
+            return Task.FromResult(new ContentChunk(atom.Type, atom.Stream.Length));
         }
 
         public override void Debug(int level)

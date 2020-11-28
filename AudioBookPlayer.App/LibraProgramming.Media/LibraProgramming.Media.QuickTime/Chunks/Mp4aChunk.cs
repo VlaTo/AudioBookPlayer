@@ -2,6 +2,7 @@
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -31,7 +32,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Vendor = vendor;
         }
 
-        public static Mp4aChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<Mp4aChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -41,18 +43,18 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             //var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
             //Print.WriteDump(bytes, "MP4A");
 
-            var bits = StreamHelper.ReadUInt64(atom.Stream);
+            var bits = await StreamHelper.ReadUInt64Async(atom.Stream);
             var referenceIndex = (ushort) (bits & 0x0000_0000_0000_FFFF);
-            var version = StreamHelper.ReadUInt16(atom.Stream);
-            var revision = StreamHelper.ReadUInt16(atom.Stream);
-            var vendor = StreamHelper.ReadUInt32(atom.Stream);
-            var channels = StreamHelper.ReadUInt16(atom.Stream);
-            var bps = StreamHelper.ReadUInt16(atom.Stream);
-            var compression = StreamHelper.ReadUInt16(atom.Stream);
-            var audioPacketSize = StreamHelper.ReadUInt16(atom.Stream);
-            var sampleRate = StreamHelper.ReadUInt32(atom.Stream);
+            var version = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var revision = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var vendor = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var channels = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var bps = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var compression = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var audioPacketSize = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var sampleRate = await StreamHelper.ReadUInt32Async(atom.Stream);
 
-            var header = AtomHeader.ReadFrom(atom.Stream, atom.Stream.Position);
+            var header = await AtomHeader.ReadFromAsync(atom.Stream, atom.Stream.Position);
             Chunk esds = null;
 
             if (null != header)
@@ -62,7 +64,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
                 if (AtomTypes.Esds == chunk.Type)
                 {
-                    esds = factory.CreateFrom(chunk);
+                    esds = await factory.CreateFromAsync(chunk);
                 }
             }
 

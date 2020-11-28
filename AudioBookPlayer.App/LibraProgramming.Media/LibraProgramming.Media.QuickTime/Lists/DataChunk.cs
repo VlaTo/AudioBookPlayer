@@ -1,7 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Lists
 {
@@ -43,36 +43,37 @@ namespace LibraProgramming.Media.QuickTime.Lists
             DataType = dataType;
         }
         
-        public static DataChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<DataChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var type = StreamHelper.ReadUInt32(atom.Stream);
-            var reserved = StreamHelper.ReadUInt32(atom.Stream);
+            var type = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var reserved = await StreamHelper.ReadUInt32Async(atom.Stream);
 
             var offset = atom.Stream.Position;
             var length = (int) (atom.Stream.Length - offset);
-            Span<byte> bytes;
+            byte[] bytes;
 
             using (var stream = new ReadOnlyAtomStream(atom.Stream, offset, length))
             {
-                bytes = StreamHelper.ReadBytes(stream, (uint) stream.Length);
+                bytes = await StreamHelper.ReadBytesAsync(stream, (uint)stream.Length);
             }
 
-            return new DataChunk(GetDataType(type), bytes.ToArray());
+            return new DataChunk(GetDataType(type), bytes);
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type);
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type}");
-        }
+        }*/
 
         private static DataType GetDataType(uint type)
         {
@@ -81,7 +82,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
                 case 0:
                 case 0x15:
                 {
-                        return DataType.Binary;
+                    return DataType.Binary;
                 }
 
                 case 1:

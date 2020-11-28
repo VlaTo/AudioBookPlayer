@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -20,14 +21,15 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Url = url;
         }
 
-        public static UrlChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<UrlChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (_, flags) = await ReadFlagsAndVersionAsync(atom.Stream);
             var url = String.Empty;
 
             if ((flags & InternalDataFlag) == 0)
@@ -36,7 +38,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
                 if (0 < length)
                 {
-                    var bytes = StreamHelper.ReadBytes(atom.Stream, length);
+                    var bytes = await StreamHelper.ReadBytesAsync(atom.Stream, length);
                     var count = bytes.Length;
 
                     for (var index = count - 1; count >= 0; count--)

@@ -2,7 +2,7 @@
 
 namespace LibraProgramming.Media.QuickTime.Components
 {
-    [AttributeUsage(AttributeTargets.Class,AllowMultiple = true, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public sealed class ChunkAttribute : Attribute
     {
         public uint AtomType

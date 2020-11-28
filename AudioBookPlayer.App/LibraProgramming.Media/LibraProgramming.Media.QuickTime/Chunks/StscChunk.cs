@@ -1,8 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.IO;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -30,11 +29,11 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             SampleDurationIndex = sampleDurationIndex;
         }
 
-        public static BlockDescription ReadFrom(Stream stream)
+        public static async Task<BlockDescription> ReadFromAsync(Stream stream)
         {
-            var firstChunk = StreamHelper.ReadUInt32(stream);
-            var samplesPerChunk = StreamHelper.ReadUInt32(stream);
-            var sampleDurationIndex = StreamHelper.ReadUInt32(stream);
+            var firstChunk = await StreamHelper.ReadUInt32Async(stream);
+            var samplesPerChunk = await StreamHelper.ReadUInt32Async(stream);
+            var sampleDurationIndex = await StreamHelper.ReadUInt32Async(stream);
 
             return new BlockDescription(firstChunk, samplesPerChunk, sampleDurationIndex);
         }
@@ -57,15 +56,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             BlockDescriptions = blockSizes ?? Array.Empty<BlockDescription>();
         }
 
-        public static StscChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<StscChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var numberOfBlocks = StreamHelper.ReadUInt32(atom.Stream);
+            var (_, _) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var numberOfBlocks = await StreamHelper.ReadUInt32Async(atom.Stream);
             var blockSizes = new BlockDescription[numberOfBlocks];
             var position = atom.Stream.Position;
 
@@ -73,7 +73,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 for (var index = 0; index < numberOfBlocks; index++)
                 {
-                    var block = BlockDescription.ReadFrom(atom.Stream);
+                    var block = await BlockDescription.ReadFromAsync(atom.Stream);
                     blockSizes[index] = block;
                 }
             }

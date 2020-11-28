@@ -1,7 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -22,20 +21,21 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Offsets = offsets ?? Array.Empty<uint>();
         }
 
-        public static StcoChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<StcoChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var numberOfOffsets = StreamHelper.ReadUInt32(atom.Stream);
+            var (_, _) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var numberOfOffsets = await StreamHelper.ReadUInt32Async(atom.Stream);
             var offsets = new uint[numberOfOffsets];
 
             for (var index = 0; index < numberOfOffsets; index++)
             {
-                var offset = StreamHelper.ReadUInt32(atom.Stream);
+                var offset = await StreamHelper.ReadUInt32Async(atom.Stream);
                 offsets[index] = offset;
             }
 

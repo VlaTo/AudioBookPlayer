@@ -4,6 +4,7 @@ using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -63,26 +64,27 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public static TkhdChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<TkhdChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (version, flags) = await ReadFlagsAndVersionAsync(atom.Stream);
             var poster = (flags & Flag.Poster) == Flag.Poster;
             var preview = (flags & Flag.Preview) == Flag.Preview;
             var movie = (flags & Flag.Movie) == Flag.Movie;
             var enabled = (flags & Flag.Enabled) == Flag.Enabled;
-            DateTime created = ReadUtcDateTime(atom.Stream, version);
-            DateTime modified = ReadUtcDateTime(atom.Stream, version);
-            var trackId = StreamHelper.ReadUInt32(atom.Stream);
-            var reserved0 = StreamHelper.ReadUInt32(atom.Stream);
-            var duration = ReadDuration(atom.Stream, version);
-            var reserved1 = StreamHelper.ReadBytes(atom.Stream, 8);
-            var layer = StreamHelper.ReadUInt16(atom.Stream);
-            var alternateGroup = StreamHelper.ReadUInt16(atom.Stream);
+            var created = await ReadUtcDateTimeAsync(atom.Stream, version);
+            var modified = await ReadUtcDateTimeAsync(atom.Stream, version);
+            var trackId = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var reserved0 = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var duration = await ReadDurationAsync(atom.Stream, version);
+            var reserved1 = await StreamHelper.ReadBytesAsync(atom.Stream, 8);
+            var layer = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var alternateGroup = await StreamHelper.ReadUInt16Async(atom.Stream);
 
             return new TkhdChunk
             {
@@ -97,27 +99,18 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             };
         }
 
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type);
-            var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
-
-            Console.WriteLine($"{tabs}{type} track ID: '{TrackId}'");
-        }*/
-
-        private static ulong ReadDuration(Stream stream, byte version)
+        private static async Task<ulong> ReadDurationAsync(Stream stream, byte version)
         {
             switch (version)
             {
                 case 0:
                 {
-                    return (ulong) StreamHelper.ReadUInt32(stream);
+                    return (ulong) await StreamHelper.ReadUInt32Async(stream);
                 }
 
                 case 1:
                 {
-                    return StreamHelper.ReadUInt64(stream);
+                    return await StreamHelper.ReadUInt64Async(stream);
                 }
 
                 default:

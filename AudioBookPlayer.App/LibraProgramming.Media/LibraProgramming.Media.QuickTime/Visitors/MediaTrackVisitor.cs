@@ -66,7 +66,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 TimeScale = timeScale.GetValueOrDefault()
             };
 
-        trackInfos.Push(actual);
+            trackInfos.Push(actual);
             
             Console.WriteLine("[TRAK] Begin");
 
@@ -110,7 +110,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                             var offset = last.Offsets[index];
                             var timeToSample = last.Entries[index];
                             var position = stream.Seek(offset, SeekOrigin.Begin);
-                            var text = StreamHelper.ReadPascalString(stream);
+                            //var text = StreamHelper.ReadPascalString(stream);
+                            var text = "";
                             var temp = TimeSpan.FromSeconds(((double)timeToSample.Duration) / last.SampleScale);
 
                             track.SetTitle(text);

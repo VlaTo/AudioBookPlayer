@@ -3,6 +3,7 @@ using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -29,21 +30,22 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             ComponentSubtype = componentSubtype;
         }
 
-        public static HdlrChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<HdlrChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var componentType = ReadComponentString(atom.Stream);
-            var componentSubtype = ReadComponentString(atom.Stream);
-            var manufacturer = StreamHelper.ReadUInt32(atom.Stream);
-            var quicktimeFlags = StreamHelper.ReadUInt32(atom.Stream);
-            var quicktimeMask = StreamHelper.ReadUInt32(atom.Stream);
-            var componentLength = StreamHelper.ReadByte(atom.Stream);
-            var componentName = StreamHelper.ReadString(atom.Stream, componentLength);
+            var (version, flags) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var componentType = await ReadComponentStringAsync(atom.Stream);
+            var componentSubtype = await ReadComponentStringAsync(atom.Stream);
+            var manufacturer = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var quicktimeFlags = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var quicktimeMask = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var componentLength = await StreamHelper.ReadByteAsync(atom.Stream);
+            var componentName = await StreamHelper.ReadStringAsync(atom.Stream, componentLength);
 
             return new HdlrChunk(componentType, componentSubtype);
         }
@@ -57,9 +59,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Console.WriteLine($"{tabs}{type}");
         }
 
-        private static string ReadComponentString(Stream stream)
+        private static async Task<string> ReadComponentStringAsync(Stream stream)
         {
-            var value = StreamHelper.ReadUInt32(stream);
+            var value = await StreamHelper.ReadUInt32Async(stream);
 
             if (0x00000000 < value)
             {

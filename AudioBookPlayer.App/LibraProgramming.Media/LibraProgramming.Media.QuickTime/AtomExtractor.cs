@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -99,7 +100,7 @@ namespace LibraProgramming.Media.QuickTime
 
             private long GetNextChunkOffset() => null != Current ? Current.Stream.Start + Current.Stream.Length : 0L;
 
-            private Atom ReadChunkFrom(long offset)
+            private async Task<Atom> ReadChunkAsync(long offset)
             {
                 try
                 {
@@ -111,7 +112,7 @@ namespace LibraProgramming.Media.QuickTime
                         return null;
                     }
 
-                    var header = AtomHeader.ReadFrom(stream, offset);
+                    var header = await AtomHeader.ReadFromAsync(stream, offset);
 
                     if (null != header)
                     {

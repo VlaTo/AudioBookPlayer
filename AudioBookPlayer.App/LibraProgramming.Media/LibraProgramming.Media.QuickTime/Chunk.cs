@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
@@ -24,9 +25,9 @@ namespace LibraProgramming.Media.QuickTime
             QuickTimeEpoch = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
-        protected static (byte version, uint flags) ReadFlagsAndVersion(Stream stream)
+        protected static async Task<(byte version, uint flags)> ReadFlagsAndVersionAsync(Stream stream)
         {
-            var bits = StreamHelper.ReadUInt32(stream);
+            var bits = await StreamHelper.ReadUInt32Async(stream);
             var version = (byte)((bits & 0xFF00_0000) >> 24);
             var flags = bits & 0x00FF_FFFF;
 
@@ -42,19 +43,19 @@ namespace LibraProgramming.Media.QuickTime
             Console.WriteLine($"{tabs}{type}");
         }
 
-        protected static DateTime ReadUtcDateTime(Stream stream, byte version)
+        protected static async Task<DateTime> ReadUtcDateTimeAsync(Stream stream, byte version)
         {
             switch (version)
             {
                 case 0:
                 {
-                    var seconds = StreamHelper.ReadUInt32(stream);
+                    var seconds = await StreamHelper.ReadUInt32Async(stream);
                     return QuickTimeEpoch + TimeSpan.FromSeconds(seconds);
                 }
 
                 case 1:
                 {
-                    var seconds = StreamHelper.ReadInt64(stream);
+                    var seconds = await StreamHelper.ReadInt64Async(stream);
                     return QuickTimeEpoch + TimeSpan.FromSeconds(seconds);
                 }
 
@@ -65,18 +66,18 @@ namespace LibraProgramming.Media.QuickTime
             }
         }
 
-        protected static ulong ReadLength(Stream stream, byte version)
+        protected static async Task<ulong> ReadLengthAsync(Stream stream, byte version)
         {
             switch (version)
             {
                 case 0:
                 {
-                    return (ulong)StreamHelper.ReadUInt32(stream);
+                    return (ulong)await StreamHelper.ReadUInt32Async(stream);
                 }
 
                 case 1:
                 {
-                    return StreamHelper.ReadUInt64(stream);
+                    return await StreamHelper.ReadUInt64Async(stream);
                 }
 
                 default:

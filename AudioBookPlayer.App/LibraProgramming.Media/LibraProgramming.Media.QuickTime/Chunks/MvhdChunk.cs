@@ -1,8 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.IO;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -80,30 +79,31 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public static MvhdChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<MvhdChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (version, _) = await ReadFlagsAndVersionAsync(atom.Stream);
 
-            DateTime created = ReadUtcDateTime(atom.Stream, version);
-            DateTime modified = ReadUtcDateTime(atom.Stream, version);
-            var timeScale = StreamHelper.ReadUInt32(atom.Stream);
-            TimeSpan duration = ReadDuration(atom.Stream, timeScale, version);
-            var playbackSpeed = StreamHelper.ReadInt32(atom.Stream);
-            var volume = StreamHelper.ReadUInt16(atom.Stream);
-            var reserved1 = StreamHelper.ReadUInt16(atom.Stream);
-            var wgm = StreamHelper.ReadBytes(atom.Stream, 36);
-            var previewTime = StreamHelper.ReadUInt32(atom.Stream);
-            var previewDuration = StreamHelper.ReadUInt32(atom.Stream);
-            var posterTime = StreamHelper.ReadUInt32(atom.Stream);
-            var selectionTime = StreamHelper.ReadInt32(atom.Stream);
-            var selectionDuration = StreamHelper.ReadInt32(atom.Stream);
-            var currentTime = StreamHelper.ReadInt32(atom.Stream);
-            var nextId = StreamHelper.ReadInt32(atom.Stream);
+            var created = await ReadUtcDateTimeAsync(atom.Stream, version);
+            var modified = await ReadUtcDateTimeAsync(atom.Stream, version);
+            var timeScale = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var duration = await ReadDurationAsync(atom.Stream, timeScale, version);
+            var playbackSpeed = await StreamHelper.ReadInt32Async(atom.Stream);
+            var volume = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var reserved1 = await StreamHelper.ReadUInt16Async(atom.Stream);
+            var wgm = await StreamHelper.ReadBytesAsync(atom.Stream, 36);
+            var previewTime = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var previewDuration = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var posterTime = await StreamHelper.ReadUInt32Async(atom.Stream);
+            var selectionTime = await StreamHelper.ReadInt32Async(atom.Stream);
+            var selectionDuration = await StreamHelper.ReadInt32Async(atom.Stream);
+            var currentTime = await StreamHelper.ReadInt32Async(atom.Stream);
+            var nextId = await StreamHelper.ReadInt32Async(atom.Stream);
 
             return new MvhdChunk
             {
@@ -122,19 +122,19 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             };
         }
 
-        private static TimeSpan ReadDuration(Stream stream, uint scale, byte version)
+        private static async Task<TimeSpan> ReadDurationAsync(Stream stream, uint scale, byte version)
         {
             switch (version)
             {
                 case 0:
                 {
-                    var value = StreamHelper.ReadUInt32(stream);
+                    var value = await StreamHelper.ReadUInt32Async(stream);
                     return TimeSpan.FromSeconds(value / scale);
                 }
 
                 case 1:
                 {
-                    var value = StreamHelper.ReadUInt64(stream);
+                    var value = await StreamHelper.ReadUInt64Async(stream);
                     return TimeSpan.FromSeconds(value / scale);
                 }
 
@@ -148,7 +148,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         /// <summary>
         /// 
         /// </summary>
-        public sealed class Wgm
+        /*public sealed class Wgm
         {
             public uint A
             {
@@ -222,6 +222,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
                 return new Wgm(a, b, u, c, d, v, x, y, w);
             }
-        }
+        }*/
     }
 }

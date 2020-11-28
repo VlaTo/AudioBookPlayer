@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -22,10 +23,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Duration = duration;
         }
 
-        public static TimeToSample ReadFromStream(Stream stream)
+        public static async Task<TimeToSample> ReadFromStreamAsync(Stream stream)
         {
-            var frameCount = StreamHelper.ReadUInt32(stream);
-            var duration = StreamHelper.ReadUInt32(stream);
+            var frameCount = await StreamHelper.ReadUInt32Async(stream);
+            var duration = await StreamHelper.ReadUInt32Async(stream);
 
             return new TimeToSample(frameCount, duration);
         }
@@ -48,15 +49,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Entries = entries ?? Array.Empty<TimeToSample>();
         }
 
-        public static SttsChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<SttsChunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
-            var numberOfTimes = StreamHelper.ReadUInt32(atom.Stream);
+            var (_, _) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var numberOfTimes = await StreamHelper.ReadUInt32Async(atom.Stream);
             var entries = new TimeToSample[numberOfTimes];
             var position = atom.Stream.Position;
 
@@ -64,7 +66,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 for (var index = 0; index < numberOfTimes; index++)
                 {
-                    var entry = TimeToSample.ReadFromStream(atom.Stream);
+                    var entry = await TimeToSample.ReadFromStreamAsync(atom.Stream);
                     entries[index] = entry;
                 }
             }
