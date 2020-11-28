@@ -22,15 +22,16 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
+            var position = atom.Stream.Position;
             var chunks = new List<Chunk>();
 
-            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
+            using (var source = new ReadOnlyAtomStream(atom.Stream, position, atom.Stream.Length - position))
             {
-                var extractor = new AtomExtractor(atom.Stream);
+                var extractor = new AtomExtractor(source);
 
-                foreach (var chuld in extractor)
+                foreach (var child in extractor)
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(chuld);
+                    var chunk = ChunkFactory.Instance.CreateFrom(child);
 
                     switch (chunk)
                     {

@@ -24,7 +24,7 @@ namespace LibraProgramming.Media.QuickTime
             QuickTimeEpoch = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         }
 
-        protected static (byte version, uint flags) ReadFlagAndVersion(Stream stream)
+        protected static (byte version, uint flags) ReadFlagsAndVersion(Stream stream)
         {
             var bits = StreamHelper.ReadUInt32(stream);
             var version = (byte)((bits & 0xFF00_0000) >> 24);
