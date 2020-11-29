@@ -1,36 +1,32 @@
 ﻿using LibraProgramming.Media.QuickTime.Chunks;
-using LibraProgramming.Media.QuickTime.Components;
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace LibraProgramming.Media.QuickTime
 {
-    public sealed class ChunkFactory
+    internal sealed class ChunkFactory : ChunkFactoryBase
     {
-        private readonly IDictionary<uint, Func<Atom, Chunk>> cache;
-
         public static readonly ChunkFactory Instance;
 
         private ChunkFactory(IDictionary<uint, Func<Atom, Chunk>> cache)
+            : base(cache)
         {
-            this.cache = cache;
         }
 
         static ChunkFactory()
         {
             var @namespace = typeof(Chunk).Namespace + ".Chunks";
-            var dict = new Dictionary<uint, Func<Atom, Chunk>>();
+            //var dict = new Dictionary<uint, Func<Atom, Chunk>>();
             var types = typeof(ChunkFactory).Assembly
                 .GetTypes()
                 .Where(type => type.Namespace.StartsWith(@namespace))
                 .ToArray();
 
-            foreach (var type in types)
+            /*foreach (var type in types)
             {
                 var attributes = type.GetCustomAttributes<ChunkAttribute>();
 
@@ -39,14 +35,14 @@ namespace LibraProgramming.Media.QuickTime
                     var func = GetCreator(type);
                     dict.Add(attribute.AtomType, func);
                 }
-            }
+            }*/
 
-            Instance = new ChunkFactory(dict);
+            Instance = new ChunkFactory(CreateCache(types));
         }
 
         public Chunk CreateFrom(Atom atom)
         {
-            if (cache.TryGetValue(atom.Type, out var creator))
+            if (Cache.TryGetValue(atom.Type, out var creator))
             {
                 return creator.Invoke(atom);
             }
@@ -60,10 +56,10 @@ namespace LibraProgramming.Media.QuickTime
             //throw new ArgumentNullException(nameof(atom));
         }
 
-        private static Func<Atom, Chunk> GetCreator(Type type)
+        /*private static Func<Atom, Chunk> GetCreator(Type type)
         {
             var method = type.GetMethod("ReadFrom", BindingFlags.Static | BindingFlags.Public);
             return method.CreateDelegate<Func<Atom, Chunk>>();
-        }
+        }*/
     }
 }

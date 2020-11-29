@@ -43,6 +43,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
             DataType = dataType;
         }
         
+        [ChunkCreator]
         public static DataChunk ReadFrom(Atom atom)
         {
             if (null == atom)

@@ -31,6 +31,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Vendor = vendor;
         }
 
+        [ChunkCreator]
         public static Mp4aChunk ReadFrom(Atom atom)
         {
             if (null == atom)

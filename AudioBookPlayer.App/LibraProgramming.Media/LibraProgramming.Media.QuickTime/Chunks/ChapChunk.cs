@@ -17,6 +17,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Scenes = scenes ?? Array.Empty<uint>();
         }
 
+        [ChunkCreator]
         public static ChapChunk ReadFrom(Atom atom)
         {
             if (null == atom)

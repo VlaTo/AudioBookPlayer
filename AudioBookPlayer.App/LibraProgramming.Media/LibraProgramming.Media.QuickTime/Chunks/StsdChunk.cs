@@ -24,6 +24,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Version = version;
         }
 
+        [ChunkCreator]
         public new static StsdChunk ReadFrom(Atom atom)
         {
             if (null == atom)

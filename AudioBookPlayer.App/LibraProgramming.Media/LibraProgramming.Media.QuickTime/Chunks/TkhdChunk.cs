@@ -63,6 +63,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static TkhdChunk ReadFrom(Atom atom)
         {
             if (null == atom)

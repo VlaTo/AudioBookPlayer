@@ -12,6 +12,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static new MoovChunk ReadFrom(Atom atom)
         {
             if (null == atom)

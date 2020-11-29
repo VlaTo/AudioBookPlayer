@@ -20,6 +20,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Url = url;
         }
 
+        [ChunkCreator]
         public static UrlChunk ReadFrom(Atom atom)
         {
             if (null == atom)

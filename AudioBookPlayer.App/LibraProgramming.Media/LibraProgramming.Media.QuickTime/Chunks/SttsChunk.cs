@@ -48,6 +48,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Entries = entries ?? Array.Empty<TimeToSample>();
         }
 
+        [ChunkCreator]
         public static SttsChunk ReadFrom(Atom atom)
         {
             if (null == atom)

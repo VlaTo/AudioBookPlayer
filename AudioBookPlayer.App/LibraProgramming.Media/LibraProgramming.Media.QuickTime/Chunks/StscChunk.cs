@@ -57,6 +57,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             BlockDescriptions = blockSizes ?? Array.Empty<BlockDescription>();
         }
 
+        [ChunkCreator]
         public static StscChunk ReadFrom(Atom atom)
         {
             if (null == atom)

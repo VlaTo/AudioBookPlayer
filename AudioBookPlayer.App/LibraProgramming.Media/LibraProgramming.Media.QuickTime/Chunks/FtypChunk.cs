@@ -1,7 +1,5 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -31,6 +29,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             CompatibleBrand = compatibleBrand;
         }
 
+        [ChunkCreator]
         public static FtypChunk ReadFrom(Atom atom)
         {
             if (null == atom)

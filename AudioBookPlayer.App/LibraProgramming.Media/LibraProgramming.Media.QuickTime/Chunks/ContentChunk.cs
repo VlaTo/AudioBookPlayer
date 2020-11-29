@@ -36,14 +36,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Length = length;
         }
 
+        [ChunkCreator]
         public static ContentChunk ReadFrom(Atom atom)
         {
-            /*if (AtomTypes.Stsd == atom.Type)
-            {
-                var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
-                Print.WriteDump(bytes,"STSD");
-            }*/
-
             return new ContentChunk(atom.Type, atom.Stream.Length);
         }
 

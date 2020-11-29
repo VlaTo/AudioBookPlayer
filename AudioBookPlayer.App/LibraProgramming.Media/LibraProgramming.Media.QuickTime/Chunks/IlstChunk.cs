@@ -21,6 +21,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             MetaInfoChunks = chunks;
         }
 
+        [ChunkCreator]
         public static IlstChunk ReadFrom(Atom atom)
         {
             if (null == atom)

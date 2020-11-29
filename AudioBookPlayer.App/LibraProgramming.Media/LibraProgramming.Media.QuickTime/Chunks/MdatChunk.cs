@@ -13,14 +13,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static new MdatChunk ReadFrom(Atom atom)
         {
-            /*if (AtomTypes.Stsd == atom.Type)
-            {
-                var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
-                Print.WriteDump(bytes, "STSD");
-            }*/
-
             return new MdatChunk(atom.Stream.Length);
         }
     }

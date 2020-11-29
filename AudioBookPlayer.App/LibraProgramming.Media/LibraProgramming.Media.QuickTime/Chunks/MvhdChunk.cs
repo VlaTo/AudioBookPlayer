@@ -80,6 +80,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static MvhdChunk ReadFrom(Atom atom)
         {
             if (null == atom)

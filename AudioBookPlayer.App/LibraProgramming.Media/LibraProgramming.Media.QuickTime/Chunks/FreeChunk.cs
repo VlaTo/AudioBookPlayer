@@ -10,14 +10,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static new FreeChunk ReadFrom(Atom atom)
         {
-            if (AtomTypes.Free == atom.Type)
-            {
-                //var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
-                //Print.WriteDump(bytes, "STSD");
-            }
-
             return new FreeChunk(atom.Stream.Length);
         }
     }

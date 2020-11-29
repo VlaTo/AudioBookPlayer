@@ -28,6 +28,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             SampleSizes = sampleSizes ?? Array.Empty<uint>();
         }
 
+        [ChunkCreator]
         public static StszChunk ReadFrom(Atom atom)
         {
             if (null == atom)
@@ -35,15 +36,21 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (_, _) = ReadFlagsAndVersion(atom.Stream);
             var sampleSize = StreamHelper.ReadUInt32(atom.Stream);
             var numberOfSizes = StreamHelper.ReadUInt32(atom.Stream);
+            
+            var position = atom.Stream.Position;
+            
             var sampleSizes = new uint[numberOfSizes];
 
-            for (var index = 0; index < numberOfSizes; index++)
+            using (var stream = new ReadOnlyAtomStream(atom.Stream, position, atom.Stream.Length - position))
             {
-                var blockSize = StreamHelper.ReadUInt32(atom.Stream);
-                sampleSizes[index] = blockSize;
+                for (var index = 0; index < numberOfSizes; index++)
+                {
+                    var blockSize = StreamHelper.ReadUInt32(atom.Stream);
+                    sampleSizes[index] = blockSize;
+                }
             }
 
             return new StszChunk(sampleSize, sampleSizes);

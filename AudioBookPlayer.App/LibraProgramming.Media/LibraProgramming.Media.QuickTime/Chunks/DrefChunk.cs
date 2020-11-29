@@ -15,6 +15,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public new static DrefChunk ReadFrom(Atom atom)
         {
             if (null == atom)

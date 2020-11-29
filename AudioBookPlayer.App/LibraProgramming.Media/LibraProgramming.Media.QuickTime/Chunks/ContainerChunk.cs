@@ -20,6 +20,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Chunks = chunks;
         }
 
+        [ChunkCreator]
         public static ContainerChunk ReadFrom(Atom atom)
         {
             if (null == atom)

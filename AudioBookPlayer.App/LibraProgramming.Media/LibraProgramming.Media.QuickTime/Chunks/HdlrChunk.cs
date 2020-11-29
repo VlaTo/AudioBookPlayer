@@ -29,6 +29,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             ComponentSubtype = componentSubtype;
         }
 
+        [ChunkCreator]
         public static HdlrChunk ReadFrom(Atom atom)
         {
             if (null == atom)

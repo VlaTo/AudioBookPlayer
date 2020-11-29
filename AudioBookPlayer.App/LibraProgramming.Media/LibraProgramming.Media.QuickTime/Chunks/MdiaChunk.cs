@@ -1,8 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -14,6 +12,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public new static MdiaChunk ReadFrom(Atom atom)
         {
             if (null == atom)

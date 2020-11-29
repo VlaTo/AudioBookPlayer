@@ -27,6 +27,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
             DataChunk = dataChunk;
         }
 
+        [ChunkCreator]
         public static MetaInfoChunk ReadFrom(Atom atom)
         {
             if (null == atom)

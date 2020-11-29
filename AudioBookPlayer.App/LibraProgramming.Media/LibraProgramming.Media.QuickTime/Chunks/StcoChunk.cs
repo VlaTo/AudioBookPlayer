@@ -22,6 +22,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Offsets = offsets ?? Array.Empty<uint>();
         }
 
+        [ChunkCreator]
         public static StcoChunk ReadFrom(Atom atom)
         {
             if (null == atom)

@@ -13,6 +13,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
+        [ChunkCreator]
         public static TextChunk ReadFrom(Atom atom)
         {
             if (null == atom)
