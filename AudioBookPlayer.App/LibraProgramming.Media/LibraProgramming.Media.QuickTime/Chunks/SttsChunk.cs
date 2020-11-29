@@ -23,6 +23,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Duration = duration;
         }
 
+        [ChunkCreator]
         public static async Task<TimeToSample> ReadFromStreamAsync(Stream stream)
         {
             var frameCount = await StreamHelper.ReadUInt32Async(stream);
@@ -50,7 +51,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
 
         [ChunkCreator]
-        public static async Task<SttsChunk> ReadFromAsync(Atom atom)
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {

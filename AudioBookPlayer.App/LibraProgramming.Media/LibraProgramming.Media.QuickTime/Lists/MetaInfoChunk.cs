@@ -1,7 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Lists
 {
@@ -27,7 +26,8 @@ namespace LibraProgramming.Media.QuickTime.Lists
             DataChunk = dataChunk;
         }
 
-        public static MetaInfoChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -37,27 +37,32 @@ namespace LibraProgramming.Media.QuickTime.Lists
             DataChunk dataChunk = null;
             var extractor = new AtomExtractor(atom.Stream);
 
-            foreach (var child in extractor)
+            using (var enumerator = extractor.GetEnumerator())
             {
-                var chunk = InformationFactory.Instance.CreateFrom(child);
+                enumerator.Reset();
 
-                switch (chunk)
+                while (await enumerator.MoveNextAsync())
                 {
-                    case DataChunk data:
+                    var chunk = await InformationFactory.Instance.CreateFromAsync(enumerator.Current);
+
+                    switch (chunk)
                     {
-                        if (null != dataChunk)
+                        case DataChunk data:
                         {
-                            throw new Exception();
+                            if (null != dataChunk)
+                            {
+                                throw new Exception();
+                            }
+
+                            dataChunk = data;
+
+                            break;
                         }
 
-                        dataChunk = data;
-
-                        break;
-                    }
-
-                    default:
-                    {
-                        break;
+                        default:
+                        {
+                            break;
+                        }
                     }
                 }
             }
@@ -65,13 +70,13 @@ namespace LibraProgramming.Media.QuickTime.Lists
             return new MetaInfoChunk(atom.Type, dataChunk);
         }
 
-        public override void Debug(int level)
+        /*public override void Debug(int level)
         {
             var tabs = new String(' ', level);
             var bytes = BitConverter.GetBytes(Type);
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type}");
-        }
+        }*/
     }
 }

@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -12,7 +13,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static MinfChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -26,25 +28,25 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 var extractor = new AtomExtractor(atom.Stream);
 
-                foreach (var child in extractor)
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
+                    enumerator.Reset();
 
-                    switch (chunk)
+                    while (await enumerator.MoveNextAsync())
                     {
-                        /*case TkhdChunk tkhd:
-                        {
-                            break;
-                        }*/
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                        case StblChunk stbl:
+                        switch (chunk)
                         {
+                            case StblChunk stbl:
+                            {
 
-                            break;
+                                break;
+                            }
                         }
-                    }
 
-                    chunks.Add(chunk);
+                        chunks.Add(chunk);
+                    }
                 }
             }
 

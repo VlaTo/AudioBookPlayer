@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -15,7 +16,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static UdtaChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -25,38 +27,19 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var chunks = new List<Chunk>();
             var extractor = new AtomExtractor(atom.Stream);
 
-            foreach (var child in extractor)
+            using (var enumerator = extractor.GetEnumerator())
             {
-                var chunk = ChunkFactory.Instance.CreateFrom(child);
-                
-                /*switch (chunk)
+                enumerator.Reset();
+
+                while (await enumerator.MoveNextAsync())
                 {
-                    case TkhdChunk tkhd:
-                    {
-                        break;
-                    }
+                    var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                    case MdiaChunk mdia:
-                    {
-                        break;
-                    }
-                }*/
-
-                chunks.Add(chunk);
+                    chunks.Add(chunk);
+                }
             }
 
             return new UdtaChunk(chunks.ToArray());
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }*/
     }
 }

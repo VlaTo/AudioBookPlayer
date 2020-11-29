@@ -102,7 +102,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             using (var stream = File.OpenRead("/storage/emulated/0/Download/book.m4b"))
             {
-                using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
+                using (var extractor = await QuickTimeMediaExtractor.CreateFromAsync(stream))
                 {
                     // get meta
                     var meta = extractor.GetMeta();

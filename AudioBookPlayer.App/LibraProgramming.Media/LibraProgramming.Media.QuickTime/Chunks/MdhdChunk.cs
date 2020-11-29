@@ -52,14 +52,14 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
 
         [ChunkCreator]
-        public static async Task<MdhdChunk> ReadFromAsync(Atom atom)
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = await ReadFlagsAndVersionAsync(atom.Stream);
+            var (version, _) = await ReadFlagsAndVersionAsync(atom.Stream);
             var created = await ReadUtcDateTimeAsync(atom.Stream, version);
             var modified = await ReadUtcDateTimeAsync(atom.Stream, version);
             var sampleRate = await StreamHelper.ReadUInt32Async(atom.Stream);

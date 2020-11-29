@@ -1,8 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -14,7 +13,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static MdiaChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -27,7 +27,48 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 var extractor = new AtomExtractor(stream);
 
-                foreach (var chuld in extractor)
+                using (var enumerator = extractor.GetEnumerator())
+                {
+                    enumerator.Reset();
+
+                    while (await enumerator.MoveNextAsync())
+                    {
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
+
+                        switch (chunk)
+                        {
+                            case MdhdChunk mdhd:
+                            {
+
+                                break;
+                            }
+
+                            case HdlrChunk hdlr:
+                            {
+
+                                break;
+                            }
+
+                            case MinfChunk minf:
+                            {
+
+                                break;
+                            }
+
+                            default:
+                            {
+
+                                break;
+                            }
+                        }
+
+                        chunks.Add(chunk);
+                    }
+                }
+
+
+
+                /*foreach (var chuld in extractor)
                 {
                     var chunk = ChunkFactory.Instance.CreateFrom(chuld);
 
@@ -59,7 +100,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                     }
 
                     chunks.Add(chunk);
-                }
+                }*/
             }
 
             return new MdiaChunk(chunks.ToArray());

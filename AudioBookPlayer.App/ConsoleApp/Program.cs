@@ -12,55 +12,52 @@ namespace ConsoleApp
         {
             var filename = args[0];
 
-            using (var stream = new BufferedStream(File.OpenRead(filename), 409600))
+            using (var extractor = await QuickTimeMediaExtractor.CreateFromAsync(File.OpenRead(filename)))
             {
-                using (var extractor = await QuickTimeMediaExtractor.CreateFromAsync(stream))
+                extractor.Debug();
+
+                var meta = extractor.GetMeta();
+                var tracks = extractor.GetTracks();
+
+                Console.WriteLine();
+                Console.WriteLine(" *** Info ***");
+
+                foreach (var item in meta.Items)
                 {
-                    extractor.Debug();
-
-                    var meta = extractor.GetMeta();
-                    var tracks = extractor.GetTracks();
-
-                    Console.WriteLine();
-                    Console.WriteLine(" *** Info ***");
-
-                    foreach (var item in meta.Items)
+                    switch (item)
                     {
-                        switch (item)
+                        case MetaInformationTextItem textItem:
                         {
-                            case MetaInformationTextItem textItem:
+                            Console.WriteLine($"[Meta] {textItem.Key} = '{textItem.Text}'");
+
+                            if (WellKnownMetaItemNames.Cover.Equals(item.Key))
                             {
-                                Console.WriteLine($"[Meta] {textItem.Key} = '{textItem.Text}'");
-
-                                if (WellKnownMetaItemNames.Cover.Equals(item.Key))
-                                {
-                                }
-
-                                break;
                             }
 
-                            case MetaInformationStreamItem streamItem:
-                            {
-                                Console.WriteLine($"[Meta] {streamItem.Key} = binary {streamItem.Stream.Length:N} byte(s)");
-                                break;
-                            }
+                            break;
+                        }
+
+                        case MetaInformationStreamItem streamItem:
+                        {
+                            Console.WriteLine($"[Meta] {streamItem.Key} = binary {streamItem.Stream.Length:N} byte(s)");
+                            break;
                         }
                     }
-
-                    Console.WriteLine();
-
-                    var total = TimeSpan.Zero;
-
-                    foreach (var track in tracks)
-                    {
-                        Console.WriteLine($"[Track] '{track.Title}' {track.Duration:hh':'mm':'ss}");
-                        total += track.Duration;
-                    }
-
-                    Console.WriteLine();
-
-                    Console.WriteLine($"[TOTAL] length: {total:c}");
                 }
+
+                Console.WriteLine();
+
+                var total = TimeSpan.Zero;
+
+                foreach (var track in tracks)
+                {
+                    Console.WriteLine($"[Track] '{track.Title}' {track.Duration:hh':'mm':'ss}");
+                    total += track.Duration;
+                }
+
+                Console.WriteLine();
+
+                Console.WriteLine($"[TOTAL] length: {total:c}");
             }
         }
     }

@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
-    internal sealed class AtomExtractor : IEnumerable<Atom>
+    internal sealed class AtomExtractor
     {
         private readonly Stream stream;
 
@@ -20,27 +18,24 @@ namespace LibraProgramming.Media.QuickTime
             this.stream = stream;
         }
 
-        public IEnumerator<Atom> GetEnumerator()
+        public AtomEnumerator GetEnumerator()
         {
             return new AtomEnumerator(stream);
         }
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
         /// <summary>
         /// 
         /// </summary>
-        private class AtomEnumerator : IEnumerator<Atom>
+        internal class AtomEnumerator : IDisposable
         {
-            private readonly Stream stream;
+            private Stream stream;
+            private bool disposed;
 
             public Atom Current
             {
                 get;
                 private set;
             }
-
-            object IEnumerator.Current => Current;
 
             public bool IsEOF
             {
@@ -56,7 +51,7 @@ namespace LibraProgramming.Media.QuickTime
                 IsEOF = false;
             }
 
-            public bool MoveNext()
+            public async Task<bool> MoveNextAsync()
             {
                 if (IsEOF)
                 {
@@ -70,7 +65,7 @@ namespace LibraProgramming.Media.QuickTime
                     return false;
                 }
 
-                SeekNextChunk(offset);
+                await SeekNextChunkAsync(offset);
 
                 return null != Current;
             }
@@ -90,15 +85,28 @@ namespace LibraProgramming.Media.QuickTime
 
             public void Dispose()
             {
-                ;
+                if (disposed)
+                {
+                    return;
+                }
+
+                Dispose(true);
             }
 
-            private void SeekNextChunk(long offset)
+            private async Task SeekNextChunkAsync(long offset)
             {
-                Current = ReadChunkFrom(offset);
+                Current = await ReadChunkAsync(offset);
             }
 
-            private long GetNextChunkOffset() => null != Current ? Current.Stream.Start + Current.Stream.Length : 0L;
+            private long GetNextChunkOffset()
+            {
+                if (null != Current)
+                {
+                    return Current.Stream.Start + Current.Stream.Length;
+                }
+
+                return 0L;
+            }
 
             private async Task<Atom> ReadChunkAsync(long offset)
             {
@@ -125,6 +133,27 @@ namespace LibraProgramming.Media.QuickTime
                 }
 
                 return null;
+            }
+
+            private void Dispose(bool dispose)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (dispose)
+                    {
+                        stream.Dispose();
+                        stream = null;
+                    }
+                }
+                finally
+                {
+                    disposed = true;
+                }
             }
         }
     }

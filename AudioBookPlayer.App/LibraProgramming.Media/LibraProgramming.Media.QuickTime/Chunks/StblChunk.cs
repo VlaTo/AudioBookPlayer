@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -15,7 +16,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static StblChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -28,56 +30,55 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 var extractor = new AtomExtractor(atom.Stream);
 
-                foreach (var child in extractor)
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
+                    enumerator.Reset();
 
-                    switch (chunk)
+                    while (await enumerator.MoveNextAsync())
                     {
-                        case StsdChunk stsd:
-                        {
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                            break;
+                        switch (chunk)
+                        {
+                            case StsdChunk stsd:
+                            {
+
+                                break;
+                            }
+
+                            case SttsChunk stts:
+                            {
+
+                                break;
+                            }
+
+                            case StszChunk stsz:
+                            {
+
+                                break;
+                            }
+
+                            case StscChunk stsc:
+                            {
+
+                                break;
+                            }
+
+                            case StcoChunk stco:
+                            {
+
+                                break;
+                            }
+
+                            default:
+                            {
+
+                                break;
+                            }
                         }
 
-                        case SttsChunk stts:
-                        {
-
-                            break;
-                        }
-
-                        case StszChunk stsz:
-                        {
-
-                            break;
-                        }
-
-                        case StscChunk stsc:
-                        {
-
-                            break;
-                        }
-
-                        case StcoChunk stco:
-                        {
-
-                            break;
-                        }
-
-                        /*case CttsChunk:
-                        {
-
-                            break;
-                        }*/
-
-                        default:
-                        {
-
-                            break;
-                        }
+                        chunks.Add(chunk);
                     }
-
-                    chunks.Add(chunk);
                 }
             }
 

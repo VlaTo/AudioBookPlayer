@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -12,7 +13,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public new static TrakChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -25,32 +27,37 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 var extractor = new AtomExtractor(atom.Stream);
 
-                foreach (var child in extractor)
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
+                    enumerator.Reset();
 
-                    switch (chunk)
+                    while (await enumerator.MoveNextAsync())
                     {
-                        case TkhdChunk tkhd:
-                        {
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                            break;
+                        switch (chunk)
+                        {
+                            case TkhdChunk tkhd:
+                            {
+
+                                break;
+                            }
+
+                            case MdiaChunk mdia:
+                            {
+
+                                break;
+                            }
+
+                            case UdtaChunk udta:
+                            {
+
+                                break;
+                            }
                         }
 
-                        case MdiaChunk mdia:
-                        {
-
-                            break;
-                        }
-
-                        case UdtaChunk udta:
-                        {
-
-                            break;
-                        }
+                        chunks.Add(chunk);
                     }
-
-                    chunks.Add(chunk);
                 }
             }
 

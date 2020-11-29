@@ -1,6 +1,7 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -12,7 +13,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public static new MoovChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static new async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -25,38 +27,43 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 var extractor = new AtomExtractor(atom.Stream);
 
-                foreach (var child in extractor)
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
+                    enumerator.Reset();
 
-                    switch (chunk)
+                    while (await enumerator.MoveNextAsync())
                     {
-                        case MvhdChunk mvhd:
-                        {
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                            break;
+                        switch (chunk)
+                        {
+                            case MvhdChunk mvhd:
+                            {
+
+                                break;
+                            }
+
+                            case TrakChunk track:
+                            {
+
+                                break;
+                            }
+
+                            case UdtaChunk udta:
+                            {
+
+                                break;
+                            }
+
+                            default:
+                            {
+
+                                break;
+                            }
                         }
 
-                        case TrakChunk track:
-                        {
-
-                            break;
-                        }
-
-                        case UdtaChunk udta:
-                        {
-
-                            break;
-                        }
-
-                        default:
-                        {
-
-                            break;
-                        }
+                        chunks.Add(chunk);
                     }
-
-                    chunks.Add(chunk);
                 }
             }
 

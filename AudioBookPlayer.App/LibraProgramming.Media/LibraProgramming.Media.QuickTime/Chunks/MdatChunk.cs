@@ -1,4 +1,5 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -13,15 +14,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         {
         }
 
-        public static new MdatChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static new Task<Chunk> ReadFromAsync(Atom atom)
         {
-            /*if (AtomTypes.Stsd == atom.Type)
-            {
-                var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
-                Print.WriteDump(bytes, "STSD");
-            }*/
-
-            return new MdatChunk(atom.Stream.Length);
+            return Task.FromResult<Chunk>(new MdatChunk(atom.Stream.Length));
         }
     }
 }

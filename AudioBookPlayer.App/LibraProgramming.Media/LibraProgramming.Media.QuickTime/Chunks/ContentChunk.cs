@@ -37,15 +37,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             Length = length;
         }
 
-        public static Task<ContentChunk> ReadFromAsync(Atom atom)
+        [ChunkCreator]
+        public static Task<Chunk> ReadFromAsync(Atom atom)
         {
-            /*if (AtomTypes.Stsd == atom.Type)
-            {
-                var bytes = StreamHelper.ReadBytes(atom.Stream, (uint)atom.Stream.Length);
-                Print.WriteDump(bytes,"STSD");
-            }*/
-
-            return Task.FromResult(new ContentChunk(atom.Type, atom.Stream.Length));
+            return Task.FromResult<Chunk>(new ContentChunk(atom.Type, atom.Stream.Length));
         }
 
         public override void Debug(int level)

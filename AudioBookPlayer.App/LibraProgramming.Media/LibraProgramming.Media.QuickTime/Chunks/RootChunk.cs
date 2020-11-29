@@ -11,9 +11,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
         public override void Debug(int level)
         {
-            var tabs = new String(' ', level);
-
-            Console.WriteLine($"{tabs}ROOT");
+            Console.WriteLine("ROOT");
 
             var next = level + 1;
 

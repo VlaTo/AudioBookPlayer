@@ -23,7 +23,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
 
         [ChunkCreator]
-        public new static async Task<StsdChunk> ReadFromAsync(Atom atom)
+        public new static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -43,7 +43,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
                 enumerator.Reset();
 
-                for (var index = 0; index < numberOfReferences && enumerator.MoveNext(); index++)
+                for (var index = 0; index < numberOfReferences && await enumerator.MoveNextAsync(); index++)
                 {
                     var current = enumerator.Current;
                     var chunk = await ChunkFactory.Instance.CreateFromAsync(current);

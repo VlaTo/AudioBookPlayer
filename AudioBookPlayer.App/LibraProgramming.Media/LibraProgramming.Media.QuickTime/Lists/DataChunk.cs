@@ -44,7 +44,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
         }
         
         [ChunkCreator]
-        public static async Task<DataChunk> ReadFromAsync(Atom atom)
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {

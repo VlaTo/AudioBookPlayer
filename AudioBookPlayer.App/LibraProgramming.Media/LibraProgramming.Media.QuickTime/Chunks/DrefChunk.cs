@@ -17,7 +17,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
 
         [ChunkCreator]
-        public static new async Task<DrefChunk> ReadFromAsync(Atom atom)
+        public static new async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -33,16 +33,18 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             using (var source = new ReadOnlyAtomStream(atom.Stream, position, atom.Stream.Length - position))
             {
                 var extractor = new AtomExtractor(source);
-                var enumerator = extractor.GetEnumerator();
-
-                enumerator.Reset();
-
-                for (var index = 0; index < numberOfReferences && enumerator.MoveNext(); index++)
+                
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var current = enumerator.Current;
-                    var chunk = await ChunkFactory.Instance.CreateFromAsync(current);
+                    enumerator.Reset();
 
-                    chunks.Add(chunk);
+                    for (var index = 0; index < numberOfReferences && await enumerator.MoveNextAsync(); index++)
+                    {
+                        var current = enumerator.Current;
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(current);
+
+                        chunks.Add(chunk);
+                    }
                 }
             }
 

@@ -1,38 +1,33 @@
 ﻿using LibraProgramming.Media.QuickTime.Chunks;
-using LibraProgramming.Media.QuickTime.Components;
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
-    public sealed class ChunkFactory
+    internal sealed class ChunkFactory : ChunkFactoryBase
     {
-        private readonly IDictionary<uint, Func<Atom, Task<Chunk>>> cache;
-
         public static readonly ChunkFactory Instance;
 
         private ChunkFactory(IDictionary<uint, Func<Atom, Task<Chunk>>> cache)
+            : base(cache)
         {
-            this.cache = cache;
         }
 
         static ChunkFactory()
         {
             var @namespace = typeof(Chunk).Namespace + ".Chunks";
-            var dict = new Dictionary<uint, Func<Atom, Task<Chunk>>>();
+            //var dict = new Dictionary<uint, Func<Atom, Task<Chunk>>>();
             var types = typeof(ChunkFactory).Assembly
                 .GetTypes()
                 .Where(type => type.Namespace.StartsWith(@namespace))
                 .ToArray();
 
-            foreach (var type in types)
+            /*foreach (var type in types)
             {
                 var attributes = type.GetCustomAttributes<ChunkAttribute>();
 
@@ -41,14 +36,14 @@ namespace LibraProgramming.Media.QuickTime
                     var func = GetCreator(type);
                     dict.Add(attribute.AtomType, func);
                 }
-            }
+            }*/
 
-            Instance = new ChunkFactory(dict);
+            Instance = new ChunkFactory(CreateCache(types));
         }
 
         public async Task<Chunk> CreateFromAsync(Atom atom)
         {
-            if (cache.TryGetValue(atom.Type, out var creator))
+            if (Cache.TryGetValue(atom.Type, out var creator))
             {
                 return await creator.Invoke(atom);
             }
@@ -61,7 +56,7 @@ namespace LibraProgramming.Media.QuickTime
             return await ContentChunk.ReadFromAsync(atom);
         }
 
-        private static Func<Atom, Task<Chunk>> GetCreator(Type type)
+        /*private static Func<Atom, Task<Chunk>> GetCreator(Type type)
         {
             var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
 
@@ -89,6 +84,6 @@ namespace LibraProgramming.Media.QuickTime
             //return method.CreateDelegate<Func<Atom, Chunk>>();
 
             throw new NotImplementedException();
-        }
+        }*/
     }
 }

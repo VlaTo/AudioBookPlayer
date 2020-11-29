@@ -4,6 +4,7 @@ using LibraProgramming.Media.QuickTime.Lists;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -21,7 +22,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             MetaInfoChunks = chunks;
         }
 
-        public static IlstChunk ReadFrom(Atom atom)
+        [ChunkCreator]
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {
@@ -31,22 +33,27 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var chunks = new List<MetaInfoChunk>();
             var extractor = new AtomExtractor(atom.Stream);
 
-            foreach (var child in extractor)
+            using (var enumerator = extractor.GetEnumerator())
             {
-                var chunk = InformationFactory.Instance.CreateFrom(child);
+                enumerator.Reset();
 
-                switch (chunk)
+                while (await enumerator.MoveNextAsync())
                 {
-                    case MetaInfoChunk meta:
-                    {
-                        chunks.Add(meta);
-                        break;
-                    }
+                    var chunk = await InformationFactory.Instance.CreateFromAsync(enumerator.Current);
 
-                    default:
+                    switch (chunk)
                     {
+                        case MetaInfoChunk meta:
+                        {
+                            chunks.Add(meta);
+                            break;
+                        }
 
-                        break;
+                        default:
+                        {
+
+                            break;
+                        }
                     }
                 }
             }

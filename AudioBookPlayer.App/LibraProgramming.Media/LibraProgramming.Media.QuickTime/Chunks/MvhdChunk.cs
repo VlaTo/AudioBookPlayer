@@ -80,7 +80,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
         }
 
         [ChunkCreator]
-        public static async Task<MvhdChunk> ReadFromAsync(Atom atom)
+        public static async Task<Chunk> ReadFromAsync(Atom atom)
         {
             if (null == atom)
             {

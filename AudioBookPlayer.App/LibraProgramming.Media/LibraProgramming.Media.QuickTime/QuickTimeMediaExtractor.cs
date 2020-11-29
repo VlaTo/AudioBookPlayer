@@ -43,11 +43,16 @@ namespace LibraProgramming.Media.QuickTime
             {
                 var extractor = new AtomExtractor(temp);
 
-                foreach (var atom in extractor)
+                using (var enumerator = extractor.GetEnumerator())
                 {
-                    var chunk = await ChunkFactory.Instance.CreateFromAsync(atom);
+                    enumerator.Reset();
 
-                    chunks.Add(chunk);
+                    while (await enumerator.MoveNextAsync())
+                    {
+                        var chunk = await ChunkFactory.Instance.CreateFromAsync(enumerator.Current);
+
+                        chunks.Add(chunk);
+                    }
                 }
             }
 
@@ -103,12 +108,12 @@ namespace LibraProgramming.Media.QuickTime
         {
             EnsureNotDisposed();
 
-            var extractor = new AtomExtractor(stream);
+            /*var extractor = new AtomExtractor(stream);
 
             foreach (var atom in extractor)
             {
                 var chunk = ChunkFactory.Instance.CreateFromAsync(atom);
-            }
+            }*/
 
             return null;
         }

@@ -1,36 +1,35 @@
 ﻿using LibraProgramming.Media.QuickTime.Chunks;
-using LibraProgramming.Media.QuickTime.Components;
 using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LibraProgramming.Media.QuickTime
 {
-    internal sealed class InformationFactory
+    internal sealed class InformationFactory : ChunkFactoryBase
     {
-        private readonly IDictionary<uint, Func<Atom, Chunk>> cache;
+        //private readonly IDictionary<uint, Func<Atom, Chunk>> cache;
 
         public static readonly InformationFactory Instance;
 
-        private InformationFactory(IDictionary<uint, Func<Atom, Chunk>> cache)
+        private InformationFactory(IDictionary<uint, Func<Atom, Task<Chunk>>> cache)
+            : base(cache)
         {
-            this.cache = cache;
         }
 
         static InformationFactory()
         {
             var @namespace = typeof(InformationFactory).Namespace + ".Lists";
-            var cache = new Dictionary<uint, Func<Atom, Chunk>>();
+            //var cache = new Dictionary<uint, Func<Atom, Chunk>>();
             var types = typeof(InformationFactory).Assembly
                 .GetTypes()
                 .Where(type => type.Namespace.StartsWith(@namespace))
                 .ToArray();
 
-            foreach (var type in types)
+            /*foreach (var type in types)
             {
                 var attributes = type.GetCustomAttributes<ChunkAttribute>();
 
@@ -39,16 +38,16 @@ namespace LibraProgramming.Media.QuickTime
                     var func = GetCreator(type);
                     cache.Add(attribute.AtomType, func);
                 }
-            }
+            }*/
 
-            Instance = new InformationFactory(cache);
+            Instance = new InformationFactory(CreateCache(types));
         }
 
-        public Chunk CreateFrom(Atom atom)
+        public async Task<Chunk> CreateFromAsync(Atom atom)
         {
-            if (cache.TryGetValue(atom.Type, out var creator))
+            if (Cache.TryGetValue(atom.Type, out var creator))
             {
-                return creator.Invoke(atom);
+                return await creator.Invoke(atom);
             }
 
             var bytes = BitConverter.GetBytes(atom.Type).ToBigEndian();
@@ -69,14 +68,13 @@ namespace LibraProgramming.Media.QuickTime
 
             Debug.WriteLine($"public const uint {type.ToVariableName()} = 0x{atom.Type:X08};\t// information factory");
 
-            return ContentChunk.ReadFrom(atom);
-            //throw new ArgumentNullException(nameof(atom));
+            return await ContentChunk.ReadFromAsync(atom);
         }
 
-        private static Func<Atom, Chunk> GetCreator(Type type)
+        /*private static Func<Atom, Chunk> GetCreator(Type type)
         {
             var method = type.GetMethod("ReadFrom", BindingFlags.Static | BindingFlags.Public);
             return method.CreateDelegate<Func<Atom, Chunk>>();
-        }
+        }*/
     }
 }
