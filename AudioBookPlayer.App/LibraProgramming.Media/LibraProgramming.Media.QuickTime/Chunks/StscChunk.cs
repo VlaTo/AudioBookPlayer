@@ -1,8 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
 using System.IO;
-using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -65,10 +63,12 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (_, _) = ReadFlagsAndVersion(atom.Stream);
             var numberOfBlocks = StreamHelper.ReadUInt32(atom.Stream);
-            var blockSizes = new BlockDescription[numberOfBlocks];
+            
             var position = atom.Stream.Position;
+            
+            var blockSizes = new BlockDescription[numberOfBlocks];
 
             using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
             {

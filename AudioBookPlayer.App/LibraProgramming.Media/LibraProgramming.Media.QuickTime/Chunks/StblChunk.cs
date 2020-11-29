@@ -24,62 +24,58 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             }
 
             var chunks = new List<Chunk>();
+            var extractor = new AtomExtractor(atom.Stream);
 
-            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
+            foreach (var child in extractor)
             {
-                var extractor = new AtomExtractor(atom.Stream);
+                var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                foreach (var child in extractor)
+                switch (chunk)
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
-
-                    switch (chunk)
+                    case StsdChunk stsd:
                     {
-                        case StsdChunk stsd:
-                        {
 
-                            break;
-                        }
-
-                        case SttsChunk stts:
-                        {
-
-                            break;
-                        }
-
-                        case StszChunk stsz:
-                        {
-
-                            break;
-                        }
-
-                        case StscChunk stsc:
-                        {
-
-                            break;
-                        }
-
-                        case StcoChunk stco:
-                        {
-
-                            break;
-                        }
-
-                        /*case CttsChunk:
-                        {
-
-                            break;
-                        }*/
-
-                        default:
-                        {
-
-                            break;
-                        }
+                        break;
                     }
 
-                    chunks.Add(chunk);
+                    case SttsChunk stts:
+                    {
+
+                        break;
+                    }
+
+                    case StszChunk stsz:
+                    {
+
+                        break;
+                    }
+
+                    case StscChunk stsc:
+                    {
+
+                        break;
+                    }
+
+                    case StcoChunk stco:
+                    {
+
+                        break;
+                    }
+
+                    /*case CttsChunk:
+                    {
+
+                        break;
+                    }*/
+
+                    default:
+                    {
+
+                        break;
+                    }
                 }
+
+                chunks.Add(chunk);
             }
 
             return new StblChunk(chunks.ToArray());

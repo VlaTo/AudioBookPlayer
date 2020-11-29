@@ -56,10 +56,12 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (_, _) = ReadFlagsAndVersion(atom.Stream);
             var numberOfTimes = StreamHelper.ReadUInt32(atom.Stream);
-            var entries = new TimeToSample[numberOfTimes];
+            
             var position = atom.Stream.Position;
+            
+            var entries = new TimeToSample[numberOfTimes];
 
             using (var stream = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
             {

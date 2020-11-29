@@ -48,16 +48,5 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             return new UdtaChunk(chunks.ToArray());
         }
-
-        /*public override void Debug(int level)
-        {
-            var tabs = new String(' ', level);
-            var bytes = BitConverter.GetBytes(Type).ToBigEndian();
-            var type = Encoding.ASCII.GetString(bytes);
-
-            Console.WriteLine($"{tabs}{type}");
-
-            base.Debug(level);
-        }*/
     }
 }

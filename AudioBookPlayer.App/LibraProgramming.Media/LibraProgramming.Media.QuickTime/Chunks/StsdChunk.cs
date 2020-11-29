@@ -34,6 +34,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             var (version, flags) = ReadFlagsAndVersion(atom.Stream);
             var numberOfReferences = StreamHelper.ReadUInt32(atom.Stream);
+            
             var position = atom.Stream.Position;
 
             var chunks = new List<Chunk>();

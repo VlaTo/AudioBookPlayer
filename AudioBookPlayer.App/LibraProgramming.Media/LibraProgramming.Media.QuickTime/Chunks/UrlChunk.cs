@@ -28,7 +28,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var (version, flags) = ReadFlagsAndVersion(atom.Stream);
+            var (_, flags) = ReadFlagsAndVersion(atom.Stream);
             var url = String.Empty;
 
             if ((flags & InternalDataFlag) == 0)

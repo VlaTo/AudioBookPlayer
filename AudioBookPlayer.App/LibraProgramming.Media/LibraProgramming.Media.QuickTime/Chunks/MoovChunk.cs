@@ -21,44 +21,40 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             }
 
             var chunks = new List<Chunk>();
+            var extractor = new AtomExtractor(atom.Stream);
 
-            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length))
+            foreach (var child in extractor)
             {
-                var extractor = new AtomExtractor(atom.Stream);
+                var chunk = ChunkFactory.Instance.CreateFrom(child);
 
-                foreach (var child in extractor)
+                switch (chunk)
                 {
-                    var chunk = ChunkFactory.Instance.CreateFrom(child);
-
-                    switch (chunk)
+                    case MvhdChunk mvhd:
                     {
-                        case MvhdChunk mvhd:
-                        {
 
-                            break;
-                        }
-
-                        case TrakChunk track:
-                        {
-
-                            break;
-                        }
-
-                        case UdtaChunk udta:
-                        {
-
-                            break;
-                        }
-
-                        default:
-                        {
-
-                            break;
-                        }
+                        break;
                     }
 
-                    chunks.Add(chunk);
+                    case TrakChunk track:
+                    {
+
+                        break;
+                    }
+
+                    case UdtaChunk udta:
+                    {
+
+                        break;
+                    }
+
+                    default:
+                    {
+
+                        break;
+                    }
                 }
+
+                chunks.Add(chunk);
             }
 
             return new MoovChunk(chunks.ToArray());
