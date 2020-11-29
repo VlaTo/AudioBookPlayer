@@ -39,6 +39,15 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             ;
         }
 
+        public override void VisitMdat(MdatChunk chunk)
+        {
+            Console.WriteLine($"[MDAT] //binary data start: {chunk.Start} length: {chunk.Length} bytes");
+            Console.WriteLine();
+
+            base.VisitMdat(chunk);
+
+        }
+
         public override void VisitMvhd(MvhdChunk chunk)
         {
             Console.WriteLine($"[MVHD] //time scale: {chunk.TimeScale}");
@@ -66,7 +75,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 TimeScale = timeScale.GetValueOrDefault()
             };
 
-        trackInfos.Push(actual);
+            trackInfos.Push(actual);
             
             Console.WriteLine("[TRAK] Begin");
 
@@ -98,29 +107,10 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         // TrackInfo last
                         // TrakChunk chunk
 
-                        //Console.WriteLine($"[TRAK] //primary track time scale: {primaryTrack.TimeScale}");
-                        //Console.WriteLine($"[TRAK] //last track time scale: {last.TimeScale}");
+                        CreateMediaTracks(last);
+                        
+                        ProcessTrack(primaryTrack);
 
-                        var samplesCount = 0u;
-                        var duration = TimeSpan.Zero;
-
-                        for (var index = 0; index < last.Offsets.Length; index++)
-                        {
-                            var track = new QuickTimeMediaTrack(extractor);
-                            var offset = last.Offsets[index];
-                            var timeToSample = last.Entries[index];
-                            var position = stream.Seek(offset, SeekOrigin.Begin);
-                            var text = StreamHelper.ReadPascalString(stream);
-                            var temp = TimeSpan.FromSeconds(((double)timeToSample.Duration) / last.SampleScale);
-
-                            track.SetTitle(text);
-                            track.SetDuration(temp);
-
-                            tracks.Add(track);
-
-                            samplesCount += timeToSample.SampleCount;
-                            duration += temp;
-                        }
                     }
                 }
             }
@@ -201,7 +191,6 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             for (var index = 0; index < Math.Min(3, count); index++)
             {
                 var description = chunk.Entries[index];
-                //var length = lengths[index] * description.SampleCount;
                 Console.WriteLine($"[{index:d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
@@ -219,15 +208,23 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitStsz(StszChunk chunk)
         {
+            var info = trackInfos.Peek();
             var sampleSize = chunk.SampleSize;
+
 
             if (0 < sampleSize)
             {
+                info.CommonSampleSize = chunk.SampleSize;
+                info.SampleSizes = null;
+
                 Console.WriteLine($"[STSZ] //common sample size: {sampleSize})");
                 return;
             }
 
             var sampleSizes = chunk.SampleSizes.Length;
+
+            info.CommonSampleSize = 0;
+            info.SampleSizes = chunk.SampleSizes;
 
             Console.WriteLine($"[STSZ] //sample sizes: {sampleSizes}");
 
@@ -304,6 +301,52 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             base.VisitStsc(chunk);
         }
 
+        private void CreateMediaTracks(TrackInfo trackInfo)
+        {
+            for (var index = 0; index < trackInfo.Offsets.Length; index++)
+            {
+                var timeToSample = trackInfo.Entries[index];
+                var track = new QuickTimeMediaTrack(extractor);
+                
+                var offset = trackInfo.Offsets[index];
+                var position = stream.Seek(offset, SeekOrigin.Begin);
+                var text = StreamHelper.ReadPascalString(stream);
+
+                var duration = TimeSpan.FromSeconds(((double)timeToSample.Duration) / trackInfo.SampleScale);
+
+                track.SetTitle(text);
+                track.SetDuration(duration);
+
+                tracks.Add(track);
+            }
+        }
+
+        private void ProcessTrack(TrackInfo primaryTrack)
+        {
+            var chunksCount = 0;
+            var samplesCount = 0L;
+            var bytesLength = 0L;
+
+            for (var index = 0; index < primaryTrack.Entries.Length; index++)
+            {
+                var entry = primaryTrack.Entries[index];
+
+                for (var offset = 0; offset < entry.SampleCount; offset++)
+                {
+                    bytesLength += primaryTrack.SampleSizes[chunksCount];
+                    chunksCount++;
+                    samplesCount += entry.Duration;
+                }
+            }
+
+            var duration = TimeSpan.FromSeconds(samplesCount / primaryTrack.SampleScale);
+
+            Console.WriteLine($"[TRAK] //chunks: {chunksCount}");
+            Console.WriteLine($"[TRAK] //samples: {samplesCount}");
+            Console.WriteLine($"[TRAK] //length: {bytesLength} bytes");
+            Console.WriteLine($"[TRAK] //duration: {duration}");
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -345,6 +388,18 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             }
 
             public TimeToSample[] Entries
+            {
+                get;
+                set;
+            }
+
+            public uint CommonSampleSize
+            {
+                get;
+                set;
+            }
+
+            public uint[] SampleSizes
             {
                 get;
                 set;

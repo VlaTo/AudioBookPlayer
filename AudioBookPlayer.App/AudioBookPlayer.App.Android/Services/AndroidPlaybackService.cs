@@ -18,29 +18,38 @@ namespace AudioBookPlayer.App.Droid.Services
     {
         private readonly NotificationManagerCompat notificationManager;
         private readonly NotificationChannel channel;
-        private readonly Notification notification;
+        //private readonly Notification notification;
+        private readonly PendingIntent pendingIntent;
 
         public AndroidPlaybackService()
         {
             notificationManager = NotificationManagerCompat.From(Application.Context);
             channel = new NotificationChannel("test", (string)null, NotificationImportance.Default);
 
+            // will crash initialization
             //notificationManager.CreateNotificationChannel(channel);
 
             var intent = new Intent(Application.Context, typeof(PlaybackActivity));
-            var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
+            pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
-            notification = new NotificationCompat.Builder(Application.Context, channel.Id)
+            /*notification = new NotificationCompat.Builder(Application.Context, channel.Id)
                 .SetStyle(new NotificationCompat.BigTextStyle())
                 .SetContentTitle("Sample Title")
                 .SetContentText("Sample content text")
                 .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_checked_black)
                 .SetContentIntent(pendingIntent)
-                .Build();
+                .Build();*/
         }
 
         public void ShowNotification()
         {
+            if (notificationManager.AreNotificationsEnabled())
+            {
+                System.Diagnostics.Debug.WriteLine("[AndroidPlaybackService] [ShowNotification] Notifications disabled");
+
+                return;
+            }
+
             //var intent = new Intent(Application.Context, typeof(MainActivity));
             //var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
@@ -49,13 +58,20 @@ namespace AudioBookPlayer.App.Droid.Services
 
             //manager.CreateNotificationChannel(channel);
 
-            //var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
-            //    .SetStyle(new NotificationCompat.BigTextStyle())
-            //    .SetContentTitle("Sample Title")
-            //    .SetContentText("Sample content text")
-            //    .SetSmallIcon(0)
-            //    .SetContentIntent(pendingIntent)
-            //    .Build();
+            var bigTextStyle = new NotificationCompat.BigTextStyle()
+                .SetBigContentTitle("Big content title")
+                .SetSummaryText("summary text");
+
+            var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
+                .SetStyle(bigTextStyle)
+                .SetContentTitle("content title")
+                .SetContentText("content text")
+                //.SetSmallIcon(Resource.Drawable.abc_ic_star_black_48dp)
+                .SetSmallIcon(NotificationCompat.BadgeIconSmall)
+                .SetContentIntent(pendingIntent)
+                .SetDefaults(NotificationCompat.DefaultAll)
+                .SetCategory(Notification.CategoryReminder)
+                .Build();
 
             notificationManager.Notify(0, notification);
         }
