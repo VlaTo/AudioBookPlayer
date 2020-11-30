@@ -329,11 +329,11 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             for (var index = 0; index < primaryTrack.Entries.Length; index++)
             {
-                var entry = primaryTrack.Entries[index];
+                var entry = primaryTrack.Entries[index]; // STTS
 
                 for (var offset = 0; offset < entry.SampleCount; offset++)
                 {
-                    bytesLength += primaryTrack.SampleSizes[chunksCount];
+                    bytesLength += primaryTrack.SampleSizes[chunksCount]; // STSZ
                     chunksCount++;
                     samplesCount += entry.Duration;
                 }

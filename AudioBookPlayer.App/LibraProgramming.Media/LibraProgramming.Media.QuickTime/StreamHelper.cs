@@ -11,133 +11,86 @@ namespace LibraProgramming.Media.QuickTime
         // should be same as extended length field size
         public const int PrefixSize = 8;
         
-        public static readonly Encoding Encoding = System.Text.Encoding.Unicode;
+        public static readonly Encoding Encoding = Encoding.Unicode;
 
-        public static UInt16 ReadUInt16(Stream stream)
+        public static ushort ReadUInt16(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(UInt16), out var bytes))
-            {
-                throw new Exception();
-            }
+            var data = new byte[sizeof(UInt16)];
 
-            return BitConverter.ToUInt16(bytes, 0);
+            ReadBytesInternal(stream, data, 0, sizeof(UInt16), true);
 
-            /*var data = new byte[sizeof(UInt16)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
-
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
-                {
-                    buffer[index] = data[data.Length - index - 1];
-                }
-
-                data = buffer;
-            }
-
-            return BitConverter.ToUInt16(data, 0);*/
+            return BitConverter.ToUInt16(data, 0);
         }
 
         public static int ReadInt32(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(int), out var bytes))
-            {
-                throw new Exception();
-            }
+            var data = new byte[sizeof(Int32)];
 
-            /*var data = new byte[sizeof(int)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
+            ReadBytesInternal(stream, data, 0, sizeof(Int32), true);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
-                {
-                    buffer[index] = data[data.Length - index - 1];
-                }
-
-                data = buffer;
-            }*/
-
-            return BitConverter.ToInt32(bytes, 0);
+            return BitConverter.ToInt32(data, 0);
         }
 
         public static long ReadInt64(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(long), out var bytes))
-            {
-                throw new Exception();
-            }
+            var data = new byte[sizeof(Int64)];
 
-            /*var data = new byte[sizeof(long)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
+            ReadBytesInternal(stream, data, 0, sizeof(Int64), true);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
-                {
-                    buffer[index] = data[data.Length - index - 1];
-                }
-
-                data = buffer;
-            }*/
-
-            return BitConverter.ToInt64(bytes, 0);
+            return BitConverter.ToInt64(data, 0);
         }
 
         public static uint ReadUInt32(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(uint), out var bytes))
-            {
-                throw new Exception();
-            }
+            var data = new byte[sizeof(UInt32)];
 
-            /*var data = new byte[sizeof(uint)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
+            ReadBytesInternal(stream, data, 0, sizeof(UInt32), true);
 
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
-                {
-                    buffer[index] = data[data.Length - index - 1];
-                }
-
-                data = buffer;
-            }*/
-
-            return BitConverter.ToUInt32(bytes, 0);
+            return BitConverter.ToUInt32(data, 0);
         }
 
         public static ulong ReadUInt64(Stream stream)
         {
-            if (false == TryReadBytesFromStream(stream, sizeof(ulong), out var bytes))
+            var data = new byte[sizeof(UInt64)];
+
+            ReadBytesInternal(stream, data, 0, sizeof(UInt64), true);
+
+            return BitConverter.ToUInt64(data, 0);
+        }
+
+        public static float ReadFixedPoint(Stream stream, int count)
+        {
+            if (2 == count)
             {
-                throw new Exception();
-            }
+                var value = ReadUInt16(stream);
+                int counter = value >> 12;
+                float result = value & 0xfff;
 
-            /*var data = new byte[sizeof(ulong)];
-            var actualCount = ReadBytesFromStreamInternal(stream, data);
-
-            if (BitConverter.IsLittleEndian)
-            {
-                var buffer = new byte[data.Length];
-
-                for (var index = 0; index < data.Length; index++)
+                while (counter > 0)
                 {
-                    buffer[index] = data[data.Length - index - 1];
+                    result /= 10.0f;
+                    counter--;
                 }
 
-                data = buffer;
-            }*/
+                return result;
+            }
 
-            return BitConverter.ToUInt64(bytes, 0);
+            if (4 == count)
+            {
+                var value = ReadUInt32(stream);
+                long counter = value >> 12;
+                float result = value & 0xfff;
+
+                while (counter > 0)
+                {
+                    result /= 10.0f;
+                    counter--;
+                }
+
+                return result;
+            }
+
+            throw new NotSupportedException();
         }
 
         public static string ReadString(Stream stream, int length)
@@ -179,7 +132,8 @@ namespace LibraProgramming.Media.QuickTime
         public static byte[] ReadBytes(Stream stream, uint length)
         {
             var data = new byte[length];
-            var actualCount = ReadBytesFromStream(stream, data, true);
+
+            ReadBytesInternal(stream, data, 0, data.Length);
 
             return data;
         }
@@ -187,7 +141,8 @@ namespace LibraProgramming.Media.QuickTime
         public static byte ReadByte(Stream stream)
         {
             var data = new byte[1];
-            var actualCount = ReadBytesFromStream(stream, data, true);
+
+            ReadBytesInternal(stream, data, 0, 1);
 
             return data[0];
         }
@@ -203,67 +158,53 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var data = new byte[size];
-            var count = ReadBytesFromStream(stream, data);
+            
+            ReadBytesInternal(stream, data, 0, sizeof(UInt32), true);
+            ReadBytesInternal(stream, data, sizeof(UInt32), sizeof(UInt32), true);
 
-            var length = (long)BitConverter.ToUInt32(data.Slice(0, 4).ToBigEndian(), 0);
-            var atomType = BitConverter.ToUInt32(data.Slice(4).ToBigEndian(), 0);
+            var length = (long) BitConverter.ToUInt32(data, 0);
+            var atomType = BitConverter.ToUInt32(data, sizeof(UInt32));
 
             if (1U == length)
             {
                 size += PrefixSize;
 
-                var extra = ReadBytesFromStream(stream, data, true);
+                ReadBytesInternal(stream, data, 0, sizeof(UInt64), true);
 
-                length = BitConverter.ToInt64(data.ToBigEndian(), 0);
+                length = BitConverter.ToInt64(data, 0);
             }
 
             return (atomType, size, length);
         }
 
-        private static int ReadBytesFromStream(Stream stream, byte[] bytes, bool throwException = false)
+        private static void ReadBytesInternal(Stream stream, byte[] buffer, int offset, int count)
         {
-            var bufferLength = bytes.Length;
-            var actualCount = stream.Read(bytes, 0, bufferLength);
+            var actualCount = stream.Read(buffer, offset, count);
 
-            if ((bufferLength != actualCount) && throwException)
+            if (actualCount != count)
             {
                 throw new InvalidOperationException();
             }
-
-            return actualCount;
         }
 
-        private static bool TryReadBytesFromStream(Stream stream, int count, out byte[] bytes)
+        private static void ReadBytesInternal(Stream stream, byte[] buffer, int offset, int count, bool forceEndian)
         {
-            var buffer = new byte[count];
-            //var actualCount = stream.Read(buffer, 0, count);
-            var actualCount = ReadBytesFromStream(stream, buffer);
+            ReadBytesInternal(stream, buffer, offset, count);
 
-            bytes = null;
-
-            if (count != actualCount)
+            if (forceEndian && BitConverter.IsLittleEndian)
             {
-                return false;
-            }
-
-            if (BitConverter.IsLittleEndian)
-            {
-                var iterations = actualCount >> 1;
-                int start = 0;
-                int end = actualCount - 1;
+                var iterations = count >> 1;
+                int start = offset;
+                int end = offset + count - 1;
 
                 for (var index = 0; index < iterations; index++)
                 {
-                    var place = buffer[start];
+                    var temp = buffer[start];
 
                     buffer[start++] = buffer[end];
-                    buffer[end--] = place;
+                    buffer[end--] = temp;
                 }
             }
-
-            bytes = buffer;
-
-            return true;
         }
     }
 }
