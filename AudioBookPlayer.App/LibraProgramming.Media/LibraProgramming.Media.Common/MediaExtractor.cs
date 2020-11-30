@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace LibraProgramming.Media.Common
 {
@@ -12,11 +11,11 @@ namespace LibraProgramming.Media.Common
         {
         }
 
-        public abstract int GetTracksCount();
+        //public abstract int GetTracksCount();
 
-        public abstract MediaTrack GetTrack(int index);
+        //public abstract MediaTrack GetTrack(int index);
 
-        public abstract MediaTrack[] GetTracks();
+        public abstract IReadOnlyCollection<IMediaTrack> GetTracks();
 
         public abstract MetaInformation GetMeta();
 

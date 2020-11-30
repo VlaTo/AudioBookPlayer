@@ -1,4 +1,7 @@
-﻿namespace AudioBookPlayer.App.Core.Services
+﻿using System.IO;
+using System.Threading.Tasks;
+
+namespace AudioBookPlayer.App.Core.Services
 {
     /// <summary>
     /// 
@@ -8,6 +11,6 @@
         /// <summary>
         /// 
         /// </summary>
-        void ShowNotification();
+        Task PlayAsync(Stream stream);
     }
 }

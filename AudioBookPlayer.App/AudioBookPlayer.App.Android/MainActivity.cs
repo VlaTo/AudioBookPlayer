@@ -1,8 +1,6 @@
 ﻿using Android.App;
-using Android.Content;
 using Android.Content.PM;
 using Android.OS;
-using AndroidX.Core.App;
 using AudioBookPlayer.App.Core.Services;
 using AudioBookPlayer.App.Droid.Services;
 using Prism;
@@ -44,6 +42,7 @@ namespace AudioBookPlayer.App.Droid
         {
             // Register any platform specific implementations
             containerRegistry.Register<ISourceStreamProvider, AssetStreamProvider>();
+            containerRegistry.RegisterSingleton<IPlaybackControlService, AndroidPalaybackControlService>();
             containerRegistry.RegisterSingleton<IPlaybackService, AndroidPlaybackService>();
         }
     }

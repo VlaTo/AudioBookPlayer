@@ -1,79 +1,74 @@
-﻿using Android.App;
-using Android.Content;
-using Android.Graphics;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using AndroidX.Core.App;
+﻿using Android.Media;
 using AudioBookPlayer.App.Core.Services;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
     internal sealed class AndroidPlaybackService : IPlaybackService
     {
-        private readonly NotificationManagerCompat notificationManager;
-        private readonly NotificationChannel channel;
-        //private readonly Notification notification;
-        private readonly PendingIntent pendingIntent;
-
         public AndroidPlaybackService()
         {
-            notificationManager = NotificationManagerCompat.From(Application.Context);
-            channel = new NotificationChannel("test", (string)null, NotificationImportance.Default);
-
-            // will crash initialization
-            //notificationManager.CreateNotificationChannel(channel);
-
-            var intent = new Intent(Application.Context, typeof(PlaybackActivity));
-            pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
-
-            /*notification = new NotificationCompat.Builder(Application.Context, channel.Id)
-                .SetStyle(new NotificationCompat.BigTextStyle())
-                .SetContentTitle("Sample Title")
-                .SetContentText("Sample content text")
-                .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_checked_black)
-                .SetContentIntent(pendingIntent)
-                .Build();*/
         }
 
-        public void ShowNotification()
+        public async Task PlayAsync(System.IO.Stream stream)
         {
-            if (notificationManager.AreNotificationsEnabled())
-            {
-                System.Diagnostics.Debug.WriteLine("[AndroidPlaybackService] [ShowNotification] Notifications disabled");
-
-                return;
-            }
-
-            //var intent = new Intent(Application.Context, typeof(MainActivity));
-            //var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
-
-            //var manager = NotificationManagerCompat.From(Application.Context);
-            //var channel = new NotificationChannel("test", (string)null, NotificationImportance.Default);
-
-            //manager.CreateNotificationChannel(channel);
-
-            var bigTextStyle = new NotificationCompat.BigTextStyle()
-                .SetBigContentTitle("Big content title")
-                .SetSummaryText("summary text");
-
-            var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
-                .SetStyle(bigTextStyle)
-                .SetContentTitle("content title")
-                .SetContentText("content text")
-                //.SetSmallIcon(Resource.Drawable.abc_ic_star_black_48dp)
-                .SetSmallIcon(NotificationCompat.BadgeIconSmall)
-                .SetContentIntent(pendingIntent)
-                .SetDefaults(NotificationCompat.DefaultAll)
-                .SetCategory(Notification.CategoryReminder)
+            var streamLength = stream.Length;
+            var mediaEncoding = Encoding.EAc3;
+            var sampleRate = 44100;
+            var channels = ChannelOut.Stereo;
+            var audioAttributes = new AudioAttributes.Builder()
+                    .SetFlags(AudioFlags.None)
+                    .SetContentType(AudioContentType.Music)
+                    .SetUsage(AudioUsageKind.Media)
+                    .Build();
+            var audioFormat = new AudioFormat.Builder()
+                .SetEncoding(mediaEncoding)
+                .SetSampleRate(sampleRate)
+                .SetChannelMask(channels)
                 .Build();
 
-            notificationManager.Notify(0, notification);
+            var bufferSize = AudioTrack.GetMinBufferSize(sampleRate, channels, mediaEncoding);
+            //var bufferSize = 2124;
+
+            System.Diagnostics.Debug.WriteLine($"[PlaybackTest] [PlayAsync] Trying to allocate buffer of {bufferSize} bytes");
+
+            using (var audio = new AudioTrack(audioAttributes, audioFormat, bufferSize, AudioTrackMode.Stream, 1))
+            {
+                audio.SetVolume(1.0f);
+
+                //audio.SetNotificationMarkerPosition((int)streamLength / 2);
+                //audio.SetPlaybackPositionUpdateListener(this);
+                //audio.SetPositionNotificationPeriod(10);
+
+                audio.Play();
+
+                var buffer = new byte[bufferSize];
+                //var memory = new Memory<byte>(buffer);
+
+                //var bytesWritten = 0;
+
+                while (true)
+                {
+                    var count = await stream.ReadAsync(buffer);
+
+                    if (0 == count)
+                    {
+                        break;
+                    }
+
+                    //bytesWritten += count;
+
+                    await audio.WriteAsync(buffer, 0, count);
+                }
+
+                //audio.SetPositionNotificationPeriod(0);
+                //audio.SetPlaybackPositionUpdateListener(null);
+
+                System.Diagnostics.Debug.WriteLine("[PlaybackTest] [PlayAsync] Done playing");
+
+                audio.Release();
+            }
         }
     }
 }

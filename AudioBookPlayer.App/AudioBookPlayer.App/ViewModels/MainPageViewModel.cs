@@ -3,8 +3,10 @@ using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
 using Prism.Commands;
 using Prism.Navigation;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
@@ -102,6 +104,8 @@ namespace AudioBookPlayer.App.ViewModels
 
             using (var stream = File.OpenRead("/storage/emulated/0/Download/book.m4b"))
             {
+                IMediaTrack track = null;
+
                 using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
                 {
                     // get meta
@@ -140,17 +144,11 @@ namespace AudioBookPlayer.App.ViewModels
                     // get tracks
                     var tracks = extractor.GetTracks();
 
-                    for (var index = 0; index < tracks.Length; index++)
-                    {
-                        var track = tracks[index];
-
-
-                    }
+                    track = tracks.First();
                 }
-            }
 
-            // notification
-            playbackService.ShowNotification();
+                await playbackService.PlayAsync(track.GetMediaStream());
+            }
         }
 
         private void DoChangeCoverCommand()

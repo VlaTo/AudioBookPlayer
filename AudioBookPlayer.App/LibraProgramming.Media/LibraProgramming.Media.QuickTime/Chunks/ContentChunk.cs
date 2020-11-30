@@ -7,7 +7,6 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 {
     [Chunk(AtomTypes.Wide)]
     [Chunk(AtomTypes.Iods)]
-    [Chunk(AtomTypes.Gmhd)]
     [Chunk(AtomTypes.Stss)]
     [Chunk(AtomTypes.Ctts)]
     [Chunk(AtomTypes.Name)]

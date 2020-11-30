@@ -62,11 +62,11 @@ namespace LibraProgramming.Media.QuickTime
             root.Debug(0);
         }
 
-        public override int GetTracksCount()
+        /*public override int GetTracksCount()
         {
             EnsureNotDisposed();
 
-            /*var chunks = new List<Chunk>();
+            var chunks = new List<Chunk>();
 
             if (0L != stream.Seek(0L, SeekOrigin.Begin))
             {
@@ -81,24 +81,24 @@ namespace LibraProgramming.Media.QuickTime
                 chunks.Add(chunk);
             }
 
-            return chunks.Count;*/
+            return chunks.Count;
 
             return 0;
-        }
+        }*/
 
-        public override MediaTrack[] GetTracks()
+        public override IReadOnlyCollection<IMediaTrack> GetTracks()
         {
             EnsureNotDisposed();
 
-            var tracks = new List<MediaTrack>();
+            var tracks = new List<IMediaTrack>();
             var visitor = new MediaTrackVisitor(this, stream, tracks);
 
             visitor.Visit(root);
 
-            return tracks.ToArray();
+            return tracks.AsReadOnly();
         }
 
-        public override MediaTrack GetTrack(int index)
+        /*public override MediaTrack GetTrack(int index)
         {
             EnsureNotDisposed();
 
@@ -110,7 +110,7 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             return null;
-        }
+        }*/
 
         public override MetaInformation GetMeta()
         {
@@ -123,5 +123,7 @@ namespace LibraProgramming.Media.QuickTime
 
             return information;
         }
+
+        internal Stream GetStream() => stream;
     }
 }

@@ -10,7 +10,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
     {
         private readonly QuickTimeMediaExtractor extractor;
         private readonly Stream stream;
-        private readonly IList<MediaTrack> tracks;
+        private readonly IList<IMediaTrack> tracks;
         private readonly Stack<TrackInfo> trackInfos;
         private TrackInfo primaryTrack;
         
@@ -20,7 +20,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         public MediaTrackVisitor(
             QuickTimeMediaExtractor extractor,
             Stream stream,
-            IList<MediaTrack> tracks)
+            IList<IMediaTrack> tracks)
         {
             this.extractor = extractor;
             this.stream = stream;
@@ -107,8 +107,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         // TrackInfo last
                         // TrakChunk chunk
 
-                        CreateMediaTracks(last);
-                        
+                        CreateMediaTracks(primaryTrack, last);
                         ProcessTrack(primaryTrack);
 
                     }
@@ -301,7 +300,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             base.VisitStsc(chunk);
         }
 
-        private void CreateMediaTracks(TrackInfo trackInfo)
+        private void CreateMediaTracks(TrackInfo primary, TrackInfo trackInfo)
         {
             for (var index = 0; index < trackInfo.Offsets.Length; index++)
             {
@@ -314,10 +313,28 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
                 var duration = TimeSpan.FromSeconds(((double)timeToSample.Duration) / trackInfo.SampleScale);
 
-                track.SetTitle(text);
-                track.SetDuration(duration);
+                track.Title = text;
+                track.Duration = duration;
 
                 tracks.Add(track);
+
+                if (0 == index)
+                {
+                    var chunksCount = 0;
+                    var samples = new List<uint>();
+
+                    for (var index1 = 0; index1 < primaryTrack.Entries.Length; index1++)
+                    {
+                        var entry = primaryTrack.Entries[index1]; // STTS
+
+                        for (var offset1 = 0; offset1 < entry.SampleCount; offset1++)
+                        {
+                            samples.Add(primaryTrack.SampleSizes[chunksCount]); // STSZ
+                        }
+                    }
+
+                    track.Samples = samples.ToArray();
+                }
             }
         }
 

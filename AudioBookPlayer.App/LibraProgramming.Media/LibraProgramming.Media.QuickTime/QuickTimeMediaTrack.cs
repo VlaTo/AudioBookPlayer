@@ -4,28 +4,49 @@ using System.IO;
 
 namespace LibraProgramming.Media.QuickTime
 {
-    public sealed class QuickTimeMediaTrack : MediaTrack
+    public sealed class QuickTimeMediaTrack : IMediaTrack
     {
         private readonly QuickTimeMediaExtractor extractor;
+
+        public string Title
+        {
+            get;
+            internal set;
+        }
+
+        public TimeSpan Duration
+        {
+            get;
+            internal set;
+        }
+
+        internal uint[] Samples
+        {
+            get;
+            set;
+        }
 
         internal QuickTimeMediaTrack(QuickTimeMediaExtractor extractor)
         {
             this.extractor = extractor;
         }
 
-        public override Stream GetSampleStream()
+        public Stream GetMediaStream()
         {
-            return null;
-        }
+            var source = extractor.GetStream();
+            var memory = new MemoryStream();
 
-        internal void SetDuration(TimeSpan value)
-        {
-            Duration = value;
-        }
+            source.Seek(168L, SeekOrigin.Begin);
 
-        internal void SetTitle(string value)
-        {
-            Title = value;
+            for (var index = 0; index < Samples.Length; index++)
+            {
+                var count = Samples[index];
+                var buffer = new byte[count];
+                var readed = source.Read(buffer, 0, (int)count);
+                memory.Write(buffer, 0, readed);
+            }
+
+            return new ReadOnlyAtomStream(memory, 0, memory.Length);
         }
     }
 }
