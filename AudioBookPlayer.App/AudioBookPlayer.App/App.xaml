@@ -138,8 +138,15 @@
                 <ImageButton
                     Grid.Column="1"
                     x:Name="PART_RewindButton"
-                    Style="{StaticResource Key=SecondaryPlaybackButtonStyle}"
-                />
+                    Style="{StaticResource Key=SecondaryPlaybackButtonStyle}">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="IconsFont"
+                            Size="8"
+                            Glyph="&#xE80A;"
+                        />
+                    </ImageButton.Source>
+                </ImageButton>
                 <ImageButton
                     Grid.Column="2"
                     x:Name="PART_PlayButton"
@@ -148,16 +155,23 @@
                     <ImageButton.Source>
                         <FontImageSource
                             FontFamily="IconsFont"
-                            Size="8"
-                            Glyph="&#x25B6;"
+                            Size="18"
+                            Glyph="&#xe816;"
                         />
                     </ImageButton.Source>
                 </ImageButton>
                 <ImageButton
                     Grid.Column="3"
                     x:Name="PART_FastForwardButton"
-                    Style="{StaticResource Key=SecondaryPlaybackButtonStyle}"
-                />
+                    Style="{StaticResource Key=SecondaryPlaybackButtonStyle}">
+                    <ImageButton.Source>
+                        <FontImageSource
+                            FontFamily="IconsFont"
+                            Size="8"
+                            Glyph="&#xE809;"
+                        />
+                    </ImageButton.Source>
+                </ImageButton>
             </StackLayout>
             <!-- <Grid
                 HorizontalOptions="CenterAndExpand"

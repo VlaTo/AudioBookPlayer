@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Media", "L
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46118F59-9312-4ECA-B34A-81F653F23FFC}"
 	ProjectSection(SolutionItems) = preProject
+		a2002011001-e02.wav = a2002011001-e02.wav
 		audioformats_2.14_letter.pdf = audioformats_2.14_letter.pdf
 		ff-16b-2c-44100hz.aac = ff-16b-2c-44100hz.aac
 		ff-16b-2c-44100hz.ac3 = ff-16b-2c-44100hz.ac3

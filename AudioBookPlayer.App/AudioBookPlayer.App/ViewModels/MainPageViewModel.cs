@@ -3,6 +3,7 @@ using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
 using Prism.Commands;
 using Prism.Navigation;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -22,6 +23,8 @@ namespace AudioBookPlayer.App.ViewModels
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
+        private string selectedFilename;
+        private IList<string> filenames;
 
         public ImageSource ImageSource
         {
@@ -51,6 +54,18 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public string SelectedFilename
+        {
+            get => selectedFilename;
+            set => SetProperty(ref selectedFilename, value);
+        }
+
+        public IList<string> Filenames
+        {
+            get => filenames;
+            set => SetProperty(ref filenames, value);
+        }
+
         public MainPageViewModel(
             INavigationService navigationService,
             ISourceStreamProvider streamProvider,
@@ -60,17 +75,76 @@ namespace AudioBookPlayer.App.ViewModels
             this.streamProvider = streamProvider;
             this.playbackService = playbackService;
 
+            //selectedFilename = "a2002011001-e02.wav";
+            selectedFilename = String.Empty;
+            filenames = new List<string>();
+
             Title = "Main Page";
             Play = new DelegateCommand(DoPlayCommand);
             ChangeCover = new DelegateCommand(DoChangeCoverCommand);
-            //ImageSource = new ImageSource();
+        }
+
+        public override void Initialize(INavigationParameters parameters)
+        {
+            const string prefix = "AudioBookPlayer.App.Resources.";
+            var assembly = typeof(App).Assembly;
+            var files = new List<string>();
+
+            foreach(var name in assembly.GetManifestResourceNames())
+            {
+                if (false == name.StartsWith(prefix))
+                {
+                    continue;
+                }
+
+                var filename = name.Substring(prefix.Length);
+                var ext = Path.GetExtension(filename);
+
+                if (String.Equals(ext, ".ttf"))
+                {
+                    continue;
+                }
+
+                Debug.WriteLine($"File: '{filename}'");
+
+                files.Add(filename);
+            }
+
+            Filenames = files;
+            SelectedFilename = files[0];
         }
 
         private async void DoPlayCommand()
         {
+            //[0:] File: 'ff-16b-2c-44100hz.mp3'
+            //[0:] File: 'a2002011001-e02.wav'
+            //[0:] File: 'ff-16b-2c-44100hz.wav'
+            //[0:] File: 'ff-16b-2c-44100hz.aac'
+            //[0:] File: 'ff-16b-2c-44100hz.ac3'
+            //var temp = await FileSystem.OpenAppPackageFileAsync("ff-16b-2c-44100hz.wav");
+
+            var audioInfo = GetAudioInfo();
+
+            if (null == audioInfo)
+            {
+                return;
+            }
+
+            var assembly = typeof(App).Assembly;
+            var mediaResourceName = $"AudioBookPlayer.App.Resources.{selectedFilename}";
+
+            using (var audio = assembly.GetManifestResourceStream(mediaResourceName))
+            {
+                await playbackService.PlayAsync(audio, audioInfo.AudioEncoding, audioInfo.SampleRate, audioInfo.Channels);
+            }
+        }
+
+        private async void DoPlayCommand1()
+        {
             //var image = await FileSystem.OpenAppPackageFileAsync("sample-200.png");
 
-            //ImageSource = ImageSource.FromStream(() => image);
+            var source = await FileSystem.OpenAppPackageFileAsync("ff-16b-2c-44100.wav");
+
             // 0F1A-3D0D:Audio/Books/book.m4b
             var drives = Directory.GetLogicalDrives();
 
@@ -102,7 +176,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             var path1 = Path.Combine(streamProvider.GetBookPath(), "book.m4b");
 
-            using (var stream = File.OpenRead("/storage/emulated/0/Download/book.m4b"))
+            /*using (var stream = File.OpenRead("/storage/emulated/0/Download/book.m4b"))
             {
                 IMediaTrack track = null;
 
@@ -148,12 +222,25 @@ namespace AudioBookPlayer.App.ViewModels
                 }
 
                 await playbackService.PlayAsync(track.GetMediaStream());
-            }
+            }*/
         }
 
         private void DoChangeCoverCommand()
         {
             Debug.WriteLine("[MainPageViewModel] [DoChangeCoverCommand]");
+        }
+
+        private SourceFileInfo GetAudioInfo()
+        {
+            foreach(var info in SourceFileInfos)
+            {
+                if (String.Equals(info.Key, selectedFilename))
+                {
+                    return info.Value;
+                }
+            }
+
+            return null;
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)
@@ -175,5 +262,78 @@ namespace AudioBookPlayer.App.ViewModels
 
             return status;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private sealed class SourceFileInfo
+        {
+            public string AudioEncoding
+            {
+                get;
+                set;
+            }
+
+            public int SampleRate
+            {
+                get;
+                set;
+            }
+
+            public string Channels
+            {
+                get;
+                set;
+            }
+        }
+
+        private static readonly KeyValuePair<string, SourceFileInfo>[] SourceFileInfos = new[]
+        {
+            new KeyValuePair<string, SourceFileInfo>(
+                "ff-16b-2c-44100hz.mp3",
+                new SourceFileInfo
+                {
+                    AudioEncoding = "Encoding.Mp3",
+                    SampleRate = 44100,
+                    Channels = "ChannelOut.Stereo"
+                }
+            ),
+            new KeyValuePair<string, SourceFileInfo>(
+                "a2002011001-e02.wav",
+                new SourceFileInfo
+                {
+                    AudioEncoding = "Encoding.Pcm16",
+                    SampleRate = 44100,
+                    Channels = "ChannelOut.Stereo"
+                }
+            ),
+            new KeyValuePair<string, SourceFileInfo>(
+                "ff-16b-2c-44100hz.wav",
+                new SourceFileInfo
+                {
+                    AudioEncoding = "Encoding.Pcm24",
+                    SampleRate = 44100,
+                    Channels = "ChannelOut.Stereo"
+                }
+            ),
+            new KeyValuePair<string, SourceFileInfo>(
+                "ff-16b-2c-44100hz.aac",
+                new SourceFileInfo
+                {
+                    AudioEncoding = "Encoding.Aac",
+                    SampleRate = 44100,
+                    Channels = "ChannelOut.Stereo"
+                }
+            ),
+            new KeyValuePair<string, SourceFileInfo>(
+                "ff-16b-2c-44100hz.ac3",
+                new SourceFileInfo
+                {
+                    AudioEncoding = "Encoding.Ac3",
+                    SampleRate = 44100,
+                    Channels = "ChannelOut.Stereo"
+                }
+            )
+        };
     }
 }

@@ -67,6 +67,20 @@
                 </Image.GestureRecognizers>
             </Image>
         </Grid>
+        <Picker
+            SelectedItem="{Binding Path=SelectedFilename, Mode=TwoWay}"
+            ItemsSource="{Binding Path=Filenames, Mode=OneWay}"
+            TextColor="{AppThemeBinding Dark={StaticResource Key=DarkPrimaryTextColor}, Light={StaticResource LightPrimaryTextColor}}"
+            Title="Select file..."
+            Margin="32,0">
+            <!-- <Picker.Items>
+                <x:String>a2002011001-e02.wav</x:String>
+                <x:String>ff-16b-2c-44100hz.aac</x:String>
+                <x:String>ff-16b-2c-44100hz.ac3</x:String>
+                <x:String>ff-16b-2c-44100hz.mp3</x:String>
+                <x:String>ff-16b-2c-44100hz.wav</x:String>
+            </Picker.Items> -->
+        </Picker>
         <ownc:PlaybackControl
             Play="{Binding Path=Play, Mode=OneWay}"
             HorizontalOptions="FillAndExpand"

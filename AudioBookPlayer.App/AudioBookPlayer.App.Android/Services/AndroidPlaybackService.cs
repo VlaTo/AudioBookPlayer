@@ -5,18 +5,22 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
+    // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-audio
+    // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming
     internal sealed class AndroidPlaybackService : IPlaybackService
     {
         public AndroidPlaybackService()
         {
         }
 
-        public async Task PlayAsync(System.IO.Stream stream)
+        public async Task PlayAsync(
+            System.IO.Stream stream,
+            string audioEncoding,
+            int sampleRate,
+            string audioChannels)
         {
-            var streamLength = stream.Length;
-            var mediaEncoding = Encoding.EAc3;
-            var sampleRate = 44100;
-            var channels = ChannelOut.Stereo;
+            var mediaEncoding = GetAudioEncoding(audioEncoding);// Encoding.Mp3;
+            var channels = GetAudioChannels(audioChannels);// ChannelOut.Stereo;
             var audioAttributes = new AudioAttributes.Builder()
                     .SetFlags(AudioFlags.None)
                     .SetContentType(AudioContentType.Music)
@@ -29,7 +33,6 @@ namespace AudioBookPlayer.App.Droid.Services
                 .Build();
 
             var bufferSize = AudioTrack.GetMinBufferSize(sampleRate, channels, mediaEncoding);
-            //var bufferSize = 2124;
 
             System.Diagnostics.Debug.WriteLine($"[PlaybackTest] [PlayAsync] Trying to allocate buffer of {bufferSize} bytes");
 
@@ -44,9 +47,6 @@ namespace AudioBookPlayer.App.Droid.Services
                 audio.Play();
 
                 var buffer = new byte[bufferSize];
-                //var memory = new Memory<byte>(buffer);
-
-                //var bytesWritten = 0;
 
                 while (true)
                 {
@@ -56,8 +56,6 @@ namespace AudioBookPlayer.App.Droid.Services
                     {
                         break;
                     }
-
-                    //bytesWritten += count;
 
                     await audio.WriteAsync(buffer, 0, count);
                 }
@@ -69,6 +67,57 @@ namespace AudioBookPlayer.App.Droid.Services
 
                 audio.Release();
             }
+        }
+
+        private static Encoding GetAudioEncoding(string value)
+        {
+            switch (value)
+            {
+                case "Encoding.Mp3":
+                {
+                    return Encoding.Mp3;
+                }
+
+                case "Encoding.Aac":
+                {
+                    return Encoding.AacHeV1;
+                }
+
+                case "Encoding.Ac3":
+                {
+                    return Encoding.Ac3;
+                }
+
+                case "Encoding.Pcm16":
+                {
+                    return Encoding.Pcm16bit;
+                }
+
+                case "Encoding.Pcm24":
+                {
+                    return Encoding.PcmFloat;
+                }
+            }
+
+            throw new NotSupportedException();
+        }
+
+        private static ChannelOut GetAudioChannels(string value)
+        {
+            switch (value)
+            {
+                case "ChannelOut.Stereo":
+                {
+                    return ChannelOut.Stereo;
+                }
+
+                case "ChannelOut.Mono":
+                {
+                    return ChannelOut.Mono;
+                }
+            }
+
+            throw new NotSupportedException();
         }
     }
 }

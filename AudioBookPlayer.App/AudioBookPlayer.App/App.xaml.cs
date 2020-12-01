@@ -2,9 +2,9 @@ using AudioBookPlayer.App.ViewModels;
 using AudioBookPlayer.App.Views;
 using Prism;
 using Prism.Ioc;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 
+// https://fontello.com/
 [assembly: ExportFont("fontello.ttf", Alias = "IconsFont")]
 
 namespace AudioBookPlayer.App

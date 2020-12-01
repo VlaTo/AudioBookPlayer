@@ -11,6 +11,6 @@ namespace AudioBookPlayer.App.Core.Services
         /// <summary>
         /// 
         /// </summary>
-        Task PlayAsync(Stream stream);
+        Task PlayAsync(Stream stream, string audioEncoding, int sampleRate, string channels);
     }
 }
