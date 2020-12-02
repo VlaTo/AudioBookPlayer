@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Media;
 using Android.OS;
 using Android.Runtime;
+using AndroidX.Core.App;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
@@ -15,6 +16,7 @@ namespace AudioBookPlayer.App.Droid.Services
         public const string ActionPlay = "com.libraprogramming.audiobookreader.action.play";
 
         private AudioManager audioManager;
+        private NotificationManager notificationManager;
         private MediaPlayer player;
 
         public AndroidPlaybackService()
@@ -25,8 +27,8 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             base.OnCreate();
 
-            audioManager = (AudioManager)GetSystemService(AudioService);
-
+            audioManager = (AudioManager)Application.GetSystemService(Application.AudioService);
+            notificationManager = (NotificationManager)Application.GetSystemService(Application.NotificationService);
         }
 
         public override IBinder OnBind(Intent intent)
@@ -93,11 +95,51 @@ namespace AudioBookPlayer.App.Droid.Services
 
         private void StartPlayFile(string filename)
         {
+            var attributes = new AudioAttributes.Builder()
+                .SetContentType(AudioContentType.Music)
+                .Build();
+
             if (null == player)
             {
                 player = new MediaPlayer();
-                player.SetAudioStreamType(Stream.Music);
+                player.SetAudioAttributes(attributes);
                 player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
+
+                var channel = new NotificationChannel("abp_notification", "Audio Book Player", NotificationImportance.Default)
+                {
+                    Description = "Sample notification description"
+                };
+
+                notificationManager.CreateNotificationChannel(channel);
+
+                var intent = new Intent(Application.Context, typeof(MainActivity));
+                var pendingIntent = PendingIntent.GetActivity(
+                    Application.Context,
+                    0,
+                    intent,
+                    PendingIntentFlags.UpdateCurrent
+                );
+                var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
+                    .SetAutoCancel(false)
+                    .SetContentTitle("Sample Title")
+                    .SetContentText("Sample content text")
+                    .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_close_circle)
+                    .SetContentIntent(pendingIntent);
+
+                notificationManager.Notify(1001, notification.Build());
+
+                /*
+                var notification = new Notification
+                {
+                    TickerText = new Java.Lang.String("Started"),
+                    Icon = Resource.Drawable.ic_mtrl_chip_close_circle
+                };
+
+                notification.Flags |= NotificationFlags.OngoingEvent;
+                notification.SetLatestEventInfo(Application.Context, "Sample title", "Sample content", pendingIntent);
+
+                StartForeground(1, notification);
+                */
             }
             else
             {
@@ -106,7 +148,11 @@ namespace AudioBookPlayer.App.Droid.Services
 
             player.SetDataSource(filename);
 
-            var result = audioManager.RequestAudioFocus(this, Stream.Music, AudioFocus.Gain);
+            var request = new AudioFocusRequestClass.Builder(AudioFocus.GainTransientMayDuck)
+                .SetAudioAttributes(attributes)
+                .Build();
+
+            var result = audioManager.RequestAudioFocus(request);
 
             if (AudioFocusRequest.Granted != result)
             {
