@@ -4,10 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:prism="http://prismlibrary.com"
     xmlns:ownc="clr-namespace:AudioBookPlayer.App.Controls"
+    xmlns:cvt="clr-namespace:AudioBookPlayer.App.Converters"
     x:Class="AudioBookPlayer.App.Views.MainPage"
     prism:ViewModelLocator.AutowireViewModel="True"
     NavigationPage.HasNavigationBar="False"
     Style="{StaticResource Key=ContentPageStyle}">
+    <ContentPage.Resources>
+        <cvt:DoubleToTimeSpanConverter x:Key="TimeConverter" />
+    </ContentPage.Resources>
     <StackLayout
         Orientation="Vertical"
         HorizontalOptions="Fill"
@@ -21,19 +25,29 @@
                 Text="{Binding Path=BookTitle, Mode=OneWay}"
                 HorizontalTextAlignment="Center"
                 VerticalTextAlignment="Center"
-                Margin="4,12,4,0"
                 HorizontalOptions="Fill"
-                VerticalOptions="Start"
-            />
+                VerticalOptions="Start">
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="4,12,4,0" />
+                        <On Platform="iOS" Value="4,12,4,0" />
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
             <Label
                 Style="{StaticResource Key=BookSubtitleLabelStyle}"
                 Text="{Binding Path=BookSubtitle, Mode=OneWay}"
                 HorizontalTextAlignment="Center"
                 VerticalTextAlignment="Center"
-                Margin="4,0,4,8"
                 HorizontalOptions="Fill"
-                VerticalOptions="Start"
-            />
+                VerticalOptions="Start">
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="4,0,4,8" />
+                        <On Platform="iOS" Value="4,0,4,8" />
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
         </StackLayout>
         <Grid
             HorizontalOptions="Fill"
@@ -67,20 +81,57 @@
                 </Image.GestureRecognizers>
             </Image>
         </Grid>
-        <Picker
-            SelectedItem="{Binding Path=SelectedFilename, Mode=TwoWay}"
-            ItemsSource="{Binding Path=Filenames, Mode=OneWay}"
-            TextColor="{AppThemeBinding Dark={StaticResource Key=DarkPrimaryTextColor}, Light={StaticResource LightPrimaryTextColor}}"
-            Title="Select file..."
-            Margin="32,0">
-            <!-- <Picker.Items>
-                <x:String>a2002011001-e02.wav</x:String>
-                <x:String>ff-16b-2c-44100hz.aac</x:String>
-                <x:String>ff-16b-2c-44100hz.ac3</x:String>
-                <x:String>ff-16b-2c-44100hz.mp3</x:String>
-                <x:String>ff-16b-2c-44100hz.wav</x:String>
-            </Picker.Items> -->
-        </Picker>
+        <StackLayout
+            Orientation="Horizontal">
+            <StackLayout.Margin>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="12,0" />
+                    <On Platform="iOS" Value="12,0" />
+                </OnPlatform>
+            </StackLayout.Margin>
+            <Label
+                Style="{StaticResource Key=SeekBarTimeLabelStyle}"
+                Text="{Binding Path=ChapterPosition, Mode=OneWay, Converter={StaticResource TimeConverter}}"
+                HorizontalOptions="Start"
+                VerticalOptions="Fill"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                WidthRequest="64">
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="4" />
+                        <On Platform="iOS" Value="4,0,4,8" />
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
+            <Slider
+                Minimum="{Binding Path=ChapterStart, Mode=OneWay}"
+                Maximum="{Binding Path=ChapterEnd, Mode=OneWay}"
+                Value="{Binding Path=ChapterPosition, Mode=TwoWay}"
+                HorizontalOptions="FillAndExpand">
+                <Slider.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="0" />
+                        <On Platform="iOS" Value="48,4" />
+                    </OnPlatform>
+                </Slider.Margin>
+            </Slider>
+            <Label
+                Style="{StaticResource Key=SeekBarTimeLabelStyle}"
+                Text="00:00:000"
+                HorizontalOptions="End"
+                VerticalOptions="Fill"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center"
+                WidthRequest="64">
+                <Label.Margin>
+                    <OnPlatform x:TypeArguments="Thickness">
+                        <On Platform="Android" Value="4" />
+                        <On Platform="iOS" Value="4,0,4,8" />
+                    </OnPlatform>
+                </Label.Margin>
+            </Label>
+        </StackLayout>
         <ownc:PlaybackControl
             Play="{Binding Path=Play, Mode=OneWay}"
             HorizontalOptions="FillAndExpand"

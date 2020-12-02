@@ -70,6 +70,16 @@
         />
     </Style>
 
+    <Style
+        x:Key="SeekBarTimeLabelStyle"
+        TargetType="Label">
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+        <Setter
+            Property="TextColor"
+            Value="{AppThemeBinding Light={StaticResource Key=LightPrimaryTextColor}, Dark={StaticResource Key=DarkPrimaryTextColor}}"
+        />
+    </Style>
+
     <Style 
         x:Key="PrimaryButtonStyle"
         TargetType="Button">

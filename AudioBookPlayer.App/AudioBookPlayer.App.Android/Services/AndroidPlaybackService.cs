@@ -4,6 +4,8 @@ using Android.Media;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.App;
+using System;
+using System.Threading;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
@@ -27,8 +29,11 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             base.OnCreate();
 
-            audioManager = (AudioManager)Application.GetSystemService(Application.AudioService);
-            notificationManager = (NotificationManager)Application.GetSystemService(Application.NotificationService);
+            audioManager = (AudioManager)Application.Context.GetSystemService(Application.AudioService);
+            notificationManager = (NotificationManager)Application.Context.GetSystemService(Application.NotificationService);
+            
+            //var temp = DependencyService.Get<IEventAggregator>();
+
         }
 
         public override IBinder OnBind(Intent intent)
@@ -106,7 +111,7 @@ namespace AudioBookPlayer.App.Droid.Services
                 player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
 
                 var notificationId = "abp_notification";
-                var notificationName = Application.Context.PackageName;
+                var notificationName = ApplicationContext.PackageName;
                 var channel = new NotificationChannel(notificationId, notificationName, NotificationImportance.Default)
                 {
                     Description = "Sample notification description"
@@ -167,7 +172,21 @@ namespace AudioBookPlayer.App.Droid.Services
             }
 
             player.Prepare();
+
+            var temp = TimeSpan.FromMilliseconds(player.Duration);
+            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 32755299 ms
+            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 09:05:55.2990000
+            System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Media duration: {temp:c}");
+
             player.Start();
+
+            var timer = new Timer(OnTimer, null, TimeSpan.FromSeconds(3.0d), TimeSpan.FromMilliseconds(500.0d));
+
+        }
+
+        private void OnTimer(object state)
+        {
+            System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnTimer] Position: {player.CurrentPosition}");
         }
 
         /*public async Task PlayAsync(

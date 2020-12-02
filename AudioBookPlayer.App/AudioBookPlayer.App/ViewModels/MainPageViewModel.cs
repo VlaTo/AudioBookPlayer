@@ -23,8 +23,9 @@ namespace AudioBookPlayer.App.ViewModels
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
-        private string selectedFilename;
-        private IList<string> filenames;
+        private double chapterStart;
+        private double chapterEnd;
+        private double chapterPosition;
 
         public ImageSource ImageSource
         {
@@ -44,6 +45,24 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref bookSubtitle, value);
         }
 
+        public double ChapterStart
+        {
+            get => chapterStart;
+            set => SetProperty(ref chapterStart, value);
+        }
+
+        public double ChapterEnd
+        {
+            get => chapterEnd;
+            set => SetProperty(ref chapterEnd, value);
+        }
+
+        public double ChapterPosition
+        {
+            get => chapterPosition;
+            set => SetProperty(ref chapterPosition, value);
+        }
+
         public ICommand Play
         {
             get;
@@ -52,18 +71,6 @@ namespace AudioBookPlayer.App.ViewModels
         public ICommand ChangeCover
         {
             get;
-        }
-
-        public string SelectedFilename
-        {
-            get => selectedFilename;
-            set => SetProperty(ref selectedFilename, value);
-        }
-
-        public IList<string> Filenames
-        {
-            get => filenames;
-            set => SetProperty(ref filenames, value);
         }
 
         public MainPageViewModel(
@@ -75,18 +82,18 @@ namespace AudioBookPlayer.App.ViewModels
             this.streamProvider = streamProvider;
             this.playbackControl = playbackControl;
 
-            //selectedFilename = "a2002011001-e02.wav";
-            selectedFilename = String.Empty;
-            filenames = new List<string>();
-
             Title = "Main Page";
             Play = new DelegateCommand(DoPlayCommand);
             ChangeCover = new DelegateCommand(DoChangeCoverCommand);
+
+            ChapterStart = 0.0d;
+            ChapterEnd = 32755299.0d;
+            ChapterPosition = 110.0d;
         }
 
         public override void Initialize(INavigationParameters parameters)
         {
-            const string prefix = "AudioBookPlayer.App.Resources.";
+            /*const string prefix = "AudioBookPlayer.App.Resources.";
             var assembly = typeof(App).Assembly;
             var files = new List<string>();
 
@@ -111,7 +118,7 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             Filenames = files;
-            SelectedFilename = files[0];
+            SelectedFilename = files[0];*/
         }
 
         private async void DoPlayCommand()
@@ -237,19 +244,6 @@ namespace AudioBookPlayer.App.ViewModels
         private void DoChangeCoverCommand()
         {
             Debug.WriteLine("[MainPageViewModel] [DoChangeCoverCommand]");
-        }
-
-        private SourceFileInfo GetAudioInfo()
-        {
-            foreach(var info in SourceFileInfos)
-            {
-                if (String.Equals(info.Key, selectedFilename))
-                {
-                    return info.Value;
-                }
-            }
-
-            return null;
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)
