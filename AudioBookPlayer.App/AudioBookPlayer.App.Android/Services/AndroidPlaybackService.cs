@@ -105,7 +105,9 @@ namespace AudioBookPlayer.App.Droid.Services
                 player.SetAudioAttributes(attributes);
                 player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
 
-                var channel = new NotificationChannel("abp_notification", "Audio Book Player", NotificationImportance.Default)
+                var notificationId = "abp_notification";
+                var notificationName = Application.Context.PackageName;
+                var channel = new NotificationChannel(notificationId, notificationName, NotificationImportance.Default)
                 {
                     Description = "Sample notification description"
                 };
@@ -120,13 +122,17 @@ namespace AudioBookPlayer.App.Droid.Services
                     PendingIntentFlags.UpdateCurrent
                 );
                 var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
+                    //.SetStyle(NotificationCompat.BigTextStyle)
                     .SetAutoCancel(false)
                     .SetContentTitle("Sample Title")
                     .SetContentText("Sample content text")
                     .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_close_circle)
-                    .SetContentIntent(pendingIntent);
+                    .SetContentIntent(pendingIntent)
+                    .Build();
 
-                notificationManager.Notify(1001, notification.Build());
+                notificationManager.Notify(1001, notification);
+
+                //notificationManager.Cancel(1001);
 
                 /*
                 var notification = new Notification
