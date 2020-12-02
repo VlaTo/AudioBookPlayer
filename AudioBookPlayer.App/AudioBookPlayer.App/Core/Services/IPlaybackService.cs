@@ -6,11 +6,13 @@ namespace AudioBookPlayer.App.Core.Services
     /// <summary>
     /// 
     /// </summary>
-    public interface IPlaybackService
+    /*public interface IPlaybackService
     {
         /// <summary>
         /// 
         /// </summary>
         Task PlayAsync(Stream stream, string audioEncoding, int sampleRate, string channels);
-    }
+
+        void Start();
+    }*/
 }

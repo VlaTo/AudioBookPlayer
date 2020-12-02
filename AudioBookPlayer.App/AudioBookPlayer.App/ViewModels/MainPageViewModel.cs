@@ -19,7 +19,7 @@ namespace AudioBookPlayer.App.ViewModels
     public class MainPageViewModel : ViewModelBase
     {
         private readonly ISourceStreamProvider streamProvider;
-        private readonly IPlaybackService playbackService;
+        private readonly IPlaybackControlService playbackControl;
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
@@ -69,11 +69,11 @@ namespace AudioBookPlayer.App.ViewModels
         public MainPageViewModel(
             INavigationService navigationService,
             ISourceStreamProvider streamProvider,
-            IPlaybackService playbackService)
+            IPlaybackControlService playbackControl)
             : base(navigationService)
         {
             this.streamProvider = streamProvider;
-            this.playbackService = playbackService;
+            this.playbackControl = playbackControl;
 
             //selectedFilename = "a2002011001-e02.wav";
             selectedFilename = String.Empty;
@@ -123,7 +123,7 @@ namespace AudioBookPlayer.App.ViewModels
             //[0:] File: 'ff-16b-2c-44100hz.ac3'
             //var temp = await FileSystem.OpenAppPackageFileAsync("ff-16b-2c-44100hz.wav");
 
-            var audioInfo = GetAudioInfo();
+            /*var audioInfo = GetAudioInfo();
 
             if (null == audioInfo)
             {
@@ -136,7 +136,16 @@ namespace AudioBookPlayer.App.ViewModels
             using (var audio = assembly.GetManifestResourceStream(mediaResourceName))
             {
                 await playbackService.PlayAsync(audio, audioInfo.AudioEncoding, audioInfo.SampleRate, audioInfo.Channels);
+            }*/
+
+            var status = await CheckAndRequestPermissionAsync(new Permissions.StorageRead());
+
+            if (PermissionStatus.Denied == status)
+            {
+                return;
             }
+
+            playbackControl.StartPlay("/storage/emulated/0/Download/book.m4b");
         }
 
         private async void DoPlayCommand1()

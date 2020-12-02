@@ -10,6 +10,7 @@ using Prism.Ioc;
 [assembly: UsesPermission(Android.Manifest.Permission.MediaContentControl)]
 [assembly: UsesPermission(Android.Manifest.Permission.ReadExternalStorage)]
 [assembly: UsesPermission(Android.Manifest.Permission.ManageDocuments)]
+[assembly: UsesPermission(Android.Manifest.Permission.WakeLock)]
 
 namespace AudioBookPlayer.App.Droid
 {
@@ -43,7 +44,7 @@ namespace AudioBookPlayer.App.Droid
             // Register any platform specific implementations
             containerRegistry.Register<ISourceStreamProvider, AssetStreamProvider>();
             containerRegistry.RegisterSingleton<IPlaybackControlService, AndroidPalaybackControlService>();
-            containerRegistry.RegisterSingleton<IPlaybackService, AndroidPlaybackService>();
+            //containerRegistry.RegisterSingleton<IPlaybackService, AndroidPlaybackService>();
         }
     }
 }

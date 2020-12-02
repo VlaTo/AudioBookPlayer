@@ -1,24 +1,133 @@
-﻿using Android.Media;
-using AudioBookPlayer.App.Core.Services;
-using System;
-using System.Threading.Tasks;
+﻿using Android.App;
+using Android.Content;
+using Android.Media;
+using Android.OS;
+using Android.Runtime;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-audio
     // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming
-    internal sealed class AndroidPlaybackService : IPlaybackService
+    [Service]
+    [IntentFilter(new []{ ActionPlay })]
+    internal sealed class AndroidPlaybackService : Service, AudioManager.IOnAudioFocusChangeListener
     {
+        public const string ActionPlay = "com.libraprogramming.audiobookreader.action.play";
+
+        private AudioManager audioManager;
+        private MediaPlayer player;
+
         public AndroidPlaybackService()
         {
         }
 
-        public async Task PlayAsync(
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+            audioManager = (AudioManager)GetSystemService(AudioService);
+
+        }
+
+        public override IBinder OnBind(Intent intent)
+        {
+            return null;
+        }
+
+        [return: GeneratedEnum]
+        public override StartCommandResult OnStartCommand(
+            Intent intent,
+            [GeneratedEnum] StartCommandFlags flags,
+            int startId)
+        {
+            switch (intent.Action)
+            {
+                case ActionPlay:
+                {
+                    var filename = intent.GetStringExtra("Filename");
+                    
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnStartCommand] Action: '{ActionPlay}', Filenamw: '{filename}'");
+
+                    StartPlayFile(filename);
+
+                    break;
+                }
+            }
+
+            return StartCommandResult.Sticky;
+        }
+
+        void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange)
+        {
+            switch (focusChange)
+            {
+                case AudioFocus.Gain:
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Start playing");
+
+                    break;
+                }
+
+                case AudioFocus.Loss:
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Stop playing");
+
+                    break;
+                }
+
+                case AudioFocus.LossTransient:
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Payse playing");
+
+                    break;
+                }
+
+                case AudioFocus.LossTransientCanDuck:
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Mute playing");
+
+                    break;
+                }
+            }
+        }
+
+        private void StartPlayFile(string filename)
+        {
+            if (null == player)
+            {
+                player = new MediaPlayer();
+                player.SetAudioStreamType(Stream.Music);
+                player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
+            }
+            else
+            {
+                player.Reset();
+            }
+
+            player.SetDataSource(filename);
+
+            var result = audioManager.RequestAudioFocus(this, Stream.Music, AudioFocus.Gain);
+
+            if (AudioFocusRequest.Granted != result)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Audio focus not accuired!");
+                return;
+            }
+
+            player.Prepare();
+            player.Start();
+        }
+
+        /*public async Task PlayAsync(
             System.IO.Stream stream,
             string audioEncoding,
             int sampleRate,
             string audioChannels)
         {
+            var player = new MediaPlayer();
+
+
+
             var mediaEncoding = GetAudioEncoding(audioEncoding);// Encoding.Mp3;
             var channels = GetAudioChannels(audioChannels);// ChannelOut.Stereo;
             var audioAttributes = new AudioAttributes.Builder()
@@ -67,9 +176,9 @@ namespace AudioBookPlayer.App.Droid.Services
 
                 audio.Release();
             }
-        }
+        }*/
 
-        private static Encoding GetAudioEncoding(string value)
+        /*private static Encoding GetAudioEncoding(string value)
         {
             switch (value)
             {
@@ -118,6 +227,6 @@ namespace AudioBookPlayer.App.Droid.Services
             }
 
             throw new NotSupportedException();
-        }
+        }*/
     }
 }

@@ -3,5 +3,7 @@
     public interface IPlaybackControlService
     {
         void ShowNotification();
+
+        void StartPlay(string filename);
     }
 }
