@@ -1,6 +1,6 @@
 ﻿namespace AudioBookPlayer.App.Core.Services
 {
-    public interface IPlaybackControlService
+    public interface IPlaybackController
     {
         void ShowNotification();
 

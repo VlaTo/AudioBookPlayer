@@ -44,7 +44,7 @@ namespace AudioBookPlayer.App.Droid
         {
             // Register any platform specific implementations
             containerRegistry.Register<ISourceStreamProvider, AssetStreamProvider>();
-            containerRegistry.RegisterSingleton<IPlaybackControlService, AndroidPalaybackControlService>();
+            containerRegistry.RegisterSingleton<IPlaybackController, AndroidPalaybackController>();
             //containerRegistry.RegisterSingleton<IPlaybackService, AndroidPlaybackService>();
         }
     }

@@ -1,7 +1,9 @@
-﻿using AudioBookPlayer.App.Core.Services;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Core.Services;
 using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
 using Prism.Commands;
+using Prism.Events;
 using Prism.Navigation;
 using System;
 using System.Collections.Generic;
@@ -19,13 +21,17 @@ namespace AudioBookPlayer.App.ViewModels
     public class MainPageViewModel : ViewModelBase
     {
         private readonly ISourceStreamProvider streamProvider;
-        private readonly IPlaybackControlService playbackControl;
+        private readonly IPlaybackController playbackControl;
+        private readonly IEventAggregator ea;
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
         private double chapterStart;
         private double chapterEnd;
         private double chapterPosition;
+        private TimeSpan elapsed;
+        private TimeSpan left;
+        private TimeSpan duration;
 
         public ImageSource ImageSource
         {
@@ -60,8 +66,22 @@ namespace AudioBookPlayer.App.ViewModels
         public double ChapterPosition
         {
             get => chapterPosition;
-            set => SetProperty(ref chapterPosition, value);
+            set
+            {
+                if (SetProperty(ref chapterPosition, value))
+                {
+                    elapsed = TimeSpan.FromMilliseconds(value);
+                    left = elapsed - duration;
+
+                    RaisePropertyChanged(nameof(Elapsed));
+                    RaisePropertyChanged(nameof(Left));
+                }
+            }
         }
+
+        public TimeSpan Elapsed => elapsed;
+
+        public TimeSpan Left => left;
 
         public ICommand Play
         {
@@ -76,23 +96,32 @@ namespace AudioBookPlayer.App.ViewModels
         public MainPageViewModel(
             INavigationService navigationService,
             ISourceStreamProvider streamProvider,
-            IPlaybackControlService playbackControl)
+            IPlaybackController playbackControl,
+            IEventAggregator ea)
             : base(navigationService)
         {
             this.streamProvider = streamProvider;
             this.playbackControl = playbackControl;
+            this.ea = ea;
 
-            Title = "Main Page";
+            //Title = "Main Page";
             Play = new DelegateCommand(DoPlayCommand);
             ChangeCover = new DelegateCommand(DoChangeCoverCommand);
 
             ChapterStart = 0.0d;
             ChapterEnd = 32755299.0d;
             ChapterPosition = 110.0d;
+
+            duration = TimeSpan.FromMilliseconds(ChapterEnd);
+            elapsed = TimeSpan.Zero;
+            left = -duration;
         }
 
         public override void Initialize(INavigationParameters parameters)
         {
+            var positionChanged = ea.GetEvent<PlaybackPositionChanged>();
+            var subscription = positionChanged.Subscribe(OnPlaybackPositionChanged);
+
             /*const string prefix = "AudioBookPlayer.App.Resources.";
             var assembly = typeof(App).Assembly;
             var files = new List<string>();
@@ -244,6 +273,11 @@ namespace AudioBookPlayer.App.ViewModels
         private void DoChangeCoverCommand()
         {
             Debug.WriteLine("[MainPageViewModel] [DoChangeCoverCommand]");
+        }
+
+        private void OnPlaybackPositionChanged(double value)
+        {
+            ChapterPosition = value;
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)

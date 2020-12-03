@@ -1,14 +1,12 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Net;
-using AndroidX.Core.App;
 using AudioBookPlayer.App.Core.Services;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
-    internal sealed class AndroidPalaybackControlService : IPlaybackControlService
+    internal sealed class AndroidPalaybackController : IPlaybackController
     {
-        public AndroidPalaybackControlService()
+        public AndroidPalaybackController()
         {
         }
 

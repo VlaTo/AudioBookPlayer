@@ -4,6 +4,9 @@ using Android.Media;
 using Android.OS;
 using Android.Runtime;
 using AndroidX.Core.App;
+using AudioBookPlayer.App.Core;
+using Prism.Events;
+using Prism.Unity;
 using System;
 using System.Threading;
 
@@ -20,6 +23,8 @@ namespace AudioBookPlayer.App.Droid.Services
         private AudioManager audioManager;
         private NotificationManager notificationManager;
         private MediaPlayer player;
+        //private IEventAggregator eventAggregator;
+        private PlaybackPositionChanged positionChanged;
 
         public AndroidPlaybackService()
         {
@@ -31,9 +36,13 @@ namespace AudioBookPlayer.App.Droid.Services
 
             audioManager = (AudioManager)Application.Context.GetSystemService(Application.AudioService);
             notificationManager = (NotificationManager)Application.Context.GetSystemService(Application.NotificationService);
-            
-            //var temp = DependencyService.Get<IEventAggregator>();
 
+            var ea = (IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator));
+            positionChanged = ea.GetEvent<PlaybackPositionChanged>();
+
+            var temp = Xamarin.Forms.DependencyService.Get<IEventAggregator>();
+
+            //Application.Context.BindService()
         }
 
         public override IBinder OnBind(Intent intent)
@@ -51,7 +60,7 @@ namespace AudioBookPlayer.App.Droid.Services
             {
                 case ActionPlay:
                 {
-                    var filename = intent.GetStringExtra("Filename");
+                    var filename = intent.Extras.GetString("Filename");
                     
                     System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnStartCommand] Action: '{ActionPlay}', Filenamw: '{filename}'");
 
@@ -187,6 +196,7 @@ namespace AudioBookPlayer.App.Droid.Services
         private void OnTimer(object state)
         {
             System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnTimer] Position: {player.CurrentPosition}");
+            positionChanged.Publish(player.CurrentPosition);
         }
 
         /*public async Task PlayAsync(
