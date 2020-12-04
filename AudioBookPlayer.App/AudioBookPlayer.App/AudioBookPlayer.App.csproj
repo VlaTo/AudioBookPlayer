@@ -9,24 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="..\..\ff-16b-2c-44100hz.mp3" Link="Resources\ff-16b-2c-44100hz.mp3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\a2002011001-e02.wav" Link="Resources\a2002011001-e02.wav" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\ff-16b-2c-44100hz.wav" Link="Resources\ff-16b-2c-44100hz.wav" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Resources\Fonts\fontello.ttf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="..\..\ff-16b-2c-44100hz.aac" Link="Resources\ff-16b-2c-44100hz.aac" />
-    <EmbeddedResource Include="..\..\ff-16b-2c-44100hz.ac3" Link="Resources\ff-16b-2c-44100hz.ac3" />
   </ItemGroup>
 
   <ItemGroup>

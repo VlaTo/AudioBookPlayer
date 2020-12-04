@@ -27,7 +27,13 @@ namespace AudioBookPlayer.App.Droid.Services
         private PlaybackPositionChanged positionChanged;
 
         public AndroidPlaybackService()
+            : this((IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator)))
         {
+        }
+
+        private AndroidPlaybackService(IEventAggregator ea)
+        {
+            positionChanged = ea.GetEvent<PlaybackPositionChanged>();
         }
 
         public override void OnCreate()
@@ -37,8 +43,8 @@ namespace AudioBookPlayer.App.Droid.Services
             audioManager = (AudioManager)Application.Context.GetSystemService(Application.AudioService);
             notificationManager = (NotificationManager)Application.Context.GetSystemService(Application.NotificationService);
 
-            var ea = (IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator));
-            positionChanged = ea.GetEvent<PlaybackPositionChanged>();
+            //var ea = (IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator));
+            //positionChanged = ea.GetEvent<PlaybackPositionChanged>();
 
             var temp = Xamarin.Forms.DependencyService.Get<IEventAggregator>();
 

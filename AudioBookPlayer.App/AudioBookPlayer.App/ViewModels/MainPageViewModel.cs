@@ -1,7 +1,5 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Core.Services;
-using LibraProgramming.Media.Common;
-using LibraProgramming.Media.QuickTime;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Navigation;
@@ -9,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
@@ -23,6 +20,7 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly ISourceStreamProvider streamProvider;
         private readonly IPlaybackController playbackControl;
         private readonly IEventAggregator ea;
+        private IDisposable subscription;
         private ImageSource imageSource;
         private string bookTitle;
         private string bookSubtitle;
@@ -120,7 +118,8 @@ namespace AudioBookPlayer.App.ViewModels
         public override void Initialize(INavigationParameters parameters)
         {
             var positionChanged = ea.GetEvent<PlaybackPositionChanged>();
-            var subscription = positionChanged.Subscribe(OnPlaybackPositionChanged);
+            
+            subscription = positionChanged.Subscribe(OnPlaybackPositionChanged, ThreadOption.UIThread);
 
             /*const string prefix = "AudioBookPlayer.App.Resources.";
             var assembly = typeof(App).Assembly;
@@ -148,6 +147,11 @@ namespace AudioBookPlayer.App.ViewModels
 
             Filenames = files;
             SelectedFilename = files[0];*/
+        }
+
+        public override void Destroy()
+        {
+            subscription.Dispose();
         }
 
         private async void DoPlayCommand()
