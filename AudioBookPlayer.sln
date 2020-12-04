@@ -3,21 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "AudioBookPlayer.App\AudioBookPlayer.App\AudioBookPlayer.App.csproj", "{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Media", "LibraProgramming.Media", "{B61F02FD-9138-4E59-8F83-E824772DA180}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46118F59-9312-4ECA-B34A-81F653F23FFC}"
 	ProjectSection(SolutionItems) = preProject
-		a2002011001-e02.wav = a2002011001-e02.wav
 		audioformats_2.14_letter.pdf = audioformats_2.14_letter.pdf
-		ff-16b-2c-44100hz.aac = ff-16b-2c-44100hz.aac
-		ff-16b-2c-44100hz.ac3 = ff-16b-2c-44100hz.ac3
-		ff-16b-2c-44100hz.m4a = ff-16b-2c-44100hz.m4a
-		ff-16b-2c-44100hz.mp3 = ff-16b-2c-44100hz.mp3
-		ff-16b-2c-44100hz.wav = ff-16b-2c-44100hz.wav
 		screenshot-0001.jpg = screenshot-0001.jpg
 		screenshot-0002.png = screenshot-0002.png
 		screenshot-0003.jpg = screenshot-0003.jpg
@@ -29,11 +19,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		screenshot-0009.png = screenshot-0009.png
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "AudioBookPlayer.App\ConsoleApp\ConsoleApp.csproj", "{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Common", "src\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj", "{DC4372F9-F8B4-4F54-821A-258AD8102020}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Common", "AudioBookPlayer.App\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj", "{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.QuickTime", "src\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj", "{84FD7379-0AB4-44A2-B0BE-C409534CE757}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.QuickTime", "AudioBookPlayer.App\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj", "{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "src\ConsoleApp\ConsoleApp.csproj", "{556E3BC2-A052-482C-B56D-7AEC8090EDF0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "src\AudioBookPlayer.App\AudioBookPlayer.App\AudioBookPlayer.App.csproj", "{02E8BDBF-9D80-4770-92F5-19592EFE8E4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "src\AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,35 +35,35 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC4372F9-F8B4-4F54-821A-258AD8102020}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC4372F9-F8B4-4F54-821A-258AD8102020}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC4372F9-F8B4-4F54-821A-258AD8102020}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC4372F9-F8B4-4F54-821A-258AD8102020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84FD7379-0AB4-44A2-B0BE-C409534CE757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84FD7379-0AB4-44A2-B0BE-C409534CE757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84FD7379-0AB4-44A2-B0BE-C409534CE757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84FD7379-0AB4-44A2-B0BE-C409534CE757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{556E3BC2-A052-482C-B56D-7AEC8090EDF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{556E3BC2-A052-482C-B56D-7AEC8090EDF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{556E3BC2-A052-482C-B56D-7AEC8090EDF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{556E3BC2-A052-482C-B56D-7AEC8090EDF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02E8BDBF-9D80-4770-92F5-19592EFE8E4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02E8BDBF-9D80-4770-92F5-19592EFE8E4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02E8BDBF-9D80-4770-92F5-19592EFE8E4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02E8BDBF-9D80-4770-92F5-19592EFE8E4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49} = {B61F02FD-9138-4E59-8F83-E824772DA180}
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8} = {B61F02FD-9138-4E59-8F83-E824772DA180}
+		{DC4372F9-F8B4-4F54-821A-258AD8102020} = {B61F02FD-9138-4E59-8F83-E824772DA180}
+		{84FD7379-0AB4-44A2-B0BE-C409534CE757} = {B61F02FD-9138-4E59-8F83-E824772DA180}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {603387A9-3A67-490A-A12C-C4714C61DCDC}
