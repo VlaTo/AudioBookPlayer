@@ -1,18 +1,27 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public class AboutViewModel : BaseViewModel
+    public class AboutViewModel : ViewModelBase
     {
-        public AboutViewModel()
+        public ICommand RefreshLibrary
         {
-            Title = "About";
-            OpenWebCommand = new Command(async () => await Browser.OpenAsync("https://aka.ms/xamarin-quickstart"));
+            get;
         }
 
-        public ICommand OpenWebCommand { get; }
+        public AboutViewModel()
+        {
+            //RefreshLibrary = new Command(async () => await Browser.OpenAsync("https://aka.ms/xamarin-quickstart"));
+            RefreshLibrary = new Command(DoRefreshLibrary);
+        }
+
+        private async void DoRefreshLibrary()
+        {
+            await Task.CompletedTask;
+        }
     }
 }

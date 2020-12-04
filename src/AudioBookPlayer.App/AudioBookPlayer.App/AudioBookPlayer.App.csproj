@@ -22,4 +22,8 @@
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\Services\" />
+  </ItemGroup>
 </Project>
