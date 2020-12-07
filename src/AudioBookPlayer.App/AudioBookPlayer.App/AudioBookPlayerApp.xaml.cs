@@ -1,5 +1,6 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
+using LibraProgramming.Xamarin.Dependency.Container;
 using Xamarin.Forms;
 
 [assembly: ExportFont("fontello.ttf", Alias = "Icons")]
@@ -30,6 +31,12 @@ namespace AudioBookPlayer.App
 
         protected override void OnResume()
         {
+        }
+
+        protected override void RegisterTypesCore(DependencyContainer container)
+        {
+            //base.RegisterTypesCore(container);
+            container.Register<IBookShelfProvider, SqLiteDatabaseBookShelfProvider>(InstanceLifetime.Singleton);
         }
     }
 }
