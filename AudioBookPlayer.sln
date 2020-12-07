@@ -29,6 +29,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "src\AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Xamarin.Dependency", "LibraProgramming.Xamarin.Dependency", "{65EC6E91-E3C7-47CF-873D-C8B40E876E1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraProgramming.Xamarin.Dependency.Container", "src\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj", "{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,10 @@ Global
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +72,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DC4372F9-F8B4-4F54-821A-258AD8102020} = {B61F02FD-9138-4E59-8F83-E824772DA180}
 		{84FD7379-0AB4-44A2-B0BE-C409534CE757} = {B61F02FD-9138-4E59-8F83-E824772DA180}
+		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8} = {65EC6E91-E3C7-47CF-873D-C8B40E876E1F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {603387A9-3A67-490A-A12C-C4714C61DCDC}

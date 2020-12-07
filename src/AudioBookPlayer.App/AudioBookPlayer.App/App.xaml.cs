@@ -1,13 +1,17 @@
-﻿using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Services;
 using Xamarin.Forms;
 
 [assembly: ExportFont("fontello.ttf", Alias = "Icons")]
 
 namespace AudioBookPlayer.App
 {
-    public partial class App : Application
+    public partial class AudioBookPlayerApp : BaseApplication
     {
-        public App()
+        public static new AudioBookPlayerApp Current => (AudioBookPlayerApp)Application.Current;
+
+        public AudioBookPlayerApp(IPlatformInitializer platformInitializer)
+            : base(platformInitializer)
         {
             InitializeComponent();
 
