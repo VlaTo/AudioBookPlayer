@@ -89,6 +89,14 @@
         https://docs.microsoft.com/dotnet/api/xamarin.forms.shellgroupitem.flyoutdisplayoptions?view=xamarin-forms
     -->
     <FlyoutItem
+        Title="Library"
+        Icon="icon_about.png">
+        <ShellContent
+            Route="BooksLibrary"
+            ContentTemplate="{DataTemplate local:BooksLibrary}"
+        />
+    </FlyoutItem>
+    <FlyoutItem
         Title="About"
         Icon="icon_about.png">
         <ShellContent

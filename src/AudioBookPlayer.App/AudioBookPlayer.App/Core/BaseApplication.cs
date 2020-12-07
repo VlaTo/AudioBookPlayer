@@ -17,16 +17,29 @@ namespace AudioBookPlayer.App.Core
             : base()
         {
             this.platformInitializer = platformInitializer;
+
+            DoInitialize();
         }
 
         protected virtual void Initialize()
         {
             DependencyContainer = new DependencyContainer();
 
+            RegisterTypesCore(DependencyContainer);
+
             if (null != platformInitializer)
             {
                 platformInitializer.RegisterTypes(DependencyContainer);
             }
+        }
+
+        protected virtual void RegisterTypesCore(DependencyContainer container)
+        {
+        }
+
+        private void DoInitialize()
+        {
+            Initialize();
         }
     }
 }
