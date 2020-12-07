@@ -3,6 +3,8 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using AudioBookPlayer.App.Core;
+using LibraProgramming.Xamarin.Dependency.Container;
 
 //[assembly: UsesPermission(Android.Manifest.Permission.AccessMediaLocation)]
 //[assembly: UsesPermission(Android.Manifest.Permission.MediaContentControl)]
@@ -26,7 +28,7 @@ namespace AudioBookPlayer.App.Droid
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
 
-            LoadApplication(new App());
+            LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
@@ -34,6 +36,17 @@ namespace AudioBookPlayer.App.Droid
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private sealed class AndroidInitializer : IPlatformInitializer
+        {
+            public void RegisterTypes(DependencyContainer container)
+            {
+                ;
+            }
         }
     }
 }

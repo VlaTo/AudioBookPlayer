@@ -102,6 +102,10 @@
       <Project>{dc4372f9-f8b4-4f54-821a-258ad8102020}</Project>
       <Name>LibraProgramming.Media.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj">
+      <Project>{5517bf35-1c3f-49f3-9958-a670baebfad8}</Project>
+      <Name>LibraProgramming.Xamarin.Dependency.Container</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
       <Project>{CE039907-6B7E-4D33-86CA-4C239AA5C46C}</Project>
       <Name>AudioBookPlayer.App</Name>
