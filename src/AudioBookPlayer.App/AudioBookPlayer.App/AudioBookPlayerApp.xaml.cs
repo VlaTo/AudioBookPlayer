@@ -36,6 +36,8 @@ namespace AudioBookPlayer.App
         protected override void RegisterTypesCore(DependencyContainer container)
         {
             //base.RegisterTypesCore(container);
+
+            container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             container.Register<IBookShelfProvider, SqLiteDatabaseBookShelfProvider>(InstanceLifetime.Singleton);
         }
     }
