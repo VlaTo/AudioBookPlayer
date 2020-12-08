@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraProgramming.Xamarin.Dependency.Container.Factories;
+using System;
 using System.Collections.Generic;
 
 namespace LibraProgramming.Xamarin.Dependency.Container

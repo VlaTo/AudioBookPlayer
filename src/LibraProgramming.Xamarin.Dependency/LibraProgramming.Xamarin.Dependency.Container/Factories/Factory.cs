@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace LibraProgramming.Xamarin.Dependency.Container
+namespace LibraProgramming.Xamarin.Dependency.Container.Factories
 {
     public abstract class Factory
     {
@@ -22,7 +22,8 @@ namespace LibraProgramming.Xamarin.Dependency.Container
 
         protected ConstructorInfo GetConstructor(Type type)
         {
-            var ti = type.GetTypeInfo();
+            var ti = IntrospectionExtensions.GetTypeInfo(type);
+            //var ti = type.GetTypeInfo();
             var candidate = ti.DeclaredConstructors
                 .FirstOrDefault(ctor => null != ctor.GetCustomAttribute<PrefferedConstructorAttribute>());
 

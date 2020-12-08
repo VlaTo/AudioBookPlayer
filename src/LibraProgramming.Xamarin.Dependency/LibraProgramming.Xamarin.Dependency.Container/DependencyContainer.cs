@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraProgramming.Xamarin.Dependency.Container.Factories;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -116,10 +117,11 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         }
 
         public void Register<TService>(
-            Func<TService> factory, Func<Factory, InstanceLifetime> lifetime = null,
+            Func<TService> factory,
+            Func<Factory, InstanceLifetime> lifetime = null,
             string key = null,
             bool createImmediate = false)
-            => Register(typeof(TService), lifetime, key, createImmediate);
+            => RegisterService(typeof(TService), new CreatorFactory<TService>(this, factory), lifetime, key, createImmediate);
 
         public void Register<TService, TConcrete>(
             Func<Factory, InstanceLifetime> lifetime = null,
@@ -129,6 +131,12 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         {
             Register(typeof(TService), typeof(TConcrete), lifetime, key, createimmediate);
         }
+
+        public void Register<TService>(
+            Func<Factory, InstanceLifetime> lifetime = null,
+            string key = null,
+            bool createImmediate = false)
+            => Register(typeof(TService), lifetime, key, createImmediate);
 
         private object GetInstanceInternal(Queue<ServiceTypeReference> queue, Type serviceType, string key = null)
         {

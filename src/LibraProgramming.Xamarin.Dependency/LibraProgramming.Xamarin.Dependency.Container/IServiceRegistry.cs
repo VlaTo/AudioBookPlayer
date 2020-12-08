@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibraProgramming.Xamarin.Dependency.Container.Factories;
+using System;
 
 namespace LibraProgramming.Xamarin.Dependency.Container
 {
@@ -21,6 +22,12 @@ namespace LibraProgramming.Xamarin.Dependency.Container
 
         void Register<TService>(
             Func<TService> factory,
+            Func<Factory, InstanceLifetime> lifetime = null,
+            string key = null,
+            bool createImmediate = false
+        );
+
+        void Register<TService>(
             Func<Factory, InstanceLifetime> lifetime = null,
             string key = null,
             bool createImmediate = false

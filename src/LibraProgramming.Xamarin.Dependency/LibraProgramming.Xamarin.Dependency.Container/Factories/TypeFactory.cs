@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace LibraProgramming.Xamarin.Dependency.Container
+namespace LibraProgramming.Xamarin.Dependency.Container.Factories
 {
     internal sealed class TypeFactory : Factory
     {
