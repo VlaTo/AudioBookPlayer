@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj" />
   </ItemGroup>
 
@@ -32,10 +33,16 @@
     <Compile Update="AudioBookPlayerApp.xaml.cs">
       <DependentUpon>AudioBookPlayerApp.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\BooksLibraryPage.xaml.cs">
+      <DependentUpon>BooksLibraryPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Views\BooksLibrary.xaml">
+    <EmbeddedResource Update="Views\BooksLibraryPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Views\ChooseLibraryFolderPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>

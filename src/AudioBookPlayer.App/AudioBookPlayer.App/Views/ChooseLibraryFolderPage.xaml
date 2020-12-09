@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
+<xam:PopupContentPage
+    xmlns:xam="clr-namespace:LibraProgramming.Xamarin.Popups.Platforms.Xamarin;assembly=LibraProgramming.Xamarin.Popups"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
-    x:Class="AudioBookPlayer.App.Views.BooksLibrary"
-    core:ViewModelLocation.AutowireViewModel="True">
+    x:Class="AudioBookPlayer.App.Views.ChooseLibraryFolderPopup">
     <ContentPage.Content>
         <StackLayout>
             <Label Text="Welcome to Xamarin.Forms!"
@@ -12,4 +11,4 @@
                 HorizontalOptions="CenterAndExpand" />
         </StackLayout>
     </ContentPage.Content>
-</ContentPage>
+</xam:PopupContentPage>
