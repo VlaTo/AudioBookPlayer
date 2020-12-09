@@ -7,9 +7,9 @@ namespace AudioBookPlayer.App.Views
 {
     [ViewModel(typeof(BooksLibraryViewModel))]
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class BooksLibrary : ContentPage
+    public partial class BooksLibraryPage : ContentPage
     {
-        public BooksLibrary()
+        public BooksLibraryPage()
         {
             InitializeComponent();
         }
