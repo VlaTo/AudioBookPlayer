@@ -1,10 +1,12 @@
-﻿
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using Android.Widget;
 using AudioBookPlayer.App.Core;
 using LibraProgramming.Xamarin.Dependency.Container;
+using LibraProgramming.Xamarin.Popups.Platforms.Android;
+using Xamarin.Forms;
 
 //[assembly: UsesPermission(Android.Manifest.Permission.AccessMediaLocation)]
 //[assembly: UsesPermission(Android.Manifest.Permission.MediaContentControl)]
@@ -18,6 +20,13 @@ namespace AudioBookPlayer.App.Droid
     [Activity(Label = "AudioBookPlayer.App", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        private bool backPressedOnce;
+
+        public MainActivity()
+        {
+            backPressedOnce = false;
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -27,6 +36,7 @@ namespace AudioBookPlayer.App.Droid
 
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            Popup.Init(this, savedInstanceState);
 
             LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
         }
@@ -37,6 +47,26 @@ namespace AudioBookPlayer.App.Droid
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
+        /*public override void OnBackPressed()
+        {
+            if (backPressedOnce)
+            {
+                base.OnBackPressed();
+
+                Java.Lang.JavaSystem.Exit(0);
+
+                return;
+            }
+
+            backPressedOnce = true;
+
+            var toast = Toast.MakeText(this, "Press twice to exit", ToastLength.Short);
+
+            toast.Show();
+
+            new Handler().PostDelayed(() => backPressedOnce = false, 2000);
+        }*/
 
         /// <summary>
         /// 

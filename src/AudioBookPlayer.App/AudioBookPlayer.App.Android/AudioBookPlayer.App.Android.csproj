@@ -102,13 +102,13 @@
       <Project>{dc4372f9-f8b4-4f54-821a-258ad8102020}</Project>
       <Name>LibraProgramming.Media.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj">
-      <Project>{42cf192a-859f-4273-b24f-dfc0bdda03d6}</Project>
-      <Name>LibraProgramming.Xamarin.Popups</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj">
-      <Project>{5517bf35-1c3f-49f3-9958-a670baebfad8}</Project>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj">
+      <Project>{515ea5f4-a8ff-4b18-aee7-ae145625c45f}</Project>
       <Name>LibraProgramming.Xamarin.Dependency.Container</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj">
+      <Project>{08fb239b-f746-46f8-a268-27aa1187522a}</Project>
+      <Name>LibraProgramming.Xamarin.Popups</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
       <Project>{CE039907-6B7E-4D33-86CA-4C239AA5C46C}</Project>

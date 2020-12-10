@@ -1,6 +1,7 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
+using LibraProgramming.Xamarin.Popups.Services;
 using Xamarin.Forms;
 
 [assembly: ExportFont("fontello.ttf", Alias = "Icons")]
@@ -39,6 +40,8 @@ namespace AudioBookPlayer.App
 
             container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             container.Register<IBookShelfProvider, SqLiteDatabaseBookShelfProvider>(InstanceLifetime.Singleton);
+            container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
+            container.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
         }
     }
 }

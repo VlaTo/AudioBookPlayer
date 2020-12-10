@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Interaction
 {
     public interface IInitialize
     {

@@ -20,6 +20,8 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
         public static readonly BindableProperty HasSystemPaddingProperty;
         public static readonly BindableProperty SystemPaddingProperty;
         public static readonly BindableProperty SystemPaddingSidesProperty;
+        public static readonly BindableProperty HasKeyboardOffsetProperty;
+        public static readonly BindableProperty KeyboardOffsetProperty;
 
         public bool HasSystemPadding
         {
@@ -39,14 +41,20 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
             set => SetValue(SystemPaddingSidesProperty, value);
         }
 
+        public bool HasKeyboardOffset
+        {
+            get => (bool)GetValue(HasKeyboardOffsetProperty);
+            set => SetValue(HasKeyboardOffsetProperty, value);
+        }
+
+        public double KeyboardOffset
+        {
+            get => (double)GetValue(KeyboardOffsetProperty);
+            set => SetValue(KeyboardOffsetProperty, value);
+        }
+
         public PopupContentPage()
         {
-            Content = new StackLayout
-            {
-                Children = {
-                    new Label { Text = "Welcome to Xamarin.Forms!" }
-                }
-            };
         }
 
         protected override void LayoutChildren(double x, double y, double width, double height)
@@ -105,6 +113,21 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
                 propertyChanged: OnSystemPaddingSidesPropertyChanged,
                 defaultValue: PaddingSides.All
             );
+            HasKeyboardOffsetProperty = BindableProperty.Create(
+                nameof(HasKeyboardOffset),
+                typeof(bool),
+                typeof(PopupContentPage),
+                propertyChanged: OnHasKeyboardOffsetPropertyChanged,
+                defaultValue: true
+            );
+            KeyboardOffsetProperty = BindableProperty.Create(
+                nameof(KeyboardOffset),
+                typeof(double),
+                typeof(PopupContentPage),
+                propertyChanged: OnKeyboardOffsetPropertyChanged,
+                defaultBindingMode: BindingMode.OneWayToSource,
+                defaultValue: 0.0d
+            );
         }
 
         private void OnHasSystemPaddingChanged()
@@ -122,6 +145,16 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
             ;
         }
 
+        private void OnHasKeyboardOffsetChanged()
+        {
+            ;
+        }
+
+        private void OnKeyboardOffsetChanged()
+        {
+            ;
+        }
+
         private static void OnHasSystemPaddingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ((PopupContentPage)bindable).OnHasSystemPaddingChanged();
@@ -135,6 +168,16 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
         private static void OnSystemPaddingSidesPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ((PopupContentPage)bindable).OnSystemPaddingSidesChanged();
+        }
+
+        private static void OnHasKeyboardOffsetPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ((PopupContentPage)bindable).OnHasKeyboardOffsetChanged();
+        }
+
+        private static void OnKeyboardOffsetPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ((PopupContentPage)bindable).OnKeyboardOffsetChanged();
         }
     }
 }

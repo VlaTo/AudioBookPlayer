@@ -1,9 +1,9 @@
 ﻿using System;
 using Xamarin.Forms;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Interactivity.Behaviors
 {
-    internal class BehaviorBase<T> : Behavior<T>
+    public class BehaviorBase<T> : Behavior<T>
         where T : BindableObject
     {
         public T AttachedObject

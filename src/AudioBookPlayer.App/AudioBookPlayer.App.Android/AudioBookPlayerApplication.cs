@@ -1,6 +1,5 @@
 ﻿using Android.App;
 using Android.Runtime;
-using LibraProgramming.Xamarin.Popups.Platforms.Android;
 using System;
 
 namespace AudioBookPlayer.App.Droid
@@ -18,7 +17,6 @@ namespace AudioBookPlayer.App.Droid
             base.OnCreate();
 
             Xamarin.Essentials.Platform.Init(this);
-            Popups.Init(Context);
         }
     }
 }

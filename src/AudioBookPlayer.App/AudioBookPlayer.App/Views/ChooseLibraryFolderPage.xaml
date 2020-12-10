@@ -1,14 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<xam:PopupContentPage
-    xmlns:xam="clr-namespace:LibraProgramming.Xamarin.Popups.Platforms.Xamarin;assembly=LibraProgramming.Xamarin.Popups"
+<ContentPage
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="AudioBookPlayer.App.Views.ChooseLibraryFolderPopup">
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:b="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    x:Class="AudioBookPlayer.App.Views.ChooseLibraryFolderPopup"
+    core:ViewModelLocation.AutowireViewModel="True"
+    BackgroundColor="Transparent">
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <On Platform="Android" Value="24" />
+            <On Platform="iOS" Value="12" />
+        </OnPlatform>
+    </ContentPage.Padding>
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <Frame
+            CornerRadius="8"
+            BackgroundColor="Bisque">
+            <StackLayout
+                BackgroundColor="Transparent"
+                Orientation="Vertical">
+                <StackLayout
+                    Orientation="Vertical">
+                    
+                </StackLayout>
+                <ListView
+                    ItemsSource="{Binding Path=Items, Mode=OneWay}"
+                    SelectionMode="None">
+                    <ListView.Behaviors>
+                        <b:EventToCommandBehavior
+                            EventName="ItemTapped"
+                            Command="{Binding Path=SelectItem, Mode=OneTime}"
+                            EventArgsParameterPath="Item">
+                        </b:EventToCommandBehavior>
+                    </ListView.Behaviors>
+                    
+                </ListView>
+            </StackLayout>
+        </Frame>
     </ContentPage.Content>
-</xam:PopupContentPage>
+</ContentPage>

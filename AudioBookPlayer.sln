@@ -29,13 +29,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "src\AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Xamarin.Dependency", "LibraProgramming.Xamarin.Dependency", "{65EC6E91-E3C7-47CF-873D-C8B40E876E1F}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Dependency.Container", "src\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj", "{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Modules", "LibraProgramming.Modules", "{BA523C18-755A-4A6E-A3C3-D475F9549058}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Popups", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj", "{42CF192A-859F-4273-B24F-DFC0BDDA03D6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Interaction", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj", "{1E7F0391-EEB1-41C2-9190-7580E77019E1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Interactivity", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj", "{82F318D5-3A8E-4D87-9C57-549B77CE7D95}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Popups", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj", "{08FB239B-F746-46F8-A268-27AA1187522A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Dependency.Container", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj", "{515EA5F4-A8FF-4B18-AEE7-AE145625C45F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,14 +67,22 @@ Global
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10DDA03F-37A1-4944-90A2-EFFC84F80EA8}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42CF192A-859F-4273-B24F-DFC0BDDA03D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42CF192A-859F-4273-B24F-DFC0BDDA03D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42CF192A-859F-4273-B24F-DFC0BDDA03D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42CF192A-859F-4273-B24F-DFC0BDDA03D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E7F0391-EEB1-41C2-9190-7580E77019E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E7F0391-EEB1-41C2-9190-7580E77019E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E7F0391-EEB1-41C2-9190-7580E77019E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E7F0391-EEB1-41C2-9190-7580E77019E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82F318D5-3A8E-4D87-9C57-549B77CE7D95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82F318D5-3A8E-4D87-9C57-549B77CE7D95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82F318D5-3A8E-4D87-9C57-549B77CE7D95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82F318D5-3A8E-4D87-9C57-549B77CE7D95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08FB239B-F746-46F8-A268-27AA1187522A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08FB239B-F746-46F8-A268-27AA1187522A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08FB239B-F746-46F8-A268-27AA1187522A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08FB239B-F746-46F8-A268-27AA1187522A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{515EA5F4-A8FF-4B18-AEE7-AE145625C45F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{515EA5F4-A8FF-4B18-AEE7-AE145625C45F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{515EA5F4-A8FF-4B18-AEE7-AE145625C45F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{515EA5F4-A8FF-4B18-AEE7-AE145625C45F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,8 +90,10 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DC4372F9-F8B4-4F54-821A-258AD8102020} = {B61F02FD-9138-4E59-8F83-E824772DA180}
 		{84FD7379-0AB4-44A2-B0BE-C409534CE757} = {B61F02FD-9138-4E59-8F83-E824772DA180}
-		{5517BF35-1C3F-49F3-9958-A670BAEBFAD8} = {65EC6E91-E3C7-47CF-873D-C8B40E876E1F}
-		{42CF192A-859F-4273-B24F-DFC0BDDA03D6} = {BA523C18-755A-4A6E-A3C3-D475F9549058}
+		{1E7F0391-EEB1-41C2-9190-7580E77019E1} = {BA523C18-755A-4A6E-A3C3-D475F9549058}
+		{82F318D5-3A8E-4D87-9C57-549B77CE7D95} = {BA523C18-755A-4A6E-A3C3-D475F9549058}
+		{08FB239B-F746-46F8-A268-27AA1187522A} = {BA523C18-755A-4A6E-A3C3-D475F9549058}
+		{515EA5F4-A8FF-4B18-AEE7-AE145625C45F} = {BA523C18-755A-4A6E-A3C3-D475F9549058}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {603387A9-3A67-490A-A12C-C4714C61DCDC}
