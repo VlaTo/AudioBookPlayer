@@ -8,18 +8,18 @@ using LibraProgramming.Xamarin.Popups.Platforms.Xamarin;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 
-[assembly: Dependency(typeof(AndroidPopup))]
+[assembly: Dependency(typeof(AndroidPlatformPopup))]
 
 namespace LibraProgramming.Xamarin.Popups.Platforms.Android
 {
     [Preserve(AllMembers = true)]
-    internal sealed class AndroidPopup : IPlatformPopup
+    internal sealed class AndroidPlatformPopup : IPlatformPopup
     {
-        public bool IsInitialized => Popups.IsInitialized;
+        public bool IsInitialized => Popup.IsInitialized;
 
         public Task AddAsync(PopupContentPage page)
         {
-            var view = GetContentView();
+            var view = Popup.GetContentView();
 
             page.Parent = global::Xamarin.Forms.Application.Current.MainPage;
 
@@ -39,7 +39,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
 
             if (null!=renderer)
             {
-                var view = GetContentView();
+                var view = Popup.GetContentView();
                 var element = renderer.Element;
 
                 if (null != view)
@@ -63,7 +63,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
             return Task.CompletedTask;
         }
 
-        private FrameLayout GetContentView()
+        /*private FrameLayout GetContentView()
         {
             if (Popups.Context is Activity activity)
             {
@@ -74,7 +74,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
             }
 
             return null;
-        }
+        }*/
 
         private static Task PostAsync(global::Android.Views.View view)
         {
@@ -93,7 +93,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
         private static bool GetIsSystemAnimationEnabled()
         {
             float animationScale = 0.0f;
-            var context = Popups.Context;
+            var context = Popup.Context;
 
             if (null == context)
             {

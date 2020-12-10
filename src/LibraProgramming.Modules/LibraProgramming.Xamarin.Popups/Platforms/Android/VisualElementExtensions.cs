@@ -11,7 +11,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
 
             if (null == renderer)
             {
-                renderer = Platform.CreateRendererWithContext(element, Popups.Context);
+                renderer = Platform.CreateRendererWithContext(element, Popup.Context);
                 Platform.SetRenderer(element, renderer);
             }
 

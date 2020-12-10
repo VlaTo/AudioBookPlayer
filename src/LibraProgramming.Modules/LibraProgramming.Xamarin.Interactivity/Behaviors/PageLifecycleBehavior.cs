@@ -1,9 +1,10 @@
-﻿using System;
+﻿using LibraProgramming.Xamarin.Interaction;
+using System;
 using Xamarin.Forms;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Interactivity.Behaviors
 {
-    internal sealed class PageLifecycleBehavior : BehaviorBase<Page>
+    public sealed class PageLifecycleBehavior : BehaviorBase<Page>
     {
         protected override void OnAttachedTo(Page bindable)
         {

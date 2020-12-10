@@ -1,9 +1,9 @@
 ﻿using System;
 using Xamarin.Forms;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Interaction
 {
-    internal static class PageInvocation
+    public static class PageInvocation
     {
         public static void InvokeViewModelAction<T>(BindableObject bindable, Action<T> action)
         {

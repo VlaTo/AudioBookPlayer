@@ -21,8 +21,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
-    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
-    <ProjectReference Include="..\..\LibraProgramming.Xamarin.Dependency\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
   </ItemGroup>
 
   <ItemGroup>

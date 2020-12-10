@@ -93,7 +93,7 @@
         Icon="icon_about.png">
         <ShellContent
             Route="BooksLibrary"
-            ContentTemplate="{DataTemplate local:BooksLibrary}"
+            ContentTemplate="{DataTemplate local:BooksLibraryPage}"
         />
     </FlyoutItem>
     <FlyoutItem

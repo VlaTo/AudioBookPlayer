@@ -92,18 +92,12 @@
   <ItemGroup>
     <Folder Include="Platforms\Shared\" />
     <Folder Include="Platforms\Netstandard\" />
+    <None Remove="Platforms\Xamarin\PopupContentPage.cs" />
+    <Compile Include="Platforms\Xamarin\PopupContentPage.cs" />
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.8.0.1451" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="Platforms\Xamarin\PopupContentPage.cs" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Include="Platforms\Xamarin\PopupContentPage.cs" />
   </ItemGroup>
   
   <!--Additional item groups-->

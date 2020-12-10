@@ -9,7 +9,12 @@
         <StackLayout>
             <Label Text="Welcome to Xamarin.Forms!"
                 VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+                HorizontalOptions="CenterAndExpand"
+            />
+            <Button
+                Text="Show popup"
+                Command="{Binding Path=Refresh, Mode=OneTime}"
+            />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
