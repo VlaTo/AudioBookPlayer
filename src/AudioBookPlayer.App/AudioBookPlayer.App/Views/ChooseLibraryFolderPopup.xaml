@@ -13,6 +13,13 @@
             <On Platform="iOS" Value="12" />
         </OnPlatform>
     </ContentPage.Padding>
+    <ContentPage.Triggers>
+        <EventTrigger Event="Raised">
+            <EventTrigger.Actions>
+                
+            </EventTrigger.Actions>
+        </EventTrigger>
+    </ContentPage.Triggers>
     <ContentPage.Content>
         <Frame
             CornerRadius="8"
@@ -34,7 +41,9 @@
                             EventArgsParameterPath="Item">
                         </b:EventToCommandBehavior>
                     </ListView.Behaviors>
-                    
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType=""></DataTemplate>
+                    </ListView.ItemTemplate>
                 </ListView>
             </StackLayout>
         </Frame>
