@@ -1,22 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Xamarin.Forms;
 
 namespace LibraProgramming.Xamarin.Interactivity
 {
     public static class Interaction
     {
-        public static readonly BindableProperty InteractionRequestsProperty;
+        public static readonly BindableProperty RequestProperty;
 
         static Interaction()
         {
-            InteractionRequestsProperty = BindableProperty.CreateAttached(
-                "InteractionRequests",
-                typeof(InteractionRequestsCollection),
+            RequestProperty = BindableProperty.CreateAttached(
+                "Request",
+                typeof(InteractionRequestCollection),
                 typeof(Interaction),
-                propertyChanged: OnInteractionRequestsPropertyChanged
+                null,
+                defaultBindingMode: BindingMode.OneWay,
+                propertyChanged: OnRequestPropertyChanged
             );
+        }
+
+        private static void OnRequestPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            throw new NotImplementedException();
         }
     }
 }

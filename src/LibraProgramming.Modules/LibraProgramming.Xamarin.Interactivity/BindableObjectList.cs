@@ -26,8 +26,6 @@ namespace LibraProgramming.Xamarin.Interactivity
             InnerList.Add(item);
         }
 
-        public void Clear() => InnerList.Clear();
-
         public bool Contains(BindableObject item)
         {
             if (null == item)
@@ -54,11 +52,6 @@ namespace LibraProgramming.Xamarin.Interactivity
         }
 
         public bool Remove(BindableObject item)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveAt(int index)
         {
             throw new NotImplementedException();
         }

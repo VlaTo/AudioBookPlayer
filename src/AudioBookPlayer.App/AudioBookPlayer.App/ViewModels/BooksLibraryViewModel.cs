@@ -2,9 +2,8 @@
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.Views;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using LibraProgramming.Xamarin.Interaction;
+using LibraProgramming.Xamarin.Interaction.Contracts;
 using LibraProgramming.Xamarin.Popups.Services;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;

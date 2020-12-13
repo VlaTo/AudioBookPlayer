@@ -1,4 +1,5 @@
 ﻿using LibraProgramming.Xamarin.Interaction;
+using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
 using Xamarin.Forms;
 
