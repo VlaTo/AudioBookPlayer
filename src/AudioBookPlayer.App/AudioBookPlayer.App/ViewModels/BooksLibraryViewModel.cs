@@ -1,8 +1,9 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
-using AudioBookPlayer.App.Views;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
+using LibraProgramming.Xamarin.Interaction.Extensions;
 using LibraProgramming.Xamarin.Popups.Services;
 using System.Windows.Input;
 using Xamarin.Essentials;
@@ -10,12 +11,19 @@ using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
+    public sealed class SourceFolderRequestContext : InteractionRequestContext
+    {
+
+    }
+
     internal class BooksLibraryViewModel : ViewModelBase, IInitialize
     {
         private readonly IBookShelfProvider bookShelf;
         private readonly IPermissionRequestor permissionRequestor;
         private readonly IPopupService popupService;
         private readonly ApplicationSettings settings;
+        private readonly Command refresh;
+        private readonly InteractionRequest<SourceFolderRequestContext> selectSourceFolder;
         private bool isBusy;
 
         public bool IsBusy
@@ -24,10 +32,9 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref isBusy, value);
         }
 
-        public ICommand Refresh
-        {
-            get;
-        }
+        public ICommand Refresh => refresh;
+
+        public IInteractionRequest SelectSourceFolder => selectSourceFolder;
 
         [PrefferedConstructor]
         public BooksLibraryViewModel(
@@ -41,7 +48,8 @@ namespace AudioBookPlayer.App.ViewModels
             this.popupService = popupService;
             this.settings = settings;
 
-            Refresh = new Command(OnRefreshCommand);
+            selectSourceFolder = new InteractionRequest<SourceFolderRequestContext>();
+            refresh = new Command(OnRefreshCommand);
         }
 
         void IInitialize.OnInitialize()
@@ -63,10 +71,10 @@ namespace AudioBookPlayer.App.ViewModels
                 }
 
                 var path = settings.LibraryRootPath;
-                var page = new ChooseLibraryFolderPopup();
+                var context = new SourceFolderRequestContext();
 
-                //await popupService.ShowPopupAsync(page);
-                await Shell.Current.Navigation.PushModalAsync(page);
+                await selectSourceFolder.RaiseAsync(context);
+                
 
                 //await Task.CompletedTask;
             }
