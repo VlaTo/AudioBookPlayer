@@ -1,7 +1,5 @@
 ﻿using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace LibraProgramming.Xamarin.Interaction
 {

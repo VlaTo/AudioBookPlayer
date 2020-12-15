@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:b="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
     x:Class="AudioBookPlayer.App.Views.ChooseLibraryFolderPopup"
     core:ViewModelLocation.AutowireViewModel="True"
     BackgroundColor="Transparent">
@@ -13,13 +14,6 @@
             <On Platform="iOS" Value="12" />
         </OnPlatform>
     </ContentPage.Padding>
-    <ContentPage.Triggers>
-        <EventTrigger Event="Raised">
-            <EventTrigger.Actions>
-                
-            </EventTrigger.Actions>
-        </EventTrigger>
-    </ContentPage.Triggers>
     <ContentPage.Content>
         <Frame
             CornerRadius="8"
@@ -42,7 +36,9 @@
                         </b:EventToCommandBehavior>
                     </ListView.Behaviors>
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType=""></DataTemplate>
+                        <DataTemplate x:DataType="vm:FileSystemItem">
+                            
+                        </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
             </StackLayout>
