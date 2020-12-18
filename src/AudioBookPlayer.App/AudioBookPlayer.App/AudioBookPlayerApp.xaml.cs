@@ -40,7 +40,7 @@ namespace AudioBookPlayer.App
 
             container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             container.Register<IBookShelfProvider, SqLiteDatabaseBookShelfProvider>(InstanceLifetime.Singleton);
-            container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
+            //container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
             container.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
         }
     }

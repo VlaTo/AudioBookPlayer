@@ -4,6 +4,8 @@ using Android.OS;
 using Android.Runtime;
 using Android.Widget;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Droid.Services;
+using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
 using Xamarin.Forms;
@@ -34,6 +36,7 @@ namespace AudioBookPlayer.App.Droid
 
             base.OnCreate(savedInstanceState);
 
+            Xamarin.Forms.Forms.SetFlags("Expander_Experimental");
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             Xamarin.Forms.Forms.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
@@ -75,7 +78,8 @@ namespace AudioBookPlayer.App.Droid
         {
             public void RegisterTypes(DependencyContainer container)
             {
-                ;
+                container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
+                container.Register<IMediaService, MediaService>(InstanceLifetime.Singleton);
             }
         }
     }

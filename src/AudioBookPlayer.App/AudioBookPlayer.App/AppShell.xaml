@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Shell xmlns="http://xamarin.com/schemas/2014/forms" 
-       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-       xmlns:local="clr-namespace:AudioBookPlayer.App.Views"
-       Title="AudioBookPlayer.App"
-       x:Class="AudioBookPlayer.App.AppShell">
+<Shell
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:AudioBookPlayer.App.Views"
+    Title="AudioBookPlayer.App"
+    x:Class="AudioBookPlayer.App.AppShell">
 
     <!--
         The overall app visual hierarchy is defined here, along with navigation.
@@ -82,6 +83,23 @@
             
         </ResourceDictionary>
     </Shell.Resources>
+    
+    <Shell.FlyoutHeaderTemplate>
+        <DataTemplate>
+            <Grid>
+                <Image
+                    HeightRequest="240"
+                />
+                <Label
+                    FontSize="Large"
+                    Text="Audio Books Library"
+                    VerticalOptions="End"
+                    HorizontalOptions="End"
+                    Margin="8,8,16,16"
+                />
+            </Grid>
+        </DataTemplate>
+    </Shell.FlyoutHeaderTemplate>
 
     <!-- 
         When the Flyout is visible this defines the content to display in the flyout.
@@ -91,9 +109,28 @@
     <FlyoutItem
         Title="Library"
         Icon="icon_about.png">
+        <Tab
+            Title="Books"
+            Route="Books"
+            FlyoutDisplayOptions="AsMultipleItems">
+            <ShellContent
+                Route="Recent"
+                Title="Recent"
+                ContentTemplate="{DataTemplate local:RecentBooksPage}"
+            />
+            <ShellContent
+                Route="All"
+                Title="All"
+                ContentTemplate="{DataTemplate local:AllBooksPage}"
+            />
+        </Tab>
+    </FlyoutItem>
+    <FlyoutItem
+        Title="Settings"
+        Icon="icon_feed.png">
         <ShellContent
-            Route="BooksLibrary"
-            ContentTemplate="{DataTemplate local:BooksLibraryPage}"
+            Route="SettingsPage"
+            ContentTemplate="{DataTemplate local:SettingsPage}"
         />
     </FlyoutItem>
     <FlyoutItem
@@ -102,14 +139,6 @@
         <ShellContent
             Route="AboutPage"
             ContentTemplate="{DataTemplate local:AboutPage}"
-        />
-    </FlyoutItem>
-    <FlyoutItem
-        Title="Browse"
-        Icon="icon_feed.png">
-        <ShellContent
-            Route="ItemsPage"
-            ContentTemplate="{DataTemplate local:ItemsPage}"
         />
     </FlyoutItem>
 

@@ -5,11 +5,11 @@ using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Views
 {
-    [ViewModel(typeof(ChooseLibraryFolderViewModel))]
+    [ViewModel(typeof(RecentBooksViewModel))]
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ChooseLibraryFolderPopup : ContentPage
+    public partial class RecentBooksPage : ContentPage
     {
-        public ChooseLibraryFolderPopup()
+        public RecentBooksPage()
         {
             InitializeComponent();
         }
