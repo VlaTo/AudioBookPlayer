@@ -4,26 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    x:Class="AudioBookPlayer.App.Views.BooksLibraryPage"
+    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    x:Class="AudioBookPlayer.App.Views.RecentBooksPage"
     core:ViewModelLocation.AutowireViewModel="True">
-    <i:Interaction.RequestTriggers>
-        <i:InteractionRequestTrigger
-            Request="{Binding Path=SelectSourceFolder}">
-            <i:CallMethodTriggerAction
-                MethodName="OnSelectFolderRequest"
-            />
-        </i:InteractionRequestTrigger>
-    </i:Interaction.RequestTriggers>
     <ContentPage.Content>
         <StackLayout>
             <Label
                 Text="Welcome to Xamarin.Forms!"
                 VerticalOptions="CenterAndExpand" 
                 HorizontalOptions="CenterAndExpand"
-            />
-            <Button
-                Text="Show popup"
-                Command="{Binding Path=Refresh, Mode=OneTime}"
             />
         </StackLayout>
     </ContentPage.Content>

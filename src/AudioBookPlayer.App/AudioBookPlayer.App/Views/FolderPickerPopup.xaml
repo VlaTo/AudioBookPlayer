@@ -4,26 +4,38 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:b="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
-    x:Class="AudioBookPlayer.App.Views.ChooseLibraryFolderPopup"
+    x:Class="AudioBookPlayer.App.Views.FolderPickerPopup"
     core:ViewModelLocation.AutowireViewModel="True"
     BackgroundColor="Transparent">
+    <i:Interaction.RequestTriggers>
+        <i:InteractionRequestTrigger
+            Request="{Binding Path=CloseRequest, Mode=OneTime}">
+            <i:CallMethodTriggerAction
+                x:TypeArguments="vm:CloseInteractionRequestContext"
+                MethodName="OnApplyRequest"
+            />
+        </i:InteractionRequestTrigger>
+    </i:Interaction.RequestTriggers>
     <ContentPage.Padding>
         <OnPlatform x:TypeArguments="Thickness">
-            <On Platform="Android" Value="24" />
-            <On Platform="iOS" Value="12" />
+            <On Platform="Android" Value="0,256,0,0" />
+            <On Platform="iOS" Value="0,12,0,0" />
         </OnPlatform>
     </ContentPage.Padding>
     <ContentPage.Content>
         <Frame
-            CornerRadius="8"
-            BackgroundColor="Bisque">
+            BackgroundColor="White">
             <StackLayout
                 BackgroundColor="Transparent"
                 Orientation="Vertical">
                 <StackLayout
                     Orientation="Vertical">
-                    
+                    <Button
+                        Command="{Binding Path=Apply, Mode=OneTime}"
+                        Text="OK"
+                    />
                 </StackLayout>
                 <ListView
                     ItemsSource="{Binding Path=Items, Mode=OneWay}"
@@ -37,7 +49,10 @@
                     </ListView.Behaviors>
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="vm:FileSystemItem">
-                            
+                            <Label
+                                Text="{Binding Path=Title}"
+                                FontSize="Default"
+                            />
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

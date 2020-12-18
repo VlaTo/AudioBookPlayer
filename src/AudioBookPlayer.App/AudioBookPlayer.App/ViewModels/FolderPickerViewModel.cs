@@ -1,5 +1,6 @@
 ﻿using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
 using System.Collections.Generic;
@@ -51,11 +52,21 @@ namespace AudioBookPlayer.App.ViewModels
         }
     }
 
-    public sealed class ChooseLibraryFolderViewModel : ViewModelBase, IInitialize
+    public sealed class CloseInteractionRequestContext : InteractionRequestContext<string>
+    {
+        public CloseInteractionRequestContext(string path)
+            : base(path)
+        {
+        }
+    }
+
+    public sealed class FolderPickerViewModel : ViewModelBase, IInitialize
     {
         private const string driveRoot = "/storage/emulated";
 
         private readonly IPermissionRequestor requestor;
+        private readonly IMediaService mediaService;
+        private readonly InteractionRequest<CloseInteractionRequestContext> closeRequest;
         private string currentPath;
 
         public ObservableCollection<FileSystemItem> Items
@@ -63,18 +74,30 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public IInteractionRequest CloseRequest => closeRequest;
+
         public ICommand SelectItem
         {
             get;
         }
 
+        public ICommand Apply
+        {
+            get;
+        }
+
         [PrefferedConstructor]
-        public ChooseLibraryFolderViewModel(IPermissionRequestor requestor)
+        public FolderPickerViewModel(
+            IPermissionRequestor requestor, 
+            IMediaService mediaService)
         {
             this.requestor = requestor;
+            this.mediaService = mediaService;
 
+            closeRequest = new InteractionRequest<CloseInteractionRequestContext>();
             Items = new ObservableCollection<FileSystemItem>();
             SelectItem = new Command<FileSystemItem>(DoSelectItem);
+            Apply = new Command(DoApply);
         }
 
         void IInitialize.OnInitialize()
@@ -86,11 +109,24 @@ namespace AudioBookPlayer.App.ViewModels
                 System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Drive: '{drive}'");
             }
 
+            var path = String.Empty;
+
+            path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] My Music: '{path}'");
+            
+            path = System.Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic);
+            System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Common Music: '{path}'");
+
+            // content://com.android.externalstorage.documents/document/primary%3AMusic
+            // content://com.android.providers.media.documents/document/audio_root
+            // var backingFile = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "count.txt");
+
             Task.Run(async () =>
             {
-                await requestor.CheckAndRequestMediaPermissionsAsync();
+                await mediaService.LoadMediaAsync();
 
-                var items = EnumerateFileSystemItems();
+                //var items = EnumerateFileSystemItems();
+                var items = Array.Empty<FileSystemItem>();
 
                 Items.Clear();
 
@@ -109,7 +145,8 @@ namespace AudioBookPlayer.App.ViewModels
                 {
                     currentPath = Path.Combine(currentPath, folder.Title);
 
-                    var items = EnumerateFileSystemItems();
+                    //var items = EnumerateFileSystemItems();
+                    var items = Array.Empty<FileSystemItem>();
 
                     Items.Clear();
 
@@ -128,6 +165,14 @@ namespace AudioBookPlayer.App.ViewModels
                     break;
                 }
             }
+        }
+
+        private void DoApply(object obj)
+        {
+            var context = new CloseInteractionRequestContext(String.Empty);
+
+            closeRequest.Raise(context);
+
         }
 
         private IReadOnlyCollection<FileSystemItem> EnumerateFileSystemItems()

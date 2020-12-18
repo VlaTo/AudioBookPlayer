@@ -1,10 +1,21 @@
-﻿using System.Threading.Tasks;
+﻿using Android.App;
+using Android.Content;
+using Android.OS;
+using Android.Runtime;
+using Android.Views;
+using Android.Widget;
+using AudioBookPlayer.App.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using static Xamarin.Essentials.Permissions;
 
-namespace AudioBookPlayer.App.Services
+namespace AudioBookPlayer.App.Droid.Services
 {
-    /*public class ReadExternalStorage : BasePlatformPermission
+    public class ReadExternalStorage : BasePlatformPermission
     {
         //[TupleElementNames(new[] { "androidPermission", "isRuntime" })]
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions
@@ -18,18 +29,18 @@ namespace AudioBookPlayer.App.Services
                 };
             }
         }
-    }*/
+    }
 
     internal sealed class PermissionRequestor : IPermissionRequestor
     {
         public PermissionRequestor()
         {
+
         }
 
         public Task<PermissionStatus> CheckAndRequestMediaPermissionsAsync()
         {
-            return CheckAndRequestPermissionAsync(new Permissions.Media());
-            //return CheckAndRequestPermissionAsync(new BasePermission();
+            return CheckAndRequestPermissionAsync<ReadExternalStorage>();
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<TPermission>()
@@ -47,35 +58,7 @@ namespace AudioBookPlayer.App.Services
                 return status;
             }
 
-            //status = await Permissions.RequestAsync<TPermission>();
-
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                status = await Permissions.RequestAsync<TPermission>();
-            });
-
-            return status;
-        }
-
-        private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<T>(T permission)
-            where T : BasePermission
-        {
-            var status = await permission.CheckStatusAsync();
-
-            if (PermissionStatus.Granted == status)
-            {
-                return status;
-            }
-
-            if (PermissionStatus.Denied == status && DevicePlatform.iOS == DeviceInfo.Platform)
-            {
-                return status;
-            }
-
-            MainThread.BeginInvokeOnMainThread(async () =>
-            {
-                status = await permission.RequestAsync();
-            });
+            status = await Permissions.RequestAsync<TPermission>();
 
             return status;
         }

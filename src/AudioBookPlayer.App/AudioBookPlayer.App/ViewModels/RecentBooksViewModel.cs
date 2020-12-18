@@ -5,18 +5,14 @@ using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using LibraProgramming.Xamarin.Interaction.Extensions;
 using LibraProgramming.Xamarin.Popups.Services;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public sealed class SourceFolderRequestContext : InteractionRequestContext
-    {
-
-    }
-
-    internal class BooksLibraryViewModel : ViewModelBase, IInitialize
+    internal class RecentBooksViewModel : ViewModelBase, IInitialize
     {
         private readonly IBookShelfProvider bookShelf;
         private readonly IPermissionRequestor permissionRequestor;
@@ -37,7 +33,7 @@ namespace AudioBookPlayer.App.ViewModels
         public IInteractionRequest SelectSourceFolder => selectSourceFolder;
 
         [PrefferedConstructor]
-        public BooksLibraryViewModel(
+        public RecentBooksViewModel(
             IBookShelfProvider bookShelf,
             IPermissionRequestor permissionRequestor,
             IPopupService popupService,
@@ -54,7 +50,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         void IInitialize.OnInitialize()
         {
-            ;
+            System.Diagnostics.Debug.WriteLine($"[RecentBooksViewModel] [OnInitialize] Executed");
         }
 
         private async void OnRefreshCommand()
@@ -71,12 +67,11 @@ namespace AudioBookPlayer.App.ViewModels
                 }
 
                 var path = settings.LibraryRootPath;
-                var context = new SourceFolderRequestContext();
+                var context = new SourceFolderRequestContext(path);
 
-                await selectSourceFolder.RaiseAsync(context);
-                
+                selectSourceFolder.Raise(context);
 
-                //await Task.CompletedTask;
+                //var temp = await context.Task;
             }
             finally
             {
