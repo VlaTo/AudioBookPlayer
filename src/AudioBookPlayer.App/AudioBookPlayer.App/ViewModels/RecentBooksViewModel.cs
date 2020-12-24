@@ -67,7 +67,10 @@ namespace AudioBookPlayer.App.ViewModels
                 }
 
                 var path = settings.LibraryRootPath;
-                var context = new SourceFolderRequestContext(path);
+                var context = new SourceFolderRequestContext
+                {
+                    LibraryRootFolder = path
+                };
 
                 selectSourceFolder.Raise(context);
 

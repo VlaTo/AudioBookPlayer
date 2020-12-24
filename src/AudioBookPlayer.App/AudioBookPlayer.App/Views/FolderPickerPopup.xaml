@@ -9,6 +9,37 @@
     x:Class="AudioBookPlayer.App.Views.FolderPickerPopup"
     core:ViewModelLocation.AutowireViewModel="True"
     BackgroundColor="Transparent">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Light Theme -->
+            <Color x:Key="LightPopupBackgroundColor">White</Color>
+
+            <!-- Dark Theme -->
+            <Color x:Key="DarkPopupBackgroundColor">#333333</Color>
+
+            <Style
+                x:Key="ToolButton"
+                TargetType="ImageButton">
+                <Setter
+                    Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPopupBackgroundColor}, Dark={StaticResource DarkPopupBackgroundColor}}"
+                />
+                <Setter Property="IsOpaque" Value="True" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="WidthRequest" Value="48" />
+                <Setter
+                    Property="Padding">
+                    <Setter.Value>
+                        <OnPlatform x:TypeArguments="Thickness">
+                            <On Platform="Android" Value="12" />
+                            <On Platform="iOS" Value="12" />
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <i:Interaction.RequestTriggers>
         <i:InteractionRequestTrigger
             Request="{Binding Path=CloseRequest, Mode=OneTime}">
@@ -26,16 +57,35 @@
     </ContentPage.Padding>
     <ContentPage.Content>
         <Frame
-            BackgroundColor="White">
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightPopupBackgroundColor}, Dark={StaticResource DarkPopupBackgroundColor}}">
             <StackLayout
                 BackgroundColor="Transparent"
                 Orientation="Vertical">
                 <StackLayout
-                    Orientation="Vertical">
-                    <Button
-                        Command="{Binding Path=Apply, Mode=OneTime}"
-                        Text="OK"
-                    />
+                    Orientation="Horizontal">
+                    <ImageButton
+                        Style="{StaticResource ToolButton}">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="Icons"
+                                Glyph="&#xF148;"
+                            />
+                        </ImageButton.Source>
+                    </ImageButton>
+                    <StackLayout
+                        Orientation="Horizontal"
+                        HorizontalOptions="FillAndExpand">
+                        
+                    </StackLayout>
+                    <ImageButton
+                        Style="{StaticResource ToolButton}">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="Icons"
+                                Glyph="&#xE80C;"
+                            />
+                        </ImageButton.Source>
+                    </ImageButton>
                 </StackLayout>
                 <ListView
                     ItemsSource="{Binding Path=Items, Mode=OneWay}"
@@ -49,10 +99,9 @@
                     </ListView.Behaviors>
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="vm:FileSystemItem">
-                            <Label
-                                Text="{Binding Path=Title}"
-                                FontSize="Default"
-                            />
+                            <ViewCell>
+                                <Label Text="{Binding Path=Title, Mode=OneTime}" />
+                            </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>

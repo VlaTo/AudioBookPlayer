@@ -1,15 +1,22 @@
-﻿using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction;
+using LibraProgramming.Xamarin.Interaction.Extensions;
 using System;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public sealed class SourceFolderRequestContext : InteractionRequestContext<string>
+    public sealed class SourceFolderRequestContext : InteractionRequestContext
     {
-        public SourceFolderRequestContext(string path)
-            : base(path)
+        public string LibraryRootFolder
+        {
+            get;
+            set;
+        }
+
+        public SourceFolderRequestContext()
         {
         }
 
@@ -24,7 +31,22 @@ namespace AudioBookPlayer.App.ViewModels
     {
         //private readonly InteractionRequest<SourceFolderRequestContext> selectSourceFolderRequest;
         //private readonly Command selectLibraryRootFolder;
+        private readonly ApplicationSettings settings;
         private readonly IPermissionRequestor permissions;
+        private readonly IMediaService mediaService;
+
+        public string LibraryRootFolder
+        {
+            get
+            {
+                return settings.LibraryRootPath;
+            }
+            set
+            {
+                settings.LibraryRootPath = value;
+                OnPropertyChanged();
+            }
+        }
 
         public Command SelectLibraryRootFolder
         {
@@ -36,9 +58,14 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public SettingsViewModel(IPermissionRequestor permissions)
+        public SettingsViewModel(
+            ApplicationSettings settings,
+            IPermissionRequestor permissions,
+            IMediaService mediaService)
         {
+            this.settings = settings;
             this.permissions = permissions;
+            this.mediaService = mediaService;
 
             SelectLibraryRootFolderRequest = new InteractionRequest<SourceFolderRequestContext>();
             SelectLibraryRootFolder = new Command(OnSelectLibraryRootFolderCommand);
@@ -53,9 +80,19 @@ namespace AudioBookPlayer.App.ViewModels
                 return;
             }
 
-            var context = new SourceFolderRequestContext(String.Empty);
+            var path = settings.LibraryRootPath;
 
-            SelectLibraryRootFolderRequest.Raise(context, () => { });
+            if (String.IsNullOrEmpty(path))
+            {
+                path = await mediaService.GetRootFolderAsync();
+            }
+
+            var context = new SourceFolderRequestContext
+            {
+                LibraryRootFolder = path
+            };
+
+            await SelectLibraryRootFolderRequest.RaiseAsync(context);
         }
     }
 }

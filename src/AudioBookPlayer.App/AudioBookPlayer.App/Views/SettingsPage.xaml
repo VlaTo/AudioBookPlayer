@@ -3,6 +3,7 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:c="clr-namespace:LibraProgramming.Xamarin.Controls;assembly=LibraProgramming.Xamarin.Controls"
     xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
     x:Class="AudioBookPlayer.App.Views.SettingsPage"
@@ -17,85 +18,17 @@
         </i:InteractionRequestTrigger>
     </i:Interaction.RequestTriggers>
     <ContentPage.Content>
-        <StackLayout
-            Orientation="Vertical">
-            <StackLayout
-                BackgroundColor="LightGray"
-                Orientation="Vertical"
-                Padding="0,8">
-                <Label
-                    FontSize="Title"
-                    Text="Path"
-                    Margin="8,4"
-                />
-                <Frame
-                    CornerRadius="8"
-                    BackgroundColor="White">
-                    <StackLayout
-                        Orientation="Vertical">
-                        <StackLayout
-                            Orientation="Horizontal"
-                            HorizontalOptions="FillAndExpand">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="2*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Label 
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    FontSize="Title"
-                                    TextColor="Black"
-                                    Text="Select Root folder"
-                                />
-                                <Label 
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    FontSize="Subtitle"
-                                    Text="mnt/emulated/0/Music/"
-                                />
-                                <Button
-                                    Grid.Row="0"
-                                    Grid.RowSpan="2"
-                                    Grid.Column="1"
-                                    Grid.ColumnSpan="2"
-                                    Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
-                                    Text="Select"
-                                    HorizontalOptions="EndAndExpand"
-                                    VerticalOptions="Center"
-                                />
-                            </Grid>
-                        </StackLayout>
-                    </StackLayout>
-                </Frame>
-            </StackLayout>
-            
-            <!--<Expander>
-                <Expander.Header>
-                    <Label
-                        FontSize="Title"
-                        Text="Path"
+        <TableView
+            Intent="Settings">
+            <TableRoot>
+                <TableSection Title="Path">
+                    <TextCell
+                        Text="Library root"
+                        Detail="Select library root folder"
+                        Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
                     />
-                </Expander.Header>
-                <StackLayout
-                    Orientation="Vertical">
-                    <StackLayout
-                        Orientation="Horizontal">
-                        <Button
-                            Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
-                            Text="Select"
-                        />
-                    </StackLayout>
-                </StackLayout>
-            </Expander>-->
-            
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+                </TableSection>
+            </TableRoot>
+        </TableView>
     </ContentPage.Content>
 </ContentPage>

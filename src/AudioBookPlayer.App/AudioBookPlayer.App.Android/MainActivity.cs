@@ -36,9 +36,11 @@ namespace AudioBookPlayer.App.Droid
 
             base.OnCreate(savedInstanceState);
 
-            Xamarin.Forms.Forms.SetFlags("Expander_Experimental");
+            //Xamarin.Forms.Forms.SetFlags("Expander_Experimental");
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            
+            Forms.Init(this, savedInstanceState);
+            Controls.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
             LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
