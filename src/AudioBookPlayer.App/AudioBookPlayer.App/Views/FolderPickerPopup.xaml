@@ -37,7 +37,33 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+
+            <Style
+                x:Key="LabelBaseStyle"
+                TargetType="Label">
+            </Style>
+
+            <Style
+                x:Key="FileItemTitle"
+                BasedOn="{StaticResource LabelBaseStyle}"
+                TargetType="Label">
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                />
+            </Style>
             
+            <Style
+                x:Key="FileItemDetail"
+                BasedOn="{StaticResource LabelBaseStyle}"
+                TargetType="Label">
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
+                />
+                <Setter Property="FontSize" Value="Micro" />
+            </Style>
+
         </ResourceDictionary>
     </ContentPage.Resources>
     <i:Interaction.RequestTriggers>
@@ -64,7 +90,8 @@
                 <StackLayout
                     Orientation="Horizontal">
                     <ImageButton
-                        Style="{StaticResource ToolButton}">
+                        Style="{StaticResource ToolButton}"
+                        Command="{Binding Path=LevelUp, Mode=OneTime}">
                         <ImageButton.Source>
                             <FontImageSource
                                 FontFamily="Icons"
@@ -90,6 +117,11 @@
                 <ListView
                     ItemsSource="{Binding Path=Items, Mode=OneWay}"
                     SelectionMode="None">
+                    <ListView.RowHeight>
+                        <OnPlatform x:TypeArguments="x:Int32">
+                            <On Platform="Android" Value="54" />
+                        </OnPlatform>
+                    </ListView.RowHeight>
                     <ListView.Behaviors>
                         <b:EventToCommandBehavior
                             EventName="ItemTapped"
@@ -98,9 +130,33 @@
                         </b:EventToCommandBehavior>
                     </ListView.Behaviors>
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:FileSystemItem">
+                        <DataTemplate x:DataType="vm:FileSystemItemViewModel">
                             <ViewCell>
-                                <Label Text="{Binding Path=Title, Mode=OneTime}" />
+                                <StackLayout Orientation="Vertical" Padding="12,4">
+                                    <Label
+                                        Style="{StaticResource FileItemTitle}"
+                                        Text="{Binding Path=Title, Mode=OneTime}"
+                                    />
+                                    <Label
+                                        Style="{StaticResource FileItemDetail}"
+                                        IsVisible="False">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <FormattedString.Spans>
+                                                    <Span Text="{Binding Path=LastModified, Mode=OneWay, StringFormat='{0:D}'}" />
+                                                    <Span Text="   " />
+                                                    <Span Text="{Binding Path=Length, Mode=OneWay}" />
+                                                    <Span Text=" bytes" />
+                                                </FormattedString.Spans>
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding Path=IsFile}" Value="True">
+                                                <Setter Property="IsVisible" Value="True" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label> 
+                                </StackLayout>
                             </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>

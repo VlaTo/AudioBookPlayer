@@ -82,6 +82,7 @@ namespace AudioBookPlayer.App.Droid
             {
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IMediaService, MediaService>(InstanceLifetime.Singleton);
+                container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
             }
         }
     }
