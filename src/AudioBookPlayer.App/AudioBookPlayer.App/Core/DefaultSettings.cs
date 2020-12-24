@@ -17,7 +17,7 @@ namespace AudioBookPlayer.App.Core
 #elif __IOS__
                 return "";
 #else
-                return "//";
+                return null;
 #endif
             }
         }

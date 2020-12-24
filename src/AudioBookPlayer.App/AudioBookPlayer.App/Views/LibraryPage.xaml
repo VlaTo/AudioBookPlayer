@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:v="clr-namespace:AudioBookPlayer.App.Views"
+    x:Class="AudioBookPlayer.App.Views.LibraryPage"
+    core:ViewModelLocation.AutowireViewModel="True"
+    Title="Library">
+    <TabbedPage.Resources>
+        
+    </TabbedPage.Resources>
+    <TabbedPage.Children>
+        <v:RecentBooksPage Title="Recent" />
+        <v:AllBooksPage Title="All" />
+    </TabbedPage.Children>
+</TabbedPage>

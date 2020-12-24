@@ -12,7 +12,7 @@ using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public abstract class FileSystemItem : ViewModelBase
+    public class FileSystemItem : ViewModelBase
     {
         private string title;
         private DateTime created;
@@ -62,11 +62,10 @@ namespace AudioBookPlayer.App.ViewModels
 
     public sealed class FolderPickerViewModel : ViewModelBase, IInitialize
     {
-        private const string driveRoot = "/storage/emulated";
-
         private readonly IPermissionRequestor requestor;
         private readonly IMediaService mediaService;
         private readonly InteractionRequest<CloseInteractionRequestContext> closeRequest;
+        private string rootPath;
         private string currentPath;
 
         public ObservableCollection<FileSystemItem> Items
@@ -98,62 +97,50 @@ namespace AudioBookPlayer.App.ViewModels
             Items = new ObservableCollection<FileSystemItem>();
             SelectItem = new Command<FileSystemItem>(DoSelectItem);
             Apply = new Command(DoApply);
+
         }
+
+        public Task InitializePathAsync(string path)
+        {
+            rootPath = path;
+            return ScanFolderAsync("");
+        }
+
+        /*
+        foreach(var drive in Directory.GetLogicalDrives())
+        {
+            System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Drive: '{drive}'");
+        }
+
+        var path = String.Empty;
+
+        path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+        System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] My Music: '{path}'");
+
+        path = System.Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic);
+        System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Common Music: '{path}'");
+        */
+
+        // content://com.android.externalstorage.documents/document/primary%3AMusic
+        // content://com.android.providers.media.documents/document/audio_root
+        // var backingFile = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "count.txt");
+        // content://com.android.providers.downloads.documents/document/raw:/storage/emulated/0/Download/book.m4b
+        // content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fbook.m4b
+        // raw:/storage/emulated/0/Download/book.m4b
 
         void IInitialize.OnInitialize()
         {
-            currentPath = "/";
-
-            foreach(var drive in Directory.GetLogicalDrives())
-            {
-                System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Drive: '{drive}'");
-            }
-
-            var path = String.Empty;
-
-            path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
-            System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] My Music: '{path}'");
-            
-            path = System.Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic);
+            var path = System.Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic);
             System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Common Music: '{path}'");
-
-            // content://com.android.externalstorage.documents/document/primary%3AMusic
-            // content://com.android.providers.media.documents/document/audio_root
-            // var backingFile = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "count.txt");
-
-            Task.Run(async () =>
-            {
-                await mediaService.LoadMediaAsync();
-
-                //var items = EnumerateFileSystemItems();
-                var items = Array.Empty<FileSystemItem>();
-
-                Items.Clear();
-
-                foreach (var item in items)
-                {
-                    Items.Add(item);
-                }
-            });
         }
 
-        private void DoSelectItem(FileSystemItem item)
+        private async void DoSelectItem(FileSystemItem item)
         {
             switch (item)
             {
                 case FolderItem folder:
                 {
-                    currentPath = Path.Combine(currentPath, folder.Title);
-
-                    //var items = EnumerateFileSystemItems();
-                    var items = Array.Empty<FileSystemItem>();
-
-                    Items.Clear();
-
-                    foreach (var fi in items)
-                    {
-                        Items.Add(fi);
-                    }
+                    await ScanFolderAsync(folder.Title);
 
                     break;
                 }
@@ -175,9 +162,24 @@ namespace AudioBookPlayer.App.ViewModels
 
         }
 
-        private IReadOnlyCollection<FileSystemItem> EnumerateFileSystemItems()
+        private async Task ScanFolderAsync(string path)
         {
-            var path = driveRoot + currentPath;
+            currentPath = String.IsNullOrEmpty(currentPath) ? path : Path.Combine(currentPath, path);
+
+            var items = await EnumerateFileSystemItemsAsync();
+
+            Items.Clear();
+
+            foreach (var fi in items)
+            {
+                Items.Add(fi);
+            }
+
+        }
+
+        private Task<IReadOnlyCollection<FileSystemItem>> EnumerateFileSystemItemsAsync()
+        {
+            var path = Path.Combine(rootPath, currentPath);
             var items = new List<FileSystemItem>();
 
             foreach (var folder in Directory.EnumerateDirectories(path))
@@ -212,7 +214,7 @@ namespace AudioBookPlayer.App.ViewModels
                 });
             }
 
-            return items.AsReadOnly();
+            return Task.FromResult<IReadOnlyCollection<FileSystemItem>>(items.AsReadOnly());
         }
     }
 }

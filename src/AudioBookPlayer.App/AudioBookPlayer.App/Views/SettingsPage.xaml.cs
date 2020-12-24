@@ -1,5 +1,6 @@
 ﻿using AudioBookPlayer.App.Core.Attributes;
 using AudioBookPlayer.App.ViewModels;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -14,16 +15,13 @@ namespace AudioBookPlayer.App.Views
             InitializeComponent();
         }
 
-        private async void OnSelectFolderRequest(object sender, SourceFolderRequestContext context)
+        private async void OnSelectFolderRequest(object sender, SourceFolderRequestContext context, Action callback)
         {
-            using (var deferral = context.GetDeferral())
-            {
-                var page = new FolderPickerPopup();
+            var page = new FolderPickerPopup();
 
-                await Shell.Current.Navigation.PushModalAsync(page);
+            await Shell.Current.Navigation.PushModalAsync(page);
 
-                deferral.Complete();
-            }
+            await page.InitializePathAsync(context.LibraryRootFolder);
         }
     }
 }
