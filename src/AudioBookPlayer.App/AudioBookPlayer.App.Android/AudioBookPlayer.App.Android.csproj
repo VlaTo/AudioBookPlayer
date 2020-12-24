@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AudioBookPlayerApplication.cs" />
+    <Compile Include="Core\Extensions\FileDateTime.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Services\AndroidPlaybackService.cs" />
     <Compile Include="Services\MediaService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
+    <Compile Include="Services\StorageSourceService.cs" />
     <Compile Include="SplashActivity.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -66,11 +66,13 @@ namespace AudioBookPlayer.App.Droid.Services
                 MediaStore.Files.FileColumns.DateAdded
             };
 
-            //var search = Android.Net.Uri.FromFile(folder1);
-            var search = uri5;
+            //var temp22 = Android.Net.Uri.FromFile(folder1);
+            //var temp23 = MediaStore.GetDocumentUri(Application.Context, temp22);
+            var search = Android.Net.Uri.Parse("raw:/storage/emulated/0/Download/");
+            //var search = uri5;
             var cursor = Application.Context.ApplicationContext.ContentResolver.Query(search, columns, null, null, null);
 
-            if (0 < cursor.Count)
+            if (null != cursor && 0 < cursor.Count)
             {
                 while (cursor.MoveToNext())
                 {
