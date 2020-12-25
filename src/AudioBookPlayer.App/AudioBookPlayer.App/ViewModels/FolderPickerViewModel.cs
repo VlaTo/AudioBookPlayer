@@ -1,11 +1,14 @@
-﻿using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -134,12 +137,14 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly IPermissionRequestor requestor;
         private readonly IStorageSourceService storageService;
-        //private readonly InteractionRequest<CloseInteractionRequestContext> closeRequest;
-        private readonly Stack<FileSystemItemViewModel> breadCrumps;
-        //private string rootPath;
-        //private string currentPath;
+        private readonly StringComparer comparer;
 
         public ObservableCollection<FileSystemItemViewModel> Items
+        {
+            get;
+        }
+
+        public ObservableStack<FileSystemItemViewModel> ReturnStack
         {
             get;
         }
@@ -169,13 +174,14 @@ namespace AudioBookPlayer.App.ViewModels
             IPermissionRequestor requestor, 
             IStorageSourceService storageService)
         {
+            comparer = StringComparer.Create(CultureInfo.CurrentUICulture, false);
+
             this.requestor = requestor;
             this.storageService = storageService;
 
-            breadCrumps = new Stack<FileSystemItemViewModel>();
-            
             CloseRequest = new InteractionRequest<CloseInteractionRequestContext>();
             Items = new ObservableCollection<FileSystemItemViewModel>();
+            ReturnStack = new ObservableStack<FileSystemItemViewModel>();
             LevelUp = new Command(DoLevelUp);
             SelectItem = new Command<FileSystemItemViewModel>(DoSelectItem);
             Apply = new Command(DoApply);
@@ -216,12 +222,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async void DoLevelUp(object _)
         {
-            if (0 == breadCrumps.Count)
+            if (0 == ReturnStack.Count)
             {
                 return;
             }
 
-            breadCrumps.Pop();
+            ReturnStack.Pop();
 
             await UpdateItemsAsync();
         }
@@ -232,7 +238,7 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 case FolderItemViewModel folder:
                 {
-                    breadCrumps.Push(folder);
+                    ReturnStack.Push(folder);
 
                     await UpdateItemsAsync();
 
@@ -260,27 +266,22 @@ namespace AudioBookPlayer.App.ViewModels
         {
             Items.Clear();
 
-            if (0 == breadCrumps.Count)
+            if (0 == ReturnStack.Count)
             {
                 var sources = await storageService.GetSourcesAsync();
 
-                foreach (var source in sources)
-                {
-                    var model = CreateModelFrom(source);
-                    Items.Add(model);
-                }
+                BindViewModels(sources.Select(source => CreateModelFrom(source)));
                 
                 return;
             }
 
-            var current = breadCrumps.Peek();
+            var current = ReturnStack.Peek();
 
             if (current is FolderItemViewModel folder)
             {
-                foreach (var model in await folder.EnumerateItemsAsync())
-                {
-                    Items.Add(model);
-                }
+                var models = await folder.EnumerateItemsAsync();
+
+                BindViewModels(models);
             }
         }
 
@@ -304,59 +305,65 @@ namespace AudioBookPlayer.App.ViewModels
             throw new Exception();
         }
 
-        /*private async Task ScanFolderAsync(string path)
+        private void BindViewModels(IEnumerable<FileSystemItemViewModel> models)
         {
-            currentPath = String.IsNullOrEmpty(currentPath) ? path : Path.Combine(currentPath, path);
-
-            var items = await EnumerateFileSystemItemsAsync();
-
-            Items.Clear();
-
-            foreach (var fi in items)
+            int FindIndex(FileSystemItemViewModel model)
             {
-                Items.Add(fi);
+                if (0 == Items.Count)
+                {
+                    return 0;
+                }
+
+                if (model.IsDirectory)
+                {
+                    for (var index = 0; index < Items.Count; index++)
+                    {
+                        if (Items[index].IsFile)
+                        {
+                            return index;
+                        }
+
+                        if (Items[index].IsDirectory)
+                        {
+                            var result = comparer.Compare(Items[index].Title, model.Title);
+
+                            if (0 <= result)
+                            {
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if (model.IsFile)
+                {
+                    for (var index = 0; index < Items.Count; index++)
+                    {
+                        if (Items[index].IsFile)
+                        {
+                            var result = comparer.Compare(Items[index].Title, model.Title);
+
+                            if (0 > result)
+                            {
+                                return index;
+                            }
+                        }
+
+                        if (Items[index].IsDirectory)
+                        {
+                            continue;
+                        }
+                    }
+                }
+
+                return Items.Count;
             }
 
+            foreach (var model in models)
+            {
+                var index = FindIndex(model);
+                Items.Insert(index, model);
+            }
         }
-
-        private Task<IReadOnlyCollection<FileSystemItem>> EnumerateFileSystemItemsAsync()
-        {
-            var path = Path.Combine(rootPath, currentPath);
-            var items = new List<FileSystemItem>();
-
-            foreach (var folder in Directory.EnumerateDirectories(path))
-            {
-                var created = Directory.GetCreationTime(folder);
-
-                items.Add(new FolderItem
-                {
-                    Title = folder,
-                    Created = created
-                });
-            }
-
-            foreach (var file in Directory.EnumerateFiles(path, "*.mp3,*.m4b"))
-            {
-                var length = 0L;
-
-                if (false == File.Exists(file))
-                {
-                    continue;
-                }
-
-                using (var stream = File.OpenRead(path))
-                {
-                    length = stream.Length;
-                }
-
-                items.Add(new FileItem
-                {
-                    Title = file,
-                    Length = length
-                });
-            }
-
-            return Task.FromResult<IReadOnlyCollection<FileSystemItem>>(items.AsReadOnly());
-        }*/
     }
 }

@@ -4,7 +4,9 @@ using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
 using Xamarin.Forms;
 
-[assembly: ExportFont("fontello.ttf", Alias = "Icons")]
+//[assembly: ExportFont("fontello.ttf", Alias = "Icons")]
+[assembly: ExportFont("font-awesome-regular.otf", Alias = "FontAwesomeRegular")]
+[assembly: ExportFont("font-awesome-solid.otf", Alias = "FontAwesomeSolid")]
 
 namespace AudioBookPlayer.App
 {
