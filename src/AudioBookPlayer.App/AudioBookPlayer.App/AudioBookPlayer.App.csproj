@@ -6,11 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Fonts\fontello.ttf" />
+    <None Remove="Resources\Fonts\font-awesome-regular.otf" />
+    <None Remove="Resources\Fonts\font-awesome-solid.otf" />
+    <None Remove="Resources\Fonts\font-awesome.otf" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Fonts\fontello.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\font-awesome-regular.otf" />
+    <EmbeddedResource Include="Resources\Fonts\font-awesome-solid.otf" />
   </ItemGroup>
 
   <ItemGroup>
