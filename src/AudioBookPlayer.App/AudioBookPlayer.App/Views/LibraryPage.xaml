@@ -6,7 +6,8 @@
     xmlns:v="clr-namespace:AudioBookPlayer.App.Views"
     x:Class="AudioBookPlayer.App.Views.LibraryPage"
     core:ViewModelLocation.AutowireViewModel="True"
-    Title="Library">
+    Title="Library"
+    BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}">
     <TabbedPage.Resources>
         
     </TabbedPage.Resources>

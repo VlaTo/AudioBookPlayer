@@ -6,6 +6,7 @@
     xmlns:c="clr-namespace:LibraProgramming.Xamarin.Controls;assembly=LibraProgramming.Xamarin.Controls"
     xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.SettingsPage"
     core:ViewModelLocation.AutowireViewModel="True">
     <i:Interaction.RequestTriggers>
@@ -21,11 +22,15 @@
         <TableView
             Intent="Settings">
             <TableRoot>
-                <TableSection Title="Path">
+                <TableSection
+                    Title="{Static res:AppResources.LibrarySettingsSectionTitle}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}">
                     <TextCell
-                        Text="Library root"
-                        Detail="Select library root folder"
+                        Text="{Static res:AppResources.LibraryRootFolderTitle}"
+                        Detail="{Binding Path=LibraryRootFolder, Mode=OneWay, TargetNullValue={Static res:AppResources.LibraryNullRootFolder}}"
                         Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
+                        TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                        DetailColor="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
                     />
                 </TableSection>
             </TableRoot>

@@ -53,7 +53,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async void OnRefreshCommand()
         {
-            try
+            /*try
             {
                 IsBusy = true;
 
@@ -77,7 +77,7 @@ namespace AudioBookPlayer.App.ViewModels
             finally
             {
                 IsBusy = false;
-            }
+            }*/
         }
     }
 }

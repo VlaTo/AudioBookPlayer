@@ -17,12 +17,20 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             var collection = new List<IFileSystemSource>();
 
-            collection.Add(new DownloadStorageFolder(this));
+            collection.Add(new SourceFolder(
+                this,
+                Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads)
+            ));
+
+            collection.Add(new SourceFolder(
+                this, 
+                Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic)
+            ));
 
             return Task.FromResult<IReadOnlyCollection<IFileSystemSource>>(collection.AsReadOnly());
         }
 
-        private sealed class DownloadStorageFolder : IFileSystemSource
+        private sealed class SourceFolder : IFileSystemSource
         {
             private readonly StorageSourceService service;
             private Java.IO.File folder;
@@ -39,15 +47,15 @@ namespace AudioBookPlayer.App.Droid.Services
 
             public long Size => folder.Length();
 
-            public DownloadStorageFolder(StorageSourceService service)
+            public SourceFolder(StorageSourceService service, Java.IO.File folder)
             {
                 this.service = service;
-
-                folder = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads);
+                this.folder = folder;
+                //folder = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
                 LastModified = FileDateTime.FromFileTime(folder.LastModified());
             }
 
-        public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
+            public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
             {
                 var files = new List<IFileSystemItem>();
 
@@ -81,9 +89,10 @@ namespace AudioBookPlayer.App.Droid.Services
             }
         }
 
+
         private sealed class DirectoryItem : IFileSystemItem
         {
-            private readonly DownloadStorageFolder owner;
+            private readonly SourceFolder owner;
             private readonly DirectoryItem parent;
             private readonly Java.IO.File folder;
 
@@ -99,7 +108,7 @@ namespace AudioBookPlayer.App.Droid.Services
 
             public long Size { get; } = -1;
 
-            public DirectoryItem(DownloadStorageFolder owner, DirectoryItem parent, Java.IO.File folder)
+            public DirectoryItem(SourceFolder owner, DirectoryItem parent, Java.IO.File folder)
             {
                 this.owner = owner;
                 this.parent = parent;
@@ -140,7 +149,7 @@ namespace AudioBookPlayer.App.Droid.Services
 
         private sealed class FileItem : IFileSystemItem
         {
-            private readonly DownloadStorageFolder owner;
+            private readonly SourceFolder owner;
             private readonly DirectoryItem parent;
             private readonly Java.IO.File file;
 
@@ -156,7 +165,7 @@ namespace AudioBookPlayer.App.Droid.Services
 
             public long Size => file.Length();
 
-            public FileItem(DownloadStorageFolder owner, DirectoryItem parent, Java.IO.File file)
+            public FileItem(SourceFolder owner, DirectoryItem parent, Java.IO.File file)
             {
                 this.owner = owner;
                 this.parent = parent;

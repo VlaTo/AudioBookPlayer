@@ -1,8 +1,8 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction;
-using LibraProgramming.Xamarin.Interaction.Extensions;
 using System;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -10,21 +10,19 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class SourceFolderRequestContext : InteractionRequestContext
     {
-        public string LibraryRootFolder
-        {
-            get;
-            set;
-        }
+        private readonly TaskCompletionSource<string> tcs;
 
         public SourceFolderRequestContext()
         {
+            tcs = new TaskCompletionSource<string>();
         }
 
-        public Deferral GetDeferral()
+        public Deferral<string> GetDeferral()
         {
-            var tcs = new TaskCompletionSource();
-            return new Deferral(tcs);
+            return new Deferral<string>(tcs);
         }
+
+        public Task<string> WaitAsync() => tcs.Task;
     }
 
     public sealed class SettingsViewModel : ViewModelBase
@@ -33,7 +31,7 @@ namespace AudioBookPlayer.App.ViewModels
         //private readonly Command selectLibraryRootFolder;
         private readonly ApplicationSettings settings;
         private readonly IPermissionRequestor permissions;
-        private readonly IMediaService mediaService;
+        //private readonly IMediaService mediaService;
 
         public string LibraryRootFolder
         {
@@ -60,12 +58,11 @@ namespace AudioBookPlayer.App.ViewModels
 
         public SettingsViewModel(
             ApplicationSettings settings,
-            IPermissionRequestor permissions,
-            IMediaService mediaService)
+            IPermissionRequestor permissions)
         {
             this.settings = settings;
             this.permissions = permissions;
-            this.mediaService = mediaService;
+            //this.mediaService = mediaService;
 
             SelectLibraryRootFolderRequest = new InteractionRequest<SourceFolderRequestContext>();
             SelectLibraryRootFolder = new Command(OnSelectLibraryRootFolderCommand);
@@ -80,19 +77,24 @@ namespace AudioBookPlayer.App.ViewModels
                 return;
             }
 
-            var path = settings.LibraryRootPath;
+            var context = new SourceFolderRequestContext();
 
-            if (String.IsNullOrEmpty(path))
+            SelectLibraryRootFolderRequest.Raise(context);
+
+            try
             {
-                path = await mediaService.GetRootFolderAsync();
+                var path = await context.WaitAsync();
+
+                if (false == String.IsNullOrEmpty(path))
+                {
+                    LibraryRootFolder = path;
+                    System.Diagnostics.Debug.WriteLine($"[SettingsViewModel] [OnSelectLibraryRootFolderCommand] Path: \"{path}\"");
+                }
             }
-
-            var context = new SourceFolderRequestContext
+            catch (TaskCanceledException)
             {
-                LibraryRootFolder = path
-            };
-
-            await SelectLibraryRootFolderRequest.RaiseAsync(context);
+                System.Diagnostics.Debug.WriteLine($"[SettingsViewModel] [OnSelectLibraryRootFolderCommand] Selection canceled");
+            }
         }
     }
 }

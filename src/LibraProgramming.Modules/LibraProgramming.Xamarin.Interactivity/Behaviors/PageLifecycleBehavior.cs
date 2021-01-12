@@ -7,22 +7,25 @@ namespace LibraProgramming.Xamarin.Interactivity.Behaviors
 {
     public sealed class PageLifecycleBehavior : BehaviorBase<Page>
     {
-        protected override void OnAttachedTo(Page bindable)
+        protected override void OnAttachedTo(Page page)
         {
-            base.OnAttachedTo(bindable);
+            base.OnAttachedTo(page);
 
-            bindable.Appearing += DoPageAppearing;
-            bindable.Disappearing += DoPageDisappearing;
+            page.Appearing += DoPageAppearing;
+            page.Disappearing += DoPageDisappearing;
+
+            PageInvocation.InvokeViewModelAction<IInitialize>(AttachedObject, aware => aware.OnInitialize());
+            //await PageInvocation.InvokeViewModelActionAsync<IInitializeAsync>(AttachedObject, aware => aware.OnInitialize());
         }
 
         private void DoPageAppearing(object sender, EventArgs e)
         {
-            PageInvocation.InvokeViewModelAction<IInitialize>(AttachedObject, aware => aware.OnInitialize());
+            PageInvocation.InvokeViewModelAction<IPageLifecycleAware>(AttachedObject, aware => aware.OnAppearing());
         }
 
         private void DoPageDisappearing(object sender, EventArgs e)
         {
-            PageInvocation.InvokeViewModelAction<IDestructible>(AttachedObject, aware => aware.OnDestroy());
+            PageInvocation.InvokeViewModelAction<IPageLifecycleAware>(AttachedObject, aware => aware.OnDisappearing());
         }
     }
 }

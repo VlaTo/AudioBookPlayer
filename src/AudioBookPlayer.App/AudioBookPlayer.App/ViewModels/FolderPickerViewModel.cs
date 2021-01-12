@@ -72,6 +72,11 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref childCount, value);
         }
 
+        public string Path
+        {
+            get => FileSystemItem.Path;
+        }
+
         public FolderItemViewModel(IFileSystemItem folder)
             : base(folder)
         {
@@ -187,10 +192,10 @@ namespace AudioBookPlayer.App.ViewModels
             Apply = new Command(DoApply);
         }
 
-        public async Task InitializePathAsync(string path)
+        /*public async Task InitializeAsync()
         {
             await UpdateItemsAsync();
-        }
+        }*/
 
         /*
         foreach(var drive in Directory.GetLogicalDrives())
@@ -214,10 +219,9 @@ namespace AudioBookPlayer.App.ViewModels
         // content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fbook.m4b
         // raw:/storage/emulated/0/Download/book.m4b
 
-        void IInitialize.OnInitialize()
+        async void IInitialize.OnInitialize()
         {
-            var path = System.Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic);
-            System.Diagnostics.Debug.WriteLine($"[ChooseLibraryFolderViewModel] [OnInitialize] Common Music: '{path}'");
+            await UpdateItemsAsync();
         }
 
         private async void DoLevelUp(object _)
@@ -256,10 +260,14 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoApply(object _)
         {
-            var context = new CloseInteractionRequestContext(String.Empty);
+            var current = ReturnStack.Peek();
 
-            CloseRequest.Raise(context);
+            if (current is FolderItemViewModel folder)
+            {
+                var context = new CloseInteractionRequestContext(folder.Path);
 
+                CloseRequest.Raise(context);
+            }
         }
 
         private async Task UpdateItemsAsync()
