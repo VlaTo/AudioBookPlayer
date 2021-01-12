@@ -1,7 +1,6 @@
 ﻿using AudioBookPlayer.App.Core.Attributes;
 using AudioBookPlayer.App.ViewModels;
-using LibraProgramming.Xamarin.Interaction.Contracts;
-using System.Threading.Tasks;
+using LibraProgramming.Xamarin.Interaction;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -9,30 +8,30 @@ namespace AudioBookPlayer.App.Views
 {
     [ViewModel(typeof(FolderPickerViewModel))]
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class FolderPickerPopup : ContentPage, IInitialize
+    public partial class FolderPickerPopup : ContentPage
     {
-        public FolderPickerPopup()
+        private readonly Deferral<string> deferral;
+
+        public FolderPickerPopup(SourceFolderRequestContext context)
         {
+            deferral = context.GetDeferral();
+
             InitializeComponent();
         }
 
-        public Task InitializePathAsync(string path)
+        protected override void OnDisappearing()
         {
-            if (BindingContext is FolderPickerViewModel viewModel && null != viewModel)
+            base.OnDisappearing();
+
+            if (false == deferral.IsCompleted)
             {
-                return viewModel.InitializePathAsync(path);
+                deferral.Cancel();
             }
-
-            return Task.CompletedTask;
         }
 
-        void IInitialize.OnInitialize()
+        private async void OnCloseRequest(object _, CloseInteractionRequestContext requestContext)
         {
-            ;
-        }
-
-        private async void OnApplyRequest(object sender, CloseInteractionRequestContext context)
-        {
+            deferral.Complete(requestContext.Argument);
             await Shell.Current.Navigation.PopModalAsync();
         }
     }

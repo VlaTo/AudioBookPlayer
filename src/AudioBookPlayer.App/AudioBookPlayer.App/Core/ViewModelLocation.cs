@@ -4,7 +4,8 @@ namespace AudioBookPlayer.App.Core
 {
     public static class ViewModelLocation
     {
-        private const string AutowireViewModelPropertyName = "AutowireViewModelProperty";
+        //private const string AutowireViewModelPropertyName = "AutowireViewModelProperty";
+        private const string AutowireViewModelPropertyName = "AutowireViewModel";
 
         public static readonly BindableProperty AutowireViewModelProperty;
 

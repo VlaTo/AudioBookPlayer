@@ -15,13 +15,10 @@ namespace AudioBookPlayer.App.Views
             InitializeComponent();
         }
 
-        private async void OnSelectFolderRequest(object sender, SourceFolderRequestContext context, Action callback)
+        private async void OnSelectFolderRequest(object sender, SourceFolderRequestContext context, Action _)
         {
-            var page = new FolderPickerPopup();
-
-            await Shell.Current.Navigation.PushModalAsync(page);
-
-            await page.InitializePathAsync(context.LibraryRootFolder);
+            var popup = new FolderPickerPopup(context);
+            await Shell.Current.Navigation.PushModalAsync(popup);
         }
     }
 }

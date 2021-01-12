@@ -4,7 +4,7 @@ using System;
 
 namespace AudioBookPlayer.App.Droid
 {
-    [Application(Theme = "@style/MainTheme")]
+    [Application(Theme = "@style/MainTheme", Label = "@strings/app_name")]
     public sealed class AudioBookPlayerApplication : Application
     {
         public AudioBookPlayerApplication(IntPtr javaReference, JniHandleOwnership transfer)
