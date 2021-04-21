@@ -1,20 +1,34 @@
-﻿using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Data;
+using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AudioBookPlayer.App.Services
 {
     internal sealed class SqLiteDatabaseBookShelfProvider : IBookShelfProvider
     {
+        private readonly IBookShelfDataContext context;
+
         [PrefferedConstructor]
-        public SqLiteDatabaseBookShelfProvider()
+        public SqLiteDatabaseBookShelfProvider(IBookShelfDataContext context)
         {
+            this.context = context;
         }
 
         public IReadOnlyCollection<AudioBook> GetBooks()
         {
-            return new AudioBook[0];
+            var books = context.Books
+                .Where(book => !book.IsExcluded)
+                .Select(book => new AudioBook(book.Id)
+                {
+                    Title = book.Title
+                })
+                .AsNoTracking()
+                .ToArray();
+
+            return books;
         }
     }
 }
