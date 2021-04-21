@@ -1,12 +1,10 @@
-﻿using AudioBookPlayer.App.ViewModels;
-using AudioBookPlayer.App.Views;
+﻿using AudioBookPlayer.App.Views;
 using System;
-using System.Collections.Generic;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App
 {
-    public partial class AppShell : Xamarin.Forms.Shell
+    public partial class AppShell
     {
         public AppShell()
         {
@@ -18,7 +16,7 @@ namespace AudioBookPlayer.App
 
         private async void OnMenuItemClicked(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//LoginPage");
+            await Current.GoToAsync("//LoginPage");
         }
     }
 }

@@ -6,7 +6,7 @@ namespace AudioBookPlayer.App.Models
 {
     public sealed class AudioBook
     {
-        public Guid Id
+        public int Id
         {
             get;
         }
@@ -14,9 +14,10 @@ namespace AudioBookPlayer.App.Models
         public string Title
         {
             get;
+            set;
         }
 
-        public AudioBook(Guid id)
+        public AudioBook(int id)
         {
             Id = id;
         }
