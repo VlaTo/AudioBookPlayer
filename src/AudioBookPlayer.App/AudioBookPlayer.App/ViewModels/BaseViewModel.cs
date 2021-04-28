@@ -10,45 +10,43 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
-        public IDataStore<Item> DataStore => DependencyService.Get<IDataStore<Item>>();
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        bool isBusy = false;
-        public bool IsBusy
-        {
-            get { return isBusy; }
-            set { SetProperty(ref isBusy, value); }
-        }
-
-        string title = string.Empty;
-        public string Title
-        {
-            get { return title; }
-            set { SetProperty(ref title, value); }
-        }
-
-        protected bool SetProperty<T>(ref T backingStore, T value,
-            [CallerMemberName] string propertyName = "",
+        protected bool SetProperty<T>(
+            ref T field,
+            T value,
+            [CallerMemberName] string propertyName = null,
             Action onChanged = null)
         {
-            if (EqualityComparer<T>.Default.Equals(backingStore, value))
-                return false;
+            var comparer = EqualityComparer<T>.Default;
 
-            backingStore = value;
-            onChanged?.Invoke();
+            if (comparer.Equals(field, value))
+            {
+                return false;
+            }
+
+            field = value;
+
+            if (null != onChanged)
+            {
+                onChanged.Invoke();
+            }
+
             OnPropertyChanged(propertyName);
+
             return true;
         }
 
-        #region INotifyPropertyChanged
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             var changed = PropertyChanged;
-            if (changed == null)
+
+            if (null == changed)
+            {
                 return;
+            }
 
             changed.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
     }
 }

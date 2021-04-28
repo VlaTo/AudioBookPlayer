@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
@@ -8,6 +9,7 @@ using AudioBookPlayer.App.Droid.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
+using Microsoft.Data.Sqlite;
 using Xamarin.Forms;
 
 //[assembly: UsesPermission(Android.Manifest.Permission.AccessMediaLocation)]

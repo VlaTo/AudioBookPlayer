@@ -2,8 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 
 namespace AudioBookPlayer.App.Data
 {
@@ -26,6 +28,7 @@ namespace AudioBookPlayer.App.Data
         public void EnsureCreated()
         {
             Database.EnsureCreated();
+            Database.Migrate();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -47,10 +50,31 @@ namespace AudioBookPlayer.App.Data
 
                 case Device.Android:
                 {
-                    var folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    ///var folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+                    /*var folders = new[]
+                    {
+                        Environment.SpecialFolder.LocalApplicationData,
+                        Environment.SpecialFolder.ApplicationData,
+                        Environment.SpecialFolder.CommonApplicationData,
+                        Environment.SpecialFolder.CommonDocuments,
+                        Environment.SpecialFolder.MyDocuments,
+                        Environment.SpecialFolder.Personal,
+                        Environment.SpecialFolder.UserProfile
+                    };
+
+                    foreach (var folder in folders)
+                    {
+                        var path = Environment.GetFolderPath(folder);
+                        Debug.Print($"[SqLiteBookShelfDataContext] [OnConfiguring] Folder: {folder} => \"{path}\"");
+                    }*/
+
                     //var info = Directory.CreateDirectory(folder);
-                    // /data/user/0/com.libraprogramming.audiobookplayer.app/files/.local/share/library.db
-                    databasePath = Path.Combine(folder, databaseName);
+                    // LocalApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.local/share/library.db
+                    // ApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.config/library.db
+
+                    //databasePath = Path.Combine(folder, databaseName);
+                    databasePath = ":memory:";
 
                     break;
                 }
