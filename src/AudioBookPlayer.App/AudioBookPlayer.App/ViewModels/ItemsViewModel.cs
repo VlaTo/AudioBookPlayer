@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Services;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -11,15 +12,25 @@ namespace AudioBookPlayer.App.ViewModels
     public class ItemsViewModel : BaseViewModel
     {
         private Item _selectedItem;
+        private bool _isBusy;
 
         public ObservableCollection<Item> Items { get; }
+
         public Command LoadItemsCommand { get; }
+
         public Command AddItemCommand { get; }
+
         public Command<Item> ItemTapped { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set => SetProperty(ref _isBusy, value);
+        }
 
         public ItemsViewModel()
         {
-            Title = "Browse";
+            //Title = "Browse";
             Items = new ObservableCollection<Item>();
             LoadItemsCommand = new Command(async () => await ExecuteLoadItemsCommand());
 
@@ -30,7 +41,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         async Task ExecuteLoadItemsCommand()
         {
-            IsBusy = true;
+            /*IsBusy = true;
 
             try
             {
@@ -48,12 +59,12 @@ namespace AudioBookPlayer.App.ViewModels
             finally
             {
                 IsBusy = false;
-            }
+            }*/
         }
 
         public void OnAppearing()
         {
-            IsBusy = true;
+            //IsBusy = true;
             SelectedItem = null;
         }
 

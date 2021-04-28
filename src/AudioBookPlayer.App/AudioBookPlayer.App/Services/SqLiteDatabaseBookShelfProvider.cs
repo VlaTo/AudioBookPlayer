@@ -1,4 +1,5 @@
-﻿using AudioBookPlayer.App.Data;
+﻿using System;
+using AudioBookPlayer.App.Data;
 using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,8 @@ namespace AudioBookPlayer.App.Services
                 .ToArray();
 
             return books;
+
+            //return Array.Empty<AudioBook>();
         }
     }
 }
