@@ -8,12 +8,12 @@ using System.Linq;
 
 namespace AudioBookPlayer.App.Services
 {
-    internal sealed class SqLiteDatabaseBookShelfProvider : IBookShelfProvider
+    internal sealed class BookShelfProvider : IBookShelfProvider
     {
         private readonly IBookShelfDataContext context;
 
         [PrefferedConstructor]
-        public SqLiteDatabaseBookShelfProvider(IBookShelfDataContext context)
+        public BookShelfProvider(IBookShelfDataContext context)
         {
             this.context = context;
         }
