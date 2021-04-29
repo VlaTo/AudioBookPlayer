@@ -1,36 +1,19 @@
-﻿using System;
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
-using Android.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Droid.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
-using Microsoft.Data.Sqlite;
 using Xamarin.Forms;
-
-//[assembly: UsesPermission(Android.Manifest.Permission.AccessMediaLocation)]
-//[assembly: UsesPermission(Android.Manifest.Permission.MediaContentControl)]
-[assembly: UsesPermission(Android.Manifest.Permission.ReadExternalStorage)]
-//[assembly: UsesPermission(Android.Manifest.Permission.ManageDocuments)]
-[assembly: UsesPermission(Android.Manifest.Permission.WakeLock)]
-[assembly: UsesPermission(Android.Manifest.Permission.ForegroundService)]
 
 namespace AudioBookPlayer.App.Droid
 {
-    [Activity(/*Label = "@string/app_name",*/ Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        private bool backPressedOnce;
-
-        public MainActivity()
-        {
-            backPressedOnce = false;
-        }
-
         protected override void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;

@@ -25,7 +25,7 @@ namespace AudioBookPlayer.App.Data
             set;
         }
 
-        public void EnsureCreated()
+        public void Initialize()
         {
             Database.EnsureCreated();
             Database.Migrate();

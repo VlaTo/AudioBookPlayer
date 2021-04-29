@@ -15,6 +15,6 @@ namespace AudioBookPlayer.App.Data
             get;
         }
 
-        void EnsureCreated();
+        void Initialize();
     }
 }

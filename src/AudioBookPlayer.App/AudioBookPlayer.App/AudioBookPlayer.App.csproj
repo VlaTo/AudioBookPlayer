@@ -3,7 +3,11 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-    <NeutralLanguage>en</NeutralLanguage>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Libra Programming</Authors>
+    <Company>Libra Programming</Company>
+    <Product>Audio Book Player</Product>
+    <Copyright>LibraProgramming</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

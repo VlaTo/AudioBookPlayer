@@ -6,6 +6,12 @@ using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
 using Microsoft.Data.Sqlite;
 using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+
+[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
+
+[assembly: ExportFont("font-awesome-regular.otf", Alias = "FontAwesomeRegular")]
+[assembly: ExportFont("font-awesome-solid.otf", Alias = "FontAwesomeSolid")]
 
 namespace AudioBookPlayer.App
 {
@@ -41,9 +47,9 @@ namespace AudioBookPlayer.App
 
         protected override void RegisterTypesCore(DependencyContainer container)
         {
-            container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
             container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
-            container.Register<IBookShelfProvider, SqLiteDatabaseBookShelfProvider>(InstanceLifetime.Singleton);
+            container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton, createimmediate: true);
+            container.Register<IBookShelfProvider, BookShelfProvider>(InstanceLifetime.Singleton);
             container.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
         }
 
@@ -53,7 +59,7 @@ namespace AudioBookPlayer.App
 
             try
             {
-                db.EnsureCreated();
+                db.Initialize();
             }
             catch (SqliteException exception)
             {
