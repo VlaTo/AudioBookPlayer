@@ -1,11 +1,9 @@
 ﻿using AudioBookPlayer.App.Data.Models;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Data.Common;
-using System.Diagnostics;
 using System.IO;
 using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration;
 
 namespace AudioBookPlayer.App.Data
 {
@@ -28,7 +26,8 @@ namespace AudioBookPlayer.App.Data
         public void Initialize()
         {
             Database.EnsureCreated();
-            Database.Migrate();
+            //CreateMigrationHistory();
+            //Database.Migrate();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -50,7 +49,9 @@ namespace AudioBookPlayer.App.Data
 
                 case Device.Android:
                 {
-                    ///var folder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    // /storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files
+                    //var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                    var folder = "/storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files";
 
                     /*var folders = new[]
                     {
@@ -69,12 +70,12 @@ namespace AudioBookPlayer.App.Data
                         Debug.Print($"[SqLiteBookShelfDataContext] [OnConfiguring] Folder: {folder} => \"{path}\"");
                     }*/
 
-                    //var info = Directory.CreateDirectory(folder);
+                    var info = Directory.CreateDirectory(folder);
                     // LocalApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.local/share/library.db
                     // ApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.config/library.db
 
-                    //databasePath = Path.Combine(folder, databaseName);
-                    databasePath = ":memory:";
+                    databasePath = Path.Combine(folder, databaseName);
+                    //databasePath = ":memory:";
 
                     break;
                 }
@@ -85,11 +86,13 @@ namespace AudioBookPlayer.App.Data
                 }
             }
 
-            var builder = new DbConnectionStringBuilder
+            var builder = new SqliteConnectionStringBuilder
             {
-                {"Filename", databasePath}
+                DataSource = databasePath,
+                Cache = SqliteCacheMode.Private,
+                Mode = SqliteOpenMode.ReadWriteCreate
             };
-
+            
             optionsBuilder.UseSqlite(builder.ConnectionString);
         }
 
@@ -99,6 +102,17 @@ namespace AudioBookPlayer.App.Data
             modelBuilder.Entity<SourceFile>()
                 .HasIndex(nameof(SourceFile.Id), nameof(SourceFile.BookId))
                 .IsUnique();
+        }
+
+        private void CreateMigrationHistory()
+        {
+            using (var transaction = Database.BeginTransaction())
+            {
+                var sql = "CREATE TABLE [__EFMigrationsHistory] ([MigrationId] text NOT NULL, [ProductVersion] text NOT NULL, CONSTRAINT [sqlite_autoindex___EFMigrationsHistory_1] PRIMARY KEY ([MigrationId]));";
+                var result = Database.ExecuteSqlRaw(sql);
+
+                transaction.Commit();
+            }
         }
     }
 }

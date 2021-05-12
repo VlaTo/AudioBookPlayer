@@ -3,6 +3,7 @@
     xmlns="http://xamarin.com/schemas/2014/forms" 
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:AudioBookPlayer.App.Views"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     Title="AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.AppShell">
 
@@ -179,15 +180,15 @@
     </FlyoutItem>-->
     
     <FlyoutItem
-        Title="Library"
+        Title="{Static res:AppResources.ShellMenuLibraryItem}"
         Icon="icon_feed.png">
         <ShellContent
-            Route="Library"
+            Route="LibraryPage"
             ContentTemplate="{DataTemplate local:LibraryPage}"
         />
     </FlyoutItem>
     <FlyoutItem
-        Title="Settings"
+        Title="{Static res:AppResources.ShellMenuSettingItem}"
         Icon="icon_feed.png">
         <ShellContent
             Route="SettingsPage"
@@ -195,7 +196,7 @@
         />
     </FlyoutItem>
     <FlyoutItem
-        Title="About"
+        Title="{Static res:AppResources.ShellMenuAboutItem}"
         Icon="icon_about.png">
         <ShellContent
             Route="AboutPage"

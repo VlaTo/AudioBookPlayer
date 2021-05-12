@@ -117,13 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AllBooksTab" xml:space="preserve">
+    <value>Все</value>
+  </data>
   <data name="LibraryNullRootFolder" xml:space="preserve">
     <value>(нет значения)</value>
+  </data>
+  <data name="LibraryPageTitle" xml:space="preserve">
+    <value>Библиотека</value>
   </data>
   <data name="LibraryRootFolderTitle" xml:space="preserve">
     <value>Корневая папка</value>
   </data>
   <data name="LibrarySettingsSectionTitle" xml:space="preserve">
     <value>Библиотека</value>
+  </data>
+  <data name="RecentBooksTab" xml:space="preserve">
+    <value>Недавние</value>
+  </data>
+  <data name="ShellMenuAboutItem" xml:space="preserve">
+    <value>О программе...</value>
+  </data>
+  <data name="ShellMenuLibraryItem" xml:space="preserve">
+    <value>Библиотека</value>
+  </data>
+  <data name="ShellMenuSettingItem" xml:space="preserve">
+    <value>Настройки</value>
   </data>
 </root>
