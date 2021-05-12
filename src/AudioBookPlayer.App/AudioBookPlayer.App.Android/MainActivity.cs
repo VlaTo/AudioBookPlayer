@@ -1,16 +1,13 @@
-﻿using System;
-using Android.App;
+﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.Content;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Droid.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
 using Xamarin.Forms;
-using Environment = Android.OS.Environment;
 
 namespace AudioBookPlayer.App.Droid
 {
@@ -31,7 +28,7 @@ namespace AudioBookPlayer.App.Droid
             Controls.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
-            var ismounded = String.Equals(Environment.ExternalStorageState, Environment.MediaMounted);
+            /*var ismounded = String.Equals(Android.OS.Environment.ExternalStorageState, Android.OS.Environment.MediaMounted);
             if (ismounded)
             {
                 var dirs = ContextCompat.GetExternalFilesDirs(ApplicationContext, null);
@@ -41,7 +38,7 @@ namespace AudioBookPlayer.App.Droid
                     var primaryExternalStorage = dirs[0];
 
                 }
-            }
+            }*/
 
             LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
         }

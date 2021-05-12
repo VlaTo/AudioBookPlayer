@@ -1,51 +1,41 @@
-﻿using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using AudioBookPlayer.App.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using AudioBookPlayer.App.Services;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
-using static Xamarin.Essentials.Permissions;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
-    public class ReadExternalStorage : BasePlatformPermission
+    /// <summary>
+    /// 
+    /// </summary>
+    public class ReadExternalStorage : Permissions.BasePlatformPermission
     {
-        //[TupleElementNames(new[] { "androidPermission", "isRuntime" })]
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions
         {
-            get
+            get;
+        }
+
+        public ReadExternalStorage()
+        {
+            RequiredPermissions = new[]
             {
-                var temp = base.RequiredPermissions;
-                return new[]
-                {
-                    (Android.Manifest.Permission.ReadExternalStorage, true),
-                    (Android.Manifest.Permission.MediaContentControl, true)
-                };
-            }
+                (Android.Manifest.Permission.ReadExternalStorage, true)
+                //(Android.Manifest.Permission.MediaContentControl, true)
+            };
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     internal sealed class PermissionRequestor : IPermissionRequestor
     {
-        public PermissionRequestor()
-        {
-
-        }
-
         public Task<PermissionStatus> CheckAndRequestMediaPermissionsAsync()
         {
             return CheckAndRequestPermissionAsync<ReadExternalStorage>();
         }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<TPermission>()
-            where TPermission : BasePermission, new()
+            where TPermission : Permissions.BasePermission, new()
         {
             var status = await Permissions.CheckStatusAsync<TPermission>();
 
