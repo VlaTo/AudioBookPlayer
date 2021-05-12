@@ -17,6 +17,12 @@ namespace AudioBookPlayer.App.Models
             set;
         }
 
+        public string Author
+        {
+            get;
+            set;
+        }
+
         public AudioBook(int id)
         {
             Id = id;

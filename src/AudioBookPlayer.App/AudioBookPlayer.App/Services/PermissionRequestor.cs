@@ -20,7 +20,7 @@ namespace AudioBookPlayer.App.Services
         }
     }*/
 
-    internal sealed class PermissionRequestor : IPermissionRequestor
+    /*internal sealed class PermissionRequestor : IPermissionRequestor
     {
         public PermissionRequestor()
         {
@@ -79,5 +79,5 @@ namespace AudioBookPlayer.App.Services
 
             return status;
         }
-    }
+    }*/
 }
