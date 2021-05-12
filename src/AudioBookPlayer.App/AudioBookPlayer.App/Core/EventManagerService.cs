@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace LibraProgramming.Xamarin.Interaction
+namespace AudioBookPlayer.App.Core
 {
     internal struct Subscription
     {

@@ -4,15 +4,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:v="clr-namespace:AudioBookPlayer.App.Views"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.LibraryPage"
     core:ViewModelLocation.AutowireViewModel="True"
-    Title="Library"
-    BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}">
+    Title="{Static res:AppResources.LibraryPageTitle}"
+    BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
+    IsBusy="{Binding Path=IsBusy, Mode=OneWay}">
     <TabbedPage.Resources>
-        
     </TabbedPage.Resources>
+    <TabbedPage.ToolbarItems>
+        <ToolbarItem
+            Command="{Binding Path=Refresh, Mode=OneTime}"
+            Order="Secondary"
+            Priority="0"
+            Text="Refresh">
+        </ToolbarItem>
+    </TabbedPage.ToolbarItems>
     <TabbedPage.Children>
-        <v:RecentBooksPage Title="Recent" />
-        <v:AllBooksPage Title="All" />
+        <v:RecentBooksPage Title="{Static res:AppResources.RecentBooksTab}" />
+        <v:AllBooksPage Title="{Static res:AppResources.AllBooksTab}" />
     </TabbedPage.Children>
 </TabbedPage>

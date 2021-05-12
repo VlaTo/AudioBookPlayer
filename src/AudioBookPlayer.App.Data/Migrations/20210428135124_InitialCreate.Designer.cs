@@ -15,7 +15,7 @@ namespace AudioBookPlayer.App.Data.Migrations
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
+            /*modelBuilder
                 .HasAnnotation("ProductVersion", "2.2.1-servicing-10028")
                 .Entity("AudioBookPlayer.App.Data.Models.Book", b =>
                 {
@@ -32,7 +32,6 @@ namespace AudioBookPlayer.App.Data.Migrations
                         .WithMany("Addresses")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade);
-
                 })
                 .Entity("AudioBookPlayer.App.Data.Models.SourceFile", b =>
                 {
@@ -51,7 +50,7 @@ namespace AudioBookPlayer.App.Data.Migrations
                         .WithMany(nameof(Book.SourceFiles))
                         .HasForeignKey(nameof(SourceFile.BookId))
                         .OnDelete(DeleteBehavior.Cascade);
-                });
+                });*/
 #pragma warning restore 612, 618
         }
     }

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace LibraProgramming.Xamarin.Interaction
+namespace AudioBookPlayer.App.Core
 {
     public sealed class WeakEventManager<TEventArgs>
     {
-        readonly Dictionary<string, List<Subscription>> handlers;
+        private readonly Dictionary<string, List<Subscription>> handlers;
 
         public WeakEventManager()
         {

@@ -61,11 +61,29 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на All.
+        /// </summary>
+        internal static string AllBooksTab {
+            get {
+                return ResourceManager.GetString("AllBooksTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на (no value).
         /// </summary>
         internal static string LibraryNullRootFolder {
             get {
                 return ResourceManager.GetString("LibraryNullRootFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Library.
+        /// </summary>
+        internal static string LibraryPageTitle {
+            get {
+                return ResourceManager.GetString("LibraryPageTitle", resourceCulture);
             }
         }
         
@@ -84,6 +102,42 @@ namespace AudioBookPlayer.App.Resources {
         internal static string LibrarySettingsSectionTitle {
             get {
                 return ResourceManager.GetString("LibrarySettingsSectionTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Recent.
+        /// </summary>
+        internal static string RecentBooksTab {
+            get {
+                return ResourceManager.GetString("RecentBooksTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на About.
+        /// </summary>
+        internal static string ShellMenuAboutItem {
+            get {
+                return ResourceManager.GetString("ShellMenuAboutItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Library.
+        /// </summary>
+        internal static string ShellMenuLibraryItem {
+            get {
+                return ResourceManager.GetString("ShellMenuLibraryItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Settings.
+        /// </summary>
+        internal static string ShellMenuSettingItem {
+            get {
+                return ResourceManager.GetString("ShellMenuSettingItem", resourceCulture);
             }
         }
     }

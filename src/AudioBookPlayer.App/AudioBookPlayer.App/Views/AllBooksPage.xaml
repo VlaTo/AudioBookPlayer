@@ -3,13 +3,18 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.AllBooksPage"
     core:ViewModelLocation.AutowireViewModel="True">
     <ContentPage.Content>
         <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
+            <Label
+                Text="All books tab"
                 VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+                HorizontalOptions="CenterAndExpand"
+            />
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
