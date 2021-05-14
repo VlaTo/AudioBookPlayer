@@ -79,6 +79,15 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Refresh.
+        /// </summary>
+        internal static string LibraryPageRefreshAction {
+            get {
+                return ResourceManager.GetString("LibraryPageRefreshAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Library.
         /// </summary>
         internal static string LibraryPageTitle {

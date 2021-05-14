@@ -48,7 +48,8 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             {
                 for (var index = 0; index < numberOfSizes; index++)
                 {
-                    var blockSize = StreamHelper.ReadUInt32(atom.Stream);
+                    //var blockSize = StreamHelper.ReadUInt32(atom.Stream);
+                    var blockSize = StreamHelper.ReadUInt32(stream);
                     sampleSizes[index] = blockSize;
                 }
             }

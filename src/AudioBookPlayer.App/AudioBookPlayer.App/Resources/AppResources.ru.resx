@@ -123,6 +123,9 @@
   <data name="LibraryNullRootFolder" xml:space="preserve">
     <value>(нет значения)</value>
   </data>
+  <data name="LibraryPageRefreshAction" xml:space="preserve">
+    <value>Обновить библиотеку</value>
+  </data>
   <data name="LibraryPageTitle" xml:space="preserve">
     <value>Библиотека</value>
   </data>

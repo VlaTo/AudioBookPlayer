@@ -9,27 +9,45 @@ namespace AudioBookPlayer.App.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                "authors",
+                table => new
+                {
+                    Id = table
+                        .Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_authors", x => x.Id);
+                }
+            );
+
+            migrationBuilder.CreateTable(
                 "books",
                 table => new
                 {
                     Id = table
-                        .Column<int>(nullable: false)
+                        .Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    AddedToLibrary = table.Column<DateTime>(nullable: true)
+                    Synopsis = table.Column<string>(nullable: true),
+                    Duration = table.Column<TimeSpan>(nullable: true),
+                    AddedToLibrary = table.Column<DateTime>(nullable: true),
+                    IsExcluded = table.Column<bool>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_books", x => x.Id);
-                });
+                }
+            );
 
             migrationBuilder.CreateTable(
                 "sources",
                 table => new
                 {
                     Id = table
-                        .Column<int>(nullable: false)
+                        .Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BookId = table.Column<int>(nullable: false),
                     Source = table.Column<string>(nullable: true),
@@ -39,7 +57,7 @@ namespace AudioBookPlayer.App.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_sourcess", x => x.Id);
+                    table.PrimaryKey("PK_sources", x => x.Id);
                     table.ForeignKey(
                         name: "FK_sources_books_Id",
                         column: x => x.BookId,
@@ -47,6 +65,30 @@ namespace AudioBookPlayer.App.Data.Migrations
                         principalColumn: nameof(Book.Id),
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "author-books",
+                columns: table => new
+                {
+                    AuthorId = table.Column<long>(nullable: false),
+                    BookId = table.Column<long>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.ForeignKey(
+                        name: "FK_author_books_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "authors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_author_books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                }
+            );
 
             /*migrationBuilder.CreateTable(
                 name: "Addresses",
@@ -158,7 +200,8 @@ namespace AudioBookPlayer.App.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_sources_BooksId",
                 table: "sources",
-                column: nameof(SourceFile.BookId));
+                columns: new[] {nameof(SourceFile.Id), nameof(SourceFile.BookId)}
+            );
 
             /*migrationBuilder.CreateIndex(
                 name: "IX_Comments_AuthorId",

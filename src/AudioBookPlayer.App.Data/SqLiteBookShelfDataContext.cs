@@ -3,6 +3,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Storage;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Data
@@ -10,6 +13,12 @@ namespace AudioBookPlayer.App.Data
     public class SqLiteBookShelfDataContext : DbContext, IBookShelfDataContext
     {
         private const string databaseName = "library.db";
+
+        public DbSet<Author> Authors
+        {
+            get;
+            set;
+        }
 
         public DbSet<Book> Books
         {
@@ -23,12 +32,24 @@ namespace AudioBookPlayer.App.Data
             set;
         }
 
+        public DbSet<AuthorBook> AuthorBooks
+        {
+            get;
+            set;
+        }
+
         public void Initialize()
         {
             Database.EnsureCreated();
             //CreateMigrationHistory();
-            //Database.Migrate();
+            Database.Migrate();
         }
+
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
+            Database.BeginTransactionAsync(cancellationToken);
+
+        async Task<bool> IBookShelfDataContext.SaveChangesAsync(CancellationToken cancellation) =>
+            0 < await base.SaveChangesAsync(cancellation);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -98,10 +119,22 @@ namespace AudioBookPlayer.App.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<SourceFile>()
-                .HasIndex(nameof(SourceFile.Id), nameof(SourceFile.BookId))
+                .HasIndex(sf => new {sf.Id, sf.BookId})
                 .IsUnique();
+
+            modelBuilder.Entity<AuthorBook>()
+                .HasKey(ab => new {ab.AuthorId, ab.BookId});
+
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Book)
+                .WithMany(b => b.AuthorBooks)
+                .HasForeignKey(ab => ab.BookId);
+
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Author)
+                .WithMany(a => a.AuthorBooks)
+                .HasForeignKey(ab => ab.AuthorId);
         }
 
         private void CreateMigrationHistory()

@@ -1,28 +1,26 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Data;
+using AudioBookPlayer.App.Data.Models;
 using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using LibraProgramming.Media.Common;
-using LibraProgramming.Media.QuickTime;
 using Xamarin.Essentials;
 
 namespace AudioBookPlayer.App.Services
 {
     internal sealed class BookShelfProvider : IBookShelfProvider
     {
-        private static readonly string[] SupportedExtensions = { ".mp3", ".m4b" };
-
         private readonly IPermissionRequestor permissionRequestor;
         private readonly IBookShelfDataContext context;
+        private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
         private readonly ApplicationSettings settings;
-        private readonly WeakEventManager<AudioBooksEventArgs> queryBooksReady;
+        private readonly WeakEventManager queryBooksReady;
 
         public event EventHandler<AudioBooksEventArgs> QueryBooksReady
         {
@@ -34,27 +32,44 @@ namespace AudioBookPlayer.App.Services
         public BookShelfProvider(
             ApplicationSettings settings,
             IBookShelfDataContext context,
+            IAudioBookFactoryProvider audioBookFactoryProvider,
             IPermissionRequestor permissionRequestor)
         {
             this.settings = settings;
             this.context = context;
+            this.audioBookFactoryProvider = audioBookFactoryProvider;
             this.permissionRequestor = permissionRequestor;
 
-            queryBooksReady = new WeakEventManager<AudioBooksEventArgs>();
+            queryBooksReady = new WeakEventManager();
         }
 
         public async Task QueryBooksAsync()
         {
             var books = await context.Books
+                .Include(book => book.AuthorBooks)
+                .Include(book => book.SourceFiles)
                 .Where(book => !book.IsExcluded)
-                .Select(book => new AudioBook(book.Id)
-                {
-                    Title = book.Title
-                })
                 .AsNoTracking()
                 .ToArrayAsync();
 
-            queryBooksReady.RaiseEvent(this, new AudioBooksEventArgs(books), nameof(QueryBooksReady));
+            var result = new AudioBook[books.Length];
+
+            for (var index = 0; index < books.Length; index++)
+            {
+                var book = books[index];
+
+                result[index] = new AudioBook
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Synopsis = book.Synopsis,
+                    Duration = book.Duration,
+                };
+
+                FillAuthors(result[index], book.AuthorBooks);
+            }
+
+            queryBooksReady.RaiseEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
         }
 
         public async Task RefreshBooksAsync()
@@ -66,14 +81,12 @@ namespace AudioBookPlayer.App.Services
                 return;
             }
 
-            var path = settings.LibraryRootPath;
-
-            EnumerateBooks(path, 0);
+            await EnumerateBooksAsync(settings.LibraryRootPath, 0);
             
             await QueryBooksAsync();
         }
 
-        private void EnumerateBooks(string path, int level)
+        private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation=default)
         {
             if (!Directory.Exists(path))
             {
@@ -85,12 +98,23 @@ namespace AudioBookPlayer.App.Services
             {
                 var folder = Path.GetDirectoryName(file);
                 var filename = Path.GetFileName(file);
-                var ext = Path.GetExtension(filename);
+                var factory = audioBookFactoryProvider.CreateFactoryFor(Path.GetExtension(filename));
 
-                if (IsSupportedExtension(ext))
+                if (null == factory)
                 {
-                    ExtractMediaInfo(file, filename, folder);
+                    // not supported
+                    continue;
                 }
+
+                var files = new[] {file};
+
+                var audioBook = factory.CreateAudioBook(folder, filename, level);
+                var existing = await GetExistingBookAsync(audioBook, cancellation);
+                var task = (null != existing)
+                    ? UpdateExistingBookAsync(existing, audioBook, cancellation)
+                    : AddNewBookAsync(audioBook, files, cancellation);
+
+                await task;
             }
 
             // enumerate sub-folders
@@ -98,71 +122,92 @@ namespace AudioBookPlayer.App.Services
 
             foreach (var directory in Directory.EnumerateDirectories(path))
             {
-                EnumerateBooks(directory, next);
+                await EnumerateBooksAsync(directory, next);
             }
         }
 
-        private static void ExtractMediaInfo(string file, string filename, string folder)
+        private async Task<Book> GetExistingBookAsync(AudioBook audioBook, CancellationToken cancellation = default)
         {
-            using (var stream = File.Open(file, FileMode.Open, FileAccess.Read))
+            var existing = await context.Books
+                .Where(book => book.Title == audioBook.Title)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(cancellation);
+
+            return existing;
+        }
+
+        private async Task UpdateExistingBookAsync(Book original, AudioBook source, CancellationToken cancellation = default)
+        {
+
+        }
+
+        private async Task AddNewBookAsync(AudioBook source, string[] files, CancellationToken cancellation = default)
+        {
+            using (var transaction = await context.BeginTransactionAsync(cancellation))
             {
-                using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
+                var book = new Book
                 {
-                    var audioBook = new AudioBook(-1);
-                    var meta = extractor.GetMeta();
-                    var tracks = extractor.GetTracks();
+                    Title = source.Title,
+                    IsExcluded = false,
+                    AddedToLibrary = DateTime.UtcNow,
+                    Synopsis = source.Synopsis,
+                    Duration = source.Duration
+                };
 
-                    foreach (var item in meta.Items)
+                await context.Books.AddAsync(book, cancellation);
+
+                foreach (var author in source.Authors)
+                {
+                    var actual = await context.Authors
+                        .Where(a => a.Name == author)
+                        .FirstOrDefaultAsync(cancellation);
+
+                    if (null == actual)
                     {
-                        switch (item)
+                        actual = new Author
                         {
-                            case MetaInformationTextItem textItem:
-                            {
-                                if (WellKnownMetaItemNames.Title.Equals(textItem.Key))
-                                {
-                                    audioBook.Title = textItem.Text;
-                                }
+                            Name = author
+                        };
 
-                                if (WellKnownMetaItemNames.Author.Equals(textItem.Key))
-                                {
-                                    audioBook.Author = textItem.Text;
-                                }
-
-                                break;
-                            }
-
-                            case MetaInformationStreamItem streamItem:
-                            {
-                                if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
-                                {
-                                    ;
-                                }
-
-                                break;
-                            }
-                        }
+                        await context.Authors.AddAsync(actual, cancellation);
                     }
 
-                    var total = TimeSpan.Zero;
-
-                    foreach (var track in tracks)
+                    book.AuthorBooks.Add(new AuthorBook
                     {
-                        audioBook.Tracks.Add(new )
-                        //Console.WriteLine($"[Track] '{track.Title}' {track.Duration:hh':'mm':'ss}");
-                        total += track.Duration;
-                    }
+                        Book = book,
+                        Author = actual
+                    });
                 }
-            }
 
-            Debug.WriteLine($"[BookShelfProvider] [EnumerateBooks] File: \"{filename}\" in \"{folder}\"");
+                foreach (var file in files)
+                {
+                    var sourceFile = new SourceFile
+                    {
+                        Source = file,
+                        Created = File.GetCreationTimeUtc(file),
+                        Modified = File.GetLastAccessTimeUtc(file),
+                        Length = -1,
+                        Book = book
+                    };
+
+                    await context.SourceFiles.AddAsync(sourceFile, cancellation);
+
+                    book.SourceFiles.Add(sourceFile);
+                }
+                //await context.Books.AddAsync(book);
+
+                await context.SaveChangesAsync(cancellation);
+
+                await transaction.CommitAsync(cancellation);
+            }
         }
 
-        private static bool IsSupportedExtension(string ext)
+        private static void FillAuthors(AudioBook audioBook, ICollection<AuthorBook> bookAuthors)
         {
-            return Array.Exists(
-                SupportedExtensions,
-                actual => String.Equals(actual, ext, StringComparison.InvariantCultureIgnoreCase)
-            );
+            foreach (var bookAuthor in bookAuthors)
+            {
+                audioBook.Authors.Add(bookAuthor.Author.Name);
+            }
         }
     }
 }

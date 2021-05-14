@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace AudioBookPlayer.App.Core
 {
-    public sealed class DelegateWeakEventManager
+    /*public sealed class DelegateWeakEventManager
     {
         readonly Dictionary<string, List<Subscription>> handlers;
 
@@ -51,5 +51,5 @@ namespace AudioBookPlayer.App.Core
         public void RaiseEvent(object sender, object eventArgs, string eventName) => EventManagerService.HandleEvent(eventName, sender, eventArgs, handlers);
 
         public void RaiseEvent(string eventName) => EventManagerService.HandleEvent(eventName, handlers);
-    }
+    }*/
 }

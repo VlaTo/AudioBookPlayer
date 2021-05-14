@@ -1,5 +1,4 @@
-﻿using LibraProgramming.Xamarin.Interaction;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -7,11 +6,10 @@ using System.ComponentModel;
 
 namespace AudioBookPlayer.App.Core
 {
-    public sealed class ObservableStack<T> : IEnumerable<T>, ICollection, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
+    public sealed class ObservableStack<T> : ICollection, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
         private readonly ArrayList items;
-        private readonly DelegateWeakEventManager collectionChanged;
-        private readonly DelegateWeakEventManager propertyChanged;
+        private readonly WeakEventManager eventManager;
 
         public int Count => items.Count;
 
@@ -23,21 +21,20 @@ namespace AudioBookPlayer.App.Core
 
         public event NotifyCollectionChangedEventHandler CollectionChanged
         {
-            add => collectionChanged.AddEventHandler(value);
-            remove => collectionChanged.RemoveEventHandler(value);
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
         }
 
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add => propertyChanged.AddEventHandler(value);
-            remove => propertyChanged.RemoveEventHandler(value);
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
         }
 
         public ObservableStack()
         {
             items = new ArrayList();
-            collectionChanged = new DelegateWeakEventManager();
-            propertyChanged = new DelegateWeakEventManager();
+            eventManager = new WeakEventManager();
         }
 
         public bool Contains(T item) => items.Contains(item);
@@ -91,15 +88,15 @@ namespace AudioBookPlayer.App.Core
         private void RaisePushEvent(T item, int index)
         {
             var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index);
-            collectionChanged.RaiseEvent(this, args, nameof(CollectionChanged));
-            propertyChanged.RaiseEvent(this, new PropertyChangedEventArgs(nameof(Count)), nameof(PropertyChanged));
+            eventManager.RaiseEvent(this, args, nameof(CollectionChanged));
+            eventManager.RaiseEvent(this, new PropertyChangedEventArgs(nameof(Count)), nameof(PropertyChanged));
         }
 
         private void RaisePopEvent(T item, int index)
         {
             var args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index);
-            collectionChanged.RaiseEvent(this, args, nameof(CollectionChanged));
-            propertyChanged.RaiseEvent(this, new PropertyChangedEventArgs(nameof(Count)), nameof(PropertyChanged));
+            eventManager.RaiseEvent(this, args, nameof(CollectionChanged));
+            eventManager.RaiseEvent(this, new PropertyChangedEventArgs(nameof(Count)), nameof(PropertyChanged));
         }
 
         /// <summary>

@@ -4,17 +4,136 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
+    xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     x:Class="AudioBookPlayer.App.Views.AllBooksPage"
     core:ViewModelLocation.AutowireViewModel="True">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <core:TimeSpanConverter x:Key="SpanConverter" />
+
+            <Style
+                x:Key="NoBooksLabelStyle"
+                TargetType="Label">
+                <Setter
+                    Property="FontSize">
+                    <Setter.Value>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="iOS" Value="14" />
+                            <On Platform="Android" Value="16" />
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Dark={StaticResource DarkSecondaryTextColor}, Light={StaticResource LightSecondaryTextColor}}"
+                />
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
     <ContentPage.Content>
-        <StackLayout>
-            <Label
-                Text="All books tab"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand"
-            />
-        </StackLayout>
+        <ListView
+            x:DataType="viewmodels:AllBooksViewModel"
+            ItemsSource="{Binding Path=Books, Mode=OneWay}"
+            RowHeight="{OnPlatform Android='168', iOS='180'}"
+            SelectionMode="None">
+            <ListView.Behaviors>
+                <behaviors:EventToCommandBehavior
+                    EventName="ItemTapped"
+                    Command="{Binding Path=PlayBook, Mode=OneTime}"
+                    EventArgsParameterPath="Item">
+                </behaviors:EventToCommandBehavior>
+            </ListView.Behaviors>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="viewmodels:AllBooksViewModel">
+                    <ViewCell>
+                        <Grid
+                            x:DataType="viewmodels:AudioBookViewModel"
+                            RowDefinitions="Auto,Auto,Auto"
+                            ColumnDefinitions="Auto,*"
+                            Padding="10">
+                            <Frame
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                Grid.RowSpan="3"
+                                BorderColor="Gray"
+                                Padding="4">
+                                <Image
+                                    Aspect="AspectFit"
+                                    WidthRequest="{OnPlatform Android='118', iOS='146'}"
+                                    HeightRequest="{OnPlatform Android='160', iOS='176'}"
+                                />
+                            </Frame>
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Text="{Binding Title, Mode=OneTime}"
+                                LineBreakMode="WordWrap"
+                                Style="{DynamicResource ListItemTextStyle}"
+                                FontSize="16"
+                                MaxLines="3"
+                                Margin="8,4,4,4"
+                            />
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                LineBreakMode="NoWrap"
+                                Style="{DynamicResource ListItemTextStyle}"
+                                FontSize="12"
+                                Margin="8,4,4,4">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Author:" />
+                                        <Span Text=" " />
+                                        <Span Text="{Binding Authors, Mode=OneTime}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                LineBreakMode="NoWrap"
+                                Style="{DynamicResource ListItemTextStyle}"
+                                FontSize="12"
+                                Margin="8,4,4,4">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Duration:" />
+                                        <Span Text=" " />
+                                        <Span Text="{Binding
+                                            Path=Duration,
+                                            Converter={StaticResource SpanConverter},
+                                            ConverterParameter='1',
+                                            Mode=OneTime}"
+                                        />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!--<ListView
+            x:DataType="vm:AllBooksViewModel"
+            ItemsSource="{Binding Books}"
+            SelectionMode="Single">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout
+                        x:DataType="vm:AudioBookViewModel"
+                        Padding="10">
+                        <Label
+                            Text="{Binding Title}"
+                            LineBreakMode="NoWrap"
+                            Style="{DynamicResource ListItemTextStyle}"
+                            FontSize="16"
+                        />
+                    </StackLayout>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>-->
     </ContentPage.Content>
 </ContentPage>
