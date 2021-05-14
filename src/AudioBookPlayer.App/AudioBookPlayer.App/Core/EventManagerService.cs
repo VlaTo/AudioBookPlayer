@@ -110,6 +110,7 @@ namespace AudioBookPlayer.App.Core
                 }
             }
         }
+
         public static void HandleEvent(
             in string eventName,
             in object actionEventArgs,

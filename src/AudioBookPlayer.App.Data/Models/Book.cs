@@ -9,7 +9,7 @@ namespace AudioBookPlayer.App.Data.Models
     public class Book
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id
+        public long Id
         {
             get;
             set;
@@ -22,8 +22,21 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
+        public ICollection<AuthorBook> AuthorBooks
+        {
+            get;
+            set;
+        }
+
         [DataType(DataType.MultilineText)]
-        public string Description
+        public string Synopsis
+        {
+            get;
+            set;
+        }
+
+        [DataType(DataType.Duration)]
+        public TimeSpan Duration
         {
             get;
             set;
@@ -42,7 +55,7 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        public List<SourceFile> SourceFiles
+        public ICollection<SourceFile> SourceFiles
         {
             get;
             set;

@@ -3,10 +3,11 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
-    xmlns:b="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     x:Class="AudioBookPlayer.App.Views.FolderPickerPopup"
+    x:DataType="viewmodels:FolderPickerViewModel"
     core:ViewModelLocation.AutowireViewModel="True"
     BackgroundColor="Transparent"
     Padding="{OnPlatform Android='0,256,0,0', iOS='0,12,0,0'}">
@@ -64,15 +65,15 @@
 
         </ResourceDictionary>
     </ContentPage.Resources>
-    <i:Interaction.RequestTriggers>
-        <i:InteractionRequestTrigger
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
             Request="{Binding Path=CloseRequest, Mode=OneTime}">
-            <i:CallMethodTriggerAction
-                x:TypeArguments="vm:CloseInteractionRequestContext"
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="viewmodels:CloseInteractionRequestContext"
                 MethodName="OnCloseRequest"
             />
-        </i:InteractionRequestTrigger>
-    </i:Interaction.RequestTriggers>
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
     <!--<ContentPage.Padding>
         <OnPlatform x:TypeArguments="Thickness">
             <On Platform="Android" Value="0,256,0,0" />
@@ -102,7 +103,7 @@
                             HorizontalOptions="StartAndExpand"
                             Spacing="5">
                             <BindableLayout.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="viewmodels:FileSystemItemViewModel">
                                     <Button
                                     Text="{Binding Path=Title, Mode=OneTime}"
                                 />
@@ -121,14 +122,14 @@
                     SelectionMode="None"
                     RowHeight="{OnPlatform Android=54, iOS=58}">
                     <ListView.Behaviors>
-                        <b:EventToCommandBehavior
+                        <behaviors:EventToCommandBehavior
                             EventName="ItemTapped"
                             Command="{Binding Path=SelectItem, Mode=OneTime}"
                             EventArgsParameterPath="Item">
-                        </b:EventToCommandBehavior>
+                        </behaviors:EventToCommandBehavior>
                     </ListView.Behaviors>
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="vm:FileSystemItemViewModel">
+                        <DataTemplate x:DataType="viewmodels:FileSystemItemViewModel">
                             <ViewCell>
                                 <Grid
                                     RowDefinitions="*,*"

@@ -48,7 +48,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             Books = new ObservableCollection<AudioBookViewModel>();
 
-            bookShelf.QueryBooksReady += OnQueryBooksReady;
+            //bookShelf.QueryBooksReady += OnQueryBooksReady;
         }
 
         /*void IInitialize.OnInitialize()

@@ -123,6 +123,9 @@
   <data name="LibraryNullRootFolder" xml:space="preserve">
     <value>(no value)</value>
   </data>
+  <data name="LibraryPageRefreshAction" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
   <data name="LibraryPageTitle" xml:space="preserve">
     <value>Library</value>
   </data>

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace AudioBookPlayer.App.Models
 {
     public sealed class AudioBook
     {
-        public int Id
+        public long? Id
         {
             get;
+            set;
         }
 
         public string Title
@@ -17,15 +17,32 @@ namespace AudioBookPlayer.App.Models
             set;
         }
 
-        public string Author
+        public TimeSpan Duration
+        {
+            get; 
+            set;
+        }
+
+        public string Synopsis
         {
             get;
             set;
         }
 
-        public AudioBook(int id)
+        public IList<string> Authors
         {
-            Id = id;
+            get;
+        }
+
+        public IList<Chapter> Chapters
+        {
+            get;
+        }
+
+        public AudioBook()
+        {
+            Authors = new List<string>();
+            Chapters = new List<Chapter>();
         }
     }
 }

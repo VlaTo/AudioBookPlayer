@@ -47,7 +47,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Subtitle, meta.DataChunk.Text);
+                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Author, meta.DataChunk.Text);
                             information.Add(info);
                         }
 

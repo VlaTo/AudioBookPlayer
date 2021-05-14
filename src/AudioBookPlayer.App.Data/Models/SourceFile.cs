@@ -8,14 +8,14 @@ namespace AudioBookPlayer.App.Data.Models
     public class SourceFile
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id
+        public long Id
         {
             get;
             set;
         }
 
         [Required]
-        public int BookId
+        public long BookId
         {
             get;
             set;
