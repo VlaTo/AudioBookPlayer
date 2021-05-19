@@ -3,37 +3,35 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
-    xmlns:c="clr-namespace:LibraProgramming.Xamarin.Controls;assembly=LibraProgramming.Xamarin.Controls"
-    xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:controls="clr-namespace:LibraProgramming.Xamarin.Controls;assembly=LibraProgramming.Xamarin.Controls"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.SettingsPage"
     core:ViewModelLocation.AutowireViewModel="True">
-    <i:Interaction.RequestTriggers>
-        <i:InteractionRequestTrigger
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
             Request="{Binding Path=SelectLibraryRootFolderRequest, Mode=OneTime}">
-            <i:CallMethodTriggerAction
-                x:TypeArguments="vm:SourceFolderRequestContext"
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="viewmodels:SourceFolderRequestContext"
                 MethodName="OnSelectFolderRequest"
             />
-        </i:InteractionRequestTrigger>
-    </i:Interaction.RequestTriggers>
-    <ContentPage.Content>
-        <TableView
-            Intent="Settings">
-            <TableRoot>
-                <TableSection
-                    Title="{Static res:AppResources.LibrarySettingsSectionTitle}"
-                    TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}">
-                    <TextCell
-                        Text="{Static res:AppResources.LibraryRootFolderTitle}"
-                        Detail="{Binding Path=LibraryRootFolder, Mode=OneWay, TargetNullValue={Static res:AppResources.LibraryNullRootFolder}}"
-                        Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
-                        TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
-                        DetailColor="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
-                    />
-                </TableSection>
-            </TableRoot>
-        </TableView>
-    </ContentPage.Content>
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
+    <TableView
+        Intent="Settings">
+        <TableRoot>
+            <TableSection
+                Title="{Static res:AppResources.LibrarySettingsSectionTitle}"
+                TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}">
+                <TextCell
+                    Text="{Static res:AppResources.LibraryRootFolderTitle}"
+                    Detail="{Binding Path=LibraryRootFolder, Mode=OneWay, TargetNullValue={Static res:AppResources.LibraryNullRootFolder}}"
+                    Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                    DetailColor="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
+                />
+            </TableSection>
+        </TableRoot>
+    </TableView>
 </ContentPage>

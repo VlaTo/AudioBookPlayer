@@ -90,6 +90,28 @@ namespace AudioBookPlayer.App.Data.Migrations
                 }
             );
 
+            migrationBuilder.CreateTable(
+                name: "book-images",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(nullable: false),
+                    BookId = table.Column<long>(nullable: false),
+                    Blob = table.Column<byte[]>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Book-images", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Book-images_BookId",
+                        column: x => x.BookId,
+                        principalTable: "books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                }
+            );
+
             /*migrationBuilder.CreateTable(
                 name: "Addresses",
                 columns: table => new
@@ -200,7 +222,13 @@ namespace AudioBookPlayer.App.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_sources_BooksId",
                 table: "sources",
-                columns: new[] {nameof(SourceFile.Id), nameof(SourceFile.BookId)}
+                columns: new[] {"Id", "BookId"}
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Book-images_BookId",
+                table: "book-images",
+                columns: new[] {"Id", "BookId"}
             );
 
             /*migrationBuilder.CreateIndex(

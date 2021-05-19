@@ -5,12 +5,12 @@ namespace AudioBookPlayer.App.Core
 {
     public class TaskCommand : TaskCommandBase
     {
-        private readonly Func<Task> action;
+        //private readonly Func<Task> action;
 
         public TaskCommand(Func<Task> action, Predicate<object> canExecute = null)
             : base(new TaskExecutionMonitor(action), canExecute)
         {
-            this.action = action;
+            //this.action = action;
         }
 
         protected override void ExecuteInternal(object parameter)

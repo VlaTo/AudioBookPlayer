@@ -135,6 +135,13 @@
   <data name="LibrarySettingsSectionTitle" xml:space="preserve">
     <value>Library</value>
   </data>
+  <data name="PlayBookBookmarkCurrentLabel" xml:space="preserve">
+    <value>Bookmark</value>
+    <comment>Create/Update bookmark for currently playing book (chapter)</comment>
+  </data>
+  <data name="PlayBookSnoozeLabel" xml:space="preserve">
+    <value>Snooze</value>
+  </data>
   <data name="RecentBooksTab" xml:space="preserve">
     <value>Recent</value>
   </data>

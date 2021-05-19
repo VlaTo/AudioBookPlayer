@@ -66,12 +66,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Platforms\Netstandard\" />
+    <Folder Include="Platforms\Xamarin\" />
+    <Folder Include="Services\" />
+    <Folder Include="Core\" />
     <None Include="Platforms\**\*.cs" />
     <None Include="Resources\*.cs" />
     <Compile Remove="Resources\*.cs" />
     <Compile Update="**\*.xaml.cs" DependentUpon="%(Filename)" />
     <Compile Include="Services\**\*.cs" />
     <Compile Include="Core\**\*.cs" />
+    <Compile Include="Core\*.cs" />
     <Compile Include="*.cs" />
   </ItemGroup>
 
@@ -89,14 +94,7 @@
     <AndroidResource Include="Resources\**\*.xml" SubType="Designer" Generator="MSBuild:UpdateAndroidResources" />
     <AndroidResource Include="Resources\**\*.json" Generator="MSBuild:UpdateAndroidResources" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Extensions\" />
-    <Folder Include="Platforms\Netstandard\" />
-    <Folder Include="Platforms\Xamarin\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-  
+ 
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.8.0.1687" />
   </ItemGroup>

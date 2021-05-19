@@ -11,14 +11,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Fonts\font-awesome-regular.otf" />
-    <None Remove="Resources\Fonts\font-awesome-solid.otf" />
+    <None Remove="Resources\Fonts\fa-brands-400.ttf" />
+    <None Remove="Resources\Fonts\fa-regular-400.ttf" />
+    <None Remove="Resources\Fonts\fa-solid-900.ttf" />
     <None Remove="Resources\Fonts\font-awesome.otf" />
+    <None Remove="Resources\Fonts\fontello.ttf" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Fonts\font-awesome-regular.otf" />
-    <EmbeddedResource Include="Resources\Fonts\font-awesome-solid.otf" />
+    <EmbeddedResource Include="Resources\Fonts\fa-brands-400.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\fa-regular-400.ttf" />
+    <EmbeddedResource Include="Resources\Fonts\fa-solid-900.ttf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,10 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="AudioBookPlayerApp.xaml.cs">
       <DependentUpon>AudioBookPlayerApp.xaml</DependentUpon>
     </Compile>
@@ -52,6 +51,9 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>AppResources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Views\PlayerControlPage.xaml.cs">
+      <DependentUpon>PlayerControlPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Views\RecentBooksPage.xaml.cs">
       <DependentUpon>RecentBooksPage.xaml</DependentUpon>
@@ -69,6 +71,9 @@
     <EmbeddedResource Update="Views\AllBooksPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="Views\BooksViewPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Views\LibraryPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -81,5 +86,11 @@
     <EmbeddedResource Update="Views\SettingsPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controls\Extensions\" />
+    <Folder Include="Controls\Internal\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 </Project>

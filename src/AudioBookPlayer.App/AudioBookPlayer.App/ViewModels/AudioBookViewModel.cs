@@ -1,13 +1,22 @@
 ﻿using System;
+using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class AudioBookViewModel : ViewModelBase
     {
+        private long id;
         private string authors;
         private string title;
         private string synopsis;
         private TimeSpan duration;
+        private ImageSource imageSource;
+
+        public long Id
+        {
+            get => id;
+            set => SetProperty(ref id, value);
+        }
 
         public string Authors
         {
@@ -31,6 +40,12 @@ namespace AudioBookPlayer.App.ViewModels
         {
             get => duration;
             set => SetProperty(ref duration, value);
+        }
+
+        public ImageSource ImageSource
+        {
+            get => imageSource;
+            set => SetProperty(ref imageSource, value);
         }
     }
 }

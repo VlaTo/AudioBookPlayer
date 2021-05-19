@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
+using BookImage = AudioBookPlayer.App.Data.Models.BookImage;
 
 namespace AudioBookPlayer.App.Services
 {
@@ -43,14 +44,19 @@ namespace AudioBookPlayer.App.Services
             queryBooksReady = new WeakEventManager();
         }
 
-        public async Task QueryBooksAsync()
+        public async Task QueryBooksAsync(CancellationToken cancellationToken = default)
         {
+
+            //await context.DeleteAllAsync();
+
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
+                .ThenInclude(ab => ab.Author)
                 .Include(book => book.SourceFiles)
+                .Include(book => book.Images)
                 .Where(book => !book.IsExcluded)
                 .AsNoTracking()
-                .ToArrayAsync();
+                .ToArrayAsync(cancellationToken);
 
             var result = new AudioBook[books.Length];
 
@@ -63,16 +69,17 @@ namespace AudioBookPlayer.App.Services
                     Id = book.Id,
                     Title = book.Title,
                     Synopsis = book.Synopsis,
-                    Duration = book.Duration,
+                    Duration = book.Duration
                 };
 
                 FillAuthors(result[index], book.AuthorBooks);
+                FillImages(result[index], book.Images);
             }
 
             queryBooksReady.RaiseEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
         }
 
-        public async Task RefreshBooksAsync()
+        public async Task RefreshBooksAsync(CancellationToken cancellationToken = default)
         {
             var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
 
@@ -81,12 +88,42 @@ namespace AudioBookPlayer.App.Services
                 return;
             }
 
-            await EnumerateBooksAsync(settings.LibraryRootPath, 0);
-            
-            await QueryBooksAsync();
+            await EnumerateBooksAsync(settings.LibraryRootPath, 0, cancellationToken);
+
+            await QueryBooksAsync(cancellationToken);
         }
 
-        private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation=default)
+        public async Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default)
+        {
+            var actual = await context.Books
+                .Include(book => book.AuthorBooks)
+                .ThenInclude(ab => ab.Author)
+                .Include(book => book.SourceFiles)
+                .Include(book => book.Images)
+                .Where(book => book.Id == bookId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (null == actual)
+            {
+                return null;
+            }
+
+            var result = new AudioBook
+            {
+                Id = actual.Id,
+                Title = actual.Title,
+                Synopsis = actual.Synopsis,
+                Duration = actual.Duration
+            };
+
+            FillAuthors(result, actual.AuthorBooks);
+            FillImages(result, actual.Images);
+
+            return result;
+        }
+
+        private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation = default)
         {
             if (!Directory.Exists(path))
             {
@@ -151,7 +188,9 @@ namespace AudioBookPlayer.App.Services
                     IsExcluded = false,
                     AddedToLibrary = DateTime.UtcNow,
                     Synopsis = source.Synopsis,
-                    Duration = source.Duration
+                    Duration = source.Duration,
+                    AuthorBooks = new List<AuthorBook>()
+                    //SourceFiles = new List<SourceFile>()
                 };
 
                 await context.Books.AddAsync(book, cancellation);
@@ -166,7 +205,8 @@ namespace AudioBookPlayer.App.Services
                     {
                         actual = new Author
                         {
-                            Name = author
+                            Name = author,
+                            AuthorBooks = new List<AuthorBook>()
                         };
 
                         await context.Authors.AddAsync(actual, cancellation);
@@ -194,7 +234,20 @@ namespace AudioBookPlayer.App.Services
 
                     book.SourceFiles.Add(sourceFile);
                 }
-                //await context.Books.AddAsync(book);
+
+                foreach (var image in source.Images)
+                {
+                    var bookImage = new BookImage
+                    {
+                        Blob = await image.GetBytesAsync(cancellation),
+                        Name = image.Key,
+                        Book = book
+                    };
+
+                    await context.BookImages.AddAsync(bookImage, cancellation);
+
+                    book.Images.Add(bookImage);
+                }
 
                 await context.SaveChangesAsync(cancellation);
 
@@ -207,6 +260,15 @@ namespace AudioBookPlayer.App.Services
             foreach (var bookAuthor in bookAuthors)
             {
                 audioBook.Authors.Add(bookAuthor.Author.Name);
+            }
+        }
+
+        private static void FillImages(AudioBook audioBook, ICollection<BookImage> bookImages)
+        {
+            foreach (var image in bookImages)
+            {
+                var item = new MemoryImage(image.Name, image.Blob);
+                audioBook.Images.Add(item);
             }
         }
     }

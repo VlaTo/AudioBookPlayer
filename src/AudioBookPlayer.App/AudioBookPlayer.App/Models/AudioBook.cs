@@ -39,10 +39,16 @@ namespace AudioBookPlayer.App.Models
             get;
         }
 
+        public IList<BookImage> Images
+        {
+            get;
+        }
+
         public AudioBook()
         {
             Authors = new List<string>();
             Chapters = new List<Chapter>();
+            Images = new List<BookImage>();
         }
     }
 }

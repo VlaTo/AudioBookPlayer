@@ -135,6 +135,12 @@
   <data name="LibrarySettingsSectionTitle" xml:space="preserve">
     <value>Библиотека</value>
   </data>
+  <data name="PlayBookBookmarkCurrentLabel" xml:space="preserve">
+    <value>Добавить закладку</value>
+  </data>
+  <data name="PlayBookSnoozeLabel" xml:space="preserve">
+    <value>Таймер сна</value>
+  </data>
   <data name="RecentBooksTab" xml:space="preserve">
     <value>Недавние</value>
   </data>
