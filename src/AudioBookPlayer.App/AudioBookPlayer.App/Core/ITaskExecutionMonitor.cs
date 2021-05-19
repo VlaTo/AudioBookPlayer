@@ -17,4 +17,19 @@ namespace AudioBookPlayer.App.Core
 
         void Start();
     }
+
+    public interface ITaskExecutionMonitor<in TValue>
+    {
+        TaskCompletionSource Source
+        {
+            get;
+        }
+
+        TaskStatus Status
+        {
+            get;
+        }
+
+        void Start(TValue value);
+    }
 }

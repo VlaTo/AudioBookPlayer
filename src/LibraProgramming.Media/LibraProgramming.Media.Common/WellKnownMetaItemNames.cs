@@ -9,5 +9,7 @@
         public const string Title = "Title";
 
         public const string Subtitle = "Subtitle";
+
+        public const string Unknown = "Unknown";
     }
 }

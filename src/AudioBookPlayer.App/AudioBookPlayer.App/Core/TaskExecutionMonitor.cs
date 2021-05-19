@@ -10,4 +10,12 @@ namespace AudioBookPlayer.App.Core
         {
         }
     }
+    
+    public class TaskExecutionMonitor<TValue> : TaskExecutionMonitorBase<TValue>
+    {
+        public TaskExecutionMonitor(Func<TValue, Task> source)
+            : base(source)
+        {
+        }
+    }
 }

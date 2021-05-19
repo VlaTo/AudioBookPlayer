@@ -3,6 +3,7 @@
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.AudioBookPlayerApp"
     UserAppTheme="Dark">
     <!--
@@ -12,6 +13,8 @@
         <ResourceDictionary>
             <!-- Light Theme -->
             <Color x:Key="LightContentPageBackgroundColor">White</Color>
+            <Color x:Key="LightListViewBackgroundColor">#2A2A2A</Color>
+            <Color x:Key="LightPlayBookCoverBackgroundColor">#2A2A2A</Color>
             <Color x:Key="LightNavigationPageBarBackgroundColor">Gray</Color>
             <Color x:Key="LightPrimaryButtonBackgroundColor">LightBlue</Color>
             <Color x:Key="LightPrimaryTextColor">Black</Color>
@@ -19,12 +22,12 @@
 
             <!-- Dark Theme -->
             <Color x:Key="DarkContentPageBackgroundColor">#1E1E1E</Color>
+            <Color x:Key="DarkListViewBackgroundColor">#2A2A2A</Color>
+            <Color x:Key="DarkPlayBookCoverBackgroundColor">#2A2A2A</Color>
             <Color x:Key="DarkNavigationPageBarBackgroundColor">#333333</Color>
             <Color x:Key="DarkPrimaryButtonBackgroundColor">DarkGray</Color>
             <Color x:Key="DarkPrimaryTextColor">White</Color>
             <Color x:Key="DarkSecondaryTextColor">DimGray</Color>
-
-
 
             <Color x:Key="Primary">#2196F3</Color>
             
@@ -69,7 +72,154 @@
                     Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
                 />
             </Style>
-            
+
+            <Style
+                x:Key="BookTitleLabelStyle"
+                TargetType="Label">
+                <Setter Property="FontSize" Value="Title" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                />
+            </Style>
+
+            <Style
+                x:Key="BookSubtitleLabelStyle"
+                TargetType="Label">
+                <Setter Property="FontSize" Value="Caption" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
+                />
+            </Style>
+
+            <Style
+                x:Key="SeekBarTimeLabelStyle"
+                TargetType="Label">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                />
+            </Style>
+
+            <Style
+                x:Key="PrimaryButtonStyle"
+                TargetType="Button">
+                <Setter 
+                    Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryButtonBackgroundColor}, Dark={StaticResource DarkPrimaryButtonBackgroundColor}}"
+                />
+            </Style>
+
+            <Style
+                x:Key="PrimaryPlaybackButtonStyle"
+                TargetType="ImageButton">
+                <Setter
+                    Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightPrimaryButtonBackgroundColor}, Dark={StaticResource DarkPrimaryButtonBackgroundColor}}"
+                />
+                <Setter Property="CornerRadius" Value="32" />
+                <Setter Property="BorderColor" Value="White" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="Aspect" Value="AspectFit" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="Margin" Value="{OnPlatform Android='12,8', iOS='8,4'}" />
+                <Setter Property="Padding" Value="{OnPlatform Android='20,16,16,16', iOS='4'}" />
+                <Setter Property="WidthRequest" Value="64" />
+                <Setter Property="HeightRequest" Value="64" />
+            </Style>
+
+            <Style
+                x:Key="SecondaryPlaybackButtonStyle"
+                TargetType="ImageButton">
+                <Setter
+                    Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
+                />
+                <Setter Property="CornerRadius" Value="24" />
+                <Setter Property="BorderColor" Value="White" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="VerticalOptions" Value="Center" />
+                <Setter Property="HorizontalOptions" Value="Center" />
+                <Setter Property="WidthRequest" Value="48" />
+                <Setter Property="HeightRequest" Value="48" />
+            </Style>
+
+            <ControlTemplate x:Key="PlaybackControlTemplate">
+                <StackLayout
+                    Orientation="Vertical"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="Center"
+                    Margin="12,20">
+                    <StackLayout
+                        Orientation="Horizontal"
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="Center">
+                        <ImageButton
+                            x:Name="PART_RewindButton"
+                            Style="{StaticResource SecondaryPlaybackButtonStyle}"
+                            Source="{FontImage FontFamily=FASolid, Size=12, Glyph='&#xF04A;'}"
+                            Padding="{OnPlatform Android='8,12,12,12', iOS='4'}"
+                        />
+                        <ImageButton
+                            x:Name="PART_PlayButton"
+                            Command="{TemplateBinding Path=Play, Mode=OneWay}"
+                            Style="{StaticResource PrimaryPlaybackButtonStyle}"
+                            Source="{FontImage FontFamily=FASolid, Size=18, Glyph='&#xF04B;'}"
+                            IsEnabled="{TemplateBinding CanPlay}"
+                        />
+                        <ImageButton
+                            x:Name="PART_FastForwardButton"
+                            Style="{StaticResource SecondaryPlaybackButtonStyle}"
+                            Source="{FontImage FontFamily=FASolid, Size=12, Glyph='&#xF04E;'}"
+                            Padding="{OnPlatform Android='12,12,8,12', iOS='4'}"
+                        />
+                    </StackLayout>
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroup x:Name="PlayingStates">
+                            <VisualState x:Name="Playing">
+                                <VisualState.Setters>
+                                    <!--<Setter
+                                        TargetName="PART_PlayButton"
+                                        Property="Source">
+                                        <Setter.Value>
+                                            <FontImageSource
+                                                FontFamily="IconsFont"
+                                                Size="18"
+                                                Glyph="&#x25B6;"
+                                            />
+                                        </Setter.Value>
+                                    </Setter>-->
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Paused">
+                                <VisualState.Setters>
+                                    <!--<Setter
+                                        TargetName="PART_PlayButton"
+                                        Property="Source">
+                                        <Setter.Value>
+                                            <FontImageSource
+                                                FontFamily="IconsFont"
+                                                Size="18"
+                                                Glyph="&#x2389;"
+                                            />
+                                        </Setter.Value>
+                                    </Setter>-->
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateManager.VisualStateGroups>
+                </StackLayout>
+            </ControlTemplate>
+
+            <Style TargetType="controls:PlaybackControl">
+                <Setter Property="ControlTemplate" Value="{StaticResource Key=PlaybackControlTemplate}" />
+            </Style>
+
         </ResourceDictionary>        
     </Application.Resources>
 </core:BaseApplication>

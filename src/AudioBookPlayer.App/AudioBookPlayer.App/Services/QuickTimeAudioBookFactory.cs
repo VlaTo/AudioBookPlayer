@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using AudioBookPlayer.App.Core.Extensions;
 using AudioBookPlayer.App.Models;
 using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
@@ -56,7 +57,8 @@ namespace AudioBookPlayer.App.Services
                             {
                                 if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
                                 {
-                                    ;
+                                    var bookImage = new MemoryImage(streamItem.Key, streamItem.Stream.ToBytes());
+                                    audioBook.Images.Add(bookImage);
                                 }
 
                                 break;

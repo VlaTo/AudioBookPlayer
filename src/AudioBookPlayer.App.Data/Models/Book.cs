@@ -60,5 +60,11 @@ namespace AudioBookPlayer.App.Data.Models
             get;
             set;
         }
+
+        public ICollection<BookImage> Images
+        {
+            get;
+            set;
+        }
     }
 }

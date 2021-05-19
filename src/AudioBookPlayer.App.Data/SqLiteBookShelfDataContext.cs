@@ -38,6 +38,12 @@ namespace AudioBookPlayer.App.Data
             set;
         }
 
+        public DbSet<BookImage> BookImages
+        {
+            get;
+            set;
+        }
+
         public void Initialize()
         {
             Database.EnsureCreated();
@@ -47,6 +53,20 @@ namespace AudioBookPlayer.App.Data
 
         public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
             Database.BeginTransactionAsync(cancellationToken);
+
+        public async Task DeleteAllAsync(CancellationToken cancellation = default)
+        {
+            using (var transaction = await Database.BeginTransactionAsync(cancellation))
+            {
+                await Database.ExecuteSqlRawAsync("DELETE FROM [sources];", cancellation);
+                await Database.ExecuteSqlRawAsync("DELETE FROM [author-books];", cancellation);
+                await Database.ExecuteSqlRawAsync("DELETE FROM [authors];", cancellation);
+                await Database.ExecuteSqlRawAsync("DELETE FROM [books];", cancellation);
+                await SaveChangesAsync(cancellation);
+
+                await transaction.CommitAsync(cancellation);
+            }
+        }
 
         async Task<bool> IBookShelfDataContext.SaveChangesAsync(CancellationToken cancellation) =>
             0 < await base.SaveChangesAsync(cancellation);
@@ -121,6 +141,10 @@ namespace AudioBookPlayer.App.Data
         {
             modelBuilder.Entity<SourceFile>()
                 .HasIndex(sf => new {sf.Id, sf.BookId})
+                .IsUnique();
+
+            modelBuilder.Entity<BookImage>()
+                .HasIndex(bi => new {bi.Id, bi.BookId})
                 .IsUnique();
 
             modelBuilder.Entity<AuthorBook>()

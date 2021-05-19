@@ -62,9 +62,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         }
                         else if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            //meta.Debug(0);
-
-                            //Debug.WriteLine($"Text: '{meta.DataChunk.Text}'");
+                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Unknown, meta.DataChunk.Text);
+                            information.Add(info);
                         }
 
                         break;

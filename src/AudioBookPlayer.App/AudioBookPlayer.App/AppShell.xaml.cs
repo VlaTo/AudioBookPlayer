@@ -1,5 +1,6 @@
 ﻿using AudioBookPlayer.App.Views;
 using System;
+using AudioBookPlayer.App.Core;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App
@@ -10,13 +11,12 @@ namespace AudioBookPlayer.App
         {
             InitializeComponent();
 
-            Routing.RegisterRoute(nameof(ItemDetailPage), typeof(ItemDetailPage));
-            Routing.RegisterRoute(nameof(NewItemPage), typeof(NewItemPage));
+            Routing.RegisterRoute(Routes.PlayerPageRoute, typeof(PlayerControlPage));
         }
 
-        private async void OnMenuItemClicked(object sender, EventArgs e)
+        private void OnMenuItemClicked(object sender, EventArgs e)
         {
-            await Current.GoToAsync("//LoginPage");
+            //await Current.GoToAsync("//LoginPage");
         }
     }
 }

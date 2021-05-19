@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
@@ -7,6 +8,7 @@ using AudioBookPlayer.App.Droid.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
+using TheControls = LibraProgramming.Xamarin.Popups.Platforms.Android.Controls;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Droid
@@ -25,7 +27,7 @@ namespace AudioBookPlayer.App.Droid
             //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             
             Forms.Init(this, savedInstanceState);
-            Controls.Init(this, savedInstanceState);
+            TheControls.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
             /*var ismounded = String.Equals(Android.OS.Environment.ExternalStorageState, Android.OS.Environment.MediaMounted);
@@ -48,6 +50,20 @@ namespace AudioBookPlayer.App.Droid
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            Xamarin.Essentials.Platform.OnResume(this);
+        }
+
+        protected override void OnNewIntent(Intent intent)
+        {
+            base.OnNewIntent(intent);
+
+            Xamarin.Essentials.Platform.OnNewIntent(intent);
         }
 
         /*public override void OnBackPressed()

@@ -115,6 +115,24 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Bookmark.
+        /// </summary>
+        internal static string PlayBookBookmarkCurrentLabel {
+            get {
+                return ResourceManager.GetString("PlayBookBookmarkCurrentLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Snooze.
+        /// </summary>
+        internal static string PlayBookSnoozeLabel {
+            get {
+                return ResourceManager.GetString("PlayBookSnoozeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Recent.
         /// </summary>
         internal static string RecentBooksTab {
