@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AudioBookPlayer.App.Data.Models
 {
-    [Table("books")]
-    public class Book
+    [Table("chapters")]
+    public sealed class Chapter
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -24,52 +23,43 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        public ICollection<AuthorBook> AuthorBooks
+        [Required]
+        public long BookId
         {
             get;
             set;
         }
-
-        [DataType(DataType.MultilineText)]
-        public string Synopsis
+        
+        [Required]
+        public long SourceFileId
         {
             get;
             set;
         }
 
         [DataType(DataType.Duration)]
-        public TimeSpan Duration
+        public TimeSpan Offset
         {
             get;
             set;
         }
 
-        [DataType(DataType.DateTime)]
-        public DateTime AddedToLibrary
+        [DataType(DataType.Duration)]
+        public TimeSpan Length
+        {
+            get;
+            set;
+        }
+        
+        [ForeignKey(nameof(BookId))]
+        public Book Book
         {
             get;
             set;
         }
 
-        public bool IsExcluded
-        {
-            get;
-            set;
-        }
-
-        public ICollection<SourceFile> SourceFiles
-        {
-            get;
-            set;
-        }
-
-        public ICollection<BookImage> Images
-        {
-            get;
-            set;
-        }
-
-        public ICollection<Chapter> Chapters
+        [ForeignKey(nameof(SourceFileId))]
+        public SourceFile SourceFile
         {
             get;
             set;

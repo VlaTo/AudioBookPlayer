@@ -1,6 +1,4 @@
-﻿using LibraProgramming.Xamarin.Interaction;
-
-namespace AudioBookPlayer.App.Core.Extensions
+﻿namespace LibraProgramming.Xamarin.Core.Extensions
 {
     internal static class WeakEventManagerExtensions
 	{

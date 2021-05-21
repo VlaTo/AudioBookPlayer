@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Models
 {
-    public abstract class BookImage
+    public abstract class AudioBookImage
     {
         public string Key
         {
             get;
         }
 
-        protected BookImage(string key)
+        protected AudioBookImage(string key)
         {
             Key = key;
         }

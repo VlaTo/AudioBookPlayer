@@ -4,8 +4,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:AudioBookPlayer.App.Views"
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     Title="AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.AppShell">
+    <Shell.Behaviors>
+        <interactivity:MultiTapToExitBehavior
+            TapCount="2"
+            Timeout="0:00:3.0"
+            ShowHintMessage="OnMultiTapToExitBehaviorOnShowHintMessage"
+        />
+    </Shell.Behaviors>
 
     <!--
         The overall app visual hierarchy is defined here, along with navigation.
@@ -17,20 +25,26 @@
         <ResourceDictionary>
             <Color x:Key="LightShellTabBarTitleColor">White</Color>
             <Color x:Key="LightShellForegroundColor">White</Color>
+            <Color x:Key="LightShellBackgroundColor">White</Color>
 
             <Color x:Key="DarkShellTabBarTitleColor">Gray</Color>
             <Color x:Key="DarkShellForegroundColor">White</Color>
+            <Color x:Key="DarkShellBackgroundColor">#2A2A2A</Color>
 
             <Style
                 x:Key="BaseStyle"
                 TargetType="Element">
                 <Setter
                     Property="Shell.BackgroundColor"
-                    Value="{AppThemeBinding Light={StaticResource LightNavigationPageBarBackgroundColor}, Dark={StaticResource DarkNavigationPageBarBackgroundColor}}"
+                    Value="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}"
                 />
                 <Setter
                     Property="Shell.ForegroundColor"
                     Value="{AppThemeBinding Light={StaticResource LightShellForegroundColor}, Dark={StaticResource DarkShellForegroundColor}}"
+                />
+                <Setter
+                    Property="Shell.FlyoutBackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}"
                 />
                 <Setter Property="Shell.TitleColor" Value="White" />
                 <Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
@@ -75,7 +89,7 @@
                 ApplyToDerivedTypes="True">
                 <Setter
                     Property="BackgroundColor"
-                    Value="LightBlue"
+                    Value="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}"
                 />
                 <Setter
                     Property="VisualStateManager.VisualStateGroups">
@@ -85,12 +99,12 @@
                                 <VisualState.Setters>
                                     <Setter
                                         Property="BackgroundColor"
-                                        Value="White"
+                                        Value="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}"
                                     />
                                     <Setter
                                         TargetName="FlyoutItemLabel"
                                         Property="Label.TextColor"
-                                        Value="{StaticResource Primary}"
+                                        Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
                                     />
                                 </VisualState.Setters>
                             </VisualState>
@@ -98,7 +112,7 @@
                                 <VisualState.Setters>
                                     <Setter
                                         Property="BackgroundColor"
-                                        Value="{StaticResource Primary}"
+                                        Value="{AppThemeBinding Light={StaticResource LightPrimaryColor}, Dark={StaticResource DarkPrimaryColor}}"
                                     />
                                 </VisualState.Setters>
                             </VisualState>
@@ -115,6 +129,10 @@
                 TargetType="Layout"
                 ApplyToDerivedTypes="True">
                 <Setter
+                    Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}"
+                />
+                <Setter
                     Property="VisualStateManager.VisualStateGroups">
                     <VisualStateGroupList>
                         <VisualStateGroup x:Name="CommonStates">
@@ -123,7 +141,7 @@
                                     <Setter
                                         TargetName="FlyoutItemLabel"
                                         Property="Label.TextColor"
-                                        Value="{StaticResource Primary}"
+                                        Value="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
                                     />
                                 </VisualState.Setters>
                             </VisualState>
@@ -138,13 +156,13 @@
     <Shell.FlyoutHeaderTemplate>
         <DataTemplate>
             <Grid
-                BackgroundColor="WhiteSmoke">
+                BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}">
                 <Image
                     HeightRequest="240"
                 />
                 <Label
                     FontSize="Large"
-                    Text="Audio Books Library"
+                    Text="{Static res:AppResources.ShellHeaderTitle}"
                     VerticalOptions="End"
                     HorizontalOptions="End"
                     Margin="8,8,16,16"
@@ -224,6 +242,13 @@
             ContentTemplate="{DataTemplate local:LoginPage}"
         />
     </TabBar>
+
+    <!--<NavigationPage>
+        <ShellContent
+            Route="{Static routes:Routes.PlayerPageRoute}"
+            ContentTemplate="{DataTemplate local:PlayerControlPage}"
+        />
+    </NavigationPage>-->
 
     <!-- Optional Templates 
     // These may be provided inline as below or as separate classes.

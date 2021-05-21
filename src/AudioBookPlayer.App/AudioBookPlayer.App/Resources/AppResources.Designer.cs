@@ -70,6 +70,15 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Press BACK to exit.
+        /// </summary>
+        internal static string ExitToastMessage {
+            get {
+                return ResourceManager.GetString("ExitToastMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на (no value).
         /// </summary>
         internal static string LibraryNullRootFolder {
@@ -138,6 +147,15 @@ namespace AudioBookPlayer.App.Resources {
         internal static string RecentBooksTab {
             get {
                 return ResourceManager.GetString("RecentBooksTab", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Audio Book Player.
+        /// </summary>
+        internal static string ShellHeaderTitle {
+            get {
+                return ResourceManager.GetString("ShellHeaderTitle", resourceCulture);
             }
         }
         

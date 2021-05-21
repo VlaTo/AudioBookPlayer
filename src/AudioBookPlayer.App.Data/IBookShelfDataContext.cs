@@ -32,6 +32,11 @@ namespace AudioBookPlayer.App.Data
             get;
         }
 
+        DbSet<Chapter> Chapters
+        {
+            get;
+        }
+
         void Initialize();
 
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);

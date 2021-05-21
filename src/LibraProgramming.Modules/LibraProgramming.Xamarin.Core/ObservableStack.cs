@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Core
 {
     public sealed class ObservableStack<T> : ICollection, IReadOnlyCollection<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {

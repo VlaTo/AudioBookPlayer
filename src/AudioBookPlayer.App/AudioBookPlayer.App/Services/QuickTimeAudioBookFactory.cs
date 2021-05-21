@@ -57,7 +57,7 @@ namespace AudioBookPlayer.App.Services
                             {
                                 if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
                                 {
-                                    var bookImage = new MemoryImage(streamItem.Key, streamItem.Stream.ToBytes());
+                                    var bookImage = new InMemoryAudioBookImage(streamItem.Key, streamItem.Stream.ToBytes());
                                     audioBook.Images.Add(bookImage);
                                 }
 
@@ -70,10 +70,12 @@ namespace AudioBookPlayer.App.Services
 
                     foreach (var track in tracks)
                     {
-                        var chapter = new Chapter
+                        var chapter = new AudioBookChapter
                         {
                             Title = track.Title,
-                            Duration = track.Duration
+                            Start = duration,
+                            Duration = track.Duration,
+                            SourceFile = file
                         };
 
                         audioBook.Chapters.Add(chapter);

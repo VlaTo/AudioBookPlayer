@@ -34,12 +34,12 @@ namespace AudioBookPlayer.App.Models
             get;
         }
 
-        public IList<Chapter> Chapters
+        public IList<AudioBookChapter> Chapters
         {
             get;
         }
 
-        public IList<BookImage> Images
+        public IList<AudioBookImage> Images
         {
             get;
         }
@@ -47,8 +47,8 @@ namespace AudioBookPlayer.App.Models
         public AudioBook()
         {
             Authors = new List<string>();
-            Chapters = new List<Chapter>();
-            Images = new List<BookImage>();
+            Chapters = new List<AudioBookChapter>();
+            Images = new List<AudioBookImage>();
         }
     }
 }

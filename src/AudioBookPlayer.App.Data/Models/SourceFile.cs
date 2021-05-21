@@ -21,7 +21,7 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        public string Source
+        public string Filename
         {
             get;
             set;

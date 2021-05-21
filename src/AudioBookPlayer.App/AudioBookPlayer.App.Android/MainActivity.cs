@@ -10,12 +10,36 @@ using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Platforms.Android;
 using TheControls = LibraProgramming.Xamarin.Popups.Platforms.Android.Controls;
 using Xamarin.Forms;
+using IPlaybackService = AudioBookPlayer.App.Droid.Services.IPlaybackService;
 
 namespace AudioBookPlayer.App.Droid
 {
     [Activity(Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        internal PlaybackServiceConnection PlaybackServiceConnection
+        {
+            get;
+            private set;
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        internal void OnPlaybackServiceConnected()
+        {
+            System.Diagnostics.Debug.WriteLine("[MainActivity] [OnPlaybackServiceConnected] Executed");
+        }
+
+        internal void OnPlaybackServiceDisconnected()
+        {
+            System.Diagnostics.Debug.WriteLine("[MainActivity] [OnPlaybackServiceDisconnected] Executed");
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             TabLayoutResource = Resource.Layout.Tabbar;
@@ -24,32 +48,26 @@ namespace AudioBookPlayer.App.Droid
             base.OnCreate(savedInstanceState);
 
             //Xamarin.Forms.Forms.SetFlags("Expander_Experimental");
-            //Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             
             Forms.Init(this, savedInstanceState);
             TheControls.Init(this, savedInstanceState);
             Popup.Init(this, savedInstanceState);
 
-            /*var ismounded = String.Equals(Android.OS.Environment.ExternalStorageState, Android.OS.Environment.MediaMounted);
-            if (ismounded)
-            {
-                var dirs = ContextCompat.GetExternalFilesDirs(ApplicationContext, null);
-                
-                if (dirs != null && dirs.Length > 0)
-                {
-                    var primaryExternalStorage = dirs[0];
-
-                }
-            }*/
-
             LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        protected override void OnStart()
         {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            base.OnStart();
 
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            if (null == PlaybackServiceConnection)
+            {
+                PlaybackServiceConnection = new PlaybackServiceConnection(this);
+            }
+
+            var intent = new Intent(this, typeof(PlaybackService));
+
+            BindService(intent, PlaybackServiceConnection, Bind.AutoCreate);
         }
 
         protected override void OnResume()
@@ -66,26 +84,6 @@ namespace AudioBookPlayer.App.Droid
             Xamarin.Essentials.Platform.OnNewIntent(intent);
         }
 
-        /*public override void OnBackPressed()
-        {
-            if (backPressedOnce)
-            {
-                base.OnBackPressed();
-
-                Java.Lang.JavaSystem.Exit(0);
-
-                return;
-            }
-
-            backPressedOnce = true;
-
-            var toast = Toast.MakeText(this, "Press twice to exit", ToastLength.Short);
-
-            toast.Show();
-
-            new Handler().PostDelayed(() => backPressedOnce = false, 2000);
-        }*/
-
         /// <summary>
         /// 
         /// </summary>
@@ -96,6 +94,16 @@ namespace AudioBookPlayer.App.Droid
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IMediaService, MediaService>(InstanceLifetime.Singleton);
                 container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
+                container.Register<IPlaybackController>(GetPlaybackController, InstanceLifetime.Singleton);
+                container.Register<IToastService, ToastService>(InstanceLifetime.Singleton);
+            }
+
+            private static PlaybackController GetPlaybackController()
+            {
+                var mainActivity = (MainActivity) Xamarin.Essentials.Platform.CurrentActivity;
+                var connection = mainActivity.PlaybackServiceConnection;
+
+                return new PlaybackController(connection.Binder.Service);
             }
         }
     }

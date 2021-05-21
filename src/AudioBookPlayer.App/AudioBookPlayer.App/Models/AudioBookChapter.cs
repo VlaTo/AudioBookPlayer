@@ -2,7 +2,7 @@
 
 namespace AudioBookPlayer.App.Models
 {
-    public sealed class Chapter
+    public sealed class AudioBookChapter
     {
         public string Title
         {
@@ -19,6 +19,12 @@ namespace AudioBookPlayer.App.Models
         public TimeSpan Duration
         {
             get; 
+            set;
+        }
+
+        public string SourceFile
+        {
+            get;
             set;
         }
     }

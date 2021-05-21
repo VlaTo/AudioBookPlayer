@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Models
 {
-    public sealed class MemoryImage : BookImage
+    public sealed class InMemoryAudioBookImage : AudioBookImage
     {
         private readonly byte[] bytes;
 
-        public MemoryImage(string tag, byte[] bytes)
+        public InMemoryAudioBookImage(string tag, byte[] bytes)
             : base(tag)
         {
             this.bytes = bytes;

@@ -2,17 +2,29 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Core
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public sealed class WeakEventManager
     {
         private readonly Dictionary<string, List<Subscription>> handlers;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public WeakEventManager()
         {
             handlers = new Dictionary<string, List<Subscription>>();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEventArgs"></typeparam>
+        /// <param name="handler"></param>
+        /// <param name="eventName"></param>
         public void AddEventHandler<TEventArgs>(EventHandler<TEventArgs> handler, [CallerMemberName] string eventName = "")
             where TEventArgs : EventArgs
         {
@@ -29,6 +41,12 @@ namespace AudioBookPlayer.App.Core
             EventManagerService.AddEventHandler(eventName, handler.Target, handler.Method, handlers);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TEventHandler"></typeparam>
+        /// <param name="handler"></param>
+        /// <param name="eventName"></param>
         public void AddEventHandler<TEventHandler>(TEventHandler handler, [CallerMemberName] string eventName = "")
             where TEventHandler : Delegate
         {

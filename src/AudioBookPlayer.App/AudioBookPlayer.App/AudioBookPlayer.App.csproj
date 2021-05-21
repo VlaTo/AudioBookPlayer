@@ -37,6 +37,7 @@
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj" />
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Core\LibraProgramming.Xamarin.Core.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj" />
@@ -91,6 +92,6 @@
   <ItemGroup>
     <Folder Include="Controls\Extensions\" />
     <Folder Include="Controls\Internal\" />
-    <Folder Include="Extensions\" />
+    <Folder Include="Core\Controllers\" />
   </ItemGroup>
 </Project>

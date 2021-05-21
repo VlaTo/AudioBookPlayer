@@ -1,6 +1,6 @@
 ﻿using AudioBookPlayer.App.Core.Attributes;
 using AudioBookPlayer.App.ViewModels;
-using LibraProgramming.Xamarin.Interaction;
+using LibraProgramming.Xamarin.Core;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 

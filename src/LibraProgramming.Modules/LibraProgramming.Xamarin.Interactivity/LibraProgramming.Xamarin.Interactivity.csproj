@@ -9,6 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LibraProgramming.Xamarin.Core\LibraProgramming.Xamarin.Core.csproj" />
     <ProjectReference Include="..\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj" />
   </ItemGroup>
 

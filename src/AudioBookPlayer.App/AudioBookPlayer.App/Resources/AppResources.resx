@@ -120,6 +120,9 @@
   <data name="AllBooksTab" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="ExitToastMessage" xml:space="preserve">
+    <value>Press BACK to exit</value>
+  </data>
   <data name="LibraryNullRootFolder" xml:space="preserve">
     <value>(no value)</value>
   </data>
@@ -144,6 +147,10 @@
   </data>
   <data name="RecentBooksTab" xml:space="preserve">
     <value>Recent</value>
+  </data>
+  <data name="ShellHeaderTitle" xml:space="preserve">
+    <value>Audio Book Player</value>
+    <comment>Shell Header Application name</comment>
   </data>
   <data name="ShellMenuAboutItem" xml:space="preserve">
     <value>About</value>

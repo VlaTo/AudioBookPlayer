@@ -2,59 +2,81 @@
 using Android.Content;
 using Android.Media;
 using Android.OS;
-using Android.Provider;
 using Android.Runtime;
 using Android.Support.V4.App;
 using System;
 using System.Threading;
+using AudioBookPlayer.App.Models;
+using AudioBookPlayer.App.Services;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-audio
     // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming
+    // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/services/creating-a-service/bound-services
     [Service]
-    [IntentFilter(new []{ ActionPlay })]
-    internal sealed class AndroidPlaybackService : Service, AudioManager.IOnAudioFocusChangeListener
+    //[IntentFilter(new []{ IPlaybackService.ActionPlay })]
+    public sealed class PlaybackService : Service, IPlaybackService, AudioManager.IOnAudioFocusChangeListener
     {
-        public const string ActionPlay = "com.libraprogramming.audiobookreader.action.play";
-
         private AudioManager audioManager;
-        private NotificationManager notificationManager;
+        //private NotificationManager notificationManager;
         private MediaPlayer player;
-        //private IEventAggregator eventAggregator;
+        private AudioBook book;
+        private AudioBookChapter currentChapter;
+
         //private PlaybackPositionChanged positionChanged;
 
-        public AndroidPlaybackService()
-            //: this((IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator)))
+        public IBinder Binder
         {
+            get;
+            private set;
         }
-
-        /*private AndroidPlaybackService(IEventAggregator ea)
-        {
-            positionChanged = ea.GetEvent<PlaybackPositionChanged>();
-        }*/
 
         public override void OnCreate()
         {
             base.OnCreate();
 
-            audioManager = (AudioManager)Application.Context.GetSystemService(Application.AudioService);
-            notificationManager = (NotificationManager)Application.Context.GetSystemService(Application.NotificationService);
+            audioManager = (AudioManager) Application.Context.GetSystemService(Application.AudioService);
+            //notificationManager = (NotificationManager) Application.Context.GetSystemService(Application.NotificationService);
 
-            //var ea = (IEventAggregator)PrismApplication.Current.Container.Resolve(typeof(IEventAggregator));
-            //positionChanged = ea.GetEvent<PlaybackPositionChanged>();
+            book = null;
+            currentChapter = null;
+            player = new MediaPlayer();
 
-            //var temp = Xamarin.Forms.DependencyService.Get<IEventAggregator>();
-
-            //Application.Context.BindService()
+            player.SetAudioAttributes(CreateAudioAttributes());
+            player.SetWakeMode(Application.Context, WakeLockFlags.Partial);
         }
 
         public override IBinder OnBind(Intent intent)
         {
-            return null;
+            Binder = new PlaybackServiceBinder(this);
+
+            return Binder;
         }
 
-        [return: GeneratedEnum]
+        public override bool OnUnbind(Intent? intent)
+        {
+            return base.OnUnbind(intent);
+        }
+
+        public override void OnDestroy()
+        {
+            audioManager = null;
+            currentChapter = null;
+            book = null;
+
+            if (player.IsPlaying)
+            {
+                player.Stop();
+            }
+
+            player = null;
+            Binder = null;
+
+            base.OnDestroy();
+        }
+
+        /*[return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(
             Intent intent,
             [GeneratedEnum] StartCommandFlags flags,
@@ -62,11 +84,11 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             switch (intent.Action)
             {
-                case ActionPlay:
+                case IPlaybackService.ActionPlay:
                 {
-                    var filename = intent.Extras.GetString("Filename");
+                    var filename = intent.GetStringExtra("Filename");
                     
-                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnStartCommand] Action: '{ActionPlay}', Filenamw: '{filename}'");
+                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnStartCommand] Action play -- \"{filename}\"");
 
                     StartPlayFile(filename);
 
@@ -75,6 +97,90 @@ namespace AudioBookPlayer.App.Droid.Services
             }
 
             return StartCommandResult.Sticky;
+        }*/
+
+        public void SetBook(AudioBook audioBook)
+        {
+            book = audioBook;
+        }
+
+        public void Play(int chapterIndex, TimeSpan position)
+        {
+            currentChapter = book.Chapters[chapterIndex];
+
+            player.Reset();
+            player.SetDataSource(currentChapter.SourceFile);
+
+            if (AudioFocusRequest.Granted != AcquireAudioFocus())
+            {
+                System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Audio focus not acquired!");
+                return;
+            }
+
+            player.Prepare();
+
+            //var temp = TimeSpan.FromMilliseconds(player.Duration);
+            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 32755299 ms
+            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 09:05:55.2990000
+            //System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Media duration: {temp:c}");
+
+            player.Start();
+
+            //var timer = new Timer(OnTimer, null, TimeSpan.FromSeconds(3.0d), TimeSpan.FromMilliseconds(500.0d));
+
+            /*if (null == player)
+            {
+                player = new MediaPlayer();
+                player.SetAudioAttributes(attributes);
+                player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
+
+                var notificationId = "abp_notification";
+                var notificationName = ApplicationContext.PackageName;
+                var channel = new NotificationChannel(notificationId, notificationName, NotificationImportance.Default)
+                {
+                    Description = "Sample notification description"
+                };
+
+                notificationManager.CreateNotificationChannel(channel);
+
+                var intent = new Intent(Application.Context, typeof(MainActivity));
+                var pendingIntent = PendingIntent.GetActivity(
+                    Application.Context,
+                    0,
+                    intent,
+                    PendingIntentFlags.UpdateCurrent
+                );
+                var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
+                    //.SetStyle(NotificationCompat.BigTextStyle)
+                    .SetAutoCancel(false)
+                    .SetContentTitle("Sample Title")
+                    .SetContentText("Sample content text")
+                    .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_close_circle)
+                    .SetContentIntent(pendingIntent)
+                    .Build();
+
+                notificationManager.Notify(1001, notification);
+
+                //notificationManager.Cancel(1001);
+
+                /--
+                var notification = new Notification
+                {
+                    TickerText = new Java.Lang.String("Started"),
+                    Icon = Resource.Drawable.ic_mtrl_chip_close_circle
+                };
+
+                notification.Flags |= NotificationFlags.OngoingEvent;
+                notification.SetLatestEventInfo(Application.Context, "Sample title", "Sample content", pendingIntent);
+
+                StartForeground(1, notification);
+                --/
+            }
+            else
+            {
+                player.Reset();
+            }*/
+
         }
 
         void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange)
@@ -111,69 +217,12 @@ namespace AudioBookPlayer.App.Droid.Services
             }
         }
 
-        private void StartPlayFile(string filename)
+        private static AudioAttributes CreateAudioAttributes() => new AudioAttributes.Builder().SetContentType(AudioContentType.Music).Build();
+
+        private AudioFocusRequest AcquireAudioFocus()
         {
-            var attributes = new AudioAttributes.Builder()
-                .SetContentType(AudioContentType.Music)
-                .Build();
-
-            if (null == player)
-            {
-                player = new MediaPlayer();
-                player.SetAudioAttributes(attributes);
-                player.SetWakeMode(ApplicationContext, WakeLockFlags.Partial);
-
-                var notificationId = "abp_notification";
-                var notificationName = ApplicationContext.PackageName;
-                var channel = new NotificationChannel(notificationId, notificationName, NotificationImportance.Default)
-                {
-                    Description = "Sample notification description"
-                };
-
-                notificationManager.CreateNotificationChannel(channel);
-
-                var intent = new Intent(Application.Context, typeof(MainActivity));
-                var pendingIntent = PendingIntent.GetActivity(
-                    Application.Context,
-                    0,
-                    intent,
-                    PendingIntentFlags.UpdateCurrent
-                );
-                var notification = new NotificationCompat.Builder(Application.Context, channel.Id)
-                    //.SetStyle(NotificationCompat.BigTextStyle)
-                    .SetAutoCancel(false)
-                    .SetContentTitle("Sample Title")
-                    .SetContentText("Sample content text")
-                    .SetSmallIcon(Resource.Drawable.ic_mtrl_chip_close_circle)
-                    .SetContentIntent(pendingIntent)
-                    .Build();
-
-                notificationManager.Notify(1001, notification);
-
-                //notificationManager.Cancel(1001);
-
-                /*
-                var notification = new Notification
-                {
-                    TickerText = new Java.Lang.String("Started"),
-                    Icon = Resource.Drawable.ic_mtrl_chip_close_circle
-                };
-
-                notification.Flags |= NotificationFlags.OngoingEvent;
-                notification.SetLatestEventInfo(Application.Context, "Sample title", "Sample content", pendingIntent);
-
-                StartForeground(1, notification);
-                */
-            }
-            else
-            {
-                player.Reset();
-            }
-
-            player.SetDataSource(filename);
-
             var request = new AudioFocusRequestClass.Builder(AudioFocus.GainTransientMayDuck)
-                .SetAudioAttributes(attributes)
+                .SetAudioAttributes(CreateAudioAttributes())
                 .Build();
 
             var result = audioManager.RequestAudioFocus(request);
@@ -181,20 +230,9 @@ namespace AudioBookPlayer.App.Droid.Services
             if (AudioFocusRequest.Granted != result)
             {
                 System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Audio focus not accuired!");
-                return;
             }
 
-            player.Prepare();
-
-            var temp = TimeSpan.FromMilliseconds(player.Duration);
-            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 32755299 ms
-            // [0:] [AndroidPlaybackService] [StartPlayFile] Media duration: 09:05:55.2990000
-            System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Media duration: {temp:c}");
-
-            player.Start();
-
-            var timer = new Timer(OnTimer, null, TimeSpan.FromSeconds(3.0d), TimeSpan.FromMilliseconds(500.0d));
-
+            return result;
         }
 
         private void OnTimer(object state)

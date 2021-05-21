@@ -2,20 +2,34 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace AudioBookPlayer.App.Core
+namespace LibraProgramming.Xamarin.Core
 {
-    internal struct Subscription
+    /// <summary>
+    /// 
+    /// </summary>
+    internal readonly struct Subscription
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public WeakReference Subscriber
         {
             get;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public MethodInfo Handler
         {
             get;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="subscriber"></param>
+        /// <param name="handler"></param>
         public Subscription(WeakReference subscriber, MethodInfo handler)
         {
             if (null == handler)
@@ -28,8 +42,18 @@ namespace AudioBookPlayer.App.Core
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     internal static class EventManagerService
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <param name="target"></param>
+        /// <param name="methodInfo"></param>
+        /// <param name="handlers"></param>
         public static void AddEventHandler(
             in string eventName,
             in object target,
@@ -52,6 +76,13 @@ namespace AudioBookPlayer.App.Core
             }
         }
         
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <param name="target"></param>
+        /// <param name="methodInfo"></param>
+        /// <param name="handlers"></param>
         public static void RemoveEventHandler(
             in string eventName,
             in object target,
@@ -80,6 +111,13 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        /// <param name="handlers"></param>
         public static void HandleEvent(
             in string eventName,
             in object sender,
@@ -111,6 +149,12 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <param name="actionEventArgs"></param>
+        /// <param name="handlers"></param>
         public static void HandleEvent(
             in string eventName,
             in object actionEventArgs,
@@ -140,6 +184,11 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eventName"></param>
+        /// <param name="eventHandlers"></param>
         public static void HandleEvent(
             in string eventName,
             in Dictionary<string, List<Subscription>> eventHandlers)
