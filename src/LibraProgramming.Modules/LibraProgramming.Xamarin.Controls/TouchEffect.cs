@@ -54,14 +54,10 @@ namespace LibraProgramming.Xamarin.Controls
         }
 
         public static bool GetShouldMakeChildrenInputTransparent(BindableObject bindable)
-        {
-            return (bool)bindable.GetValue(ShouldMakeChildrenInputTransparentProperty);
-        }
+            => (bool) bindable.GetValue(ShouldMakeChildrenInputTransparentProperty);
 
         public static void SetShouldMakeChildrenInputTransparent(BindableObject bindable, bool value)
-        {
-            bindable.SetValue(ShouldMakeChildrenInputTransparentProperty, value);
-        }
+            => bindable.SetValue(ShouldMakeChildrenInputTransparentProperty, value);
 
         internal static TouchEffect GetFrom(BindableObject bindable)
         {

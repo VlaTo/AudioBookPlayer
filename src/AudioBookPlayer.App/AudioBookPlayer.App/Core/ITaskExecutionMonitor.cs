@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using LibraProgramming.Xamarin.Interaction;
+﻿using LibraProgramming.Xamarin.Core;
+using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Core
 {

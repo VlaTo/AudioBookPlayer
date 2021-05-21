@@ -19,6 +19,7 @@
             <Color x:Key="LightPrimaryButtonBackgroundColor">LightBlue</Color>
             <Color x:Key="LightPrimaryTextColor">Black</Color>
             <Color x:Key="LightSecondaryTextColor">DimGray</Color>
+            <Color x:Key="LightPrimaryColor">#2196F3</Color>
 
             <!-- Dark Theme -->
             <Color x:Key="DarkContentPageBackgroundColor">#1E1E1E</Color>
@@ -28,8 +29,7 @@
             <Color x:Key="DarkPrimaryButtonBackgroundColor">DarkGray</Color>
             <Color x:Key="DarkPrimaryTextColor">White</Color>
             <Color x:Key="DarkSecondaryTextColor">DimGray</Color>
-
-            <Color x:Key="Primary">#2196F3</Color>
+            <Color x:Key="DarkPrimaryColor">DimGray</Color>
             
             <Style
                 TargetType="ContentPage"
@@ -51,7 +51,10 @@
                         <VisualStateGroup x:Name="CommonStates">
                             <VisualState x:Name="Normal">
                                 <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                    <Setter
+                                        Property="BackgroundColor"
+                                        Value="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
+                                    />
                                 </VisualState.Setters>
                             </VisualState>
                             <VisualState x:Name="Disabled">

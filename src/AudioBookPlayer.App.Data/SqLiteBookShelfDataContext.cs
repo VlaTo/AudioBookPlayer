@@ -44,6 +44,12 @@ namespace AudioBookPlayer.App.Data
             set;
         }
 
+        public DbSet<Chapter> Chapters
+        {
+            get;
+            set;
+        }
+
         public void Initialize()
         {
             Database.EnsureCreated();
@@ -139,14 +145,22 @@ namespace AudioBookPlayer.App.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // SourceFiles
             modelBuilder.Entity<SourceFile>()
                 .HasIndex(sf => new {sf.Id, sf.BookId})
                 .IsUnique();
 
+            // BookImages
             modelBuilder.Entity<BookImage>()
                 .HasIndex(bi => new {bi.Id, bi.BookId})
                 .IsUnique();
 
+            // Chapters
+            modelBuilder.Entity<Chapter>()
+                .HasIndex(bi => new {bi.Id, bi.BookId})
+                .IsUnique();
+
+            // AuthorBooks
             modelBuilder.Entity<AuthorBook>()
                 .HasKey(ab => new {ab.AuthorId, ab.BookId});
 

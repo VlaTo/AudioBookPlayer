@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
+using LibraProgramming.Xamarin.Core;
 
 namespace AudioBookPlayer.App.Core
 {

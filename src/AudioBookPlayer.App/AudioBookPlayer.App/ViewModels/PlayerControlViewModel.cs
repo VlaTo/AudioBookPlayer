@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Extensions;
+using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Media.Common;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
@@ -19,7 +20,10 @@ namespace AudioBookPlayer.App.ViewModels
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
         private readonly IBookShelfProvider provider;
+        private readonly IPlaybackController playbackController;
         private readonly TaskExecutionMonitor executionMonitor;
+        private AudioBook book;
+        private IPlayback playback;
         private string bookId;
         private string bookTitle;
         private string bookSubtitle;
@@ -30,6 +34,7 @@ namespace AudioBookPlayer.App.ViewModels
         private TimeSpan left;
         private TimeSpan duration;
         private ImageSource imageSource;
+        private bool canPlayBook;
         private bool isPlaying;
 
         public string BookId
@@ -108,6 +113,12 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref left, value);
         }
 
+        public bool CanPlayBook
+        {
+            get => canPlayBook;
+            set => SetProperty(ref canPlayBook, value);
+        }
+
         public bool IsPlaying
         {
             get => isPlaying;
@@ -145,9 +156,14 @@ namespace AudioBookPlayer.App.ViewModels
         }
 
         [PrefferedConstructor]
-        public PlayerControlViewModel(IBookShelfProvider provider)
+        public PlayerControlViewModel(
+            IBookShelfProvider provider,
+            IPlaybackController playbackController)
         {
             this.provider = provider;
+            this.playbackController = playbackController;
+
+            playback = null;
             executionMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
 
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -164,7 +180,7 @@ namespace AudioBookPlayer.App.ViewModels
             //ChapterEnd = 32755299.0d;
             //ChapterPosition = 110.0d;
 
-            Duration = TimeSpan.Zero; // TimeSpan.FromMilliseconds(ChapterEnd);
+            Duration = TimeSpan.Zero;
             Elapsed = TimeSpan.Zero;
             Left = TimeSpan.Zero;
         }
@@ -181,8 +197,15 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
-            IsPlaying = false == IsPlaying;
             Debug.WriteLine($"[PlayerControlViewModel] [DoPlayCommand] Playing: {IsPlaying}");
+
+            if (null != playback)
+            {
+                playback.SelectChapter(0);
+                playback.Play(TimeSpan.Zero);
+
+                //IsPlaying = true;
+            }
         }
 
         private void DoSmallFastForwardCommand()
@@ -209,35 +232,45 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async Task DoLoadBookAsync()
         {
-            string JoinAuthors(IEnumerable<string> authors)
-            {
-                var sep = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-                return String.Join(sep, authors);
-            }
-
             if (String.IsNullOrEmpty(BookId))
             {
                 return;
             }
 
             var id = long.Parse(BookId, CultureInfo.InvariantCulture);
-            var book = await provider.GetBookAsync(id);
+            
+            book = await provider.GetBookAsync(id);
 
             if (null != book)
             {
-                BookTitle = book.Title;
-                BookSubtitle = JoinAuthors(book.Authors);
-                
-                Duration = book.Duration;
-                Elapsed = TimeSpan.Zero;
-                Left = -book.Duration;
-                
-                ChapterStart = 0.0d;
-                ChapterEnd = book.Duration.TotalMilliseconds;
-                ChapterPosition = 0.0d;
-
-                ImageSource = await book.GetImageAsync(WellKnownMetaItemNames.Cover);
+                await BindBookProperties();
+                playback = await playbackController.CreatePlaybackAsync(book);
             }
+            else
+            {
+                // should we clear book properties?
+            }
+        }
+
+        private async Task BindBookProperties()
+        {
+            var authors = String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, book.Authors);
+            var images = await book.GetImageAsync(WellKnownMetaItemNames.Cover);
+            var canPlay = 0 < book.Chapters.Count;
+
+            BookTitle = book.Title;
+            BookSubtitle = authors;
+            ImageSource = images;
+
+            Duration = book.Duration;
+            Elapsed = TimeSpan.Zero;
+            Left = -book.Duration;
+
+            ChapterStart = 0.0d;
+            ChapterEnd = book.Duration.TotalMilliseconds;
+            ChapterPosition = 0.0d;
+
+            CanPlayBook = canPlay;
         }
     }
 }

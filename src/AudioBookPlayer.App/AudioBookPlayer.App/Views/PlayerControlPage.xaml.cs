@@ -1,5 +1,5 @@
-﻿using AudioBookPlayer.App.ViewModels;
-using AudioBookPlayer.App.Core.Attributes;
+﻿using AudioBookPlayer.App.Core.Attributes;
+using AudioBookPlayer.App.ViewModels;
 using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Views
