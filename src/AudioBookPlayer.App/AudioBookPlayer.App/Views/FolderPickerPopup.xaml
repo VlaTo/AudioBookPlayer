@@ -84,7 +84,7 @@
                 <!-- Source="{FontImage FontFamily=Icons, Glyph=&#xF148;}" -->
                 <ImageButton
                     Style="{StaticResource ToolButton}"
-                    Source="{FontImage FontFamily=FontAwesome, Glyph='&#xF3BF;', Size=14}"
+                    Source="{FontImage FontFamily=FASolid, Glyph='&#xF3BF;', Size=14}"
                     Command="{Binding Path=LevelUp, Mode=OneTime}"
                 />
                 <ScrollView
@@ -106,7 +106,7 @@
                 </ScrollView>
                 <ImageButton
                     Style="{StaticResource ToolButton}"
-                    Source="{FontImage FontFamily=FontAwesome, Glyph='&#xF00C;'}"
+                    Source="{FontImage FontFamily=FASolid, Glyph='&#xF00C;'}"
                     Command="{Binding Path=Apply, Mode=OneTime}"
                 />
             </StackLayout>

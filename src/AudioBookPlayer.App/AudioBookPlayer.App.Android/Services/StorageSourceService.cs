@@ -2,38 +2,41 @@
 using AudioBookPlayer.App.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Android.App;
+using Android.Media;
+using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
     internal sealed class StorageSourceService : IStorageSourceService
     {
-        public StorageSourceService()
-        {
-
-        }
-
         public Task<IReadOnlyCollection<IFileSystemSource>> GetSourcesAsync()
         {
-            var collection = new List<IFileSystemSource>();
+            var temp = new MediaService();
+            temp.LoadMedia();
 
-            collection.Add(new SourceFolder(
-                this,
-                Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads)
-            ));
-
-            collection.Add(new SourceFolder(
-                this, 
-                Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic)
-            ));
-
+            var collection = new List<IFileSystemSource>
+            {
+                new SourceFolder(
+                    this,
+                    Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads)
+                ),
+                new SourceFolder(
+                    this,
+                    Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic)
+                )
+            };
+            
             return Task.FromResult<IReadOnlyCollection<IFileSystemSource>>(collection.AsReadOnly());
         }
 
+        // 
         private sealed class SourceFolder : IFileSystemSource
         {
             private readonly StorageSourceService service;
-            private Java.IO.File folder;
+            private readonly Java.IO.File folder;
 
             public string Name => folder.Name;
 
@@ -58,30 +61,36 @@ namespace AudioBookPlayer.App.Droid.Services
             public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
             {
                 var files = new List<IFileSystemItem>();
+                var sourceFiles = await folder.ListFilesAsync();
 
-                foreach (var item in await folder.ListFilesAsync())
+                var tenp = Directory.EnumerateFileSystemEntries(folder.AbsolutePath);
+
+                if (null != sourceFiles)
                 {
-                    if (item.IsHidden)
+                    foreach (var item in sourceFiles)
                     {
-                        continue;
-                    }
+                        if (item.IsHidden)
+                        {
+                            continue;
+                        }
 
-                    if (item.IsFile)
-                    {
-                        var directory = new FileItem(this, null, item);
+                        if (item.IsFile)
+                        {
+                            var directory = new FileItem(this, null, item);
 
-                        files.Add(directory);
+                            files.Add(directory);
 
-                        continue;
-                    }
+                            continue;
+                        }
 
-                    if (item.IsDirectory)
-                    {
-                        var directory = new DirectoryItem(this, null, item);
+                        if (item.IsDirectory)
+                        {
+                            var directory = new DirectoryItem(this, null, item);
 
-                        files.Add(directory);
+                            files.Add(directory);
 
-                        continue;
+                            continue;
+                        }
                     }
                 }
 
@@ -89,7 +98,7 @@ namespace AudioBookPlayer.App.Droid.Services
             }
         }
 
-
+        // DirectoryItem class
         private sealed class DirectoryItem : IFileSystemItem
         {
             private readonly SourceFolder owner;
@@ -120,26 +129,30 @@ namespace AudioBookPlayer.App.Droid.Services
             public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
             {
                 var files = new List<IFileSystemItem>();
+                var sourceFiles = await folder.ListFilesAsync();
 
-                foreach (var item in await folder.ListFilesAsync())
+                if (null != sourceFiles)
                 {
-                    if (item.IsHidden)
+                    foreach (var item in sourceFiles)
                     {
-                        continue;
-                    }
+                        if (item.IsHidden)
+                        {
+                            continue;
+                        }
 
-                    if (item.IsFile)
-                    {
-                        continue;
-                    }
+                        if (item.IsFile)
+                        {
+                            continue;
+                        }
 
-                    if (item.IsDirectory)
-                    {
-                        var directory = new DirectoryItem(owner, this, item);
+                        if (item.IsDirectory)
+                        {
+                            var directory = new DirectoryItem(owner, this, item);
 
-                        files.Add(directory);
+                            files.Add(directory);
 
-                        continue;
+                            continue;
+                        }
                     }
                 }
 
@@ -147,6 +160,7 @@ namespace AudioBookPlayer.App.Droid.Services
             }
         }
 
+        // FileItem class
         private sealed class FileItem : IFileSystemItem
         {
             private readonly SourceFolder owner;

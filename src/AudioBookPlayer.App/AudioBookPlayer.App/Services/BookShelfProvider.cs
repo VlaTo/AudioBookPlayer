@@ -10,8 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LibraProgramming.Xamarin.Core;
 using Xamarin.Essentials;
+using Xamarin.Forms;
 using BookImage = AudioBookPlayer.App.Data.Models.BookImage;
 using Chapter = AudioBookPlayer.App.Data.Models.Chapter;
 
@@ -82,7 +82,7 @@ namespace AudioBookPlayer.App.Services
                 FillSourceFiles(result[index], book.SourceFiles);
             }
 
-            queryBooksReady.RaiseEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
+            queryBooksReady.HandleEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
         }
 
         public async Task RefreshBooksAsync(CancellationToken cancellationToken = default)
@@ -185,7 +185,7 @@ namespace AudioBookPlayer.App.Services
 
         private async Task UpdateExistingBookAsync(Book original, AudioBook source, CancellationToken cancellation = default)
         {
-
+            throw new NotImplementedException();
         }
 
         private async Task AddNewBookAsync(AudioBook source, CancellationToken cancellation = default)

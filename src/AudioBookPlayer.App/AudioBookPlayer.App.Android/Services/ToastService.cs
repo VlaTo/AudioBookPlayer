@@ -7,16 +7,16 @@ namespace AudioBookPlayer.App.Droid.Services
     /// <summary>
     /// 
     /// </summary>
-    public sealed class ToastService : IToastService
+    public sealed class ToastService : IPlatformToastService
     {
-        /// <inheritdoc cref="IToastService.ShowLongMessage" />
+        /// <inheritdoc cref="IPlatformToastService.ShowLongMessage" />
         public void ShowLongMessage(string message)
         {
             var toast = Toast.MakeText(Application.Context, message, ToastLength.Long);
             toast.Show();
         }
 
-        /// <inheritdoc cref="IToastService.ShowShortMessage" />
+        /// <inheritdoc cref="IPlatformToastService.ShowShortMessage" />
         public void ShowShortMessage(string message)
         {
             var toast = Toast.MakeText(Application.Context, message, ToastLength.Short);

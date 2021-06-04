@@ -1,9 +1,11 @@
-﻿
-using System;
+﻿using System;
 using Xamarin.Forms;
 
-namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
+namespace LibraProgramming.Xamarin.Popups.Views
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Flags]
     public enum PaddingSides
     {
@@ -15,6 +17,9 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Xamarin
         All = Left | Top | Right | Bottom
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class PopupContentPage : ContentPage
     {
         public static readonly BindableProperty HasSystemPaddingProperty;

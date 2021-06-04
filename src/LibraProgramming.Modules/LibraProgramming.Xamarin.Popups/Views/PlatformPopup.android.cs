@@ -3,17 +3,17 @@ using Android.OS;
 using Android.Runtime;
 using Android.Widget;
 using LibraProgramming.Xamarin.Popups.Core;
-using LibraProgramming.Xamarin.Popups.Platforms.Android;
-using LibraProgramming.Xamarin.Popups.Platforms.Xamarin;
 using System.Threading.Tasks;
+using LibraProgramming.Xamarin.Popups.Views;
 using Xamarin.Forms;
+using Xamarin.Forms.Platform.Android;
 
-[assembly: Dependency(typeof(AndroidPlatformPopup))]
+[assembly: Dependency(typeof(PlatformPopup))]
 
-namespace LibraProgramming.Xamarin.Popups.Platforms.Android
+namespace LibraProgramming.Xamarin.Popups.Views
 {
     [Preserve(AllMembers = true)]
-    internal sealed class AndroidPlatformPopup : IPlatformPopup
+    internal sealed class PlatformPopup : IPlatformPopup
     {
         public bool IsInitialized => Popup.IsInitialized;
 
@@ -24,6 +24,11 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
             page.Parent = global::Xamarin.Forms.Application.Current.MainPage;
 
             var renderer = page.GetOrCreateRenderer();
+
+            if (null == renderer)
+            {
+                return Task.CompletedTask;
+            }
 
             if (null != view)
             {
@@ -37,7 +42,7 @@ namespace LibraProgramming.Xamarin.Popups.Platforms.Android
         {
             var renderer = page.GetOrCreateRenderer();
 
-            if (null!=renderer)
+            if (null != renderer)
             {
                 var view = Popup.GetContentView();
                 var element = renderer.Element;

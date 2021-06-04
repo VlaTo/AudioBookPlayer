@@ -3,7 +3,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
-using LibraProgramming.Xamarin.Core;
+using Xamarin.Forms;
+using AudioBookPlayer.App.Core.Extensions;
 
 namespace AudioBookPlayer.App.Core
 {
@@ -22,8 +23,8 @@ namespace AudioBookPlayer.App.Core
 
         public event PropertyChangedEventHandler PropertyChanged
         {
-            add => eventManager.AddEventHandler(value);
-            remove => eventManager.RemoveEventHandler(value);
+            add => eventManager.AddEventHandler<PropertyChangedEventHandler, PropertyChangedEventArgs>(value);
+            remove => eventManager.RemoveEventHandler<PropertyChangedEventHandler, PropertyChangedEventArgs>(value);
         }
 
         public bool CanBeExecuted
@@ -113,9 +114,9 @@ namespace AudioBookPlayer.App.Core
 
         protected abstract void ExecuteInternal(object parameter);
 
-        protected void RaisePropertyChanged([CallerMemberName] string propertyName = "")
+        protected void RaisePropertyChanged([CallerMemberName] string propertyName = null)
         {
-            eventManager.RaiseEvent(this, new PropertyChangedEventArgs(propertyName), nameof(PropertyChanged));
+            eventManager.HandleEvent(this, new PropertyChangedEventArgs(propertyName), nameof(PropertyChanged));
         }
     }
 }

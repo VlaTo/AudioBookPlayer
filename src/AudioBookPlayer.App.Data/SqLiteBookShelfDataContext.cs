@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using LibraProgramming.Xamarin.Core;
+using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore.Storage;
 using Xamarin.Forms;
 
@@ -12,6 +14,7 @@ namespace AudioBookPlayer.App.Data
 {
     public class SqLiteBookShelfDataContext : DbContext, IBookShelfDataContext
     {
+        private readonly IPlatformDatabasePath pathProvider;
         private const string databaseName = "library.db";
 
         public DbSet<Author> Authors
@@ -50,11 +53,21 @@ namespace AudioBookPlayer.App.Data
             set;
         }
 
+        [PrefferedConstructor]
+        protected SqLiteBookShelfDataContext(IPlatformDatabasePath pathProvider)
+        {
+            this.pathProvider = pathProvider;
+        }
+
+        public SqLiteBookShelfDataContext(DbContextOptions options) : base(options)
+        {
+        }
+
         public void Initialize()
         {
             Database.EnsureCreated();
             //CreateMigrationHistory();
-            Database.Migrate();
+            //Database.Migrate();
         }
 
         public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
@@ -79,9 +92,7 @@ namespace AudioBookPlayer.App.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //base.OnConfiguring(optionsBuilder);
-
-            var databasePath = String.Empty;
+            var databasePath = pathProvider.GetDatabasePath(databaseName);
 
             switch (Device.RuntimePlatform)
             {
@@ -89,35 +100,16 @@ namespace AudioBookPlayer.App.Data
                 {
                     SQLitePCL.Batteries_V2.Init();
 
-                    databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "..", "Library", databaseName);
+                    //databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "..", "Library", databaseName);
 
                     break;
                 }
 
-                case Device.Android:
+                /*case Device.Android:
                 {
                     // /storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files
                     //var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
                     var folder = "/storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files";
-
-                    /*var folders = new[]
-                    {
-                        Environment.SpecialFolder.LocalApplicationData,
-                        Environment.SpecialFolder.ApplicationData,
-                        Environment.SpecialFolder.CommonApplicationData,
-                        Environment.SpecialFolder.CommonDocuments,
-                        Environment.SpecialFolder.MyDocuments,
-                        Environment.SpecialFolder.Personal,
-                        Environment.SpecialFolder.UserProfile
-                    };
-
-                    foreach (var folder in folders)
-                    {
-                        var path = Environment.GetFolderPath(folder);
-                        Debug.Print($"[SqLiteBookShelfDataContext] [OnConfiguring] Folder: {folder} => \"{path}\"");
-                    }*/
-
-                    var info = Directory.CreateDirectory(folder);
                     // LocalApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.local/share/library.db
                     // ApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.config/library.db
 
@@ -130,7 +122,7 @@ namespace AudioBookPlayer.App.Data
                 default:
                 {
                     throw new NotImplementedException("Platform not supported");
-                }
+                }*/
             }
 
             var builder = new SqliteConnectionStringBuilder

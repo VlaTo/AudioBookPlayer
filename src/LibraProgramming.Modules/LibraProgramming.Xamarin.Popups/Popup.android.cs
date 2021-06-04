@@ -5,7 +5,7 @@ using Android.Widget;
 using System;
 using System.Threading;
 
-namespace LibraProgramming.Xamarin.Popups.Platforms.Android
+namespace LibraProgramming.Xamarin.Popups
 {
     public static class Popup
     {
