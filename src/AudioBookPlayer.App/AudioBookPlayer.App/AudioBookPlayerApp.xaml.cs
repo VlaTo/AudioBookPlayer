@@ -62,7 +62,8 @@ namespace AudioBookPlayer.App
         {
             container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             container.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
-            container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton, createimmediate: true);
+            container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
+            // container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton, createimmediate: true);
             container.Register<IBookShelfProvider, BookShelfProvider>(InstanceLifetime.Singleton);
             container.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
         }

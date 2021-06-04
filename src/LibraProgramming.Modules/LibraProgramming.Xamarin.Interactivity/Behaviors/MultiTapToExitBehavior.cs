@@ -109,7 +109,7 @@ namespace LibraProgramming.Xamarin.Interactivity.Behaviors
                     }
 
                     last = current;
-                    eventManager.RaiseEvent(this, EventArgs.Empty, nameof(ShowHintMessage));
+                    eventManager.HandleEvent(this, EventArgs.Empty, nameof(ShowHintMessage));
 
                     e.Cancel();
                 }

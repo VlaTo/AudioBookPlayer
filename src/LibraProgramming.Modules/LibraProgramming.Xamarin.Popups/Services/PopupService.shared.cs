@@ -1,8 +1,8 @@
 ﻿using LibraProgramming.Xamarin.Popups.Core;
 using LibraProgramming.Xamarin.Popups.Core.Extensions;
-using LibraProgramming.Xamarin.Popups.Platforms.Xamarin;
 using System;
 using System.Threading.Tasks;
+using LibraProgramming.Xamarin.Popups.Views;
 using Xamarin.Forms;
 
 // https://github.com/rotorgames/Rg.Plugins.Popup

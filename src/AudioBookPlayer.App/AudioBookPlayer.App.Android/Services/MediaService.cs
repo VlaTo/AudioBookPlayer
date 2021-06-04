@@ -1,15 +1,10 @@
 ﻿using Android.App;
-using Android.Content.PM;
-using Android.Graphics;
+using Android.Media;
+using Android.OS;
 using Android.Provider;
-using Android.Support.V4.Content;
 using AudioBookPlayer.App.Services;
 using System;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Xamarin.Essentials;
-using static Xamarin.Essentials.Permissions;
 
 namespace AudioBookPlayer.App.Droid.Services
 {
@@ -84,13 +79,22 @@ namespace AudioBookPlayer.App.Droid.Services
             return path;
         }
 
-        public async Task LoadMediaAsync()
+        public void LoadMedia()
         {
+            var collection = (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+                ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
+                : MediaStore.Audio.Media.ExternalContentUri;
+
+            var projection = new[]
+            {
+                MediaStore.Audio.IAudioColumns.Track,
+                MediaStore.Audio.Media.ContentType
+            };
 
             //var uri = MediaStore.Files.GetContentUri("external");
             //var uri1 = MediaStore.Audio.Media.GetContentUriForPath("extenal");
             //var uri2 = MediaStore.Audio.Media.GetContentUri("extenal");
-            var columns = new[]
+            /*var columns = new[]
             {
                 MediaStore.Files.FileColumns.Id,
                 MediaStore.Files.FileColumns.Title,
@@ -99,15 +103,17 @@ namespace AudioBookPlayer.App.Droid.Services
                 MediaStore.Files.FileColumns.MimeType,
                 MediaStore.Files.FileColumns.Size,
                 MediaStore.Files.FileColumns.DateAdded
-            };
+            };*/
 
-            var temp1 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
-            var temp2 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-            var temp3 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+            var sortOrder = MediaStore.Audio.IAudioColumns.Track + " ASC";
+
+            // var temp1 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
+            // var temp2 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
+            // var temp3 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
             //var uri = MediaStore.Audio.Media.GetContentUriForPath(temp3);
             //var uri = MediaStore.Audio.Media.GetContentUri(temp3);
-            var uri1 = MediaStore.Audio.Media.ExternalContentUri;
-            var uri2 = MediaStore.Audio.Media.InternalContentUri;
+            // var uri1 = MediaStore.Audio.Media.ExternalContentUri;
+            // var uri2 = MediaStore.Audio.Media.InternalContentUri;
 
             /*var permission = ContextCompat.CheckSelfPermission(Application.Context, Android.Manifest.Permission.ReadExternalStorage);
 
@@ -115,34 +121,18 @@ namespace AudioBookPlayer.App.Droid.Services
             {
             }*/
 
-            var files = Directory.EnumerateFiles(temp2);
-
-            foreach(var file in files)
-            {
-                var extension = System.IO.Path.GetExtension(file);
-                
-                System.Diagnostics.Debug.WriteLine($"[MediaService] [LoadMediaAsync] File: '{file}'");
-
-                if (String.Equals("m4b", extension))
-                {
-
-                }
-            }
-
             // content://media/internal/audio/media
 
             // content://media/external/file
             // content://com.android.externalstorage.documents/document/primary%3AMusic
             // content://com.android.providers.media.documents/document/audio_root
 
-            var resolver = Application.Context.ApplicationContext.ContentResolver;
-            var cursor = resolver.Query(
-                uri1,
-                columns,
-                //$"{MediaStore.Files.FileColumns.MediaType} = {(int)MediaType.Audio}",
+            var cursor = Application.Context.ApplicationContext.ContentResolver.Query(
+                collection,
+                projection,
                 null,
                 null,
-                $"{MediaStore.Files.FileColumns.DateAdded} DESC"
+                sortOrder
             );
 
             if (0 < cursor.Count)
@@ -151,10 +141,8 @@ namespace AudioBookPlayer.App.Droid.Services
                 {
                     try
                     {
-                        var id = cursor.GetInt(cursor.GetColumnIndex(MediaStore.Files.FileColumns.Id));
-                        //var mediaType = cursor.GetInt(cursor.GetColumnIndex(MediaStore.Files.FileColumns.MediaType));
-                        var title = cursor.GetString(cursor.GetColumnIndex(MediaStore.Files.FileColumns.Title));
-                        var displayName = cursor.GetString(cursor.GetColumnIndex(MediaStore.Files.FileColumns.DisplayName));
+                        var id = cursor.GetInt(cursor.GetColumnIndex(MediaStore.Audio.IAudioColumns.Track));
+                        var displayName = cursor.GetString(cursor.GetColumnIndex(MediaStore.Audio.Media.ContentType));
 
                         //Bitmap bitmap = null;
 
@@ -188,11 +176,38 @@ namespace AudioBookPlayer.App.Droid.Services
                     }
                     catch (Exception exception)
                     {
-
+                        ;
                     }
                 }
             }
         }
 
+        private void UpdateMediaStoreFileInfo(Action<string> callback, params string[] files)
+        {
+            MediaScannerConnection.ScanFile(
+                Application.Context,
+                files,
+                null,
+                new OnScanCompletedListener(callback)
+            );
+        }
+
+        // MediaScannerConnection update listener
+        private sealed class OnScanCompletedListener : Java.Lang.Object, MediaScannerConnection.IOnScanCompletedListener
+        {
+            private readonly Action<string> callback;
+
+            public OnScanCompletedListener(Action<string> callback)
+            {
+                this.callback = callback;
+            }
+
+#nullable enable
+            public void OnScanCompleted(string? path, Android.Net.Uri? uri)
+            {
+                callback.Invoke(path);
+            }
+#nullable restore
+        }
     }
 }

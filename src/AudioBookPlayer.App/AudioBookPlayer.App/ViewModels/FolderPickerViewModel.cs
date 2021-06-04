@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Core;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels

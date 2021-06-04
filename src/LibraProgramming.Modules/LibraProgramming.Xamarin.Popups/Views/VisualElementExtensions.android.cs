@@ -1,7 +1,7 @@
 ﻿using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 
-namespace LibraProgramming.Xamarin.Popups.Platforms.Android
+namespace LibraProgramming.Xamarin.Popups.Views
 {
     internal static class VisualElementExtensions
     {

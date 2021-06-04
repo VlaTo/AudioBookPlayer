@@ -18,8 +18,9 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             RequiredPermissions = new[]
             {
-                (Android.Manifest.Permission.ReadExternalStorage, true)
-                //(Android.Manifest.Permission.MediaContentControl, true)
+                (Android.Manifest.Permission.ReadExternalStorage, true),
+                // (Android.Manifest.Permission.WriteExternalStorage, true),
+                // (Android.Manifest.Permission.MediaContentControl, true)
             };
         }
     }

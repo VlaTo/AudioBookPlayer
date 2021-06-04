@@ -3,16 +3,16 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
-using LibraProgramming.Xamarin.Popups.Platforms.Android.Renderers;
-using LibraProgramming.Xamarin.Popups.Platforms.Xamarin;
 using System;
+using LibraProgramming.Xamarin.Popups.Views;
+using LibraProgramming.Xamarin.Popups.Views.Renderers;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Point = Xamarin.Forms.Point;
 
 [assembly: ExportRenderer(typeof(PopupContentPage), typeof(PopupContentPageRenderer))]
 
-namespace LibraProgramming.Xamarin.Popups.Platforms.Android.Renderers
+namespace LibraProgramming.Xamarin.Popups.Views.Renderers
 {
     [Preserve(AllMembers = true)]
     public sealed class PopupContentPageRenderer : PageRenderer

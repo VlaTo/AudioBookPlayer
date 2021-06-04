@@ -3,7 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
-    public interface IToastService
+    public interface IPlatformToastService
     {
         /// <summary>
         /// 

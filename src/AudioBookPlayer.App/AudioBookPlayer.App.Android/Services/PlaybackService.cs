@@ -54,7 +54,7 @@ namespace AudioBookPlayer.App.Droid.Services
             return Binder;
         }
 
-        public override bool OnUnbind(Intent? intent)
+        public override bool OnUnbind(Intent intent)
         {
             return base.OnUnbind(intent);
         }

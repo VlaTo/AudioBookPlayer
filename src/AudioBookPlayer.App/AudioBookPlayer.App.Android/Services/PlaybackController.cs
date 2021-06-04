@@ -24,30 +24,65 @@ namespace AudioBookPlayer.App.Droid.Services
         public Task<IPlayback> CreatePlaybackAsync(AudioBook audioBook, CancellationToken cancellationToken = default)
         {
             service.SetBook(audioBook);
-            service.Play(chapterIndex, position);
-
-            return Task.FromResult()
+            return Task.FromResult<IPlayback>(new Playback(this));
         }
 
+        private void Play()
+        {
+            ;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         private sealed class Playback : IPlayback
         {
-            public Playback()
-            {
-            }
+            private PlaybackController controller;
+            private bool disposed;
 
-            public void Dispose()
+            public Playback(PlaybackController controller)
             {
-                throw new NotImplementedException();
+                this.controller = controller;
             }
 
             public void SelectChapter(int chapterIndex)
             {
-                throw new NotImplementedException();
+                ;
             }
 
             public void Play(TimeSpan position)
             {
-                throw new NotImplementedException();
+                controller.Play();
+            }
+
+            public void Dispose()
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                Dispose(true);
+            }
+
+            private void Dispose(bool dispose)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (dispose)
+                    {
+                        controller = null;
+                    }
+                }
+                finally
+                {
+                    disposed = true;
+                }
             }
         }
     }

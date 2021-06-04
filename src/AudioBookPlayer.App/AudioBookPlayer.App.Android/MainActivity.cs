@@ -6,11 +6,12 @@ using Android.Runtime;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Droid.Services;
 using AudioBookPlayer.App.Services;
+using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container;
-using LibraProgramming.Xamarin.Popups.Platforms.Android;
-using TheControls = LibraProgramming.Xamarin.Popups.Platforms.Android.Controls;
+using LibraPopups = LibraProgramming.Xamarin.Popups.Popup;
+using LibraControls = LibraProgramming.Xamarin.Controls.Controls;
 using Xamarin.Forms;
-using IPlaybackService = AudioBookPlayer.App.Droid.Services.IPlaybackService;
+// using IPlaybackService = AudioBookPlayer.App.Droid.Services.IPlaybackService;
 
 namespace AudioBookPlayer.App.Droid
 {
@@ -50,8 +51,8 @@ namespace AudioBookPlayer.App.Droid
             //Xamarin.Forms.Forms.SetFlags("Expander_Experimental");
             
             Forms.Init(this, savedInstanceState);
-            TheControls.Init(this, savedInstanceState);
-            Popup.Init(this, savedInstanceState);
+            LibraControls.Init(this, savedInstanceState);
+            LibraPopups.Init(this, savedInstanceState);
 
             LoadApplication(new AudioBookPlayerApp(new AndroidInitializer()));
         }
@@ -95,7 +96,8 @@ namespace AudioBookPlayer.App.Droid
                 container.Register<IMediaService, MediaService>(InstanceLifetime.Singleton);
                 container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
                 container.Register<IPlaybackController>(GetPlaybackController, InstanceLifetime.Singleton);
-                container.Register<IToastService, ToastService>(InstanceLifetime.Singleton);
+                container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
+                container.Register<IPlatformDatabasePath, DatabasePath>();
             }
 
             private static PlaybackController GetPlaybackController()

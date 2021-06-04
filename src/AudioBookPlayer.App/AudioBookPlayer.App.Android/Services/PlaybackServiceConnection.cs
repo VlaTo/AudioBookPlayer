@@ -28,7 +28,7 @@ namespace AudioBookPlayer.App.Droid.Services
             IsConnected = false;
             Binder = null;
         }
-
+#nullable enable
         public void OnServiceConnected(ComponentName? name, IBinder? service)
         {
             Binder = service as PlaybackServiceBinder;
@@ -51,7 +51,7 @@ namespace AudioBookPlayer.App.Droid.Services
 
             mainActivity.OnPlaybackServiceDisconnected();
         }
-
+#nullable restore
         public void SetBook(AudioBook audioBook)
         {
             if (false == IsConnected)

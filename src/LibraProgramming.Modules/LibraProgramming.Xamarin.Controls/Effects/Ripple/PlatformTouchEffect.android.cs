@@ -4,21 +4,26 @@ using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Views.Accessibility;
 using Android.Widget;
-using LibraProgramming.Xamarin.Controls.Platforms.Shared;
 using System;
 using System.ComponentModel;
+using System.Drawing;
+using Android.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using Color = Xamarin.Forms.Color;
+using ListView = global::Android.Widget.ListView;
+using Point = Xamarin.Forms.Point;
+using Rectangle = Xamarin.Forms.Rectangle;
+using ScrollView = global::Android.Widget.ScrollView;
 using View = global::Android.Views.View;
 using ViewGroup = global::Android.Views.ViewGroup;
-using TouchEffectCore = LibraProgramming.Xamarin.Controls.TouchEffect;
 
-[assembly: ResolutionGroupName("LibraProgramming.Xamarin.Controls.Platforms.Xamarin")]
-[assembly: ExportEffect(typeof(LibraProgramming.Xamarin.Controls.Platforms.Android.TouchEffect), nameof(LibraProgramming.Xamarin.Controls.Platforms.Android.TouchEffect))]
+[assembly: ResolutionGroupName("LibraProgramming.Xamarin.Controls.Effects.Ripple")]
+[assembly: ExportEffect(typeof(LibraProgramming.Xamarin.Controls.Effects.Ripple.PlatformTouchEffect), nameof(LibraProgramming.Xamarin.Controls.Effects.Ripple.PlatformTouchEffect))]
 
-namespace LibraProgramming.Xamarin.Controls.Platforms.Android
+namespace LibraProgramming.Xamarin.Controls.Effects.Ripple
 {
-    public sealed class TouchEffect : PlatformEffect
+    public sealed class PlatformTouchEffect : PlatformEffect
     {
         static readonly Color defaultNativeAnimationColor = Color.FromRgba(128, 128, 128, 64);
 
@@ -26,9 +31,10 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
         //private FrameLayout viewOverlay;
         private View viewOverlay;
         private RippleDrawable ripple;
-        private TouchEffectCore effect;
+        private TouchEffect effect;
         private AccessibilityManager accessibilityManager;
         private AccessibilityListener accessibilityListener;
+        private PointF origin;
 
         internal View View
         {
@@ -43,7 +49,7 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
 
         protected override void OnAttached()
         {
-            if (Control is global::Android.Widget.ListView || Control is global::Android.Widget.ScrollView)
+            if (Control is ListView || Control is ScrollView)
             {
                 return;
             }
@@ -55,12 +61,12 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
                 return;
             }
 
-            effect = TouchEffectCore.GetFrom(Element);
-            accessibilityManager = (AccessibilityManager)View.Context.GetSystemService(Context.AccessibilityService);
+            effect = TouchEffect.GetFrom(Element);
+            accessibilityManager = (AccessibilityManager) View.Context.GetSystemService(Context.AccessibilityService);
 
-            effect.Element = (VisualElement)Element;
+            effect.Element = (VisualElement) Element;
 
-            TouchController.Add(View, OnTouch);
+            View.Touch += OnTouch;
 
             UpdateClickHandler();
 
@@ -121,8 +127,7 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
                 if (null != View)
                 {
                     View.LayoutChange -= OnViewLayoutChange;
-                    TouchController.Delete(View, OnTouch);
-
+                    View.Touch -= OnTouch;
                     View.Click -= OnClick;
                 }
 
@@ -164,9 +169,30 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
             }
         }
 
-        private void OnTouch(View.TouchEventArgs e)
+        private void OnTouch(object sender, View.TouchEventArgs e)
         {
-            ;
+            switch (e.Event.ActionMasked)
+            {
+                case MotionEventActions.Down:
+                {
+                    OnTouchDown(e);
+                    //_activeView = view;
+                    View.PlaySoundEffect(SoundEffects.Click);
+
+                    break;
+                }
+
+                case MotionEventActions.Up:
+                case MotionEventActions.Cancel:
+                {
+                    //_activeView = null;
+                    e.Handled = true;
+
+                    OnTouchUp(e);
+
+                    break;
+                }
+            }
         }
 
         private void OnClick(object sender, EventArgs args)
@@ -182,31 +208,7 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
             }
 
             //IsCanceled = false;
-            //HandleEnd(TouchStatus.Completed);
-        }
-
-        private RippleDrawable GetOrCreateRipple()
-        {
-            var background = View?.Background;
-
-            if (background is RippleDrawable)
-            {
-                ripple = (RippleDrawable)background.GetConstantState().NewDrawable();
-            }
-            else
-            {
-                var noBackground = Element is Layout || null == background;
-                
-                ripple = new RippleDrawable(
-                    GetColorStateList(),
-                    noBackground ? null : background,
-                    noBackground ? new ColorDrawable(Color.White.ToAndroid()) : null
-                );
-
-                UpdateRipple();
-            }
-
-            return ripple;
+            HandleEnd(TouchStatus.Completed);
         }
 
         private void UpdateClickHandler()
@@ -219,6 +221,58 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
             }
         }
 
+        #region Ripple
+
+        private RippleDrawable GetOrCreateRipple()
+        {
+            var background = (BuildVersionCodes.M <= Build.VERSION.SdkInt)
+                ? View?.Background
+                : View?.Foreground;
+
+            if (background is RippleDrawable)
+            {
+                ripple = (RippleDrawable)background.GetConstantState().NewDrawable();
+            }
+            else
+            {
+                var noBackground = Element is Layout || null == background;
+
+                ripple = new RippleDrawable(
+                    GetColorStateList(),
+                    noBackground ? null : background,
+                    noBackground ? new ColorDrawable(Color.White.ToAndroid()) : null
+                );
+
+                UpdateRipple();
+            }
+
+            return ripple;
+        }
+
+        private void StartRipple(PointF position)
+        {
+            /*if (effect?.IsDisabled ?? true)
+                return;*/
+
+            /*if (effect.CanExecute && effect.NativeAnimation)
+            {
+                UpdateRipple();
+
+                if (viewOverlay != null)
+                {
+                    viewOverlay.Enabled = true;
+                    viewOverlay.BringToFront();
+                    ripple.SetHotspot(position.X, position.Y);
+                    viewOverlay.Pressed = true;
+                }
+                else if (IsForegroundRippleWithTapGestureRecognizer)
+                {
+                    ripple.SetHotspot(position.X, position.Y);
+                    View.Pressed = true;
+                }
+            }*/
+        }
+
         private void UpdateRipple()
         {
             ripple.SetColor(GetColorStateList());
@@ -229,18 +283,47 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
             }
         }
 
-        /*void HandleEnd(TouchStatus status)
+        private void EndRipple()
         {
-            if (IsCanceled)
+            /*if (effect?.IsDisabled ?? true)
+                return;*/
+
+            if (null != View)
+            {
+                if (View.Pressed)
+                {
+                    View.Pressed = false;
+                    View.Enabled = false;
+                }
+            }
+            else /*if (IsForegroundRippleWithTapGestureRecognizer)*/
+            {
+                if (View.Pressed)
+                {
+                    View.Pressed = false;
+                }
+            }
+        }
+
+        #endregion
+
+        private void HandleEnd(TouchStatus status)
+        {
+            /*if (IsCanceled)
                 return;
 
             IsCanceled = true;
             if (effect.DisallowTouchThreshold > 0)
-                Group?.Parent?.RequestDisallowInterceptTouchEvent(false);
+                Group?.Parent?.RequestDisallowInterceptTouchEvent(false);*/
 
-            effect?.HandleTouch(status);
-            effect?.HandleUserInteraction(TouchInteractionStatus.Completed);
+            effect.HandleTouch(status);
+            // effect?.HandleUserInteraction(TouchInteractionStatus.Completed);
             EndRipple();
+        }
+
+        /*private void OnClick(object sender, EventArgs e)
+        {
+
         }*/
 
         private ColorStateList GetColorStateList()
@@ -267,14 +350,85 @@ namespace LibraProgramming.Xamarin.Controls.Platforms.Android
             viewOverlay.Bottom = group.Height;
         }
 
+        private void OnTouchDown(View.TouchEventArgs e)
+        {
+            origin = new PointF(e.Event.GetX(), e.Event.GetY());
+
+            effect.HandleTouch(TouchStatus.Started);
+
+            StartRipple(origin);
+
+            /*if (effect.DisallowTouchThreshold > 0)
+            {
+                group.Parent?.RequestDisallowInterceptTouchEvent(true);
+            }*/
+        }
+
+        private void OnTouchUp(View.TouchEventArgs e)
+        {
+            HandleEnd(effect.Status == TouchStatus.Started ? TouchStatus.Completed : TouchStatus.Canceled);
+        }
+
+        private void OnTouchCancel()
+        {
+            HandleEnd(TouchStatus.Canceled);
+        }
+
+        private void OnTouchMove(View.TouchEventArgs e)
+        {
+            if ( /*IsCanceled || */e.Event == null)
+            {
+                return;
+            }
+
+            var position = new PointF(e.Event.GetX(), e.Event.GetY());
+
+            var diffX = Math.Abs(position.X - origin.X) / View.Context?.Resources?.DisplayMetrics?.Density ?? throw new NullReferenceException();
+            var diffY = Math.Abs(position.Y - origin.Y) / View.Context?.Resources?.DisplayMetrics?.Density ?? throw new NullReferenceException();
+            var maxDiff = Math.Max(diffX, diffY);
+
+            /*var disallowTouchThreshold = effect?.DisallowTouchThreshold;
+            if (disallowTouchThreshold > 0 && maxDiff > disallowTouchThreshold)
+            {
+                HandleEnd(TouchStatus.Canceled);
+                return;
+            }
+
+            if (sender is not AView view)
+                return;*/
+
+            var screenPointerCoords = new Point(View.Left + position.X, View.Top + position.Y);
+            var viewRect = new Rectangle(View.Left, View.Top, View.Right - View.Left, View.Bottom - View.Top);
+            var status = viewRect.Contains(screenPointerCoords) ? TouchStatus.Started : TouchStatus.Canceled;
+
+            /*if (isHoverSupported && ((status == TouchStatus.Canceled && effect?.HoverStatus == HoverStatus.Entered)
+                                     || (status == TouchStatus.Started && effect?.HoverStatus == HoverStatus.Exited)))
+                effect?.HandleHover(status == TouchStatus.Started ? HoverStatus.Entered : HoverStatus.Exited);*/
+
+            if (status != effect.Status)
+            {
+                effect.HandleTouch(status);
+
+                if (status == TouchStatus.Started)
+                {
+                    StartRipple(position);
+                }
+
+                if (status == TouchStatus.Canceled)
+                {
+                    EndRipple();
+                }
+            }
+        }
+
         /// <summary>
         /// AccessibilityListener class.
         /// </summary>
         internal class AccessibilityListener : Java.Lang.Object, AccessibilityManager.IAccessibilityStateChangeListener, AccessibilityManager.ITouchExplorationStateChangeListener
         {
-            private TouchEffect effect;
+            private PlatformTouchEffect effect;
 
-            public AccessibilityListener(TouchEffect effect)
+            public AccessibilityListener(PlatformTouchEffect effect)
             {
                 this.effect = effect;
             }

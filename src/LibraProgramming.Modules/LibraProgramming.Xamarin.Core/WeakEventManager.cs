@@ -7,6 +7,7 @@ namespace LibraProgramming.Xamarin.Core
     /// <summary>
     /// 
     /// </summary>
+    /*
     public sealed class WeakEventManager
     {
         private readonly Dictionary<string, List<Subscription>> handlers;
@@ -195,4 +196,5 @@ namespace LibraProgramming.Xamarin.Core
 
         public void RaiseEvent(EventArgs eventArgs, string eventName) => EventManagerService.HandleEvent(eventName, eventArgs, handlers);
     }
+*/
 }

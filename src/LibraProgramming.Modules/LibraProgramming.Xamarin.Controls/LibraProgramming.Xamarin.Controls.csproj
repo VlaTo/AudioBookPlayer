@@ -2,9 +2,8 @@
 
   <PropertyGroup>
     <!--Work around so the conditions work below-->
-    <TargetFrameworks></TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">netstandard2.0;MonoAndroid90</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard2.0;MonoAndroid90</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;MonoAndroid11.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);netcoreapp3.1</TargetFrameworks>
     <!--Feel free to add as many targets as you need below
     netstandard1.0;netstandard2.0;MonoAndroid90;Xamarin.iOS10;uap10.0.16299;Xamarin.TVOS10;Xamarin.WatchOS10;Xamarin.Mac20;Tizen40
     For UWP update the version number with a version number you have installed.
@@ -61,42 +60,36 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('uap')) And '$(OS)' == 'Windows_NT'">
+  <PropertyGroup Condition=" $(TargetFramework.StartsWith('uap')) And '$(OS)' == 'Windows_NT' ">
     <GenerateLibraryLayout>true</GenerateLibraryLayout>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Platforms\Netstandard\" />
-    <Folder Include="Platforms\Xamarin\" />
-    <Folder Include="Services\" />
-    <Folder Include="Core\" />
-    <None Include="Platforms\**\*.cs" />
-    <None Include="Resources\*.cs" />
     <Compile Remove="Resources\*.cs" />
-    <Compile Update="**\*.xaml.cs" DependentUpon="%(Filename)" />
-    <Compile Include="Services\**\*.cs" />
-    <Compile Include="Core\**\*.cs" />
-    <Compile Include="Core\*.cs" />
-    <Compile Include="*.cs" />
+    <Compile Update="**/*.xaml.cs" DependentUpon="%(Filename)" />
+    <Compile Include="**/*.shared.cs" />
+    <Compile Include="**/*.shared.*.cs" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard'))">
-    <Compile Include="Platforms\Netstandard\**\*.cs" />
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
+    <Compile Include="**/*.netstandard.cs" />
+    <Compile Include="**/*.netstandard*.cs" />
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
-    <Compile Include="Platforms\Shared\**\*.cs" />
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.1' ">
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('MonoAndroid'))">
-    <Compile Include="Platforms\Android\**\*.cs" />
-    <Compile Include="Platforms\Xamarin\**\*.cs" />
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('MonoAndroid')) ">
+    <Compile Include="**/*.android.cs" />
+    <Compile Include="**/*.android.*.cs" />
+    <AndroidResource Include="Resources\**\*.axml" />
+    <AndroidResource Include="Resources\**\*.png" />
     <AndroidResource Include="Resources\**\*.xml" SubType="Designer" Generator="MSBuild:UpdateAndroidResources" />
     <AndroidResource Include="Resources\**\*.json" Generator="MSBuild:UpdateAndroidResources" />
-  </ItemGroup>
- 
-  <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.8.0.1687" />
   </ItemGroup>
 
 </Project>
