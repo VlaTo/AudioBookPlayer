@@ -1,9 +1,9 @@
-﻿using Android.Content;
+﻿using System;
+using Android.Content;
 using Android.OS;
 using AudioBookPlayer.App.Models;
-using System;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     public class PlaybackServiceConnection : Java.Lang.Object, IServiceConnection, IPlaybackService
     {

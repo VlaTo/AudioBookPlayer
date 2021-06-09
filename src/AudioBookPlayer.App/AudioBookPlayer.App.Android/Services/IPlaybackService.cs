@@ -1,7 +1,7 @@
 ﻿using System;
 using AudioBookPlayer.App.Models;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     internal interface IPlaybackService
     {

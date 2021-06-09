@@ -1,14 +1,12 @@
-﻿using AudioBookPlayer.App.Droid.Core.Extensions;
-using AudioBookPlayer.App.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Android.App;
-using Android.Media;
-using Uri = Android.Net.Uri;
+using AudioBookPlayer.App.Android.Core.Extensions;
+using AudioBookPlayer.App.Services;
+using Environment = Android.OS.Environment;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class StorageSourceService : IStorageSourceService
     {
@@ -21,11 +19,11 @@ namespace AudioBookPlayer.App.Droid.Services
             {
                 new SourceFolder(
                     this,
-                    Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads)
+                    Environment.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads)
                 ),
                 new SourceFolder(
                     this,
-                    Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic)
+                    Environment.GetExternalStoragePublicDirectory(Environment.DirectoryMusic)
                 )
             };
             
@@ -55,7 +53,7 @@ namespace AudioBookPlayer.App.Droid.Services
                 this.service = service;
                 this.folder = folder;
                 //folder = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic);
-                LastModified = FileDateTime.FromFileTime(folder.LastModified());
+                LastModified = folder.LastModified().ToFileTime();
             }
 
             public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
@@ -123,7 +121,7 @@ namespace AudioBookPlayer.App.Droid.Services
                 this.parent = parent;
                 this.folder = folder;
 
-                LastModified = FileDateTime.FromFileTime(folder.LastModified());
+                LastModified = folder.LastModified().ToFileTime();
             }
 
             public async Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()
@@ -185,7 +183,7 @@ namespace AudioBookPlayer.App.Droid.Services
                 this.parent = parent;
                 this.file = file;
 
-                LastModified = FileDateTime.FromFileTime(file.LastModified());
+                LastModified = file.LastModified().ToFileTime();
             }
 
             public Task<IReadOnlyCollection<IFileSystemItem>> EnumerateItemsAsync()

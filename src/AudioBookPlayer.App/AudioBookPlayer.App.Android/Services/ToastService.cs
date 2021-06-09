@@ -2,7 +2,7 @@
 using Android.Widget;
 using AudioBookPlayer.App.Services;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     /// <summary>
     /// 

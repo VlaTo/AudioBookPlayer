@@ -1,8 +1,9 @@
-﻿using AudioBookPlayer.App.Services;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using AudioBookPlayer.App.Services;
 using Xamarin.Essentials;
+using Permission = Android.Manifest.Permission;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     /// <summary>
     /// 
@@ -18,7 +19,7 @@ namespace AudioBookPlayer.App.Droid.Services
         {
             RequiredPermissions = new[]
             {
-                (Android.Manifest.Permission.ReadExternalStorage, true),
+                (Permission.ReadExternalStorage, true),
                 // (Android.Manifest.Permission.WriteExternalStorage, true),
                 // (Android.Manifest.Permission.MediaContentControl, true)
             };

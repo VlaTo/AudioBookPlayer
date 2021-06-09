@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <core:BaseApplication
-    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
     xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App"
-    x:Class="AudioBookPlayer.App.AudioBookPlayerApp"
+    x:Class="AudioBookPlayer.App.AudioBookPlayerApplication"
     UserAppTheme="Dark">
     <!--
         Define global resources and styles here, that apply to all pages in your app.
@@ -30,7 +30,7 @@
             <Color x:Key="DarkPrimaryTextColor">White</Color>
             <Color x:Key="DarkSecondaryTextColor">DimGray</Color>
             <Color x:Key="DarkPrimaryColor">DimGray</Color>
-            
+
             <Style
                 TargetType="ContentPage"
                 ApplyToDerivedTypes="True">
@@ -67,6 +67,7 @@
                 </Setter>
             </Style>
 
+            <!-- Label -->
             <Style
                 TargetType="Label"
                 ApplyToDerivedTypes="True">
@@ -219,6 +220,7 @@
                 </StackLayout>
             </ControlTemplate>
 
+            <!-- PlaybackControl -->
             <Style TargetType="controls:PlaybackControl">
                 <Setter Property="ControlTemplate" Value="{StaticResource Key=PlaybackControlTemplate}" />
             </Style>

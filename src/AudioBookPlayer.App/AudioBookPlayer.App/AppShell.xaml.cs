@@ -9,7 +9,7 @@ namespace AudioBookPlayer.App
 {
     public partial class AppShell
     {
-        private readonly IPlatformToastService toastService;
+        // private readonly IPlatformToastService toastService;
 
         public AppShell()
         {
@@ -17,7 +17,6 @@ namespace AudioBookPlayer.App
             
             Routing.RegisterRoute(Routes.PlayerPageRoute, typeof(PlayerControlPage));
 
-            toastService = AudioBookPlayerApp.Current.DependencyContainer.GetInstance<IPlatformToastService>();
         }
 
         private void OnMenuItemClicked(object sender, EventArgs e)
@@ -27,6 +26,7 @@ namespace AudioBookPlayer.App
 
         private void OnMultiTapToExitBehaviorOnShowHintMessage(object sender, EventArgs e)
         {
+            var toastService = AudioBookPlayerApplication.Current.DependencyContainer.GetInstance<IPlatformToastService>();
             toastService.ShowShortMessage(AppResources.ExitToastMessage);
         }
     }

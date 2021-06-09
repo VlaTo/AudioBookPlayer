@@ -183,7 +183,7 @@ namespace AudioBookPlayer.App.Services
             return existing;
         }
 
-        private async Task UpdateExistingBookAsync(Book original, AudioBook source, CancellationToken cancellation = default)
+        private Task UpdateExistingBookAsync(Book original, AudioBook source, CancellationToken cancellation = default)
         {
             throw new NotImplementedException();
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using LibraProgramming.Xamarin.Core;
 using Xamarin.Forms;
 
 namespace LibraProgramming.Xamarin.Interactivity.Behaviors

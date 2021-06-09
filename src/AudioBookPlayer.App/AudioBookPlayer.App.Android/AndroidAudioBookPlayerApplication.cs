@@ -1,13 +1,16 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Runtime;
-using System;
 
-namespace AudioBookPlayer.App.Droid
+namespace AudioBookPlayer.App.Android
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Application(Theme = "@style/MainTheme", Label = "@string/app_name")]
-    public sealed class AudioBookPlayerApplication : Application
+    public sealed class AndroidAudioBookPlayerApplication : Application
     {
-        public AudioBookPlayerApplication(IntPtr javaReference, JniHandleOwnership transfer)
+        public AndroidAudioBookPlayerApplication(IntPtr javaReference, JniHandleOwnership transfer)
             : base(javaReference, transfer)
         {
         }

@@ -6,7 +6,7 @@ using Android.Content;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class PlaybackController : IPlaybackController
     {
