@@ -11,7 +11,7 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         
         public static void MissingServiceRegistration(Type serviceType, string paramName)
         {
-            throw new ArgumentException(paramName, "");
+            throw new ArgumentException($"Service of type: \"{serviceType.FullName}\" not resolved.", paramName);
         }
         
         public static void UnsupportedServiceType(Type serviceType)

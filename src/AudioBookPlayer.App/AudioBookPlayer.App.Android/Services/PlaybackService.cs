@@ -1,15 +1,12 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Content;
 using Android.Media;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.App;
-using System;
-using System.Threading;
 using AudioBookPlayer.App.Models;
-using AudioBookPlayer.App.Services;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-audio
     // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming

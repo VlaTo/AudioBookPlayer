@@ -13,7 +13,7 @@ namespace AudioBookPlayer.App.Core
 
             if (null != attribute)
             {
-                var container = AudioBookPlayerApp.Current.DependencyContainer;
+                var container = AudioBookPlayerApplication.Current.DependencyContainer;
                 var viewModel = container.CreateInstance(attribute.Type);
 
                 bind.Invoke(bindable, viewModel);

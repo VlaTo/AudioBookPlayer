@@ -1,6 +1,6 @@
 ﻿using Android.OS;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     /// <summary>
     /// 

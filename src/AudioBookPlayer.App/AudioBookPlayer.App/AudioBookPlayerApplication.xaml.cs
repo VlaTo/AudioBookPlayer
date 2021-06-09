@@ -1,8 +1,8 @@
 ﻿using System;
+using AudioBookPlayer.App.Core;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Data;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
@@ -10,64 +10,50 @@ using LibraProgramming.Xamarin.Popups.Services;
 using Microsoft.Data.Sqlite;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-
-[assembly: XamlCompilation(XamlCompilationOptions.Compile)]
-
-[assembly: ExportFont("fa-solid-900.ttf", Alias = "FASolid")]
-[assembly: ExportFont("fa-regular-400.ttf", Alias = "FARegular")]
-[assembly: ExportFont("fa-brands-400.ttf", Alias = "FABrands")]
 
 namespace AudioBookPlayer.App
 {
-    public partial class AudioBookPlayerApp
+    public partial class AudioBookPlayerApplication
     {
-        internal new static AudioBookPlayerApp Current => (AudioBookPlayerApp) Application.Current;
+        internal new static AudioBookPlayerApplication Current => (AudioBookPlayerApplication) Application.Current;
 
         private readonly TaskExecutionMonitor executionMonitor;
 
-        public AudioBookPlayerApp(IPlatformInitializer platformInitializer)
-            : base(platformInitializer)
+        public AudioBookPlayerApplication(IPlatformInitializer initializer)
+            : base(initializer)
         {
             InitializeComponent();
 
             executionMonitor = new TaskExecutionMonitor(RegisterExtraActionsAsync);
 
+            DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IBookShelfProvider, BookShelfProvider>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
+
             MainPage = new AppShell();
         }
 
-        protected override void Initialize()
+        protected override void OnInitialize()
         {
-            base.Initialize();
-            InitializeDatabase();
+            base.OnInitialize();
+            // InitializeDatabase();
         }
 
         protected override void OnStart()
         {
-            Debug.WriteLine($"[AudioBookPlayerApp] [OnStart] Execute");
             executionMonitor.Start();
         }
 
         protected override void OnSleep()
         {
-            Debug.WriteLine($"[AudioBookPlayerApp] [OnSleep] Execute");
         }
 
         protected override void OnResume()
         {
-            Debug.WriteLine($"[AudioBookPlayerApp] [OnResume] Execute");
         }
-
-        protected override void RegisterTypesCore(DependencyContainer container)
-        {
-            container.Register<ApplicationSettings>(InstanceLifetime.Singleton);
-            container.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
-            container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
-            // container.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton, createimmediate: true);
-            container.Register<IBookShelfProvider, BookShelfProvider>(InstanceLifetime.Singleton);
-            container.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
-        }
-
+        
         private Task RegisterExtraActionsAsync()
         {
             var actions = new List<AppAction>();
@@ -99,10 +85,10 @@ namespace AudioBookPlayer.App
                 Debug.Fail($"Can't register extra AppActions");
             }
         }
-
+        
         private void OnExtraAppAction(object sender, AppActionEventArgs e)
         {
-            if (Application.Current != this && Application.Current is AudioBookPlayerApp app)
+            if (Application.Current != this && Application.Current is AudioBookPlayerApplication app)
             {
                 AppActions.OnAppAction -= app.OnExtraAppAction;
                 return;
@@ -112,17 +98,17 @@ namespace AudioBookPlayer.App
             {
                 case "continue_play":
                 {
-                    
+
                     Debug.WriteLine($"App Action: \"{e.AppAction.Title}\" received");
 
                     break;
                 }
             }
         }
-
-        private static void InitializeDatabase()
+        
+        private void InitializeDatabase()
         {
-            var db = Current.DependencyContainer.GetInstance<IBookShelfDataContext>();
+            var db = DependencyContainer.GetInstance<IBookShelfDataContext>();
 
             try
             {

@@ -1,12 +1,14 @@
-﻿using Android.App;
+﻿using System;
+using System.Threading.Tasks;
+using Android.App;
 using Android.Media;
 using Android.OS;
 using Android.Provider;
 using AudioBookPlayer.App.Services;
-using System;
-using System.Threading.Tasks;
+using Environment = Android.OS.Environment;
+using Uri = Android.Net.Uri;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class MediaService : IMediaService
     {
@@ -16,7 +18,7 @@ namespace AudioBookPlayer.App.Droid.Services
             // raw:/storage/emulated/0/Download/book.m4b
 
             // /storage/emulated/0/Download
-            var path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
+            var path = Environment.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads).AbsolutePath;
             // content://media//storage/emulated/0/Download/file
             var uri1 = MediaStore.Files.GetContentUri(path);
             // content://media/external/audio/media
@@ -30,7 +32,7 @@ namespace AudioBookPlayer.App.Droid.Services
             // content://media/internal/audio/media
             var uri6 = MediaStore.Audio.Media.InternalContentUri;
 
-            var folder1 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads);
+            var folder1 = Environment.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads);
             var temp1 = folder1.CanonicalPath;
             var temp2 = folder1.ToPath();
             var temp3 = await folder1.ListFilesAsync();
@@ -63,7 +65,7 @@ namespace AudioBookPlayer.App.Droid.Services
 
             //var temp22 = Android.Net.Uri.FromFile(folder1);
             //var temp23 = MediaStore.GetDocumentUri(Application.Context, temp22);
-            var search = Android.Net.Uri.Parse("raw:/storage/emulated/0/Download/");
+            var search = Uri.Parse("raw:/storage/emulated/0/Download/");
             //var search = uri5;
             var cursor = Application.Context.ApplicationContext.ContentResolver.Query(search, columns, null, null, null);
 
@@ -203,7 +205,7 @@ namespace AudioBookPlayer.App.Droid.Services
             }
 
 #nullable enable
-            public void OnScanCompleted(string? path, Android.Net.Uri? uri)
+            public void OnScanCompleted(string? path, Uri? uri)
             {
                 callback.Invoke(path);
             }

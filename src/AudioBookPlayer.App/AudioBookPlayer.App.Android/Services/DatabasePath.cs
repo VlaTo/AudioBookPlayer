@@ -1,8 +1,7 @@
-﻿using System.IO;
-using Android.App;
+﻿using Android.App;
 using LibraProgramming.Xamarin.Core;
 
-namespace AudioBookPlayer.App.Droid.Services
+namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class DatabasePath : IPlatformDatabasePath
     {

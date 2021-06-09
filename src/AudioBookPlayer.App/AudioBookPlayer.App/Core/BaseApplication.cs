@@ -21,11 +21,11 @@ namespace AudioBookPlayer.App.Core
             DoInitialize();
         }
 
-        protected virtual void Initialize()
+        protected virtual void OnInitialize()
         {
             DependencyContainer = new DependencyContainer();
 
-            RegisterTypesCore(DependencyContainer);
+            // RegisterTypesCore(DependencyContainer);
 
             if (null != platformInitializer)
             {
@@ -33,13 +33,13 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
-        protected virtual void RegisterTypesCore(DependencyContainer container)
+        /*protected virtual void RegisterTypesCore(DependencyContainer container)
         {
-        }
+        }*/
 
         private void DoInitialize()
         {
-            Initialize();
+            OnInitialize();
         }
     }
 }
