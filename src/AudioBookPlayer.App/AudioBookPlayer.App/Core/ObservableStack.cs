@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using AudioBookPlayer.App.Core.Extensions;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Core
@@ -21,17 +20,9 @@ namespace AudioBookPlayer.App.Core
 
         public bool IsReadOnly => items.IsReadOnly;
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged
-        {
-            add => eventManager.AddEventHandler<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(value);
-            remove => eventManager.RemoveEventHandler<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(value);
-        }
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        public event PropertyChangedEventHandler PropertyChanged
-        {
-            add => eventManager.AddEventHandler<PropertyChangedEventHandler, ProgressChangedEventArgs>(value);
-            remove => eventManager.RemoveEventHandler<PropertyChangedEventHandler, ProgressChangedEventArgs>(value);
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public ObservableStack()
         {

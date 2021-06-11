@@ -8,20 +8,20 @@ namespace AudioBookPlayer.App.Android.Services
     /// <summary>
     /// 
     /// </summary>
-    public class ReadExternalStorage : Permissions.BasePlatformPermission
+    public class ExternalMediaStoragePermissions : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions
         {
             get;
         }
 
-        public ReadExternalStorage()
+        public ExternalMediaStoragePermissions()
         {
             RequiredPermissions = new[]
             {
                 (Permission.ReadExternalStorage, true),
-                // (Android.Manifest.Permission.WriteExternalStorage, true),
-                // (Android.Manifest.Permission.MediaContentControl, true)
+                (Permission.WriteExternalStorage, true),
+                (Permission.ManageExternalStorage, true)
             };
         }
     }
@@ -32,9 +32,7 @@ namespace AudioBookPlayer.App.Android.Services
     internal sealed class PermissionRequestor : IPermissionRequestor
     {
         public Task<PermissionStatus> CheckAndRequestMediaPermissionsAsync()
-        {
-            return CheckAndRequestPermissionAsync<ReadExternalStorage>();
-        }
+            => CheckAndRequestPermissionAsync<ExternalMediaStoragePermissions>();
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<TPermission>()
             where TPermission : Permissions.BasePermission, new()

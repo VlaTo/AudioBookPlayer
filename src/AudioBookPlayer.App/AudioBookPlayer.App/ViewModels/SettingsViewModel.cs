@@ -71,12 +71,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async void OnSelectLibraryRootFolderCommand(object obj)
         {
-            var status = await permissions.CheckAndRequestMediaPermissionsAsync();
+            /*var status = await permissions.CheckAndRequestMediaPermissionsAsync();
 
             if (PermissionStatus.Denied == status)
             {
                 return;
-            }
+            }*/
 
             var context = new SourceFolderRequestContext();
 
