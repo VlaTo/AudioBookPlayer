@@ -97,6 +97,13 @@ namespace AudioBookPlayer.App.Android.Services
 
         public async Task LoadMediaAsync()
         {
+            // https://developer.android.com/training/data-storage/manage-all-files
+            // https://developer.android.com/training/data-storage#scoped-storage
+            // https://developer.android.com/training/data-storage/app-specific#media
+            // https://developer.android.com/training/data-storage/shared/media#query-collection
+            // https://developer.android.com/training/data-storage/use-cases#show-all-folder
+            // https://developer.android.com/training/data-storage#scoped-storage
+            // https://developer.android.com/about/versions/10/privacy/changes
             var externalVolumes = MediaStore.GetExternalVolumeNames(Application.Context);
 
             foreach (var volume in externalVolumes)
