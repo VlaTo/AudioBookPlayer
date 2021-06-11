@@ -1,17 +1,31 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
+using Android.Content.PM;
 using Android.Media;
 using Android.OS;
 using Android.Provider;
+using AndroidX.Core.Content;
 using AudioBookPlayer.App.Services;
+using Java.IO;
+using Java.Util;
+using Xamarin.Essentials;
 using Environment = Android.OS.Environment;
+using FileProvider = Xamarin.Essentials.FileProvider;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class MediaService : IMediaService
     {
+        private readonly IPermissionRequestor permissionRequestor;
+
+        public MediaService(IPermissionRequestor permissionRequestor)
+        {
+            this.permissionRequestor = permissionRequestor;
+        }
+
         public async Task<string> GetRootFolderAsync()
         {
             // content://com.android.providers.downloads.documents/document/raw%3A%2Fstorage%2Femulated%2F0%2FDownload%2Fbook.m4b
@@ -81,105 +95,103 @@ namespace AudioBookPlayer.App.Android.Services
             return path;
         }
 
-        public void LoadMedia()
+        public async Task LoadMediaAsync()
         {
-            var collection = (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
-                ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
-                : MediaStore.Audio.Media.ExternalContentUri;
+            var externalVolumes = MediaStore.GetExternalVolumeNames(Application.Context);
 
-            var projection = new[]
+            foreach (var volume in externalVolumes)
             {
-                MediaStore.Audio.IAudioColumns.Track,
-                MediaStore.Audio.Media.ContentType
+                // MediaStore.GetMediaUri()
+                System.Diagnostics.Debug.WriteLine($"[MediaService] [LoadMediaAsync] Volume: '{volume}'");
+            }
+
+            var collection = /*(Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+                ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
+                : MediaStore.Audio.Media.ExternalContentUri;*/
+                MediaStore.Files.GetContentUri(MediaStore.VolumeExternalPrimary);
+
+            if (null == collection)
+            {
+                return;
+            }
+
+            var columns = new[]
+            {
+                MediaStore.Audio.Media.InterfaceConsts.Id,
+                MediaStore.IMediaColumns.VolumeName,
+                MediaStore.Files.IFileColumns.MediaType,
+                MediaStore.Files.IFileColumns.MimeType,
+                MediaStore.Files.IFileColumns.Title,
+                MediaStore.Files.IFileColumns.Parent,
+                MediaStore.IMediaColumns.DateModified
             };
 
-            //var uri = MediaStore.Files.GetContentUri("external");
-            //var uri1 = MediaStore.Audio.Media.GetContentUriForPath("extenal");
-            //var uri2 = MediaStore.Audio.Media.GetContentUri("extenal");
-            /*var columns = new[]
+            var permission = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
+
+            if (permission != PermissionStatus.Granted)
             {
-                MediaStore.Files.FileColumns.Id,
-                MediaStore.Files.FileColumns.Title,
-                MediaStore.Files.FileColumns.DisplayName,
-                //MediaStore.Files.FileColumns.MediaType,
-                MediaStore.Files.FileColumns.MimeType,
-                MediaStore.Files.FileColumns.Size,
-                MediaStore.Files.FileColumns.DateAdded
-            };*/
+                return;
+            }
 
-            var sortOrder = MediaStore.Audio.IAudioColumns.Track + " ASC";
+            var contentResolver = Application.Context.ContentResolver;
+            // const string sortOrder = MediaStore.Audio.Media.InterfaceConsts.Id + " ASC";
+            const string sortOrder = MediaStore.Audio.Media.InterfaceConsts.Id + " ASC";
+            var cursor = contentResolver?.Query(collection, columns, null, null, sortOrder);
 
-            // var temp1 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDocuments).AbsolutePath;
-            // var temp2 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryDownloads).AbsolutePath;
-            // var temp3 = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-            //var uri = MediaStore.Audio.Media.GetContentUriForPath(temp3);
-            //var uri = MediaStore.Audio.Media.GetContentUri(temp3);
-            // var uri1 = MediaStore.Audio.Media.ExternalContentUri;
-            // var uri2 = MediaStore.Audio.Media.InternalContentUri;
-
-            /*var permission = ContextCompat.CheckSelfPermission(Application.Context, Android.Manifest.Permission.ReadExternalStorage);
-
-            if ((int)Permission.Granted == permission)
+            for (var moved = null != cursor && cursor.MoveToFirst(); moved; moved = cursor.MoveToNext())
             {
-            }*/
-
-            // content://media/internal/audio/media
-
-            // content://media/external/file
-            // content://com.android.externalstorage.documents/document/primary%3AMusic
-            // content://com.android.providers.media.documents/document/audio_root
-
-            var cursor = Application.Context.ApplicationContext.ContentResolver.Query(
-                collection,
-                projection,
-                null,
-                null,
-                sortOrder
-            );
-
-            if (0 < cursor.Count)
-            {
-                while (cursor.MoveToNext())
+                try
                 {
-                    try
+                    var id = cursor.GetLong(cursor.GetColumnIndex(MediaStore.Audio.Media.InterfaceConsts.Id));
+                    var volumeName = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.VolumeName));
+                    var mediaType = cursor.GetLong(cursor.GetColumnIndex(MediaStore.Files.IFileColumns.MediaType));
+                    var mimeType = cursor.GetString(cursor.GetColumnIndex(MediaStore.Files.IFileColumns.MimeType));
+                    var title = cursor.GetString(cursor.GetColumnIndex(MediaStore.Files.IFileColumns.Title));
+                    var parent = cursor.GetLong(cursor.GetColumnIndex(MediaStore.Files.IFileColumns.Parent));
+                    var dateModified = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.DateModified));
+
+                    System.Diagnostics.Debug.WriteLine($"[Audio] [{id}] '{volumeName}' {mediaType} '{mimeType}' '{title}' ({parent})");
+
+
+                    /*var id = cursor.GetLong(cursor.GetColumnIndex(MediaStore.Audio.Media.InterfaceConsts.Id));
+                    var volumeName = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.VolumeName));
+                    var artist = cursor.GetString(cursor.GetColumnIndex(MediaStore.Audio.Media.InterfaceConsts.Artist));
+                    var album = cursor.GetString(cursor.GetColumnIndex(MediaStore.Audio.Media.InterfaceConsts.Album));
+                    var title = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.Title));
+                    var relativePath = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.RelativePath));
+
+                    TimeSpan duration;
                     {
-                        var id = cursor.GetInt(cursor.GetColumnIndex(MediaStore.Audio.IAudioColumns.Track));
-                        var displayName = cursor.GetString(cursor.GetColumnIndex(MediaStore.Audio.Media.ContentType));
+                        var value = cursor.GetLong(cursor.GetColumnIndex(MediaStore.IMediaColumns.Duration));
+                        duration = TimeSpan.FromMilliseconds(value);
+                    }
 
-                        //Bitmap bitmap = null;
+                    DateTime modified;
+                    {
+                        var value = cursor.GetLong(cursor.GetColumnIndex(MediaStore.IMediaColumns.DateModified));
+                        modified = DateTime.UnixEpoch + TimeSpan.FromSeconds(value);
+                    }
 
-                        /*switch (mediaType)
+                    /--Uri documentUri;
+                    {
+                        var value = cursor.GetString(cursor.GetColumnIndex(MediaStore.IMediaColumns.DocumentId));
+                        documentUri = DocumentsContract.BuildDocumentUri("com.android.providers.media.documents", value);
+                    }--/
+
+                    // get content
+                    {
+                        var contentUri = MediaStore.Audio.Media.GetContentUri(volumeName);
+                        var uri = ContentUris.WithAppendedId(contentUri, id);
+                        
+                        using (var fd = contentResolver.OpenAssetFileDescriptor(uri, "r"))
                         {
-                            case (int)MediaType.Image:
-                            {
-                                bitmap = MediaStore.Images.Thumbnails.GetThumbnail(resolver, id, ThumbnailKind.MiniKind, new BitmapFactory.Options
-                                {
-                                    InSampleSize = 4,
-                                    InPurgeable = true
-                                });
-
-                                break;
-                            }
-
-                            case (int)MediaType.Video:
-                            {
-                                bitmap = MediaStore.Video.Thumbnails.GetThumbnail(resolver, id, VideoThumbnailKind.MiniKind, new BitmapFactory.Options
-                                {
-                                    InSampleSize = 4,
-                                    InPurgeable = true
-                                });
-
-                                break;
-                            }
-                        }*/
-
-                        System.Diagnostics.Debug.WriteLine($"[MediaService] [LoadMediaAsync] Audio: '{displayName}'");
-
-                    }
-                    catch (Exception exception)
-                    {
-                        ;
-                    }
+                            System.Diagnostics.Debug.WriteLine($"[Audio] [{id}] '{album}' '{artist}' '{title}' {duration:g} ({uri}) [{relativePath}] {fd.Length:N0} {modified:g}");
+                        }
+                    }*/
+                }
+                catch (Exception exception)
+                {
+                    System.Diagnostics.Debug.WriteLine(exception.Message);
                 }
             }
         }

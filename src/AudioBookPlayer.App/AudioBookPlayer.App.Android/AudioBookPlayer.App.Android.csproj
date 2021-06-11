@@ -37,6 +37,11 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
+    <AndroidKeyStore>true</AndroidKeyStore>
+    <AndroidSigningKeyStore>D:\Test\AudioBookPlayer\audioplayer.app.keystore</AndroidSigningKeyStore>
+    <AndroidSigningStorePass>hg3s31$dh2</AndroidSigningStorePass>
+    <AndroidSigningKeyPass>hg3s31$dh2</AndroidSigningKeyPass>
+    <AndroidSigningKeyAlias>audioplayer.app.alias</AndroidSigningKeyAlias>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

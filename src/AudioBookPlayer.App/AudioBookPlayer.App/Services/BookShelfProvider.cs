@@ -51,6 +51,8 @@ namespace AudioBookPlayer.App.Services
 
             //await context.DeleteAllAsync();
 
+            return;
+
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
                 .ThenInclude(ab => ab.Author)

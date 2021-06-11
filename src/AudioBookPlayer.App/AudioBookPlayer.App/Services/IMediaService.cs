@@ -4,7 +4,7 @@ namespace AudioBookPlayer.App.Services
 {
     public interface IMediaService
     {
-        void LoadMedia();
+        Task LoadMediaAsync();
 
         Task<string> GetRootFolderAsync();
     }
