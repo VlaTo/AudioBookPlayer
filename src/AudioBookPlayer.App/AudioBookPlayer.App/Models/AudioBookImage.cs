@@ -6,13 +6,19 @@ namespace AudioBookPlayer.App.Models
 {
     public abstract class AudioBookImage
     {
+        public AudioBook AudioBook
+        {
+            get;
+        }
+
         public string Key
         {
             get;
         }
 
-        protected AudioBookImage(string key)
+        protected AudioBookImage(AudioBook audioBook, string key)
         {
+            AudioBook = audioBook;
             Key = key;
         }
 

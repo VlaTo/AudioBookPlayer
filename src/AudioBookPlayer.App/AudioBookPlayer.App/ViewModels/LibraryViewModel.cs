@@ -3,12 +3,15 @@ using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class LibraryViewModel : ViewModelBase, IInitialize
     {
-        private readonly IBookShelfProvider provider;
+        // private readonly IBookShelfProvider provider;
+        private readonly IMediaService mediaService;
+        private readonly IAudioBooksPublisher booksPublisher;
         private readonly ITaskExecutionMonitor executionMonitor;
         private bool isBusy;
 
@@ -18,19 +21,24 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref isBusy, value);
         }
 
-        public TaskCommand Refresh
+        public Command Refresh
         {
             get;
         }
 
         [PrefferedConstructor]
-        public LibraryViewModel(IBookShelfProvider provider)
+        public LibraryViewModel(
+            //IBookShelfProvider provider,
+            IMediaService mediaService,
+            IAudioBooksPublisher booksPublisher)
         {
-            this.provider = provider;
+            // this.provider = provider;
+            this.mediaService = mediaService;
+            this.booksPublisher = booksPublisher;
 
-            executionMonitor = new TaskExecutionMonitor(DoQueryLibrary);
+            executionMonitor = new TaskExecutionMonitor(DoQueryLibraryAsync);
 
-            Refresh = new TaskCommand(DoRefreshLibrary);
+            Refresh = new Command(DoRefreshLibrary);
         }
 
         void IInitialize.OnInitialize()
@@ -40,13 +48,14 @@ namespace AudioBookPlayer.App.ViewModels
             executionMonitor.Start();
         }
 
-        private async Task DoQueryLibrary()
+        private async Task DoQueryLibraryAsync()
         {
             IsBusy = true;
 
             try
             {
-                await provider.QueryBooksAsync();
+                var audioBooks = await mediaService.QueryBooksAsync();
+                booksPublisher.OnNext(audioBooks);
             }
             finally
             {
@@ -54,18 +63,9 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
-        private async Task DoRefreshLibrary()
+        private void DoRefreshLibrary()
         {
-            IsBusy = true;
-
-            try
-            {
-                await provider.RefreshBooksAsync();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            executionMonitor.Start();
         }
     }
 }

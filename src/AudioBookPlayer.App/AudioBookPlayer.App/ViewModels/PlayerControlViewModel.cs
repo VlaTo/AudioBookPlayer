@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using AudioBookPlayer.App.Core;
+﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Extensions;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Media.Common;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction.Contracts;
+using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -19,7 +16,7 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        private readonly IBookShelfProvider provider;
+        //private readonly IBookShelfProvider provider;
         private readonly IPlaybackController playbackController;
         private readonly TaskExecutionMonitor executionMonitor;
         private AudioBook book;
@@ -42,6 +39,9 @@ namespace AudioBookPlayer.App.ViewModels
             get => bookId;
             set
             {
+                
+                Debug.WriteLine($"[PlayerControlViewModel] Set BookId: {value}");
+
                 if (SetProperty(ref bookId, value))
                 {
                     executionMonitor.Start();
@@ -157,10 +157,10 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public PlayerControlViewModel(
-            IBookShelfProvider provider,
+            //IBookShelfProvider provider,
             IPlaybackController playbackController)
         {
-            this.provider = provider;
+            //this.provider = provider;
             this.playbackController = playbackController;
 
             playback = null;
@@ -239,7 +239,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             var id = long.Parse(BookId, CultureInfo.InvariantCulture);
             
-            book = await provider.GetBookAsync(id);
+            /*book = await provider.GetBookAsync(id);
 
             if (null != book)
             {
@@ -249,7 +249,7 @@ namespace AudioBookPlayer.App.ViewModels
             else
             {
                 // should we clear book properties?
-            }
+            }*/
         }
 
         private async Task BindBookProperties()

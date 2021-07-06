@@ -1,13 +1,13 @@
-﻿using System;
-using AudioBookPlayer.App.Core;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
+﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Data;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
 using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -32,13 +32,12 @@ namespace AudioBookPlayer.App
             DependencyContainer.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
-            MainPage = new AppShell();
-        }
+            var audioBooksHub = new AudioBooksHub();
 
-        protected override void OnInitialize()
-        {
-            base.OnInitialize();
-            // InitializeDatabase();
+            DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
+            DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
+
+            MainPage = new AppShell();
         }
 
         protected override void OnStart()
@@ -56,11 +55,13 @@ namespace AudioBookPlayer.App
         
         private Task RegisterExtraActionsAsync()
         {
+            InitializeDatabase();
+
             var actions = new List<AppAction>();
 
             if (true)
             {
-                actions.Add(new AppAction("continue_play", "Continue Play"));
+                actions.Add(new AppAction("continue_play", "Extra action #1"));
             }
 
             return RegisterAppActionsAsync(actions);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Models;
@@ -22,7 +23,7 @@ namespace AudioBookPlayer.App.Services
     {
         event EventHandler<AudioBooksEventArgs> QueryBooksReady;
 
-        Task QueryBooksAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default);
 
         Task RefreshBooksAsync(CancellationToken cancellationToken = default);
 

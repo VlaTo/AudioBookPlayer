@@ -62,30 +62,6 @@ namespace LibraProgramming.Media.QuickTime
             root.Debug(0);
         }
 
-        /*public override int GetTracksCount()
-        {
-            EnsureNotDisposed();
-
-            var chunks = new List<Chunk>();
-
-            if (0L != stream.Seek(0L, SeekOrigin.Begin))
-            {
-                throw new Exception();
-            }
-
-            var extractor = new AtomExtractor(stream);
-
-            foreach (var atom in extractor)
-            {
-                var chunk = ChunkFactory.Instance.CreateFrom(atom);
-                chunks.Add(chunk);
-            }
-
-            return chunks.Count;
-
-            return 0;
-        }*/
-
         public override IReadOnlyCollection<IMediaTrack> GetTracks()
         {
             EnsureNotDisposed();
@@ -98,30 +74,16 @@ namespace LibraProgramming.Media.QuickTime
             return tracks.AsReadOnly();
         }
 
-        /*public override MediaTrack GetTrack(int index)
+        public override IReadOnlyCollection<MetaInformationItem> GetMeta()
         {
             EnsureNotDisposed();
 
-            var extractor = new AtomExtractor(stream);
-
-            foreach (var atom in extractor)
-            {
-                var chunk = ChunkFactory.Instance.CreateFrom(atom);
-            }
-
-            return null;
-        }*/
-
-        public override MetaInformation GetMeta()
-        {
-            EnsureNotDisposed();
-
-            var information = new MetaInformation();
-            var visitor = new MetaInformationVisitor(information);
+            var items = new List<MetaInformationItem>();
+            var visitor = new MetaInformationVisitor(items);
 
             visitor.Visit(root);
 
-            return information;
+            return items.AsReadOnly();
         }
 
         internal Stream GetStream() => stream;

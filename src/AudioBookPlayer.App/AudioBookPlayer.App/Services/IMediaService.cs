@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {
     public interface IMediaService
     {
-        Task LoadMediaAsync();
-
-        Task<string> GetRootFolderAsync();
+        Task<IEnumerable<AudioBook>> QueryBooksAsync();
     }
 }

@@ -19,7 +19,6 @@ namespace AudioBookPlayer.App.Services
 {
     internal sealed class BookShelfProvider : IBookShelfProvider
     {
-        private readonly IPermissionRequestor permissionRequestor;
         private readonly IBookShelfDataContext context;
         private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
         private readonly ApplicationSettings settings;
@@ -35,23 +34,19 @@ namespace AudioBookPlayer.App.Services
         public BookShelfProvider(
             ApplicationSettings settings,
             IBookShelfDataContext context,
-            IAudioBookFactoryProvider audioBookFactoryProvider,
-            IPermissionRequestor permissionRequestor)
+            IAudioBookFactoryProvider audioBookFactoryProvider)
         {
             this.settings = settings;
             this.context = context;
             this.audioBookFactoryProvider = audioBookFactoryProvider;
-            this.permissionRequestor = permissionRequestor;
 
             queryBooksReady = new WeakEventManager();
         }
 
-        public async Task QueryBooksAsync(CancellationToken cancellationToken = default)
+        public Task<IEnumerable<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
         {
-
+            /*
             //await context.DeleteAllAsync();
-
-            return;
 
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
@@ -85,16 +80,19 @@ namespace AudioBookPlayer.App.Services
             }
 
             queryBooksReady.HandleEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
+            */
+
+            return Task.FromResult(Enumerable.Empty<AudioBook>());
         }
 
         public async Task RefreshBooksAsync(CancellationToken cancellationToken = default)
         {
-            var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
+            /*var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
 
             if (PermissionStatus.Denied == status)
             {
                 return;
-            }
+            }*/
 
             await EnumerateBooksAsync(settings.LibraryRootPath, 0, cancellationToken);
 
@@ -119,13 +117,7 @@ namespace AudioBookPlayer.App.Services
                 return null;
             }
 
-            var result = new AudioBook
-            {
-                Id = actual.Id,
-                Title = actual.Title,
-                Synopsis = actual.Synopsis,
-                Duration = actual.Duration
-            };
+            var result = new AudioBook(actual.Title, actual.Id, actual.Synopsis);
 
             FillAuthors(result, actual.AuthorBooks);
             FillImages(result, actual.Images);
@@ -157,13 +149,15 @@ namespace AudioBookPlayer.App.Services
 
                 var files = new[] {file};
 
-                var audioBook = factory.CreateAudioBook(folder, filename, level);
+                /*var audioBook = factory.CreateAudioBook(folder, filename, level);
                 var existing = await GetExistingBookAsync(audioBook, cancellation);
                 var task = (null != existing)
                     ? UpdateExistingBookAsync(existing, audioBook, cancellation)
                     : AddNewBookAsync(audioBook, cancellation);
 
-                await task;
+                await task;*/
+
+                await Task.CompletedTask;
             }
 
             // enumerate sub-folders
@@ -227,7 +221,7 @@ namespace AudioBookPlayer.App.Services
 
         private async Task AddBookAuthorsAsync(AudioBook source, Book book, CancellationToken cancellation)
         {
-            foreach (var author in source.Authors)
+            /*foreach (var author in source.Authors)
             {
                 var actual = await context.Authors
                     .Where(a => a.Name == author)
@@ -249,12 +243,12 @@ namespace AudioBookPlayer.App.Services
                     Book = book,
                     Author = actual
                 });
-            }
+            }*/
         }
 
         private async Task AddBookChaptersAsync(AudioBook source, Book book, CancellationToken cancellation)
         {
-            foreach (var audioBookChapter in source.Chapters)
+            /*foreach (var audioBookChapter in source.Chapters)
             {
                 var filename = audioBookChapter.SourceFile;
                 var sourceFile = await context.SourceFiles
@@ -292,7 +286,7 @@ namespace AudioBookPlayer.App.Services
                 await context.Chapters.AddAsync(chapter, cancellation);
 
                 book.Chapters.Add(chapter);
-            }
+            }*/
         }
 
         private async Task AddBookImagesAsync(AudioBook source, Book book, CancellationToken cancellation)
@@ -316,7 +310,7 @@ namespace AudioBookPlayer.App.Services
         {
             foreach (var bookAuthor in bookAuthors)
             {
-                audioBook.Authors.Add(bookAuthor.Author.Name);
+                //audioBook.Authors.Add(bookAuthor.Author.Name);
             }
         }
 
@@ -324,8 +318,8 @@ namespace AudioBookPlayer.App.Services
         {
             foreach (var image in bookImages)
             {
-                var item = new InMemoryAudioBookImage(image.Name, image.Blob);
-                audioBook.Images.Add(item);
+                //var item = new InMemoryAudioBookImage(image.Name, image.Blob);
+                //audioBook.Images.Add(item);
             }
         }
 
@@ -333,7 +327,7 @@ namespace AudioBookPlayer.App.Services
         {
             foreach (var chapter in chapters)
             {
-                var audioBookChapter = new AudioBookChapter
+                /*var audioBookChapter = new AudioBookChapter
                 {
                     Title = chapter.Title,
                     Start = chapter.Offset,
@@ -341,7 +335,7 @@ namespace AudioBookPlayer.App.Services
                     SourceFile = chapter.SourceFile.Filename
                 };
 
-                audioBook.Chapters.Add(audioBookChapter);
+                audioBook.Chapters.Add(audioBookChapter);*/
             }
         }
 

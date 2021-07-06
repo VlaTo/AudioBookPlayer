@@ -5,7 +5,9 @@ using System.Text;
 
 namespace LibraProgramming.Media.QuickTime.Lists
 {
-    [Chunk(AtomTypes.Art)]
+    [Chunk(AtomTypes.Art0)]
+    [Chunk(AtomTypes.Art1)]
+    [Chunk(AtomTypes.Aart)]
     [Chunk(AtomTypes.Alb)]
     [Chunk(AtomTypes.Day)]
     [Chunk(AtomTypes.Gen)]
@@ -14,6 +16,9 @@ namespace LibraProgramming.Media.QuickTime.Lists
     [Chunk(AtomTypes.Covr)]
     [Chunk(AtomTypes.Nam)]
     [Chunk(AtomTypes.Stik)]
+    [Chunk(AtomTypes.Wrt)]
+    [Chunk(AtomTypes.Lyr)]
+    [Chunk(AtomTypes.Trkn)]
     public class MetaInfoChunk : Chunk
     {
         public DataChunk DataChunk

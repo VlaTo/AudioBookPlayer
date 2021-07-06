@@ -37,11 +37,6 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
-    <AndroidKeyStore>true</AndroidKeyStore>
-    <AndroidSigningKeyStore>D:\Test\AudioBookPlayer\audioplayer.app.keystore</AndroidSigningKeyStore>
-    <AndroidSigningStorePass>hg3s31$dh2</AndroidSigningStorePass>
-    <AndroidSigningKeyPass>hg3s31$dh2</AndroidSigningKeyPass>
-    <AndroidSigningKeyAlias>audioplayer.app.alias</AndroidSigningKeyAlias>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -68,7 +63,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AndroidAudioBookPlayerApplication.cs" />
+    <Compile Include="Core\Attributes\ColumnAttribute.cs" />
+    <Compile Include="Core\AudioBookFileScanner.cs" />
     <Compile Include="Core\Extensions\FileDateTime.cs" />
+    <Compile Include="Core\Extensions\TypeExtensions.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -113,6 +111,10 @@
     <AndroidResource Include="Resources\values-ru\strings.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj">
+      <Project>{3dec16f4-061d-4a36-8756-8231af121484}</Project>
+      <Name>LibraProgramming.Media.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj">
       <Project>{0ecc3056-6412-4a3a-acc2-ffa6c31d51d0}</Project>
       <Name>LibraProgramming.Xamarin.Controls</Name>
@@ -134,6 +136,7 @@
       <Name>AudioBookPlayer.App</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

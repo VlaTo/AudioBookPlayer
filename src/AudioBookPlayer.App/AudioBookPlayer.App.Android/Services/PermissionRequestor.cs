@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Services;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Permission = Android.Manifest.Permission;
 
@@ -8,20 +8,18 @@ namespace AudioBookPlayer.App.Android.Services
     /// <summary>
     /// 
     /// </summary>
-    public class ExternalMediaStoragePermissions : Permissions.BasePlatformPermission
+    public class ReadExternalStoragePermission : Permissions.BasePlatformPermission
     {
         public override (string androidPermission, bool isRuntime)[] RequiredPermissions
         {
             get;
         }
 
-        public ExternalMediaStoragePermissions()
+        public ReadExternalStoragePermission()
         {
             RequiredPermissions = new[]
             {
-                (Permission.ReadExternalStorage, true),
-                (Permission.WriteExternalStorage, true),
-                (Permission.ManageExternalStorage, true)
+                (Permission.ReadExternalStorage, true)
             };
         }
     }
@@ -32,7 +30,9 @@ namespace AudioBookPlayer.App.Android.Services
     internal sealed class PermissionRequestor : IPermissionRequestor
     {
         public Task<PermissionStatus> CheckAndRequestMediaPermissionsAsync()
-            => CheckAndRequestPermissionAsync<ExternalMediaStoragePermissions>();
+        {
+            return CheckAndRequestPermissionAsync<ReadExternalStoragePermission>();
+        }
 
         private static async Task<PermissionStatus> CheckAndRequestPermissionAsync<TPermission>()
             where TPermission : Permissions.BasePermission, new()

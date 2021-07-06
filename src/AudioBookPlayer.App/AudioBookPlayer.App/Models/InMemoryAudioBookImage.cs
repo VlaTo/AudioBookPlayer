@@ -8,8 +8,8 @@ namespace AudioBookPlayer.App.Models
     {
         private readonly byte[] bytes;
 
-        public InMemoryAudioBookImage(string tag, byte[] bytes)
-            : base(tag)
+        public InMemoryAudioBookImage(AudioBook audioBook, string key, byte[] bytes)
+            : base(audioBook, key)
         {
             this.bytes = bytes;
         }

@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
 using Xamarin.Forms;
-using AudioBookPlayer.App.Core.Extensions;
 
 namespace AudioBookPlayer.App.Core
 {
@@ -21,11 +20,7 @@ namespace AudioBookPlayer.App.Core
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        public event PropertyChangedEventHandler PropertyChanged
-        {
-            add => eventManager.AddEventHandler<PropertyChangedEventHandler, PropertyChangedEventArgs>(value);
-            remove => eventManager.RemoveEventHandler<PropertyChangedEventHandler, PropertyChangedEventArgs>(value);
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public bool CanBeExecuted
         {

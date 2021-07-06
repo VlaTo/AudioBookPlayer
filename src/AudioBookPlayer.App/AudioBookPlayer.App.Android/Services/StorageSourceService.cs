@@ -10,19 +10,8 @@ namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class StorageSourceService : IStorageSourceService
     {
-        private readonly IPermissionRequestor permissionRequestor;
-
-        public StorageSourceService(IPermissionRequestor permissionRequestor)
+        public Task<IReadOnlyCollection<IFileSystemSource>> GetSourcesAsync()
         {
-            this.permissionRequestor = permissionRequestor;
-        }
-
-        public async Task<IReadOnlyCollection<IFileSystemSource>> GetSourcesAsync()
-        {
-            var temp = new MediaService(permissionRequestor);
-
-            await temp.LoadMediaAsync();
-
             var collection = new List<IFileSystemSource>
             {
                 new SourceFolder(
@@ -34,8 +23,8 @@ namespace AudioBookPlayer.App.Android.Services
                     Environment.GetExternalStoragePublicDirectory(Environment.DirectoryMusic)
                 )
             };
-
-            return collection.AsReadOnly();
+            
+            return Task.FromResult<IReadOnlyCollection<IFileSystemSource>>(collection.AsReadOnly());
         }
 
         // 
