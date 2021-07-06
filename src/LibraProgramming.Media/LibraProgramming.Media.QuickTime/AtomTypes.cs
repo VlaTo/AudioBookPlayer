@@ -61,7 +61,9 @@
 
         // ilst
         public const uint Too = 0xA9746F6F;
-        public const uint Art = 0xA9415254;
+        public const uint Art0 = 0xA9415254;
+        public const uint Art1 = 0xA9617274;
+        public const uint Aart = 0x61415254;
         public const uint Alb = 0xA9616C62;
         public const uint Day = 0xA9646179;
         public const uint Gen = 0xA967656E;
@@ -73,5 +75,8 @@
         public const uint Rtp = 0x72747020;
         public const uint Nam = 0xA96E616D;
         public const uint Stik = 0x7374696B;
+        public const uint Wrt = 0xA9777274;
+        public const uint Lyr = 0xA96C7972;
+        public const uint Trkn = 0x74726B6E;
     }
 }

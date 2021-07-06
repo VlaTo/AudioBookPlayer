@@ -1,4 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <resources>
   <string name="app_name">Проигрыватель для аудио-книг</string>
+  <string name="notification_channel_name">Воспроизведение Audio Book Player</string>
+  <string name="notification_channel_description">Воспроизведение Audio Book Player</string>
 </resources>

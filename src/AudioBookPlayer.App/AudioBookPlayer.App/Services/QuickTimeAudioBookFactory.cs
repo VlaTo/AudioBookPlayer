@@ -1,9 +1,10 @@
-﻿using System;
-using System.IO;
-using AudioBookPlayer.App.Core.Extensions;
-using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Models;
 using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 
 namespace AudioBookPlayer.App.Services
 {
@@ -13,81 +14,83 @@ namespace AudioBookPlayer.App.Services
         {
         }
 
-        public AudioBook CreateAudioBook(string folder, string filename, int level)
+        public MediaInformation ExtractMediaInfo(Stream stream)
         {
-            var path = Path.Combine(folder, filename);
-            return ExtractMediaInfo(path);
-        }
-
-        private static AudioBook ExtractMediaInfo(string file)
-        {
-            using (var stream = File.Open(file, FileMode.Open, FileAccess.Read))
+            using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
             {
-                using (var extractor = QuickTimeMediaExtractor.CreateFrom(stream))
+                var originalMeta = extractor.GetMeta();
+                var originalTracks = extractor.GetTracks();
+                
+                var meta = new List<MetaInformationItem>();
+                string bookTitle = null;
+                List<string> bookAuthors = new List<string>();
+                ushort? bookYear;
+
+                foreach (var item in originalMeta)
                 {
-                    var audioBook = new AudioBook();
-                    var meta = extractor.GetMeta();
-                    var tracks = extractor.GetTracks();
-
-                    foreach (var item in meta.Items)
+                    switch (item)   
                     {
-                        switch (item)
+                        case MetaInformationTextItem textItem:
                         {
-                            case MetaInformationTextItem textItem:
+                            if (WellKnownMetaItemNames.Title.Equals(textItem.Key))
                             {
-                                if (WellKnownMetaItemNames.Title.Equals(textItem.Key))
-                                {
-                                    audioBook.Title = textItem.Text;
-                                }
-                                else
-                                if (WellKnownMetaItemNames.Author.Equals(textItem.Key))
-                                {
-                                    audioBook.Authors.Add(textItem.Text);
-                                }
-                                else
-                                if (WellKnownMetaItemNames.Subtitle.Equals(textItem.Key))
-                                {
-                                    audioBook.Synopsis = textItem.Text;
-                                }
+                                bookTitle = textItem.Text;
+                            }
+                            else if (WellKnownMetaItemNames.Author.Equals(textItem.Key))
+                            {
+                                var index = bookAuthors.FindIndex(author => String.Equals(author, textItem.Text));
 
-                                break;
+                                if (0 > index)
+                                {
+                                    bookAuthors.Add(textItem.Text);
+                                }
+                            }
+                            else
+                            {
+                                meta.Add(item);
                             }
 
-                            case MetaInformationStreamItem streamItem:
-                            {
-                                if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
-                                {
-                                    var bookImage = new InMemoryAudioBookImage(streamItem.Key, streamItem.Stream.ToBytes());
-                                    audioBook.Images.Add(bookImage);
-                                }
+                            break;
+                        }
 
-                                break;
+                        case MetaInformationStreamItem streamItem:
+                        {
+                            if (WellKnownMetaItemNames.Cover.Equals(streamItem.Key))
+                            {
+                                /*var bookImage = new InMemoryAudioBookImage(audioBook, streamItem.Key,
+                                    streamItem.Stream.ToBytes());
+                                audioBook.Images.Add(bookImage);*/
                             }
+                            else
+                            {
+                                Debug.WriteLine($"[Binary Meta] key: '{streamItem.Key}'");
+                            }
+
+                            break;
                         }
                     }
-
-                    var duration = TimeSpan.Zero;
-
-                    foreach (var track in tracks)
-                    {
-                        var chapter = new AudioBookChapter
-                        {
-                            Title = track.Title,
-                            Start = duration,
-                            Duration = track.Duration,
-                            SourceFile = file
-                        };
-
-                        audioBook.Chapters.Add(chapter);
-                        //Console.WriteLine($"[Track] '{track.Title}' {track.Duration:hh':'mm':'ss}");
-
-                        duration += track.Duration;
-                    }
-
-                    audioBook.Duration = duration;
-
-                    return audioBook;
                 }
+
+                var tracks = new List<IMediaTrack>();
+                var start = TimeSpan.Zero;
+
+                foreach (var track in originalTracks)
+                {
+
+                    /*var chapter = new AudioBookChapter(audioBook, track.Title, start);
+                    var fragment = new AudioBookChapterFragment(start, track.Duration, null);
+
+                    audioBook.Chapters.Add(chapter);
+                    audioBook.SourceFiles.Add(new AudioBookSourceFile(audioBook, file));
+
+                    chapter.Fragments.Add(fragment);*/
+
+                    tracks.Add(track);
+
+                    start += track.Duration;
+                }
+
+                return new MediaInformation(tracks, meta, bookTitle, bookAuthors.ToArray(), start);
             }
         }
     }

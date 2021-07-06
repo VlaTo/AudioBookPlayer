@@ -79,16 +79,21 @@ namespace LibraProgramming.Media.QuickTime.Lists
         {
             switch (type)
             {
-                case 0:
+                case 0x00:
                 case 0x15:
                 {
-                        return DataType.Binary;
+                    return DataType.Binary;
                 }
 
-                case 1:
+                case 0x01:
                 case 0x12:
                 {
                     return DataType.Text;
+                }
+
+                case 0x0D:
+                {
+                    return DataType.Binary;
                 }
 
                 default:

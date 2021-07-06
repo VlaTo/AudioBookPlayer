@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using AudioBookPlayer.App.Core.Extensions;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Core

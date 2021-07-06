@@ -30,28 +30,28 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             primaryTrack = null;
         }
 
-        public override void Visit(RootChunk chunk)
+        /*public override void Visit(RootChunk chunk)
         {
             Console.WriteLine();
 
             base.Visit(chunk);
 
             ;
-        }
+        }*/
 
-        public override void VisitMdat(MdatChunk chunk)
+        /*public override void VisitMdat(MdatChunk chunk)
         {
             Console.WriteLine($"[MDAT] //binary data start: {chunk.Start} length: {chunk.Length} bytes");
             Console.WriteLine();
 
             base.VisitMdat(chunk);
 
-        }
+        }*/
 
         public override void VisitMvhd(MvhdChunk chunk)
         {
-            Console.WriteLine($"[MVHD] //time scale: {chunk.TimeScale}");
-            Console.WriteLine();
+            //Console.WriteLine($"[MVHD] //time scale: {chunk.TimeScale}");
+            //Console.WriteLine();
 
             timeScale = chunk.TimeScale;
 
@@ -60,8 +60,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitMdhd(MdhdChunk chunk)
         {
-            Console.WriteLine($"[MDHD] //sample rate: {chunk.SampleRate}");
-            Console.WriteLine();
+            //Console.WriteLine($"[MDHD] //sample rate: {chunk.SampleRate}");
+            //Console.WriteLine();
 
             sampleScale = chunk.SampleRate;
 
@@ -77,7 +77,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             trackInfos.Push(actual);
             
-            Console.WriteLine("[TRAK] Begin");
+            //Console.WriteLine("[TRAK] Begin");
 
             base.VisitTrak(chunk);
 
@@ -108,14 +108,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         // TrakChunk chunk
 
                         CreateMediaTracks(primaryTrack, last);
-                        ProcessTrack(primaryTrack);
+                        //ProcessTrack(primaryTrack);
 
                     }
                 }
             }
 
-            Console.WriteLine("[TRAK] End");
-            Console.WriteLine();
+            //Console.WriteLine("[TRAK] End");
+            //Console.WriteLine();
         }
 
         public override void VisitTkhd(TkhdChunk chunk)
@@ -125,14 +125,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             info.TrackId = chunk.TrackId;
             info.Duration = chunk.Duration;
             
-            var length = TimeSpan.FromSeconds(chunk.Duration / info.TimeScale);
+            //var length = TimeSpan.FromSeconds(chunk.Duration / info.TimeScale);
 
-            Console.WriteLine($"[TKHD] //track id: {chunk.TrackId}");
-            Console.WriteLine($"[TKHD] //duration: {chunk.Duration:d8}");
-            Console.WriteLine($"[TKHD] //created: {chunk.Created}");
-            Console.WriteLine($"[TKHD] //modified: {chunk.Modified}");
-            Console.WriteLine($"[TKHD] //length: {length:c}");
-            Console.WriteLine();
+            //Console.WriteLine($"[TKHD] //track id: {chunk.TrackId}");
+            //Console.WriteLine($"[TKHD] //duration: {chunk.Duration:d8}");
+            //Console.WriteLine($"[TKHD] //created: {chunk.Created}");
+            //Console.WriteLine($"[TKHD] //modified: {chunk.Modified}");
+            //Console.WriteLine($"[TKHD] //length: {length:c}");
+            //Console.WriteLine();
 
             base.VisitTkhd(chunk);
         }
@@ -146,7 +146,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
         public override void VisitChap(ChapChunk chunk)
         {
-            var count = chunk.Scenes.Length;
+            //var count = chunk.Scenes.Length;
 
             if (0 < chunk.Scenes.Length)
             {
@@ -154,7 +154,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 info.Chapters = chunk.Scenes;
             }
 
-            Console.WriteLine($"[CHAP] //scenes: {count}");
+            /*Console.WriteLine($"[CHAP] //scenes: {count}");
             Console.WriteLine(" -index-   scene");
 
             for (var index = 0; index < Math.Min(3, count); index++)
@@ -170,7 +170,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 Console.WriteLine($"[{(count - 1):d8}] {scene:d8}");
             }
 
-            Console.WriteLine();
+            Console.WriteLine();*/
 
             base.VisitChap(chunk);
         }
@@ -181,7 +181,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             info.Entries = chunk.Entries;
 
-            Console.WriteLine($"[STTS] //entries: {chunk.Entries.Length}");
+            /*Console.WriteLine($"[STTS] //entries: {chunk.Entries.Length}");
 
             var count = chunk.Entries.Length;
 
@@ -200,7 +200,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 Console.WriteLine($"[{(count - 1):d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
-            Console.WriteLine();
+            Console.WriteLine();*/
 
             base.VisitStts(chunk);
         }
@@ -216,16 +216,16 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 info.CommonSampleSize = chunk.SampleSize;
                 info.SampleSizes = null;
 
-                Console.WriteLine($"[STSZ] //common sample size: {sampleSize})");
+                //Console.WriteLine($"[STSZ] //common sample size: {sampleSize})");
                 return;
             }
 
-            var sampleSizes = chunk.SampleSizes.Length;
+            //var sampleSizes = chunk.SampleSizes.Length;
 
             info.CommonSampleSize = 0;
             info.SampleSizes = chunk.SampleSizes;
 
-            Console.WriteLine($"[STSZ] //sample sizes: {sampleSizes}");
+            /*Console.WriteLine($"[STSZ] //sample sizes: {sampleSizes}");
 
             for (var index = 0; index < Math.Min(3, sampleSizes); index++)
             {
@@ -240,7 +240,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 Console.WriteLine($"[{(sampleSizes - 1):d8}] {size:d8} byte(s)");
             }
 
-            Console.WriteLine();
+            Console.WriteLine();*/
 
             base.VisitStsz(chunk);
         }
@@ -251,9 +251,9 @@ namespace LibraProgramming.Media.QuickTime.Visitors
 
             info.Offsets = chunk.Offsets;
 
-            var count = chunk.Offsets.Length;
+            //var count = chunk.Offsets.Length;
 
-            Console.WriteLine($"[STCO] //offsets: {count}");
+            /*Console.WriteLine($"[STCO] //offsets: {count}");
             Console.WriteLine(" -index-   offsets");
 
             for (var index = 0; index < Math.Min(3, count); index++)
@@ -270,12 +270,12 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 Console.WriteLine($"[{(count - 1):d8}] {offset:d8}");
             }
 
-            Console.WriteLine();
+            Console.WriteLine();*/
 
             base.VisitStco(chunk);
         }
 
-        public override void VisitStsc(StscChunk chunk)
+        /*public override void VisitStsc(StscChunk chunk)
         {
             var count = chunk.BlockDescriptions.Length;
 
@@ -298,7 +298,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             Console.WriteLine();
 
             base.VisitStsc(chunk);
-        }
+        }*/
 
         private void CreateMediaTracks(TrackInfo primary, TrackInfo trackInfo)
         {
@@ -310,7 +310,6 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 var offset = trackInfo.Offsets[index];
                 var position = stream.Seek(offset, SeekOrigin.Begin);
                 var text = StreamHelper.ReadPascalString(stream);
-
                 var duration = TimeSpan.FromSeconds(((double)timeToSample.Duration) / trackInfo.SampleScale);
 
                 track.Title = text;
@@ -338,7 +337,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             }
         }
 
-        private void ProcessTrack(TrackInfo primaryTrack)
+        /*private void ProcessTrack(TrackInfo primaryTrack)
         {
             var chunksCount = 0;
             var samplesCount = 0L;
@@ -362,11 +361,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             Console.WriteLine($"[TRAK] //samples: {samplesCount}");
             Console.WriteLine($"[TRAK] //length: {bytesLength} bytes");
             Console.WriteLine($"[TRAK] //duration: {duration}");
-        }
+        }*/
 
-        /// <summary>
-        /// 
-        /// </summary>
         private sealed class TrackInfo
         {
             public uint TrackId

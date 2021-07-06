@@ -98,34 +98,28 @@ namespace AudioBookPlayer.App.ViewModels
             }*/
         }
 
-        /*protected string GetAuthorsForBook(IList<string> authors)
+        protected string GetAuthorsForBook(ICollection<AudioBookAuthor> authors)
         {
             var sep = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-            return String.Join(sep, authors);
-        }*/
+            return String.Join(sep, authors.Select(author => author.Name));
+        }
 
-        private async Task BindBooks(AudioBook[] books)
+        protected void AddBookToList(AudioBook audioBook)
         {
-            string GetAuthorsForBook(IEnumerable<string> authors)
+            Books.Add(new AudioBookViewModel
             {
-                var sep = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-                return String.Join(sep, authors);
-            }
+                Id = audioBook.Id.GetValueOrDefault(-1L),
+                Title = audioBook.Title,
+                Authors = GetAuthorsForBook(audioBook.Authors),
+                Synopsis = audioBook.Synopsis,
+                Duration = audioBook.Duration,
+                //ImageSource = await audioBook.GetImageAsync(WellKnownMetaItemNames.Cover)
+            });
+        }
 
-            Books.Clear();
-
-            foreach (var book in books)
-            {
-                Books.Add(new AudioBookViewModel
-                {
-                    Id = book.Id.GetValueOrDefault(-1L),
-                    Title = book.Title,
-                    Authors = GetAuthorsForBook(book.Authors),
-                    Synopsis = book.Synopsis,
-                    Duration = book.Duration,
-                    ImageSource = await book.GetImageAsync(WellKnownMetaItemNames.Cover)
-                });
-            }
+        protected virtual Task BindBooks(AudioBook[] audioBooks)
+        {
+            return Task.CompletedTask;
         }
     }
 }

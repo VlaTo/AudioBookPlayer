@@ -1,9 +1,10 @@
-﻿using AudioBookPlayer.App.Models;
+﻿using System.IO;
+using LibraProgramming.Media.Common;
 
 namespace AudioBookPlayer.App.Services
 {
     public interface IAudioBookFactory
     {
-        AudioBook CreateAudioBook(string folder, string filename, int level);
+        MediaInformation ExtractMediaInfo(Stream stream);
     }
 }

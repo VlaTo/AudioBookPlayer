@@ -20827,28 +20827,34 @@ namespace AudioBookPlayer.App.Android
 			public const int mtrl_picker_toggle_to_year_selection = 2131624018;
 			
 			// aapt resource value: 0x7F0E0053
-			public const int overflow_tab_title = 2131624019;
+			public const int notification_channel_description = 2131624019;
 			
 			// aapt resource value: 0x7F0E0054
-			public const int password_toggle_content_description = 2131624020;
+			public const int notification_channel_name = 2131624020;
 			
 			// aapt resource value: 0x7F0E0055
-			public const int path_password_eye = 2131624021;
+			public const int overflow_tab_title = 2131624021;
 			
 			// aapt resource value: 0x7F0E0056
-			public const int path_password_eye_mask_strike_through = 2131624022;
+			public const int password_toggle_content_description = 2131624022;
 			
 			// aapt resource value: 0x7F0E0057
-			public const int path_password_eye_mask_visible = 2131624023;
+			public const int path_password_eye = 2131624023;
 			
 			// aapt resource value: 0x7F0E0058
-			public const int path_password_strike_through = 2131624024;
+			public const int path_password_eye_mask_strike_through = 2131624024;
 			
 			// aapt resource value: 0x7F0E0059
-			public const int search_menu_title = 2131624025;
+			public const int path_password_eye_mask_visible = 2131624025;
 			
 			// aapt resource value: 0x7F0E005A
-			public const int status_bar_notification_info_overflow = 2131624026;
+			public const int path_password_strike_through = 2131624026;
+			
+			// aapt resource value: 0x7F0E005B
+			public const int search_menu_title = 2131624027;
+			
+			// aapt resource value: 0x7F0E005C
+			public const int status_bar_notification_info_overflow = 2131624028;
 			
 			static String()
 			{

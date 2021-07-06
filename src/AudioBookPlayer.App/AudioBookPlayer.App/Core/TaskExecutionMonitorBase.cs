@@ -41,9 +41,7 @@ namespace AudioBookPlayer.App.Core
 
             try
             {
-
                 await Task.Run(source);
-
             }
             catch (TaskCanceledException)
             {

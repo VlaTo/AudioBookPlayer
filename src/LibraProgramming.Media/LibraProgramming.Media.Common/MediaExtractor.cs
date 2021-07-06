@@ -11,13 +11,9 @@ namespace LibraProgramming.Media.Common
         {
         }
 
-        //public abstract int GetTracksCount();
-
-        //public abstract MediaTrack GetTrack(int index);
-
         public abstract IReadOnlyCollection<IMediaTrack> GetTracks();
 
-        public abstract MetaInformation GetMeta();
+        public abstract IReadOnlyCollection<MetaInformationItem> GetMeta();
 
         public void Dispose()
         {
