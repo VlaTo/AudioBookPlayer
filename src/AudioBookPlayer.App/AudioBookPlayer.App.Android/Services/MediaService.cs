@@ -6,9 +6,11 @@ using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Android.Media;
+using AudioBookPlayer.App.Core;
 using Java.Nio.FileNio.Attributes;
 using LibraProgramming.Media.Common;
 using Environment = Android.OS.Environment;
@@ -37,77 +39,83 @@ namespace AudioBookPlayer.App.Android.Services
             
             var audioBooks = new List<AudioBook>();
 
-            foreach (var audioFile in audioFiles)
+            using (StopwatchMeter.Start("Creating books"))
             {
-                try
+                foreach (var audioFile in audioFiles)
                 {
-                    var streamType = contentResolver.GetType(audioFile.ContentUri);
-                    var info = contentResolver.GetTypeInfo(streamType);
-
-                    System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync] Uri: '{audioFile.ContentUri}' mimetype: '{streamType}' lbl: '{info.Label}' desc: '{info.ContentDescription}'");
-
-                    using (var descriptor = contentResolver.OpenAssetFileDescriptor(audioFile.ContentUri, "r"))
+                    try
                     {
-                        var extension = Path.GetExtension(audioFile.Name);
-                        var factory = audioBookFactoryProvider.CreateFactoryFor(extension);
+                        var streamType = contentResolver.GetType(audioFile.ContentUri);
+                        var info = contentResolver.GetTypeInfo(streamType);
 
-                        using (var stream = descriptor.CreateInputStream())
+                        using (var descriptor = contentResolver.OpenAssetFileDescriptor(audioFile.ContentUri, "r"))
                         {
-                            var information = factory.ExtractMediaInfo(stream);
+                            var extension = Path.GetExtension(audioFile.Name);
+                            var factory = audioBookFactoryProvider.CreateFactoryFor(extension);
 
-                            if (false == SameBook(audioFile, information))
+                            using (var stream = descriptor.CreateInputStream())
                             {
-                                continue;
-                            }
+                                MediaInformation information;
 
-                            var audioBookIndex = audioBooks.FindIndex(book => String.Equals(book.Title, audioFile.Album));
-                            AudioBook audioBook;
-
-                            if (0 > audioBookIndex)
-                            {
-                                string synopsis = null;
-                                
-                                foreach (var item in information.Meta)
+                                using (StopwatchMeter.Start("Extract MediaInfo"))
                                 {
-                                    switch (item.Key)
-                                    {
-                                        case WellKnownMetaItemNames.Subtitle:
-                                        {
-                                            if (item is MetaInformationTextItem textItem)
-                                            {
-                                                synopsis = textItem.Text;
-                                            }
-
-                                            break;
-                                        }
-                                    }
+                                    information = factory.ExtractMediaInfo(stream);
                                 }
 
-                                audioBook = new AudioBook(audioFile.Album, synopsis: synopsis);
-                                audioBook.Authors.Add(new AudioBookAuthor(audioFile.Artist));
-                                audioBooks.Add(audioBook);
-                            }
-                            else
-                            {
-                                audioBook = audioBooks[audioBookIndex];
-                            }
+                                var audioBookIndex = audioBooks.FindIndex(book => String.Equals(book.Title, audioFile.Album));
+                                AudioBook audioBook;
 
-                            foreach (var track in information.Tracks)
-                            {
-                                var chapter = new AudioBookChapter(audioBook, track.Title, track.Duration);
-                                var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString(), descriptor.Length);
+                                if (0 > audioBookIndex)
+                                {
+                                    string synopsis = null;
 
-                                chapter.Fragments.Add(new AudioBookChapterFragment(audioBook.Duration, track.Duration, sourceFile));
-                                audioBook.Chapters.Add(chapter);
-                                audioBook.SourceFiles.Add(sourceFile);
+                                    foreach (var (key, meta) in information.Meta)
+                                    {
+                                        switch (key)
+                                        {
+                                            case WellKnownMetaItemNames.Subtitle:
+                                            {
+                                                foreach (var item in meta)
+                                                {
+                                                    if (item is TextItemValue textItem)
+                                                    {
+                                                        synopsis = textItem.Text;
+                                                    }
+                                                }
+
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    audioBook = new AudioBook(audioFile.Album, synopsis: synopsis);
+                                    audioBook.Authors.Add(new AudioBookAuthor(audioFile.Artist));
+                                    audioBooks.Add(audioBook);
+                                }
+                                else
+                                {
+                                    audioBook = audioBooks[audioBookIndex];
+                                }
+
+                                foreach (var track in information.Tracks)
+                                {
+                                    var chapter = new AudioBookChapter(audioBook, track.Title, track.Duration);
+                                    var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString(),
+                                        descriptor.Length);
+
+                                    chapter.Fragments.Add(new AudioBookChapterFragment(audioBook.Duration,
+                                        track.Duration, sourceFile));
+                                    audioBook.Chapters.Add(chapter);
+                                    audioBook.SourceFiles.Add(sourceFile);
+                                }
                             }
                         }
                     }
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine(exception);
-                    throw;
+                    catch (Exception exception)
+                    {
+                        Console.WriteLine(exception);
+                        throw;
+                    }
                 }
             }
 

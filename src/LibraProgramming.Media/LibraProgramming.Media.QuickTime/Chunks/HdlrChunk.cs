@@ -44,7 +44,7 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var quicktimeFlags = StreamHelper.ReadUInt32(atom.Stream);
             var quicktimeMask = StreamHelper.ReadUInt32(atom.Stream);
             var componentLength = StreamHelper.ReadByte(atom.Stream);
-            var componentName = StreamHelper.ReadString(atom.Stream, componentLength);
+            var componentName = StreamHelper.ReadASCIIString(atom.Stream, componentLength);
 
             return new HdlrChunk(componentType, componentSubtype);
         }

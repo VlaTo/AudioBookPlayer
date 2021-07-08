@@ -2,7 +2,7 @@
   "profiles": {
     "ConsoleApp": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\Temp\\book.m4b D:\\Temp\\audio.wav"
+      "commandLineArgs": "\"D:\\Temp\\AudioBooks\\Я - легенда\\Часть 1. Январь 1976 г.m4b\" D:\\Temp\\book1.dat"
     }
   }
 }

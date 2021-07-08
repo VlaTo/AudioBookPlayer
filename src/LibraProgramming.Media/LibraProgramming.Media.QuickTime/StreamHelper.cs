@@ -1,6 +1,5 @@
 ﻿using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -11,8 +10,6 @@ namespace LibraProgramming.Media.QuickTime
         // should be same as extended length field size
         public const int PrefixSize = 8;
         
-        public static readonly Encoding Encoding = Encoding.Unicode;
-
         public static ushort ReadUInt16(Stream stream)
         {
             var data = new byte[sizeof(UInt16)];
@@ -93,7 +90,7 @@ namespace LibraProgramming.Media.QuickTime
             throw new NotSupportedException();
         }
 
-        public static string ReadString(Stream stream, int length)
+        public static string ReadASCIIString(Stream stream, int length)
         {
             var data = new byte[length];
             var count = stream.Read(data, 0, data.Length);
@@ -101,7 +98,7 @@ namespace LibraProgramming.Media.QuickTime
             return Encoding.ASCII.GetString(data, 0, count);
         }
 
-        public static string ReadPascalString(Stream stream)
+        public static string ReadUnicodeString(Stream stream)
         {
             var length = ReadUInt16(stream);
 
@@ -111,22 +108,15 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             var bytes = ReadBytes(stream, length);
-            var offset = 0;
-            var preamble = Encoding.GetPreamble();
+            var encoding = Encoding.Unicode;
+            var preamble = encoding.GetPreamble();
 
-            if (true)
+            if (bytes.StartsWith(preamble))
             {
-                for (var index = 0; index < preamble.Length; index++)
-                {
-                    if (preamble[index] == bytes[index])
-                    {
-                        offset = index + 1;
-                        length--;
-                    }
-                }
+                return encoding.GetString(bytes, preamble.Length, length - preamble.Length);
             }
 
-            return Encoding.GetString(bytes, offset, length);
+            return Encoding.UTF8.GetString(bytes);
         }
 
         public static byte[] ReadBytes(Stream stream, uint length)
