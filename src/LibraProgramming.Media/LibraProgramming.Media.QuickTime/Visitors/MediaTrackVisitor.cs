@@ -309,7 +309,13 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 
                 var offset = trackInfo.Offsets[index];
                 var position = stream.Seek(offset, SeekOrigin.Begin);
-                var text = StreamHelper.ReadPascalString(stream);
+
+                if (position != offset)
+                {
+                    throw new Exception();
+                }
+
+                var text = StreamHelper.ReadUnicodeString(stream);
                 var duration = TimeSpan.FromSeconds(((double)timeToSample.Duration) / trackInfo.SampleScale);
 
                 track.Title = text;

@@ -52,5 +52,44 @@ namespace LibraProgramming.Media.QuickTime.Extensions
 
             return buffer;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static bool StartsWith(this byte[] array, byte[] value)
+        {
+            if (null == array)
+            {
+                throw new ArgumentNullException(nameof(array));
+            }
+
+            if (null == value)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (0 == value.Length)
+            {
+                throw new ArgumentException("", nameof(value));
+            }
+
+            if (array.Length < value.Length)
+            {
+                throw new InvalidOperationException("");
+            }
+
+            for (var index = 0; index < value.Length; index++)
+            {
+                if (array[index] != value[index])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

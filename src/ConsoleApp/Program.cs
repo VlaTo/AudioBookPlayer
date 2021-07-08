@@ -22,32 +22,30 @@ namespace ConsoleApp
                 {
                     extractor.Debug();
 
-                    var meta = extractor.GetMeta();
+                    var items = extractor.GetMeta();
 
                     tracks = extractor.GetTracks();
 
                     Console.WriteLine();
                     Console.WriteLine(" *** Info ***");
 
-                    foreach (var item in meta.Items)
+                    foreach (var (key, meta) in items)
                     {
-                        switch (item)
+                        Console.WriteLine($"[Meta] {key}");
+
+                        foreach (var item in meta)
                         {
-                            case MetaInformationTextItem textItem:
+                            if (item is TextItemValue textItem)
                             {
-                                Console.WriteLine($"[Meta] {textItem.Key} = '{textItem.Text}'");
-
-                                if (WellKnownMetaItemNames.Cover.Equals(item.Key))
-                                {
-                                }
-
-                                break;
+                                Console.WriteLine($"[Meta]    Text: '{textItem.Text}'");
                             }
-
-                            case MetaInformationStreamItem streamItem:
+                            else if (item is StreamItemValue streamItem)
                             {
-                                Console.WriteLine($"[Meta] {streamItem.Key} = binary {streamItem.Stream.Length:N} byte(s)");
-                                break;
+                                Console.WriteLine($"[Meta]    Stream: {streamItem.Stream.Length} bytes");
+                            }
+                            else if (item is BinaryItemValue binaryItem)
+                            {
+                                Console.WriteLine($"[Meta]    Binary: {binaryItem.Bytes.Length} bytes");
                             }
                         }
                     }

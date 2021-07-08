@@ -1,22 +1,19 @@
-﻿using System;
-using LibraProgramming.Media.Common;
+﻿using LibraProgramming.Media.Common;
 using LibraProgramming.Media.QuickTime.Chunks;
-using LibraProgramming.Media.QuickTime.Lists;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Text;
 using LibraProgramming.Media.QuickTime.Extensions;
+using LibraProgramming.Media.QuickTime.Lists;
+using System;
+using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Visitors
 {
     internal sealed class MetaInformationVisitor : QuickTimeMediaVisitor
     {
-        private readonly IList<MetaInformationItem> items;
+        private readonly MetaInformation information;
 
-        public MetaInformationVisitor(IList<MetaInformationItem> items)
+        public MetaInformationVisitor(MetaInformation information)
         {
-            this.items = items;
+            this.information = information;
         }
 
         public override void VisitIlst(IlstChunk chunk)
@@ -36,7 +33,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         if (DataType.Binary == meta.DataChunk.DataType)
                         {
                             var stream = new MemoryStream(meta.DataChunk.Data);
-                            items.Add(MetaInformationItem.FromStream(WellKnownMetaItemNames.Cover, stream));
+                            information.Add(WellKnownMetaItemNames.Cover, MetaItemValue.FromStream(stream));
                         }
 
                         break;
@@ -47,8 +44,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Title, meta.DataChunk.Text);
-                            items.Add(info);
+                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMetaItemNames.Title, info);
                         }
 
                         break;
@@ -59,8 +56,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Author, meta.DataChunk.Text);
-                            items.Add(info);
+                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMetaItemNames.Author, info);
                         }
 
                         break;
@@ -70,8 +67,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaInformationItem.FromText(WellKnownMetaItemNames.Subtitle, meta.DataChunk.Text);
-                            items.Add(info);
+                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMetaItemNames.Subtitle, info);
                         }
 
                         break;
@@ -88,8 +85,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         }
                         else if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaInformationItem.FromText(key, meta.DataChunk.Text);
-                            items.Add(info);
+                            var info = MetaItemValue.FromText( meta.DataChunk.Text);
+                            information.Add(key, info);
                         }
 
                         break;

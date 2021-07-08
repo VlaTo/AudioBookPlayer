@@ -31,21 +31,21 @@ namespace LibraProgramming.Media.Common
             get;
         }
 
-        public  IReadOnlyCollection<MetaInformationItem> Meta
+        public  MetaInformation Meta
         {
             get;
         }
 
         public MediaInformation(
             IList<IMediaTrack> tracks,
-            IList<MetaInformationItem> meta = null,
+            MetaInformation meta,
             string bookTitle = null,
             string[] bookAuthors = null,
             TimeSpan? bookDuration = null,
             ushort? bookYear = null)
         {
             Tracks = new ReadOnlyCollection<IMediaTrack>(tracks);
-            Meta = new ReadOnlyCollection<MetaInformationItem>(meta ?? new List<MetaInformationItem>());
+            Meta = meta;
             BookTitle = bookTitle;
             BookAuthors = bookAuthors ?? Array.Empty<string>();
             BookDuration = bookDuration;

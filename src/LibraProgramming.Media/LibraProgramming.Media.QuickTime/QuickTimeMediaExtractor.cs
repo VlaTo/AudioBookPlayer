@@ -74,16 +74,16 @@ namespace LibraProgramming.Media.QuickTime
             return tracks.AsReadOnly();
         }
 
-        public override IReadOnlyCollection<MetaInformationItem> GetMeta()
+        public override MetaInformation GetMeta()
         {
             EnsureNotDisposed();
 
-            var items = new List<MetaInformationItem>();
-            var visitor = new MetaInformationVisitor(items);
+            var information = new MetaInformation();
+            var visitor = new MetaInformationVisitor(information);
 
             visitor.Visit(root);
 
-            return items.AsReadOnly();
+            return information;
         }
 
         internal Stream GetStream() => stream;

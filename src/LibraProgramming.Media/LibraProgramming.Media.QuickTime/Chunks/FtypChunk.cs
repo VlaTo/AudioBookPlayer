@@ -37,9 +37,9 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 throw new ArgumentNullException(nameof(atom));
             }
 
-            var brand = StreamHelper.ReadString(atom.Stream, 4);
+            var brand = StreamHelper.ReadASCIIString(atom.Stream, 4);
             var version = StreamHelper.ReadUInt32(atom.Stream);
-            var compatibleBrand = StreamHelper.ReadString(atom.Stream, 4);
+            var compatibleBrand = StreamHelper.ReadASCIIString(atom.Stream, 4);
             var data = StreamHelper.ReadBytes(atom.Stream, 4);
 
             return new FtypChunk(brand, version, compatibleBrand, data);
