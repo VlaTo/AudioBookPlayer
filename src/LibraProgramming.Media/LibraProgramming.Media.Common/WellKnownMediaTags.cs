@@ -1,6 +1,6 @@
 ﻿namespace LibraProgramming.Media.Common
 {
-    public static class WellKnownMetaItemNames
+    public static class WellKnownMediaTags
     {
         public const string Author = "Author";
 

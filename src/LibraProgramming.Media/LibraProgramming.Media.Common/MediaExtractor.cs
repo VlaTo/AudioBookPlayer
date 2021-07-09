@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace LibraProgramming.Media.Common
 {
@@ -13,11 +14,17 @@ namespace LibraProgramming.Media.Common
 
         public abstract IReadOnlyCollection<IMediaTrack> GetTracks();
 
-        public abstract MetaInformation GetMeta();
+        public abstract MediaTags GetMediaTags();
 
         public void Dispose()
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             Dispose(true);
+
+            stopwatch.Stop();
+            Debug.WriteLine($"[MediaExtractor] Dispose took: {stopwatch.Elapsed:g}");
         }
 
         protected void EnsureNotDisposed()
@@ -28,7 +35,7 @@ namespace LibraProgramming.Media.Common
             }
         }
 
-        protected void DoDispose()
+        protected virtual void DoDispose()
         {
         }
 

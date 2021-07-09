@@ -107,7 +107,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         // TrackInfo last
                         // TrakChunk chunk
 
-                        CreateMediaTracks(primaryTrack, last);
+                        CreateMediaTracks(/*primaryTrack,*/ last);
                         //ProcessTrack(primaryTrack);
 
                     }
@@ -300,12 +300,12 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             base.VisitStsc(chunk);
         }*/
 
-        private void CreateMediaTracks(TrackInfo primary, TrackInfo trackInfo)
+        private void CreateMediaTracks(/*TrackInfo primary, */TrackInfo trackInfo)
         {
             for (var index = 0; index < trackInfo.Offsets.Length; index++)
             {
                 var timeToSample = trackInfo.Entries[index];
-                var track = new QuickTimeMediaTrack(extractor);
+                var track = new QuickTimeMediaTrack(/*extractor*/);
                 
                 var offset = trackInfo.Offsets[index];
                 var position = stream.Seek(offset, SeekOrigin.Begin);

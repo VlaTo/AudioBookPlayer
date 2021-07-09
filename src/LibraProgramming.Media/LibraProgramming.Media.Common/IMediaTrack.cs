@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 
 namespace LibraProgramming.Media.Common
 {
@@ -14,7 +13,5 @@ namespace LibraProgramming.Media.Common
         {
             get;
         }
-
-        Stream GetMediaStream();
     }
 }
