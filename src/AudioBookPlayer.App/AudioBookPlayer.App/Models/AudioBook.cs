@@ -41,6 +41,7 @@ namespace AudioBookPlayer.App.Models
         public string Synopsis
         {
             get;
+            set;
         }
 
         public ICollection<AudioBookAuthor> Authors
@@ -63,11 +64,10 @@ namespace AudioBookPlayer.App.Models
             get;
         }
 
-        public AudioBook(string title, long? id = null, string synopsis = null)
+        public AudioBook(string title, long? id = null)
         {
             Id = id;
             Title = title;
-            Synopsis = synopsis;
             Authors = new Collection<AudioBookAuthor>();
             Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
             Images = new OwnedCollection<AudioBookImage>(OnImagesCollectionChanged);

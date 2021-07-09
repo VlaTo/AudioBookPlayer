@@ -3,45 +3,45 @@ using System.IO;
 
 namespace LibraProgramming.Media.Common
 {
-    public class MetaItemValue
+    public class TagValue
     {
-        public static TextItemValue FromText(string text)
+        public static TextValue FromText(string text)
         {
-            return new TextItemValue(text);
+            return new TextValue(text);
         }
 
-        public static StreamItemValue FromStream(Stream stream)
+        public static StreamValue FromStream(Stream stream)
         {
             if (null == stream)
             {
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            return new StreamItemValue(stream);
+            return new StreamValue(stream);
         }
 
-        public static BinaryItemValue FromBinary(byte[] bytes)
+        public static BinaryValue FromBinary(byte[] bytes)
         {
             if (null == bytes)
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
 
-            return new BinaryItemValue(bytes);
+            return new BinaryValue(bytes);
         }
     }
 
     /// <summary>
     /// 
     /// </summary>
-    public sealed class TextItemValue : MetaItemValue
+    public sealed class TextValue : TagValue
     {
         public string Text
         {
             get;
         }
 
-        internal TextItemValue(string text)
+        internal TextValue(string text)
         {
             Text = text;
         }
@@ -50,14 +50,14 @@ namespace LibraProgramming.Media.Common
     /// <summary>
     /// 
     /// </summary>
-    public sealed class StreamItemValue : MetaItemValue
+    public sealed class StreamValue : TagValue
     {
         public Stream Stream
         {
             get;
         }
 
-        internal StreamItemValue(Stream stream)
+        internal StreamValue(Stream stream)
         {
             Stream = stream;
         }
@@ -66,14 +66,14 @@ namespace LibraProgramming.Media.Common
     /// <summary>
     /// 
     /// </summary>
-    public sealed class BinaryItemValue : MetaItemValue
+    public sealed class BinaryValue : TagValue
     {
         public byte[] Bytes
         {
             get;
         }
 
-        internal BinaryItemValue(byte[] bytes)
+        internal BinaryValue(byte[] bytes)
         {
             Bytes = bytes;
         }

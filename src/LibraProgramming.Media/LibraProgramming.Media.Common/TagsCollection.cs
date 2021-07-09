@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Media.Common
 {
-    public sealed class MetaItemCollection : ICollection<MetaItemValue>
+    public sealed class TagsCollection : ICollection<TagValue>
     {
         private readonly ArrayList items;
         private readonly List<Enumerator> enumerators;
@@ -12,9 +12,9 @@ namespace LibraProgramming.Media.Common
         public int Count => items.Count;
         public bool IsReadOnly => items.IsReadOnly;
 
-        public MetaItemValue this[int index]
+        public TagValue this[int index]
         {
-            get => (MetaItemValue) items[index];
+            get => (TagValue) items[index];
             set
             {
                 items[index] = value;
@@ -22,17 +22,17 @@ namespace LibraProgramming.Media.Common
             }
         }
 
-        public MetaItemCollection()
+        public TagsCollection()
         {
             items = new ArrayList();
             enumerators = new List<Enumerator>();
         }
 
-        public IEnumerator<MetaItemValue> GetEnumerator() => new Enumerator(this);
+        public IEnumerator<TagValue> GetEnumerator() => new Enumerator(this);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void Add(MetaItemValue value)
+        public void Add(TagValue value)
         {
             if (null == value)
             {
@@ -55,7 +55,7 @@ namespace LibraProgramming.Media.Common
             DoNotify();
         }
 
-        public bool Contains(MetaItemValue item)
+        public bool Contains(TagValue item)
         {
             if (null == item)
             {
@@ -65,12 +65,12 @@ namespace LibraProgramming.Media.Common
             return items.Contains(item);
         }
 
-        public void CopyTo(MetaItemValue[] array, int arrayIndex)
+        public void CopyTo(TagValue[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
-        public bool Remove(MetaItemValue item)
+        public bool Remove(TagValue item)
         {
             if (null == item)
             {
@@ -113,15 +113,15 @@ namespace LibraProgramming.Media.Common
             }
         }
 
-        private sealed class Enumerator : IEnumerator<MetaItemValue>
+        private sealed class Enumerator : IEnumerator<TagValue>
         {
-            private MetaItemCollection collection;
+            private TagsCollection collection;
             private IDisposable subscription;
             private bool collectionInvalidated;
             private bool disposed;
             private int index;
 
-            public MetaItemValue Current
+            public TagValue Current
             {
                 get;
                 private set;
@@ -129,7 +129,7 @@ namespace LibraProgramming.Media.Common
 
             object IEnumerator.Current => Current;
 
-            public Enumerator(MetaItemCollection collection)
+            public Enumerator(TagsCollection collection)
             {
                 this.collection = collection;
 
@@ -239,11 +239,11 @@ namespace LibraProgramming.Media.Common
 
         private sealed class Subscription : IDisposable
         {
-            private MetaItemCollection collection;
+            private TagsCollection collection;
             private Enumerator enumerator;
             private bool disposed;
 
-            public Subscription(MetaItemCollection collection, Enumerator enumerator)
+            public Subscription(TagsCollection collection, Enumerator enumerator)
             {
                 this.collection = collection;
                 this.enumerator = enumerator;
@@ -281,46 +281,5 @@ namespace LibraProgramming.Media.Common
                 }
             }
         }
-    }
-
-    public sealed class MetaInformation : IEnumerable<KeyValuePair<string, MetaItemCollection>>
-    {
-        private readonly Dictionary<string, MetaItemCollection> items;
-
-        public MetaItemCollection this[string key] => items.TryGetValue(key, out var collection) ? collection : null;
-
-        public MetaInformation()
-        {
-            items = new Dictionary<string, MetaItemCollection>();
-        }
-
-        public void Add(string key, MetaItemValue item)
-        {
-            if (null == item)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            var collection = GetOdAddCollection(key);
-
-            collection.Add(item);
-        }
-
-        public IEnumerator<KeyValuePair<string, MetaItemCollection>> GetEnumerator() => items.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        private MetaItemCollection GetOdAddCollection(string key)
-        {
-            if (false == items.TryGetValue(key, out var collection))
-            {
-                collection = new MetaItemCollection();
-                items.Add(key, collection);
-            }
-
-            return collection;
-        }
-
-
     }
 }

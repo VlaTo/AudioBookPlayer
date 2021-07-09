@@ -117,7 +117,10 @@ namespace AudioBookPlayer.App.Services
                 return null;
             }
 
-            var result = new AudioBook(actual.Title, actual.Id, actual.Synopsis);
+            var result = new AudioBook(actual.Title, actual.Id)
+            {
+                Synopsis = actual.Synopsis
+            };
 
             FillAuthors(result, actual.AuthorBooks);
             FillImages(result, actual.Images);

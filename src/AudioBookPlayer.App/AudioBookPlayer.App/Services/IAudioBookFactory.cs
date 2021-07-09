@@ -5,6 +5,6 @@ namespace AudioBookPlayer.App.Services
 {
     public interface IAudioBookFactory
     {
-        MediaInformation ExtractMediaInfo(Stream stream);
+        MediaInfo ExtractMediaInfo(Stream stream);
     }
 }

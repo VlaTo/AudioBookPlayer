@@ -1,12 +1,11 @@
 ﻿using LibraProgramming.Media.Common;
 using System;
-using System.IO;
 
 namespace LibraProgramming.Media.QuickTime
 {
     public sealed class QuickTimeMediaTrack : IMediaTrack
     {
-        private readonly QuickTimeMediaExtractor extractor;
+        // private readonly QuickTimeMediaExtractor extractor;
 
         public string Title
         {
@@ -26,12 +25,12 @@ namespace LibraProgramming.Media.QuickTime
             set;
         }
 
-        internal QuickTimeMediaTrack(QuickTimeMediaExtractor extractor)
+        internal QuickTimeMediaTrack(/*QuickTimeMediaExtractor extractor*/)
         {
-            this.extractor = extractor;
+            // this.extractor = extractor;
         }
 
-        public Stream GetMediaStream()
+        /*public Stream GetMediaStream()
         {
             var source = extractor.GetStream();
             var memory = new MemoryStream();
@@ -47,6 +46,6 @@ namespace LibraProgramming.Media.QuickTime
             }
 
             return new ReadOnlyAtomStream(memory, 0, memory.Length);
-        }
+        }*/
     }
 }

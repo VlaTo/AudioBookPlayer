@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content;
+using Android.Content.Res;
 using Android.Database;
 using Android.Provider;
 using AudioBookPlayer.App.Android.Core.Attributes;
@@ -93,6 +94,8 @@ namespace AudioBookPlayer.App.Android.Core
 
     internal sealed class AudioBookFileScanner
     {
+        private const string OpenRead = "r";
+
         private readonly ContentResolver contentResolver;
         private readonly Uri collection;
 
@@ -138,6 +141,29 @@ namespace AudioBookPlayer.App.Android.Core
 
                 success = cursor.MoveToNext();
             }
+        }
+
+        public AssetFileDescriptor OpenFile(AudioBookFile file)
+        {
+            if (null == file)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            return contentResolver.OpenAssetFileDescriptor(file.ContentUri, OpenRead);
+        }
+
+        public (string MimeType, ContentResolver.MimeTypeInfo MimeInfo) GetMimeInfo(AudioBookFile file)
+        {
+            if (null == file)
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            var mimeType = contentResolver.GetType(file.ContentUri);
+            var mimeInfo = contentResolver.GetTypeInfo(mimeType);
+
+            return (mimeType, mimeInfo);
         }
 
         private static AudioBookFile CreateAudioBookFile(ICursor cursor, (string Name, PropertyInfo Property)[] columns)

@@ -255,7 +255,7 @@ namespace AudioBookPlayer.App.ViewModels
         private async Task BindBookProperties()
         {
             var authors = String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, book.Authors);
-            var images = await book.GetImageAsync(WellKnownMetaItemNames.Cover);
+            var images = await book.GetImageAsync(WellKnownMediaTags.Cover);
             var canPlay = 0 < book.Chapters.Count;
 
             BookTitle = book.Title;

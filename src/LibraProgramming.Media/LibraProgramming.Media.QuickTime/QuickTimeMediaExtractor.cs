@@ -11,7 +11,6 @@ namespace LibraProgramming.Media.QuickTime
     {
         private Stream stream;
         private RootChunk root;
-        private bool disposed;
 
         private QuickTimeMediaExtractor(Stream stream, RootChunk root)
         {
@@ -74,12 +73,12 @@ namespace LibraProgramming.Media.QuickTime
             return tracks.AsReadOnly();
         }
 
-        public override MetaInformation GetMeta()
+        public override MediaTags GetMediaTags()
         {
             EnsureNotDisposed();
 
-            var information = new MetaInformation();
-            var visitor = new MetaInformationVisitor(information);
+            var information = new MediaTags();
+            var visitor = new MediaTagsVisitor(information);
 
             visitor.Visit(root);
 
@@ -87,5 +86,11 @@ namespace LibraProgramming.Media.QuickTime
         }
 
         internal Stream GetStream() => stream;
+
+        protected override void DoDispose()
+        {
+            root = null;
+            stream = null;
+        }
     }
 }

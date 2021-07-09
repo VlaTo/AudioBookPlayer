@@ -28,15 +28,15 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public LibraryViewModel(
-            //IBookShelfProvider provider,
+            IBookShelfProvider provider,
             IMediaService mediaService,
             IAudioBooksPublisher booksPublisher)
         {
-            // this.provider = provider;
+            this.provider = provider;
             this.mediaService = mediaService;
             this.booksPublisher = booksPublisher;
 
-            executionMonitor = new TaskExecutionMonitor(DoQueryLibraryAsync);
+            executionMonitor = new TaskExecutionMonitor(DoUpdateLibraryAsync);
 
             Refresh = new Command(DoRefreshLibrary);
         }
@@ -48,13 +48,14 @@ namespace AudioBookPlayer.App.ViewModels
             executionMonitor.Start();
         }
 
-        private async Task DoQueryLibraryAsync()
+        private async Task DoUpdateLibraryAsync()
         {
             IsBusy = true;
 
             try
             {
                 var audioBooks = await mediaService.QueryBooksAsync();
+
                 booksPublisher.OnNext(audioBooks);
             }
             finally

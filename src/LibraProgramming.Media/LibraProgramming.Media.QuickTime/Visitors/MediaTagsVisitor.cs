@@ -7,11 +7,11 @@ using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Visitors
 {
-    internal sealed class MetaInformationVisitor : QuickTimeMediaVisitor
+    internal sealed class MediaTagsVisitor : QuickTimeMediaVisitor
     {
-        private readonly MetaInformation information;
+        private readonly MediaTags information;
 
-        public MetaInformationVisitor(MetaInformation information)
+        public MediaTagsVisitor(MediaTags information)
         {
             this.information = information;
         }
@@ -33,7 +33,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         if (DataType.Binary == meta.DataChunk.DataType)
                         {
                             var stream = new MemoryStream(meta.DataChunk.Data);
-                            information.Add(WellKnownMetaItemNames.Cover, MetaItemValue.FromStream(stream));
+                            information.Add(WellKnownMediaTags.Cover, TagValue.FromStream(stream));
                         }
 
                         break;
@@ -44,8 +44,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
-                            information.Add(WellKnownMetaItemNames.Title, info);
+                            var info = TagValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMediaTags.Title, info);
                         }
 
                         break;
@@ -56,8 +56,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
-                            information.Add(WellKnownMetaItemNames.Author, info);
+                            var info = TagValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMediaTags.Author, info);
                         }
 
                         break;
@@ -67,8 +67,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     {
                         if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaItemValue.FromText(meta.DataChunk.Text);
-                            information.Add(WellKnownMetaItemNames.Subtitle, info);
+                            var info = TagValue.FromText(meta.DataChunk.Text);
+                            information.Add(WellKnownMediaTags.Subtitle, info);
                         }
 
                         break;
@@ -85,7 +85,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                         }
                         else if (DataType.Text == meta.DataChunk.DataType)
                         {
-                            var info = MetaItemValue.FromText( meta.DataChunk.Text);
+                            var info = TagValue.FromText( meta.DataChunk.Text);
                             information.Add(key, info);
                         }
 

@@ -22,7 +22,7 @@ namespace ConsoleApp
                 {
                     extractor.Debug();
 
-                    var items = extractor.GetMeta();
+                    var items = extractor.GetMediaTags();
 
                     tracks = extractor.GetTracks();
 
@@ -35,15 +35,15 @@ namespace ConsoleApp
 
                         foreach (var item in meta)
                         {
-                            if (item is TextItemValue textItem)
+                            if (item is TextValue textItem)
                             {
                                 Console.WriteLine($"[Meta]    Text: '{textItem.Text}'");
                             }
-                            else if (item is StreamItemValue streamItem)
+                            else if (item is StreamValue streamItem)
                             {
                                 Console.WriteLine($"[Meta]    Stream: {streamItem.Stream.Length} bytes");
                             }
-                            else if (item is BinaryItemValue binaryItem)
+                            else if (item is BinaryValue binaryItem)
                             {
                                 Console.WriteLine($"[Meta]    Binary: {binaryItem.Bytes.Length} bytes");
                             }
@@ -64,7 +64,7 @@ namespace ConsoleApp
                 Console.WriteLine();
                 Console.WriteLine($"[TOTAL] length: {total:hh':'mm':'ss}");
 
-                var audioTrack = tracks.First();
+                /*var audioTrack = tracks.First();
 
                 using (var audio = audioTrack.GetMediaStream())
                 {
@@ -72,7 +72,7 @@ namespace ConsoleApp
                     {
                         audio.CopyTo(target);
                     }
-                }
+                }*/
             }
         }
     }
