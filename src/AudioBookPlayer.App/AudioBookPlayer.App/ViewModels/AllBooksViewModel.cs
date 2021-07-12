@@ -14,9 +14,9 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public AllBooksViewModel(
-            IBookShelfProvider bookShelf,
+            IBooksProvider books,
             IAudioBooksConsumer booksConsumer)
-            : base(bookShelf)
+            : base(books)
         {
             this.booksConsumer = booksConsumer;
 

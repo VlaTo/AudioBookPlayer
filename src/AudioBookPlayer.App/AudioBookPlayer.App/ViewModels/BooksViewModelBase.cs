@@ -1,4 +1,6 @@
-﻿using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Models;
+using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
@@ -6,10 +8,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Extensions;
-using AudioBookPlayer.App.Models;
-using LibraProgramming.Media.Common;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -35,7 +33,6 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     internal abstract class BooksViewModelBase : ViewModelBase, IBooksViewModel
     {
-        protected readonly IBookShelfProvider BookShelf;
         private readonly TaskExecutionMonitor<AudioBook[]> executionMonitor;
 
         public ObservableCollection<AudioBookViewModel> Books
@@ -53,16 +50,18 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected BooksViewModelBase(IBookShelfProvider bookShelf)
+        protected readonly IBooksProvider Provider;
+
+        protected BooksViewModelBase(IBooksProvider provider)
         {
             executionMonitor = new TaskExecutionMonitor<AudioBook[]>(BindBooks);
 
-            BookShelf = bookShelf;
+            Provider = provider;
             Books = new ObservableCollection<AudioBookViewModel>();
             PlayBook = new Command<AudioBookViewModel>(DoPlayBook);
             PlayBookRequest = new InteractionRequest<PlayBookInteractionRequestContext>();
 
-            bookShelf.QueryBooksReady += OnQueryBooksReady;
+            //.QueryBooksReady += OnQueryBooksReady;
         }
 
         protected virtual void DoPlayBook(AudioBookViewModel book)

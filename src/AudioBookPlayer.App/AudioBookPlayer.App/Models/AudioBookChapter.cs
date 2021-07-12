@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AudioBookPlayer.App.Models.Collections;
+using AudioBookPlayer.App.Core.Collections;
 
 namespace AudioBookPlayer.App.Models
 {
@@ -56,7 +56,7 @@ namespace AudioBookPlayer.App.Models
             Fragments = new OwnedCollection<AudioBookChapterFragment>(OnCollectionChanged);
         }
 
-        private void OnCollectionChanged(ChangeAction action, int index)
+        private void OnCollectionChanged(CollectionChange action, int index)
         {
             duration = null;
         }

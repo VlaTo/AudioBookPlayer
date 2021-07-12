@@ -73,7 +73,7 @@ namespace AudioBookPlayer.App.Android
             public void RegisterTypes(DependencyContainer container)
             {
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
-                container.Register<IMediaService, MediaService>(InstanceLifetime.Singleton);
+                container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
                 container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
                 container.Register<IPlaybackController>(GetPlaybackController, InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
