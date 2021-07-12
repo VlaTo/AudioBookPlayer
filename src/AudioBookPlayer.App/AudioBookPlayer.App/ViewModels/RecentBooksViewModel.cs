@@ -6,8 +6,8 @@ namespace AudioBookPlayer.App.ViewModels
     internal sealed class RecentBooksViewModel : BooksViewModelBase
     {
         [PrefferedConstructor]
-        public RecentBooksViewModel(IBookShelfProvider bookShelf)
-            : base(bookShelf)
+        public RecentBooksViewModel(IBooksProvider books)
+            : base(books)
         {
         }
 

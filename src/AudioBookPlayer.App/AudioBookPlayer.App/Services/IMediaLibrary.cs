@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Models;
@@ -19,14 +18,12 @@ namespace AudioBookPlayer.App.Services
         }
     }
 
-    public interface IBookShelfProvider
+    public interface IMediaLibrary : IBooksProvider
     {
         event EventHandler<AudioBooksEventArgs> QueryBooksReady;
 
-        Task<IEnumerable<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default);
-
-        Task RefreshBooksAsync(CancellationToken cancellationToken = default);
-
         Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default);
+
+        Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
     }
 }

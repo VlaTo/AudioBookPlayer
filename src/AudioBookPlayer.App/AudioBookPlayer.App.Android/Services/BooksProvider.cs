@@ -9,21 +9,22 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed class MediaService : IMediaService
+    internal sealed class BooksProvider : IBooksProvider
     {
         private readonly IAudioBookFactoryProvider factoryProvider;
 
-        public MediaService(IAudioBookFactoryProvider factoryProvider)
+        public BooksProvider(IAudioBookFactoryProvider factoryProvider)
         {
             this.factoryProvider = factoryProvider;
         }
 
-        public Task<IEnumerable<AudioBook>> QueryBooksAsync()
+        public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
         {
             var collection = GetExternalContentUri();
             var contentResolver = Application.Context.ContentResolver;
@@ -67,7 +68,7 @@ namespace AudioBookPlayer.App.Android.Services
                 }
             }
 
-            return Task.FromResult<IEnumerable<AudioBook>>(audioBooks.ToArray());
+            return Task.FromResult<IReadOnlyList<AudioBook>>(audioBooks);
         }
 
         private static Uri GetExternalContentUri()

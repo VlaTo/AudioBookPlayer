@@ -28,7 +28,7 @@ namespace AudioBookPlayer.App
 
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IBookShelfProvider, BookShelfProvider>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 

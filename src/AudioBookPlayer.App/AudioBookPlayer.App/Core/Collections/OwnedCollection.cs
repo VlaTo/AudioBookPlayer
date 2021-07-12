@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace AudioBookPlayer.App.Models.Collections
+namespace AudioBookPlayer.App.Core.Collections
 {
-    public enum ChangeAction
+    public enum CollectionChange
     {
         Added,
         Insert,
@@ -13,7 +13,7 @@ namespace AudioBookPlayer.App.Models.Collections
         Clear
     }
 
-    public delegate void CollectionChanged(ChangeAction action, int index);
+    public delegate void CollectionChanged(CollectionChange action, int index);
 
     public sealed class OwnedCollection<TValue> : IList<TValue>
     {
@@ -34,7 +34,7 @@ namespace AudioBookPlayer.App.Models.Collections
                 
                 version++;
 
-                action.Invoke(ChangeAction.Changed, index);
+                action.Invoke(CollectionChange.Changed, index);
             }
         }
 
@@ -59,7 +59,7 @@ namespace AudioBookPlayer.App.Models.Collections
 
             var index = items.Add(item);
 
-            action.Invoke(ChangeAction.Added, index);
+            action.Invoke(CollectionChange.Added, index);
         }
 
         public void Clear()
@@ -73,7 +73,7 @@ namespace AudioBookPlayer.App.Models.Collections
 
             items.Clear();
 
-            action.Invoke(ChangeAction.Clear, -1);
+            action.Invoke(CollectionChange.Clear, -1);
         }
 
         public bool Contains(TValue item) => items.Contains(item);
@@ -96,7 +96,7 @@ namespace AudioBookPlayer.App.Models.Collections
 
             items.Insert(index, item);
 
-            action.Invoke(ChangeAction.Insert, index);
+            action.Invoke(CollectionChange.Insert, index);
         }
 
         public void RemoveAt(int index)
@@ -110,7 +110,7 @@ namespace AudioBookPlayer.App.Models.Collections
 
             items.RemoveAt(index);
 
-            action.Invoke(ChangeAction.Removed, index);
+            action.Invoke(CollectionChange.Removed, index);
         }
 
         public bool Remove(TValue item)
@@ -131,7 +131,7 @@ namespace AudioBookPlayer.App.Models.Collections
 
             items.RemoveAt(index);
 
-            action.Invoke(ChangeAction.Removed, index);
+            action.Invoke(CollectionChange.Removed, index);
 
             return true;
         }
