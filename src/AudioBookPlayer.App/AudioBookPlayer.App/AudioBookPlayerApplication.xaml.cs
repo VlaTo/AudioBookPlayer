@@ -29,7 +29,7 @@ namespace AudioBookPlayer.App
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IBookShelfDataContext, SqLiteBookShelfDataContext>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IMediaLibraryDataContext, SqLiteMediaLibraryDataContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
             var audioBooksHub = new AudioBooksHub();
@@ -55,7 +55,7 @@ namespace AudioBookPlayer.App
         
         private Task RegisterExtraActionsAsync()
         {
-            InitializeDatabase();
+            //InitializeDatabase();
 
             var actions = new List<AppAction>();
 
@@ -109,7 +109,7 @@ namespace AudioBookPlayer.App
         
         private void InitializeDatabase()
         {
-            var db = DependencyContainer.GetInstance<IBookShelfDataContext>();
+            var db = DependencyContainer.GetInstance<IMediaLibraryDataContext>();
 
             try
             {

@@ -8,7 +8,7 @@ using AudioBookPlayer.App.Data.Models;
 
 namespace AudioBookPlayer.App.Data.Migrations
 {
-    [DbContext(typeof(SqLiteBookShelfDataContext))]
+    [DbContext(typeof(SqLiteMediaLibraryDataContext))]
     [Migration("20210428135124_InitialCreate")]
     public partial class InitialMigration
     {

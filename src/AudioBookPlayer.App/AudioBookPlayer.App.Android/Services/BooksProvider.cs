@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MediaExtractor = Android.Media.MediaExtractor;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services

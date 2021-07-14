@@ -14,7 +14,7 @@ namespace AudioBookPlayer.App.Views
             InitializeComponent();
         }
 
-        protected virtual async void OnPlayBookRequest(object sender, PlayBookInteractionRequestContext context, Action callback)
+        protected virtual async void OnPlayBookRequest(object sender, StartPlayInteractionRequestContext context, Action callback)
         {
             var uri = $"{Routes.PlayerPageRoute}?{nameof(PlayerControlViewModel.BookId)}={context.BookId}";
             

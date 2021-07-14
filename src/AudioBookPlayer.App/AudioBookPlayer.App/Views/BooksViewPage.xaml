@@ -46,9 +46,9 @@
     <interactivity:Interaction.RequestTriggers>
         <interactivity:InteractionRequestTrigger
             x:DataType="viewmodels:IBooksViewModel"
-            Request="{Binding Path=PlayBookRequest, Mode=OneTime}">
+            Request="{Binding Path=StartPlayRequest, Mode=OneTime}">
             <interactivity:CallMethodTriggerAction
-                x:TypeArguments="viewmodels:PlayBookInteractionRequestContext"
+                x:TypeArguments="viewmodels:StartPlayInteractionRequestContext"
                 MethodName="OnPlayBookRequest"
             />
         </interactivity:InteractionRequestTrigger>
@@ -65,7 +65,7 @@
         <ListView.Behaviors>
             <behaviors:EventToCommandBehavior
                 EventName="ItemTapped"
-                Command="{Binding Path=PlayBook, Mode=OneTime}"
+                Command="{Binding Path=StartPlay, Mode=OneTime}"
                 EventArgsParameterPath="Item"
             />
         </ListView.Behaviors>

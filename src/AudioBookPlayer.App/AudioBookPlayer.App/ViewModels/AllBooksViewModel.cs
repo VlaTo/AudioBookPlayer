@@ -23,9 +23,9 @@ namespace AudioBookPlayer.App.ViewModels
             subscription = booksConsumer.Subscribe(Observer.Create<IEnumerable<AudioBook>>(DoNextAudioBook));
         }
 
-        protected override void DoPlayBook(AudioBookViewModel book)
+        protected override void DoStartPlay(AudioBookViewModel book)
         {
-            base.DoPlayBook(book);
+            base.DoStartPlay(book);
         }
 
         private void DoNextAudioBook(IEnumerable<AudioBook> audioBooks)

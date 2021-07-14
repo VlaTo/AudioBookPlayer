@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xamarin.Forms;
 using BookImage = AudioBookPlayer.App.Data.Models.BookImage;
 using Chapter = AudioBookPlayer.App.Data.Models.Chapter;
 
@@ -17,34 +16,33 @@ namespace AudioBookPlayer.App.Services
 {
     internal sealed class MediaLibrary : IMediaLibrary
     {
-        private readonly IBookShelfDataContext context;
+        private readonly IMediaLibraryDataContext context;
         private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
         private readonly ApplicationSettings settings;
-        private readonly WeakEventManager queryBooksReady;
+        //private readonly WeakEventManager queryBooksReady;
 
-        public event EventHandler<AudioBooksEventArgs> QueryBooksReady
+        /*public event EventHandler<AudioBooksEventArgs> QueryBooksReady
         {
             add => queryBooksReady.AddEventHandler(value);
             remove => queryBooksReady.RemoveEventHandler(value);
-        }
+        }*/
 
         [PrefferedConstructor]
         public MediaLibrary(
             ApplicationSettings settings,
-            IBookShelfDataContext context,
+            IMediaLibraryDataContext context,
             IAudioBookFactoryProvider audioBookFactoryProvider)
         {
             this.settings = settings;
             this.context = context;
             this.audioBookFactoryProvider = audioBookFactoryProvider;
 
-            queryBooksReady = new WeakEventManager();
+            // queryBooksReady = new WeakEventManager();
         }
 
-        public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
         {
-            /*
-            //await context.DeleteAllAsync();
+            //await context.DeleteAllAsync(cancellationToken);
 
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
@@ -57,30 +55,27 @@ namespace AudioBookPlayer.App.Services
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
 
-            var result = new AudioBook[books.Length];
+            var audioBooks = new AudioBook[books.Length];
 
             for (var index = 0; index < books.Length; index++)
             {
-                var book = books[index];
-
-                result[index] = new AudioBook
+                var source = books[index];
+                var audioBook = new AudioBook(source.Title, source.Id)
                 {
-                    Id = book.Id,
-                    Title = book.Title,
-                    Synopsis = book.Synopsis,
-                    Duration = book.Duration
+                    Synopsis = source.Synopsis
                 };
 
-                FillAuthors(result[index], book.AuthorBooks);
-                FillImages(result[index], book.Images);
-                FillChapters(result[index], book.Chapters);
-                FillSourceFiles(result[index], book.SourceFiles);
+                audioBooks[index] = audioBook;
+
+                FillAuthors(audioBook, source.AuthorBooks);
+                FillImages(audioBook, source.Images);
+                FillChapters(audioBook, source.Chapters);
+                //FillSourceFiles(audioBook, source.SourceFiles);
             }
 
-            queryBooksReady.HandleEvent(this, new AudioBooksEventArgs(result), nameof(QueryBooksReady));
-            */
+            //queryBooksReady.HandleEvent(this, new AudioBooksEventArgs(audioBooks), nameof(QueryBooksReady));
 
-            return Task.FromResult<IReadOnlyList<AudioBook>>(new List<AudioBook>());
+            return audioBooks;
         }
 
         /*public async Task RefreshBooksAsync(CancellationToken cancellationToken = default)
@@ -123,14 +118,21 @@ namespace AudioBookPlayer.App.Services
             FillAuthors(result, actual.AuthorBooks);
             FillImages(result, actual.Images);
             FillChapters(result, actual.Chapters);
-            FillSourceFiles(result, actual.SourceFiles);
+            //FillSourceFiles(result, actual.SourceFiles);
 
             return result;
         }
 
-        public Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default)
+        public async Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            if (audioBook.Id.HasValue)
+            {
+
+            }
+            else
+            {
+                await AddNewBookAsync(audioBook, cancellationToken);
+            }
         }
 
         /*private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation = default)
@@ -190,22 +192,24 @@ namespace AudioBookPlayer.App.Services
             throw new NotImplementedException();
         }*/
 
-        /*private async Task AddNewBookAsync(AudioBook source, CancellationToken cancellation = default)
+        private async Task AddNewBookAsync(AudioBook source, CancellationToken cancellation = default)
         {
             using (var transaction = await context.BeginTransactionAsync(cancellation))
             {
                 var book = await AddBookAsync(source, cancellation);
 
-                await AddBookAuthorsAsync(source, book, cancellation);
-                await AddBookChaptersAsync(source, book, cancellation);
-                await AddBookImagesAsync(source, book, cancellation);
+                await AddBookAuthorsAsync(book, source, cancellation);
+                await AddBookChaptersAsync(book, source, cancellation);
+                //await AddBookImagesAsync(source, book, cancellation);
 
                 await context.SaveChangesAsync(cancellation);
                 await transaction.CommitAsync(cancellation);
-            }
-        }*/
 
-        /*private async Task<Book> AddBookAsync(AudioBook source, CancellationToken cancellation)
+                source.Id = book.Id;
+            }
+        }
+
+        private async Task<Book> AddBookAsync(AudioBook source, CancellationToken cancellation)
         {
             var book = new Book
             {
@@ -223,77 +227,73 @@ namespace AudioBookPlayer.App.Services
             await context.Books.AddAsync(book, cancellation);
 
             return book;
-        }*/
+        }
 
-        /*private async Task AddBookAuthorsAsync(AudioBook source, Book book, CancellationToken cancellation)
+        private async Task AddBookAuthorsAsync(Book book, AudioBook source, CancellationToken cancellation)
         {
-            foreach (var author in source.Authors)
+            for (var index = 0; index < source.Authors.Count; index++)
             {
-                var actual = await context.Authors
-                    .Where(a => a.Name == author)
+                var author = source.Authors[index];
+                var entity = await context.Authors
+                    .Where(a => a.Name == author.Name)
+                    //.AsNoTracking()
                     .FirstOrDefaultAsync(cancellation);
 
-                if (null == actual)
+                if (null == entity)
                 {
-                    actual = new Author
+                    entity = new Author
                     {
-                        Name = author,
+                        Name = author.Name,
                         AuthorBooks = new List<AuthorBook>()
                     };
 
-                    await context.Authors.AddAsync(actual, cancellation);
+                    await context.Authors.AddAsync(entity, cancellation);
                 }
 
                 book.AuthorBooks.Add(new AuthorBook
                 {
                     Book = book,
-                    Author = actual
+                    Author = entity
                 });
             }
-        }*/
+        }
 
-        /*private async Task AddBookChaptersAsync(AudioBook source, Book book, CancellationToken cancellation)
+        private async Task AddBookChaptersAsync(Book book, AudioBook source, CancellationToken cancellation)
         {
-            foreach (var audioBookChapter in source.Chapters)
+            foreach (var sourceChapter in source.Chapters)
             {
-                var filename = audioBookChapter.SourceFile;
-                var sourceFile = await context.SourceFiles
-                    .Where(s => s.Filename == filename)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(cancellation);
-
-                if (null == sourceFile)
+                for (var index = 0; index < sourceChapter.Fragments.Count; index++)
                 {
-                    var file = new FileInfo(filename);
-                    
-                    sourceFile = new SourceFile
+                    var sourceFragment = sourceChapter.Fragments[index];
+                    var contentUri = sourceFragment.SourceFile.ContentUri;
+                    var sourceFile = new SourceFile
                     {
-                        Filename = filename,
-                        Created = file.CreationTimeUtc,
-                        Modified = file.LastAccessTimeUtc,
-                        Length = file.Length,
+                        Filename = contentUri,
+                        //Created = file.CreationTimeUtc,
+                        //Modified = file.LastAccessTimeUtc,
+                        //Length = file.Length,
                         Book = book
                     };
 
                     await context.SourceFiles.AddAsync(sourceFile, cancellation);
 
                     book.SourceFiles.Add(sourceFile);
+
+                    var chapter = new Chapter
+                    {
+                        Title = sourceChapter.Title,
+                        Offset = sourceChapter.Start,
+                        Length = sourceChapter.Duration,
+                        Book = book,
+                        SourceFile = sourceFile
+                    };
+
+                    await context.Chapters.AddAsync(chapter, cancellation);
+
+                    book.Chapters.Add(chapter);
                 }
-
-                var chapter = new Chapter
-                {
-                    Title = audioBookChapter.Title,
-                    Offset = audioBookChapter.Start,
-                    Length = audioBookChapter.Duration,
-                    Book = book,
-                    SourceFile = sourceFile
-                };
-
-                await context.Chapters.AddAsync(chapter, cancellation);
-
-                book.Chapters.Add(chapter);
             }
-        }*/
+        }
 
         /*private async Task AddBookImagesAsync(AudioBook source, Book book, CancellationToken cancellation)
         {
@@ -316,7 +316,8 @@ namespace AudioBookPlayer.App.Services
         {
             foreach (var bookAuthor in bookAuthors)
             {
-                //audioBook.Authors.Add(bookAuthor.Author.Name);
+                var author = new AudioBookAuthor(bookAuthor.Author.Name);
+                audioBook.Authors.Add(author);
             }
         }
 
@@ -329,28 +330,44 @@ namespace AudioBookPlayer.App.Services
             }
         }
 
-        private void FillChapters(AudioBook audioBook, ICollection<Chapter> chapters)
+        private void FillChapters(AudioBook audioBook, ICollection<Chapter> bookChapters)
         {
-            foreach (var chapter in chapters)
+            foreach (var bookChapter in bookChapters)
             {
-                /*var audioBookChapter = new AudioBookChapter
-                {
-                    Title = chapter.Title,
-                    Start = chapter.Offset,
-                    Duration = chapter.Length,
-                    SourceFile = chapter.SourceFile.Filename
-                };
+                var chapter = new AudioBookChapter(audioBook, bookChapter.Title, bookChapter.Offset);
+                var sourceFile = GetOrCreateSourceFile(audioBook, bookChapter.SourceFile);
+                var fragment = new AudioBookChapterFragment(bookChapter.Offset, bookChapter.Length, sourceFile);
 
-                audioBook.Chapters.Add(audioBookChapter);*/
+                audioBook.Chapters.Add(chapter);
+                chapter.Fragments.Add(fragment);
             }
         }
 
-        private void FillSourceFiles(AudioBook audioBook, ICollection<SourceFile> sourceFiles)
+        private static AudioBookSourceFile GetOrCreateSourceFile(AudioBook audioBook, SourceFile sourceFile)
+        {
+            var contentUri = sourceFile.Filename;
+
+            foreach (var bookSourceFile in audioBook.SourceFiles)
+            {
+                if (String.Equals(contentUri, bookSourceFile.ContentUri))
+                {
+                    return bookSourceFile;
+                }
+            }
+
+            var source = new AudioBookSourceFile(audioBook, contentUri, sourceFile.Length);
+
+            audioBook.SourceFiles.Add(source);
+
+            return source;
+        }
+
+        /*private void FillSourceFiles(AudioBook audioBook, ICollection<SourceFile> sourceFiles)
         {
             foreach (var sourceFile in sourceFiles)
             {
                 ;
             }
-        }
+        }*/
     }
 }

@@ -11,12 +11,12 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        Command<AudioBookViewModel> PlayBook
+        Command<AudioBookViewModel> StartPlay
         {
             get;
         }
 
-        InteractionRequest<PlayBookInteractionRequestContext> PlayBookRequest
+        InteractionRequest<StartPlayInteractionRequestContext> StartPlayRequest
         {
             get;
         }

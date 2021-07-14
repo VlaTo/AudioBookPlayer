@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace AudioBookPlayer.App.Data.Migrations
 {
-    [DbContext(typeof(SqLiteBookShelfDataContext))]
+    [DbContext(typeof(SqLiteMediaLibraryDataContext))]
     public partial class StoryBlogDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

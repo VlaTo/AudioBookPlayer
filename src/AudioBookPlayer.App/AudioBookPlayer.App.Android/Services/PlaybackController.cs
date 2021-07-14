@@ -29,7 +29,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void Play()
         {
-            ;
+            service.Play(0, TimeSpan.Zero);
         }
 
         /// <summary>

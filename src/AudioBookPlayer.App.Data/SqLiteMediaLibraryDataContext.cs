@@ -1,21 +1,20 @@
 ﻿using AudioBookPlayer.App.Data.Models;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Data
 {
-    public class SqLiteBookShelfDataContext : DbContext, IBookShelfDataContext
+    public class SqLiteMediaLibraryDataContext : DbContext, IMediaLibraryDataContext
     {
-        private readonly IPlatformDatabasePath pathProvider;
         private const string databaseName = "library.db";
+
+        private readonly IPlatformDatabasePath pathProvider;
 
         public DbSet<Author> Authors
         {
@@ -54,12 +53,13 @@ namespace AudioBookPlayer.App.Data
         }
 
         [PrefferedConstructor]
-        protected SqLiteBookShelfDataContext(IPlatformDatabasePath pathProvider)
+        protected SqLiteMediaLibraryDataContext(IPlatformDatabasePath pathProvider)
         {
             this.pathProvider = pathProvider;
         }
 
-        public SqLiteBookShelfDataContext(DbContextOptions options) : base(options)
+        public SqLiteMediaLibraryDataContext(DbContextOptions options)
+            : base(options)
         {
         }
 
@@ -70,8 +70,10 @@ namespace AudioBookPlayer.App.Data
             //Database.Migrate();
         }
 
-        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default) =>
-            Database.BeginTransactionAsync(cancellationToken);
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return Database.BeginTransactionAsync(cancellationToken);
+        }
 
         public async Task DeleteAllAsync(CancellationToken cancellation = default)
         {
@@ -80,14 +82,16 @@ namespace AudioBookPlayer.App.Data
                 await Database.ExecuteSqlRawAsync("DELETE FROM [sources];", cancellation);
                 await Database.ExecuteSqlRawAsync("DELETE FROM [author-books];", cancellation);
                 await Database.ExecuteSqlRawAsync("DELETE FROM [authors];", cancellation);
+                await Database.ExecuteSqlRawAsync("DELETE FROM [chapters];", cancellation);
                 await Database.ExecuteSqlRawAsync("DELETE FROM [books];", cancellation);
+                
                 await SaveChangesAsync(cancellation);
 
                 await transaction.CommitAsync(cancellation);
             }
         }
 
-        async Task<bool> IBookShelfDataContext.SaveChangesAsync(CancellationToken cancellation) =>
+        async Task<bool> IMediaLibraryDataContext.SaveChangesAsync(CancellationToken cancellation) =>
             0 < await base.SaveChangesAsync(cancellation);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
