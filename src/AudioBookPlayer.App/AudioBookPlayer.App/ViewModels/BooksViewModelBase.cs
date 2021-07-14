@@ -1,5 +1,4 @@
-﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction;
 using System;
@@ -7,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -15,14 +13,14 @@ namespace AudioBookPlayer.App.ViewModels
     /// <summary>
     /// 
     /// </summary>
-    public sealed class PlayBookInteractionRequestContext : InteractionRequestContext
+    public sealed class StartPlayInteractionRequestContext : InteractionRequestContext
     {
         public long BookId
         {
             get;
         }
 
-        public PlayBookInteractionRequestContext(long bookId)
+        public StartPlayInteractionRequestContext(long bookId)
         {
             BookId = bookId;
         }
@@ -33,19 +31,17 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     internal abstract class BooksViewModelBase : ViewModelBase, IBooksViewModel
     {
-        private readonly TaskExecutionMonitor<AudioBook[]> executionMonitor;
-
         public ObservableCollection<AudioBookViewModel> Books
         {
             get;
         }
 
-        public InteractionRequest<PlayBookInteractionRequestContext> PlayBookRequest
+        public InteractionRequest<StartPlayInteractionRequestContext> StartPlayRequest
         {
             get;
         }
 
-        public Command<AudioBookViewModel> PlayBook
+        public Command<AudioBookViewModel> StartPlay
         {
             get;
         }
@@ -54,34 +50,27 @@ namespace AudioBookPlayer.App.ViewModels
 
         protected BooksViewModelBase(IBooksProvider provider)
         {
-            executionMonitor = new TaskExecutionMonitor<AudioBook[]>(BindBooks);
-
             Provider = provider;
             Books = new ObservableCollection<AudioBookViewModel>();
-            PlayBook = new Command<AudioBookViewModel>(DoPlayBook);
-            PlayBookRequest = new InteractionRequest<PlayBookInteractionRequestContext>();
-
-            //.QueryBooksReady += OnQueryBooksReady;
+            StartPlay = new Command<AudioBookViewModel>(DoStartPlay);
+            StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
         }
 
-        protected virtual void DoPlayBook(AudioBookViewModel book)
+        protected virtual void DoStartPlay(AudioBookViewModel book)
         {
-            var context = new PlayBookInteractionRequestContext(book.Id)
-            {
+            var context = new StartPlayInteractionRequestContext(book.Id);
 
-            };
-
-            PlayBookRequest.Raise(context, () =>
+            StartPlayRequest.Raise(context, () =>
             {
                 ;
             });
         }
 
-        protected virtual void OnQueryBooksReady(object sender, AudioBooksEventArgs e)
+        /*protected virtual void OnQueryBooksReady(object sender, AudioBooksEventArgs e)
         {
             executionMonitor.Start(e.Books);
             
-            /*Books.Clear();
+            Books.Clear();
 
             foreach (var book in e.Books)
             {
@@ -94,8 +83,8 @@ namespace AudioBookPlayer.App.ViewModels
                     Duration = book.Duration,
                     ImageBlob = await book.GetImageAsync(WellKnownMetaItemNames.Cover)
                 });
-            }*/
-        }
+            }
+        }*/
 
         protected string GetAuthorsForBook(ICollection<AudioBookAuthor> authors)
         {
@@ -107,18 +96,13 @@ namespace AudioBookPlayer.App.ViewModels
         {
             Books.Add(new AudioBookViewModel
             {
-                Id = audioBook.Id.GetValueOrDefault(-1L),
+                Id = audioBook.Id.Value,
                 Title = audioBook.Title,
                 Authors = GetAuthorsForBook(audioBook.Authors),
                 Synopsis = audioBook.Synopsis,
                 Duration = audioBook.Duration,
                 //ImageSource = await audioBook.GetImageAsync(WellKnownMetaItemNames.Cover)
             });
-        }
-
-        protected virtual Task BindBooks(AudioBook[] audioBooks)
-        {
-            return Task.CompletedTask;
         }
     }
 }

@@ -20,7 +20,27 @@ namespace AudioBookPlayer.App.Android
         internal PlaybackServiceConnection PlaybackServiceConnection
         {
             get; 
-            set;
+            private set;
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
+        {
+            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            if (null == PlaybackServiceConnection)
+            {
+                PlaybackServiceConnection = new PlaybackServiceConnection(this);
+            }
+
+            var intent = new Intent(this, typeof(PlaybackService));
+
+            BindService(intent, PlaybackServiceConnection, Bind.AutoCreate);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -37,12 +57,6 @@ namespace AudioBookPlayer.App.Android
             LoadApplication(new AudioBookPlayerApplication(new AndroidInitializer()));
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
-        {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-        
         protected override void OnResume()
         {
             base.OnResume();

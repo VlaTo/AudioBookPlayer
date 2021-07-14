@@ -11,7 +11,8 @@
     core:ViewModelLocation.AutowireViewModel="True"
     Title="{Static res:AppResources.LibraryPageTitle}"
     BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
-    IsBusy="{Binding Path=IsBusy, Mode=OneWay}">
+    IsBusy="{Binding Path=IsBusy, Mode=OneWay}"
+    NavigationPage.HasNavigationBar="{OnPlatform Android=false, iOS=true}">
     <TabbedPage.Resources>
     </TabbedPage.Resources>
     <TabbedPage.ToolbarItems>

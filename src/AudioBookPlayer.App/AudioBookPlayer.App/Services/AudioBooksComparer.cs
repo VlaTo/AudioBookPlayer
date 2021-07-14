@@ -46,7 +46,7 @@ namespace AudioBookPlayer.App.Services
             new LibraryChange(ChangeAction.Add, source: source);
     }
 
-    internal sealed class AudioBooksPatcher
+    internal sealed class AudioBooksComparer
     {
         public IReadOnlyList<LibraryChange> GetChanges(IReadOnlyList<AudioBook> libraryBooks, IReadOnlyList<AudioBook> actualBooks)
         {

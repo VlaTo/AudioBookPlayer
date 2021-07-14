@@ -73,9 +73,9 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 var libraryBooks = await mediaLibrary.QueryBooksAsync();
                 var actualBooks = await booksProvider.QueryBooksAsync();
-                var patcher = new AudioBooksPatcher();
+                var comparer = new AudioBooksComparer();
 
-                var changes = patcher.GetChanges(libraryBooks, actualBooks);
+                var changes = comparer.GetChanges(libraryBooks, actualBooks);
 
                 var manager = new AudioBooksManager(mediaLibrary);
 

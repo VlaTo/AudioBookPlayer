@@ -20,7 +20,6 @@ namespace AudioBookPlayer.App.Android.Services
         /// </summary>
         /// <param name="service"></param>
         public PlaybackServiceBinder(PlaybackService service)
-            : base()
         {
             Service = service;
         }

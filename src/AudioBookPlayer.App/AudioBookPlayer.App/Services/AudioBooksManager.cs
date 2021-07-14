@@ -19,6 +19,19 @@ namespace AudioBookPlayer.App.Services
             {
                 var change = changes[index];
 
+                switch (change.Action)
+                {
+                    case ChangeAction.Add:
+                    {
+                        await mediaLibrary.SaveBookAsync(change.Source, cancellationToken);
+                        break;
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
+                }
             }
 
             await Task.CompletedTask;

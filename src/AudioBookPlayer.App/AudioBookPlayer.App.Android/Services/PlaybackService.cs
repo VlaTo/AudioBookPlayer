@@ -83,6 +83,7 @@ namespace AudioBookPlayer.App.Android.Services
             // 3. create notification
             var notification = new Notification.Builder(Application.Context, notificationChannel?.Id)
                 .SetStyle(new Notification.MediaStyle().SetMediaSession(mediaSession.SessionToken))
+                .SetSmallIcon(Resource.Drawable.icon_feed)
                 .SetContentTitle("Sample Title")
                 .SetContentText("Sample Content Text")
                 .SetContentIntent(pendingIntent)

@@ -5,7 +5,7 @@ using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {
-    public sealed class AudioBooksEventArgs : EventArgs
+    /*public sealed class AudioBooksEventArgs : EventArgs
     {
         public AudioBook[] Books
         {
@@ -16,11 +16,11 @@ namespace AudioBookPlayer.App.Services
         {
             Books = books;
         }
-    }
+    }*/
 
     public interface IMediaLibrary : IBooksProvider
     {
-        event EventHandler<AudioBooksEventArgs> QueryBooksReady;
+        // event EventHandler<AudioBooksEventArgs> QueryBooksReady;
 
         Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default);
 

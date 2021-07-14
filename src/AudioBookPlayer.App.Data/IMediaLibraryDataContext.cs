@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Data
 {
-    public interface IBookShelfDataContext
+    public interface IMediaLibraryDataContext
     {
         DbSet<Author> Authors
         {

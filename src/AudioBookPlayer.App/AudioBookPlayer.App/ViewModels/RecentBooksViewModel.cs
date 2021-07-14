@@ -11,9 +11,9 @@ namespace AudioBookPlayer.App.ViewModels
         {
         }
 
-        protected override void DoPlayBook(AudioBookViewModel book)
+        protected override void DoStartPlay(AudioBookViewModel book)
         {
-            base.DoPlayBook(book);
+            base.DoStartPlay(book);
         }
 
         /*private async void OnRefreshCommand()
