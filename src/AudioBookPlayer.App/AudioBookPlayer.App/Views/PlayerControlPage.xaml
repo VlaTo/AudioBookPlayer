@@ -7,11 +7,21 @@
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     x:Class="AudioBookPlayer.App.Views.PlayerControlPage"
     x:DataType="viewmodels:PlayerControlViewModel"
     core:ViewModelLocation.AutowireViewModel="True"
     NavigationPage.HasNavigationBar="True"
     NavigationPage.HasBackButton="True">
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
+            Request="{Binding Path=PickChapterRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="viewmodels:PickChapterRequestContext"
+                MethodName="OnPickChapterRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
     <ContentPage.Resources>
         <ResourceDictionary>
             
@@ -136,6 +146,7 @@
             Margin="{OnPlatform Android='12,4,12,8', iOS='12,0'}"
             HeightRequest="{OnPlatform Android='42', iOS='24'}">
             <ImageButton
+                Command="{Binding Path=PickChapter, Mode=OneTime}"
                 Style="{StaticResource PreviousChapterImageButtonStyle}"
                 HorizontalOptions="Start"
             />

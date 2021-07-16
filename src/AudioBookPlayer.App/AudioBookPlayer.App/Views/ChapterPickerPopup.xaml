@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
+    x:DataType="viewmodels:ChapterPickerViewModel"
+    core:ViewModelLocation.AutowireViewModel="True"
+    x:Class="AudioBookPlayer.App.Views.ChapterPickerPopup"
+    BackgroundColor="Transparent">
+    <ContentPage.Content>
+        <Frame
+            BackgroundColor="#d1d1d1"
+            VerticalOptions="EndAndExpand"
+            CornerRadius="8"
+            HeightRequest="480">
+            <StackLayout
+                Orientation="Vertical">
+                <Label
+                    Text="Welcome to Xamarin.Forms!"
+                    VerticalOptions="CenterAndExpand" 
+                    HorizontalOptions="CenterAndExpand"
+                />
+            </StackLayout>
+        </Frame>
+    </ContentPage.Content>
+</ContentPage>

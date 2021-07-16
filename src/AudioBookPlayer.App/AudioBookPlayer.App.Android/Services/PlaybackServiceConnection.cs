@@ -1,11 +1,9 @@
-﻿using System;
-using Android.Content;
+﻿using Android.Content;
 using Android.OS;
-using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    public class PlaybackServiceConnection : Java.Lang.Object, IServiceConnection, IPlaybackService
+    public class PlaybackServiceConnection : Java.Lang.Object, IServiceConnection
     {
         private readonly MainActivity mainActivity;
 
@@ -28,6 +26,7 @@ namespace AudioBookPlayer.App.Android.Services
             IsConnected = false;
             Binder = null;
         }
+
 #nullable enable
         public void OnServiceConnected(ComponentName? name, IBinder? service)
         {
@@ -52,28 +51,6 @@ namespace AudioBookPlayer.App.Android.Services
             mainActivity.OnPlaybackServiceDisconnected();
         }
 #nullable restore
-        public void SetBook(AudioBook audioBook)
-        {
-            if (false == IsConnected)
-            {
-                return;
-            }
 
-            var service = Binder.Service;
-
-            service.SetBook(audioBook);
-        }
-
-        public void Play(int chapterIndex, TimeSpan position)
-        {
-            if (false == IsConnected)
-            {
-                return;
-            }
-
-            var service = Binder.Service;
-
-            service.Play(chapterIndex, position);
-        }
     }
 }

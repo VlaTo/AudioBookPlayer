@@ -1,8 +1,6 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Extensions;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
-using LibraProgramming.Media.Common;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
@@ -10,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
+using LibraProgramming.Xamarin.Interaction;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -21,7 +20,7 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IPlaybackController playbackController;
         private readonly TaskExecutionMonitor loadBookMonitor;
         private AudioBook book;
-        private IPlayback playback;
+        // private IPlayback playback;
         private string bookId;
         private string bookTitle;
         private string bookSubtitle;
@@ -30,7 +29,7 @@ namespace AudioBookPlayer.App.ViewModels
         private double chapterPosition;
         private TimeSpan elapsed;
         private TimeSpan left;
-        private TimeSpan duration;
+        private TimeSpan bookDuration;
         private ImageSource imageSource;
         private bool canPlayBook;
         private bool isPlaying;
@@ -80,10 +79,10 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref chapterEnd, value);
         }
 
-        public TimeSpan Duration
+        public TimeSpan BookDuration
         {
-            get => duration;
-            set => SetProperty(ref duration, value);
+            get => bookDuration;
+            set => SetProperty(ref bookDuration, value);
         }
         
         public double ChapterPosition
@@ -94,7 +93,7 @@ namespace AudioBookPlayer.App.ViewModels
                 if (SetProperty(ref chapterPosition, value))
                 {
                     elapsed = TimeSpan.FromMilliseconds(value);
-                    left = elapsed - duration;
+                    left = elapsed - bookDuration;
 
                     OnPropertyChanged(nameof(Elapsed));
                     OnPropertyChanged(nameof(Left));
@@ -124,6 +123,11 @@ namespace AudioBookPlayer.App.ViewModels
         {
             get => isPlaying;
             set => SetProperty(ref isPlaying, value);
+        }
+
+        public Command PickChapter
+        {
+            get;
         }
 
         public Command SmallRewind
@@ -156,6 +160,11 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public InteractionRequest<PickChapterRequestContext> PickChapterRequest
+        {
+            get;
+        }
+
         [PrefferedConstructor]
         public PlayerControlViewModel(
             IMediaLibrary mediaLibrary,
@@ -164,26 +173,30 @@ namespace AudioBookPlayer.App.ViewModels
             this.mediaLibrary = mediaLibrary;
             this.playbackController = playbackController;
 
-            playback = null;
+            // playback = null;
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
 
+            PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
             Play = new Command(DoPlayCommand);
             SmallFastForward = new Command(DoSmallFastForwardCommand);
             ChangeCover = new Command(DoChangeCoverCommand);
             BookmarkCurrent = new Command(DoBookmarkCurrentCommand);
             Snooze = new Command(DoSnoozeCommand);
+            PickChapterRequest = new InteractionRequest<PickChapterRequestContext>();
 
             ChapterStart = 0.0d;
             ChapterEnd = 0.1d;
             ChapterPosition = 0.0d;
 
-            //ChapterEnd = 32755299.0d;
-            //ChapterPosition = 110.0d;
-
-            Duration = TimeSpan.Zero;
+            BookDuration = TimeSpan.Zero;
             Elapsed = TimeSpan.Zero;
             Left = TimeSpan.Zero;
+
+            playbackController.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
+            playbackController.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
+            playbackController.CurrentChapterChanged += OnPlaybackControllerCurrentChapterChanged;
+            playbackController.CurrentPositionChanged += OnPlaybackControllerCurrentPositionChanged;
         }
 
         public void OnInitialize()
@@ -191,24 +204,33 @@ namespace AudioBookPlayer.App.ViewModels
             Debug.WriteLine($"[PlayerControlViewModel] [OnInitialize] Execute");
         }
 
+        private void DoPickChapter()
+        {
+            var context = new PickChapterRequestContext(book.Id.Value);
+
+            PickChapterRequest.Raise(context, () =>
+            {
+                Debug.WriteLine($"[PlayerControlViewModel] [DoPickChapter] Callback");
+            });
+        }
+
         private void DoSmallRewindCommand()
         {
             Debug.WriteLine($"[PlayerControlViewModel] [DoSmallRewindCommand] Execute");
         }
 
-        private async void DoPlayCommand()
+        private void DoPlayCommand()
         {
             Debug.WriteLine($"[PlayerControlViewModel] [DoPlayCommand] Playing: {IsPlaying}");
-            
-            if (null == playback)
+
+            if (IsPlaying)
             {
-                playback = await playbackController.CreatePlaybackAsync(book);
+                playbackController.Stop();
             }
-
-            playback.SelectChapter(0);
-            playback.Play(TimeSpan.Zero);
-
-            //IsPlaying = true;
+            else
+            {
+                playbackController.Play(TimeSpan.Zero);
+            }
         }
 
         private void DoSmallFastForwardCommand()
@@ -247,7 +269,7 @@ namespace AudioBookPlayer.App.ViewModels
             if (null != book)
             {
                 BindBookProperties();
-                //playback = await playbackController.CreatePlaybackAsync(book);
+                playbackController.AudioBook = book;
             }
             else
             {
@@ -265,7 +287,7 @@ namespace AudioBookPlayer.App.ViewModels
             BookSubtitle = authors;
             //ImageSource = images;
 
-            Duration = book.Duration;
+            BookDuration = book.Duration;
             Elapsed = TimeSpan.Zero;
             Left = -book.Duration;
 
@@ -292,6 +314,27 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             return builder.ToString();
+        }
+
+        private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
+        {
+            IsPlaying = playbackController.IsPlaying;
+        }
+
+        private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
+        {
+            ;
+        }
+
+        private void OnPlaybackControllerCurrentChapterChanged(object sender, EventArgs e)
+        {
+            ;
+        }
+
+        private void OnPlaybackControllerCurrentPositionChanged(object sender, EventArgs e)
+        {
+            var position = playbackController.CurrentPosition;
+            ChapterPosition = position.TotalMilliseconds;
         }
     }
 }

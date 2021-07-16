@@ -74,12 +74,12 @@
     <Compile Include="Services\IPlaybackService.cs" />
     <Compile Include="Services\BooksProvider.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
-    <Compile Include="Services\PlaybackController.cs" />
     <Compile Include="Services\PlaybackService.cs" />
     <Compile Include="Services\PlaybackServiceBinder.cs" />
     <Compile Include="Services\PlaybackServiceConnection.cs" />
     <Compile Include="Services\StorageSourceService.cs" />
     <Compile Include="Services\ToastService.cs" />
+    <Compile Include="SplashActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
