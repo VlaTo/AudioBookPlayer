@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
@@ -10,11 +8,32 @@ namespace AudioBookPlayer.App.Services
     /// </summary>
     public interface IPlaybackController
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="audioBook"></param>
-        /// <param name="cancellationToken"></param>
-        Task<IPlayback> CreatePlaybackAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
+        AudioBook AudioBook
+        {
+            get; 
+            set;
+        }
+
+        event EventHandler IsPlayingChanged;
+
+        event EventHandler AudioBookChanged;
+
+        event EventHandler CurrentChapterChanged;
+
+        event EventHandler CurrentPositionChanged;
+
+        TimeSpan CurrentPosition
+        {
+            get;
+        }
+
+        bool IsPlaying
+        {
+            get;
+        }
+
+        void Play(TimeSpan position);
+
+        void Stop();
     }
 }

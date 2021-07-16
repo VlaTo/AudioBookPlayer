@@ -55,8 +55,6 @@ namespace AudioBookPlayer.App
         
         private Task RegisterExtraActionsAsync()
         {
-            //InitializeDatabase();
-
             var actions = new List<AppAction>();
 
             if (true)
@@ -85,6 +83,10 @@ namespace AudioBookPlayer.App
             {
                 Debug.Fail($"Can't register extra AppActions");
             }
+
+            await Task.Delay(TimeSpan.FromSeconds(30.0d));
+
+            InitializeDatabase();
         }
         
         private void OnExtraAppAction(object sender, AppActionEventArgs e)

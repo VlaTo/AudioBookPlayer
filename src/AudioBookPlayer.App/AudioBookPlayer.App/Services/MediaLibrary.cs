@@ -19,13 +19,6 @@ namespace AudioBookPlayer.App.Services
         private readonly IMediaLibraryDataContext context;
         private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
         private readonly ApplicationSettings settings;
-        //private readonly WeakEventManager queryBooksReady;
-
-        /*public event EventHandler<AudioBooksEventArgs> QueryBooksReady
-        {
-            add => queryBooksReady.AddEventHandler(value);
-            remove => queryBooksReady.RemoveEventHandler(value);
-        }*/
 
         [PrefferedConstructor]
         public MediaLibrary(
@@ -36,8 +29,6 @@ namespace AudioBookPlayer.App.Services
             this.settings = settings;
             this.context = context;
             this.audioBookFactoryProvider = audioBookFactoryProvider;
-
-            // queryBooksReady = new WeakEventManager();
         }
 
         public async Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
@@ -72,8 +63,6 @@ namespace AudioBookPlayer.App.Services
                 FillChapters(audioBook, source.Chapters);
                 //FillSourceFiles(audioBook, source.SourceFiles);
             }
-
-            //queryBooksReady.HandleEvent(this, new AudioBooksEventArgs(audioBooks), nameof(QueryBooksReady));
 
             return audioBooks;
         }

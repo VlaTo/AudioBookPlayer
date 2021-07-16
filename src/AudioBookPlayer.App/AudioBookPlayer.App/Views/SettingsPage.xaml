@@ -3,7 +3,6 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
-    xmlns:controls="clr-namespace:LibraProgramming.Xamarin.Controls;assembly=LibraProgramming.Xamarin.Controls"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"

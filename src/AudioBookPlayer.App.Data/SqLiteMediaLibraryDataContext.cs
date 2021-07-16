@@ -65,6 +65,7 @@ namespace AudioBookPlayer.App.Data
 
         public void Initialize()
         {
+
             Database.EnsureCreated();
             //CreateMigrationHistory();
             //Database.Migrate();
@@ -170,7 +171,7 @@ namespace AudioBookPlayer.App.Data
                 .WithMany(a => a.AuthorBooks)
                 .HasForeignKey(ab => ab.AuthorId);
         }
-
+        
         private void CreateMigrationHistory()
         {
             using (var transaction = Database.BeginTransaction())
