@@ -15,6 +15,12 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
+        public int Position
+        {
+            get;
+            set;
+        }
+
         [Required]
         [DataType(DataType.Text)]
         public string Title

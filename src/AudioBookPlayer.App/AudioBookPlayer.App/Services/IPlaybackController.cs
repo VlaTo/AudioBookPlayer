@@ -14,15 +14,13 @@ namespace AudioBookPlayer.App.Services
             set;
         }
 
-        event EventHandler IsPlayingChanged;
+        int ChapterIndex
+        {
+            get;
+            set;
+        }
 
-        event EventHandler AudioBookChanged;
-
-        event EventHandler CurrentChapterChanged;
-
-        event EventHandler CurrentPositionChanged;
-
-        TimeSpan CurrentPosition
+        TimeSpan Position
         {
             get;
         }
@@ -31,6 +29,14 @@ namespace AudioBookPlayer.App.Services
         {
             get;
         }
+
+        event EventHandler IsPlayingChanged;
+
+        event EventHandler AudioBookChanged;
+
+        event EventHandler ChapterIndexChanged;
+
+        event EventHandler PositionChanged;
 
         void Play(TimeSpan position);
 

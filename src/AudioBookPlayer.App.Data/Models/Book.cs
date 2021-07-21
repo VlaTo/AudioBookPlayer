@@ -51,7 +51,7 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        public bool IsExcluded
+        public bool DoNotShow
         {
             get;
             set;

@@ -146,20 +146,20 @@
             Margin="{OnPlatform Android='12,4,12,8', iOS='12,0'}"
             HeightRequest="{OnPlatform Android='42', iOS='24'}">
             <ImageButton
-                Command="{Binding Path=PickChapter, Mode=OneTime}"
+                Command="{Binding Path=PreviousChapter, Mode=OneTime}"
                 Style="{StaticResource PreviousChapterImageButtonStyle}"
                 HorizontalOptions="Start"
             />
-            <Label
-                Style="{StaticResource ChapterTitleLabelStyle}"
-                Text="01. Sample Chapter text"
+            <Button
+                Command="{Binding Path=PickChapter, Mode=OneTime}"
                 HorizontalOptions="FillAndExpand"
                 VerticalOptions="Fill"
                 Padding="{OnPlatform Android='8', iOS='16'}"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
+                TextTransform="None"
+                Text="{Binding Path=CurrentChapterTitle, Mode=OneWay}"
             />
             <ImageButton
+                Command="{Binding Path=NextChapter, Mode=OneTime}"
                 Style="{StaticResource NextChapterImageButtonStyle}"
                 HorizontalOptions="End"
             />
@@ -197,7 +197,7 @@
             />
         </StackLayout>
         <controls:PlaybackControl
-            CanPlay="{Binding Path=CanPlayBook, Mode=OneWay}"
+            CanPlay="{Binding Path=CanPlay, Mode=OneWay}"
             IsPlaying="{Binding Path=IsPlaying, Mode=OneWay}"
             Rewind="{Binding Path=SmallRewind, Mode=OneTime}"
             Play="{Binding Path=Play, Mode=OneTime}"

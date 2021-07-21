@@ -6,6 +6,7 @@ using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +43,8 @@ namespace AudioBookPlayer.App.Services
                 .ThenInclude(chapter => chapter.SourceFile)
                 .Include(book => book.SourceFiles)
                 .Include(book => book.Images)
-                .Where(book => !book.IsExcluded)
+                .Where(book => !book.DoNotShow)
+                .OrderBy(book => book.Id)
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
 
@@ -203,7 +205,7 @@ namespace AudioBookPlayer.App.Services
             var book = new Book
             {
                 Title = source.Title,
-                IsExcluded = false,
+                DoNotShow = false,
                 AddedToLibrary = DateTime.UtcNow,
                 Synopsis = source.Synopsis,
                 Duration = source.Duration,
@@ -249,27 +251,25 @@ namespace AudioBookPlayer.App.Services
 
         private async Task AddBookChaptersAsync(Book book, AudioBook source, CancellationToken cancellation)
         {
-            foreach (var sourceChapter in source.Chapters)
+            for (var chapterIndex = 0; chapterIndex < source.Chapters.Count; chapterIndex++)
             {
+                var sourceChapter = source.Chapters[chapterIndex];
+
                 for (var index = 0; index < sourceChapter.Fragments.Count; index++)
                 {
                     var sourceFragment = sourceChapter.Fragments[index];
-                    var contentUri = sourceFragment.SourceFile.ContentUri;
                     var sourceFile = new SourceFile
                     {
-                        Filename = contentUri,
+                        Filename = sourceFragment.SourceFile.ContentUri,
                         //Created = file.CreationTimeUtc,
                         //Modified = file.LastAccessTimeUtc,
                         //Length = file.Length,
                         Book = book
                     };
 
-                    await context.SourceFiles.AddAsync(sourceFile, cancellation);
-
-                    book.SourceFiles.Add(sourceFile);
-
                     var chapter = new Chapter
                     {
+                        Position = chapterIndex,
                         Title = sourceChapter.Title,
                         Offset = sourceChapter.Start,
                         Length = sourceChapter.Duration,
@@ -277,9 +277,13 @@ namespace AudioBookPlayer.App.Services
                         SourceFile = sourceFile
                     };
 
-                    await context.Chapters.AddAsync(chapter, cancellation);
+                    // Debug.WriteLine($"[MediaLibrary] [AddBookChaptersAsync] ({sourceChapter.Start:g}, {sourceChapter.Duration:g}) '{sourceChapter.Title}'");
 
+                    book.SourceFiles.Add(sourceFile);
                     book.Chapters.Add(chapter);
+
+                    await context.SourceFiles.AddAsync(sourceFile, cancellation);
+                    await context.Chapters.AddAsync(chapter, cancellation);
                 }
             }
         }
@@ -321,7 +325,7 @@ namespace AudioBookPlayer.App.Services
 
         private void FillChapters(AudioBook audioBook, ICollection<Chapter> bookChapters)
         {
-            foreach (var bookChapter in bookChapters)
+            foreach (var bookChapter in bookChapters.OrderBy(chapter => chapter.Position))
             {
                 var chapter = new AudioBookChapter(audioBook, bookChapter.Title, bookChapter.Offset);
                 var sourceFile = GetOrCreateSourceFile(audioBook, bookChapter.SourceFile);

@@ -10,20 +10,62 @@
     core:ViewModelLocation.AutowireViewModel="True"
     x:Class="AudioBookPlayer.App.Views.ChapterPickerPopup"
     BackgroundColor="Transparent">
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
+            Request="{Binding Path=CloseRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="core:ClosePopupRequestContext"
+                MethodName="OnCloseRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
     <ContentPage.Content>
-        <Frame
-            BackgroundColor="#d1d1d1"
+        <StackLayout
+            BackgroundColor="Transparent"
+            Orientation="Vertical"
             VerticalOptions="EndAndExpand"
-            CornerRadius="8"
-            HeightRequest="480">
-            <StackLayout
-                Orientation="Vertical">
-                <Label
-                    Text="Welcome to Xamarin.Forms!"
-                    VerticalOptions="CenterAndExpand" 
-                    HorizontalOptions="CenterAndExpand"
+            HorizontalOptions="FillAndExpand">
+            <StackLayout.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding Path=Close, Mode=OneTime}"
                 />
-            </StackLayout>
-        </Frame>
+            </StackLayout.GestureRecognizers>
+            <Frame
+                BackgroundColor="White"
+                VerticalOptions="EndAndExpand"
+                CornerRadius="8"
+                HeightRequest="480">
+                <StackLayout
+                    Orientation="Vertical">
+                    <CollectionView
+                        ItemsSource="{Binding Path=Chapters, Mode=OneWay}"
+                        SelectedItem="{Binding Path=SelectedChapter, Mode=TwoWay}"
+                        SelectionMode="Single">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate
+                                x:DataType="viewmodels:ChapterViewModel">
+                                <StackLayout
+                                    Orientation="Horizontal">
+                                    <BoxView
+                                        WidthRequest="36"
+                                        HeightRequest="36"
+                                    />
+                                    <Label
+                                        TextColor="Black"
+                                        Text="{Binding Path=Title, Mode=OneTime}"
+                                        VerticalOptions="CenterAndExpand" 
+                                        HorizontalOptions="StartAndExpand"
+                                        HorizontalTextAlignment="Start"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+
+                    </CollectionView>
+                </StackLayout>
+            </Frame>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

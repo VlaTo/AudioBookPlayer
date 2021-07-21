@@ -65,7 +65,7 @@ namespace AudioBookPlayer.App.Data
 
         public void Initialize()
         {
-
+            //Database.EnsureDeleted();
             Database.EnsureCreated();
             //CreateMigrationHistory();
             //Database.Migrate();
@@ -76,24 +76,10 @@ namespace AudioBookPlayer.App.Data
             return Database.BeginTransactionAsync(cancellationToken);
         }
 
-        public async Task DeleteAllAsync(CancellationToken cancellation = default)
+        async Task<bool> IMediaLibraryDataContext.SaveChangesAsync(CancellationToken cancellation)
         {
-            using (var transaction = await Database.BeginTransactionAsync(cancellation))
-            {
-                await Database.ExecuteSqlRawAsync("DELETE FROM [sources];", cancellation);
-                await Database.ExecuteSqlRawAsync("DELETE FROM [author-books];", cancellation);
-                await Database.ExecuteSqlRawAsync("DELETE FROM [authors];", cancellation);
-                await Database.ExecuteSqlRawAsync("DELETE FROM [chapters];", cancellation);
-                await Database.ExecuteSqlRawAsync("DELETE FROM [books];", cancellation);
-                
-                await SaveChangesAsync(cancellation);
-
-                await transaction.CommitAsync(cancellation);
-            }
+            return 0 < await base.SaveChangesAsync(cancellation);
         }
-
-        async Task<bool> IMediaLibraryDataContext.SaveChangesAsync(CancellationToken cancellation) =>
-            0 < await base.SaveChangesAsync(cancellation);
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -156,6 +142,9 @@ namespace AudioBookPlayer.App.Data
             modelBuilder.Entity<Chapter>()
                 .HasIndex(bi => new {bi.Id, bi.BookId})
                 .IsUnique();
+
+            modelBuilder.Entity<Chapter>()
+                .HasIndex(bi => new {bi.Position});
 
             // AuthorBooks
             modelBuilder.Entity<AuthorBook>()

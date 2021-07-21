@@ -20,10 +20,11 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IPlaybackController playbackController;
         private readonly TaskExecutionMonitor loadBookMonitor;
         private AudioBook book;
-        // private IPlayback playback;
         private string bookId;
         private string bookTitle;
         private string bookSubtitle;
+        private string currentChapterTitle;
+        private int chapterIndex;
         private double chapterStart;
         private double chapterEnd;
         private double chapterPosition;
@@ -31,7 +32,7 @@ namespace AudioBookPlayer.App.ViewModels
         private TimeSpan left;
         private TimeSpan bookDuration;
         private ImageSource imageSource;
-        private bool canPlayBook;
+        private bool canPlay;
         private bool isPlaying;
 
         public string BookId
@@ -101,6 +102,18 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
+        public int ChapterIndex
+        {
+            get => chapterIndex;
+            set => SetProperty(ref chapterIndex, value);
+        }
+
+        public string CurrentChapterTitle
+        {
+            get => currentChapterTitle;
+            set => SetProperty(ref currentChapterTitle, value);
+        }
+
         public TimeSpan Elapsed
         {
             get => elapsed;
@@ -113,10 +126,10 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref left, value);
         }
 
-        public bool CanPlayBook
+        public bool CanPlay
         {
-            get => canPlayBook;
-            set => SetProperty(ref canPlayBook, value);
+            get => canPlay;
+            set => SetProperty(ref canPlay, value);
         }
 
         public bool IsPlaying
@@ -160,6 +173,16 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public Command PreviousChapter
+        {
+            get;
+        }
+
+        public Command NextChapter
+        {
+            get;
+        }
+
         public InteractionRequest<PickChapterRequestContext> PickChapterRequest
         {
             get;
@@ -173,7 +196,6 @@ namespace AudioBookPlayer.App.ViewModels
             this.mediaLibrary = mediaLibrary;
             this.playbackController = playbackController;
 
-            // playback = null;
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
 
             PickChapter = new Command(DoPickChapter);
@@ -183,11 +205,15 @@ namespace AudioBookPlayer.App.ViewModels
             ChangeCover = new Command(DoChangeCoverCommand);
             BookmarkCurrent = new Command(DoBookmarkCurrentCommand);
             Snooze = new Command(DoSnoozeCommand);
+            PreviousChapter = new Command(DoPreviousChapter);
+            NextChapter = new Command(DoNextChapter);
             PickChapterRequest = new InteractionRequest<PickChapterRequestContext>();
 
             ChapterStart = 0.0d;
             ChapterEnd = 0.1d;
             ChapterPosition = 0.0d;
+            ChapterIndex = -1;
+            CurrentChapterTitle = String.Empty;
 
             BookDuration = TimeSpan.Zero;
             Elapsed = TimeSpan.Zero;
@@ -195,8 +221,8 @@ namespace AudioBookPlayer.App.ViewModels
 
             playbackController.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
             playbackController.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
-            playbackController.CurrentChapterChanged += OnPlaybackControllerCurrentChapterChanged;
-            playbackController.CurrentPositionChanged += OnPlaybackControllerCurrentPositionChanged;
+            playbackController.ChapterIndexChanged += OnPlaybackControllerChapterIndexChanged;
+            playbackController.PositionChanged += OnPlaybackControllerPositionChanged;
         }
 
         public void OnInitialize()
@@ -255,6 +281,16 @@ namespace AudioBookPlayer.App.ViewModels
             Debug.WriteLine($"[PlayerControlViewModel] [DoSnoozeCommand] Current: {position:g}");
         }
 
+        private void DoPreviousChapter()
+        {
+            Debug.WriteLine("[PlayerControlViewModel] [DoPreviousChapter]");
+        }
+
+        private void DoNextChapter()
+        {
+            Debug.WriteLine("[PlayerControlViewModel] [DoNextChapter]");
+        }
+
         private async Task DoLoadBookAsync()
         {
             if (String.IsNullOrEmpty(BookId))
@@ -281,8 +317,8 @@ namespace AudioBookPlayer.App.ViewModels
         {
             var authors = GetBookAuthors();
             //var images = await book.GetImageAsync(WellKnownMediaTags.Cover);
-            var canPlay = 0 < book.Chapters.Count;
 
+            CanPlay = 0 < book.Chapters.Count;
             BookTitle = book.Title;
             BookSubtitle = authors;
             //ImageSource = images;
@@ -291,11 +327,29 @@ namespace AudioBookPlayer.App.ViewModels
             Elapsed = TimeSpan.Zero;
             Left = -book.Duration;
 
-            ChapterStart = 0.0d;
-            ChapterEnd = book.Duration.TotalMilliseconds;
-            ChapterPosition = 0.0d;
+            // ChapterStart = 0.0d;
+            // ChapterEnd = book.Duration.TotalMilliseconds;
+            // ChapterPosition = 0.0d;
 
-            CanPlayBook = canPlay;
+            if (CanPlay)
+            {
+                ChapterIndex = 0;
+
+                var chapter = book.Chapters[ChapterIndex];
+
+                CurrentChapterTitle = chapter.Title;
+                ChapterStart = chapter.Start.TotalMilliseconds;
+                ChapterEnd = chapter.End.TotalMilliseconds;
+                ChapterPosition = ChapterStart;
+            }
+            else
+            {
+                ChapterIndex = -1;
+                CurrentChapterTitle = String.Empty;
+                ChapterStart = 0.0d;
+                ChapterEnd = 0.1d;
+                ChapterPosition = ChapterStart;
+            }
         }
 
         private string GetBookAuthors()
@@ -326,14 +380,14 @@ namespace AudioBookPlayer.App.ViewModels
             ;
         }
 
-        private void OnPlaybackControllerCurrentChapterChanged(object sender, EventArgs e)
+        private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
         {
             ;
         }
 
-        private void OnPlaybackControllerCurrentPositionChanged(object sender, EventArgs e)
+        private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
         {
-            var position = playbackController.CurrentPosition;
+            var position = playbackController.Position;
             ChapterPosition = position.TotalMilliseconds;
         }
     }
