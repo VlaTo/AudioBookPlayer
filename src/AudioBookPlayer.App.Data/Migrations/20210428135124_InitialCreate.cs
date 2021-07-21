@@ -81,6 +81,7 @@ namespace AudioBookPlayer.App.Data.Migrations
                     Id = table
                         .Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Position = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: false),
                     BookId = table.Column<long>(nullable: false),
                     SourceFileId = table.Column<long>(nullable: false),
@@ -279,6 +280,12 @@ namespace AudioBookPlayer.App.Data.Migrations
                 name: "IX_Book-images_BookId",
                 table: "book-images",
                 columns: new[] {"Id", "BookId"}
+            );
+
+            migrationBuilder.CreateIndex(
+                name: "IX_chapters_Position",
+                table: "chapters",
+                columns: new[] {"Position"}
             );
 
             /*migrationBuilder.CreateIndex(

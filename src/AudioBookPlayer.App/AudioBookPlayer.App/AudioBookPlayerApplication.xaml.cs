@@ -84,7 +84,7 @@ namespace AudioBookPlayer.App
                 Debug.Fail($"Can't register extra AppActions");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(30.0d));
+            await Task.Delay(TimeSpan.FromSeconds(3.0d));
 
             InitializeDatabase();
         }

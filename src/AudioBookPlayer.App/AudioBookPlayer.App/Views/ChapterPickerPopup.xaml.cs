@@ -1,6 +1,8 @@
 ﻿using AudioBookPlayer.App.Core.Attributes;
 using AudioBookPlayer.App.ViewModels;
 using System;
+using AudioBookPlayer.App.Core;
+using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Views
@@ -9,13 +11,13 @@ namespace AudioBookPlayer.App.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class ChapterPickerPopup
     {
-        private readonly PickChapterRequestContext context;
-        private readonly Action callback;
+        private readonly PickChapterRequestContext pickChapterContext;
+        private readonly Action pickChapterCallback;
 
-        public ChapterPickerPopup(PickChapterRequestContext context, Action callback)
+        public ChapterPickerPopup(PickChapterRequestContext pickChapterContext, Action pickChapterCallback)
         {
-            this.context = context;
-            this.callback = callback;
+            this.pickChapterContext = pickChapterContext;
+            this.pickChapterCallback = pickChapterCallback;
 
             InitializeComponent();
             
@@ -29,10 +31,15 @@ namespace AudioBookPlayer.App.Views
         {
             base.OnDisappearing();
 
-            if (null != callback)
+            if (null != pickChapterCallback)
             {
-                callback.Invoke();
+                pickChapterCallback.Invoke();
             }
+        }
+
+        private async void OnCloseRequest(object sender, ClosePopupRequestContext context, Action _)
+        {
+            await Shell.Current.Navigation.PopModalAsync(context.Animated);
         }
     }
 }

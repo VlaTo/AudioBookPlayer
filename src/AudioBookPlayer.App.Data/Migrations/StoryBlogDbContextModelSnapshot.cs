@@ -20,7 +20,7 @@ namespace AudioBookPlayer.App.Data.Migrations
                     b.Property<int>(nameof(Book.Id)).ValueGeneratedOnAdd();
                     b.Property<string>(nameof(Book.Title)).IsRequired();
                     b.Property<string>(nameof(Book.Synopsis));
-                    b.Property<bool>(nameof(Book.IsExcluded));
+                    b.Property<bool>(nameof(Book.DoNotShow));
                     b.Property<DateTime>(nameof(Book.AddedToLibrary));
 
                     b.HasKey(nameof(Book.Id));

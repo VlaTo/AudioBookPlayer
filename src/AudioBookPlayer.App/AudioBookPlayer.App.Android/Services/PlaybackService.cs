@@ -30,6 +30,7 @@ namespace AudioBookPlayer.App.Android.Services
         private MediaPlayer player;
         private AudioBook audioBook;
         private AudioBookChapter currentChapter;
+        private int chapterIndex;
         private PendingIntent pendingIntent;
         private Timer playingTimer;
         private bool isPlaying;
@@ -48,10 +49,20 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        public TimeSpan CurrentPosition
+        public TimeSpan Position
         {
             get;
             private set;
+        }
+
+        public int ChapterIndex
+        {
+            get => chapterIndex;
+            set
+            {
+                chapterIndex = value;
+                ;
+            }
         }
 
         public bool IsPlaying
@@ -78,13 +89,13 @@ namespace AudioBookPlayer.App.Android.Services
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        public event EventHandler CurrentChapterChanged
+        public event EventHandler ChapterIndexChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        public event EventHandler CurrentPositionChanged
+        public event EventHandler PositionChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
@@ -119,7 +130,8 @@ namespace AudioBookPlayer.App.Android.Services
         {
             var contentResolver = Application.Context.ContentResolver;
 
-            currentChapter = audioBook.Chapters[0];
+            chapterIndex = 0;
+            currentChapter = audioBook.Chapters[chapterIndex];
 
             var fragment = currentChapter.Fragments[0];
             var source = fragment.SourceFile;
@@ -141,6 +153,8 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 player.SeekTo((long) position.TotalMilliseconds, MediaPlayerSeekMode.Closest);
             }
+
+            DoRaiseChapterIndexChanged();
 
             player.Start();
 
@@ -320,8 +334,8 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void OnTimer(object state)
         {
-            CurrentPosition = TimeSpan.FromMilliseconds(player.CurrentPosition);
-            DoRaiseCurrentPositionChanged();
+            Position = TimeSpan.FromMilliseconds(player.CurrentPosition);
+            DoRaisePositionChanged();
         }
 
         private void DoRaiseIsPlayingChanged()
@@ -334,14 +348,14 @@ namespace AudioBookPlayer.App.Android.Services
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(AudioBookChanged));
         }
 
-        private void DoRaiseCurrentChapterChanged()
+        private void DoRaiseChapterIndexChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(CurrentChapterChanged));
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChapterIndexChanged));
         }
 
-        private void DoRaiseCurrentPositionChanged()
+        private void DoRaisePositionChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(CurrentPositionChanged));
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(PositionChanged));
         }
 
         /*public async Task PlayAsync(

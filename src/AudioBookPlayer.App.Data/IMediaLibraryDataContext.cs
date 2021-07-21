@@ -42,7 +42,5 @@ namespace AudioBookPlayer.App.Data
         Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 
         Task<bool> SaveChangesAsync(CancellationToken cancellation = default);
-
-        Task DeleteAllAsync(CancellationToken cancellation = default);
     }
 }
