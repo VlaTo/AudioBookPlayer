@@ -10,6 +10,9 @@ namespace AudioBookPlayer.App.Controls
         private const string FastForwardButtonPartName = "PART_FastForwardButton";
         private const string RewindButtonPartName = "PART_RewindButton";
 
+        private const string PlayStateName = "Play";
+        public const string PauseStateName = "Pause";
+
         public static readonly BindableProperty PlayProperty;
         public static readonly BindableProperty RewindProperty;
         public static readonly BindableProperty FastForwardProperty;
@@ -100,6 +103,10 @@ namespace AudioBookPlayer.App.Controls
             playButton.Clicked += OnPlayButtonClicked;
 
             base.OnApplyTemplate();
+
+
+            var stateName = IsPlaying ? PauseStateName : PlayStateName;
+            VisualStateManager.GoToState(this, stateName);
         }
 
         private void OnPlayButtonClicked(object sender, EventArgs e)
@@ -109,12 +116,12 @@ namespace AudioBookPlayer.App.Controls
 
         private void OnCanPlayPropertyChanged(bool oldValue, bool newValue)
         {
-            ;
+            //VisualStateManager.GoToState(this,);
         }
 
         private void OnIsPlayingPropertyChanged(bool oldValue, bool newValue)
         {
-            var stateName = IsPlaying ? "Paused" : "Playing";
+            var stateName = IsPlaying ? PauseStateName : PlayStateName;
             VisualStateManager.GoToState(this, stateName);
         }
 

@@ -21,21 +21,14 @@
         </interactivity:InteractionRequestTrigger>
     </interactivity:Interaction.RequestTriggers>
     <ContentPage.Content>
-        <StackLayout
-            BackgroundColor="Transparent"
-            Orientation="Vertical"
-            VerticalOptions="EndAndExpand"
-            HorizontalOptions="FillAndExpand">
-            <StackLayout.GestureRecognizers>
-                <TapGestureRecognizer
-                    Command="{Binding Path=Close, Mode=OneTime}"
-                />
-            </StackLayout.GestureRecognizers>
+        <Grid
+            RowDefinitions="*,*,*">
             <Frame
+                Grid.Row="1"
+                Grid.RowSpan="2"
                 BackgroundColor="White"
                 VerticalOptions="EndAndExpand"
-                CornerRadius="8"
-                HeightRequest="480">
+                CornerRadius="8">
                 <StackLayout
                     Orientation="Vertical">
                     <CollectionView
@@ -67,6 +60,17 @@
                     </CollectionView>
                 </StackLayout>
             </Frame>
-        </StackLayout>
+        </Grid>
+        <!--<StackLayout
+            BackgroundColor="Transparent"
+            Orientation="Vertical"
+            VerticalOptions="EndAndExpand"
+            HorizontalOptions="FillAndExpand">
+            <StackLayout.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding Path=Close, Mode=OneTime}"
+                />
+            </StackLayout.GestureRecognizers>
+        </StackLayout>-->
     </ContentPage.Content>
 </ContentPage>

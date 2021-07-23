@@ -45,7 +45,7 @@ namespace AudioBookPlayer.App.ViewModels
             updateExecutionMonitor = new TaskExecutionMonitor(ExecuteLibraryUpdateAsync);
             refreshExecutionMonitor = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
 
-            Refresh = new Command(refreshExecutionMonitor.Start);
+            Refresh = new Command(DoLibraryRefresh);
         }
 
         void IInitialize.OnInitialize()
@@ -67,7 +67,7 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
-        private async Task ExecuteLibraryRefreshAsync()
+        private async void DoLibraryRefresh()
         {
             var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
 
@@ -76,6 +76,29 @@ namespace AudioBookPlayer.App.ViewModels
                 return;
             }
 
+            IsBusy = true;
+
+            try
+            {
+                var libraryBooks = await mediaLibrary.QueryBooksAsync();
+                var actualBooks = await booksProvider.QueryBooksAsync();
+                var comparer = new AudioBooksComparer();
+
+                var changes = comparer.GetChanges(libraryBooks, actualBooks);
+
+                var manager = new AudioBooksManager(mediaLibrary);
+
+                await manager.ApplyChangesAsync(changes, CancellationToken.None);
+                await DoQueryLibraryAsync(CancellationToken.None);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task ExecuteLibraryRefreshAsync()
+        {
             IsBusy = true;
 
             try

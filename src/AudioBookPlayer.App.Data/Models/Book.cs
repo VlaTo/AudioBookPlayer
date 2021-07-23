@@ -44,13 +44,6 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        [DataType(DataType.DateTime)]
-        public DateTime AddedToLibrary
-        {
-            get;
-            set;
-        }
-
         public bool DoNotShow
         {
             get;

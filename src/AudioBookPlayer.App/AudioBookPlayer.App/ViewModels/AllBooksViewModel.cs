@@ -14,27 +14,23 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public AllBooksViewModel(
-            IBooksProvider books,
+            IMediaLibrary mediaLibrary,
             IAudioBooksConsumer booksConsumer)
-            : base(books)
+            : base(mediaLibrary)
         {
             this.booksConsumer = booksConsumer;
 
-            subscription = booksConsumer.Subscribe(Observer.Create<IEnumerable<AudioBook>>(DoNextAudioBook));
+            subscription = booksConsumer.Subscribe(Observer.Create<IEnumerable<AudioBook>>(DoBindAudioBooks));
         }
 
-        protected override void DoStartPlay(AudioBookViewModel book)
-        {
-            base.DoStartPlay(book);
-        }
-
-        private void DoNextAudioBook(IEnumerable<AudioBook> audioBooks)
+        private void DoBindAudioBooks(IEnumerable<AudioBook> audioBooks)
         {
             Books.Clear();
 
             foreach (var audioBook in audioBooks)
             {
-                AddBookToList(audioBook);
+                var model = CreateAudioBookModel(audioBook);
+                Books.Add(model);
             }
         }
     }

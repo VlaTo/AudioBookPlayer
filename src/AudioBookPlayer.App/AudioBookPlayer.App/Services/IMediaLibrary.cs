@@ -1,4 +1,5 @@
-﻿using AudioBookPlayer.App.Models;
+﻿using System;
+using AudioBookPlayer.App.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,5 +34,22 @@ namespace AudioBookPlayer.App.Services
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<IReadOnlyCollection<AudioBookPosition>> QueryBookmarksAsync(long bookId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookId"></param>
+        /// <param name="activity"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task RecordBookActivityAsync(long bookId, BookActivity activity, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AudioBookActivity> GetLatestBookActivityAsync(long bookId, CancellationToken cancellationToken = default);
     }
 }

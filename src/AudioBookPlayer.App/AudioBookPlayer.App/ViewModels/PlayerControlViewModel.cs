@@ -266,7 +266,7 @@ namespace AudioBookPlayer.App.ViewModels
             Debug.WriteLine($"[PlayerControlViewModel] [DoSmallRewindCommand] Execute");
         }
 
-        private void DoPlayCommand()
+        private async void DoPlayCommand()
         {
             if (IsPlaying)
             {
@@ -276,6 +276,8 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 playbackController.Play(TimeSpan.Zero);
             }
+
+            await mediaLibrary.RecordBookActivityAsync(playbackController.AudioBook.Id.Value, BookActivity.Playing);
         }
 
         private void DoSmallFastForwardCommand()
@@ -341,6 +343,21 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             var id = long.Parse(BookId, CultureInfo.InvariantCulture);
+
+            if (playbackController.IsPlaying)
+            {
+                if (playbackController.AudioBook.Id == id)
+                {
+                    UpdateAudioBookProperties();
+                    ChapterIndex = playbackController.ChapterIndex;
+                    UpdateChapterProperties();
+
+                    return;
+                }
+
+                playbackController.Stop();
+            }
+            
             var book = await mediaLibrary.GetBookAsync(id);
 
             if (null != book)
@@ -378,6 +395,34 @@ namespace AudioBookPlayer.App.ViewModels
             return builder.ToString();
         }
 
+        private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
+        {
+            IsPlaying = playbackController.IsPlaying;
+        }
+
+        private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
+        {
+            UpdateAudioBookProperties();
+        }
+
+        private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
+        {
+            ChapterIndex = playbackController.ChapterIndex;
+            UpdateChapterProperties();
+        }
+
+        private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
+        {
+            var position = playbackController.Position;
+
+            if (position > BookPosition)
+            {
+                BookPosition = position;
+            }
+
+            ChapterPosition = position.TotalMilliseconds - chapterStart;
+        }
+
         private void UpdateChapterProperties()
         {
             if (-1 < ChapterIndex)
@@ -405,12 +450,7 @@ namespace AudioBookPlayer.App.ViewModels
             ChapterPosition = 0.0d;
         }
 
-        private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
-        {
-            IsPlaying = playbackController.IsPlaying;
-        }
-
-        private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
+        private void UpdateAudioBookProperties()
         {
             //var images = await book.GetImageAsync(WellKnownMediaTags.Cover);
 
@@ -421,24 +461,6 @@ namespace AudioBookPlayer.App.ViewModels
 
             BookDuration = playbackController.AudioBook.Duration;
             BookPosition = TimeSpan.Zero;
-        }
-
-        private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
-        {
-            ChapterIndex = playbackController.ChapterIndex;
-            UpdateChapterProperties();
-        }
-
-        private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
-        {
-            var position = playbackController.Position;
-
-            if (position > BookPosition)
-            {
-                BookPosition = position;
-            }
-
-            ChapterPosition = position.TotalMilliseconds - chapterStart;
         }
     }
 }

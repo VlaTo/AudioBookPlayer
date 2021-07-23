@@ -57,80 +57,86 @@
       x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
       https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
     -->
-    <ListView
+    <CollectionView
         x:DataType="viewmodels:IBooksViewModel"
         ItemsSource="{Binding Path=Books, Mode=OneWay}"
-        RowHeight="{OnPlatform Android='168', iOS='180'}"
         SelectionMode="None">
-        <ListView.Behaviors>
-            <behaviors:EventToCommandBehavior
-                EventName="ItemTapped"
-                Command="{Binding Path=StartPlay, Mode=OneTime}"
-                EventArgsParameterPath="Item"
-            />
-        </ListView.Behaviors>
-        <ListView.ItemTemplate>
-            <DataTemplate x:DataType="viewmodels:AudioBookViewModel">
-                <ViewCell>
-                    <Grid
-                        RowDefinitions="Auto,Auto,Auto"
-                        ColumnDefinitions="Auto,*"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
-                        Padding="10">
-                        <Frame
-                            Grid.Column="0"
-                            Grid.Row="0"
-                            Grid.RowSpan="3"
-                            BorderColor="Gray"
-                            BackgroundColor="DimGray"
-                            Padding="2"
-                            Margin="0"
-                            HorizontalOptions="Center">
-                            <Image
-                                Aspect="Fill"
-                                Source="{Binding Path=ImageSource, Mode=OneTime}"
-                                WidthRequest="{OnPlatform Android='108', iOS='146'}"
-                                HeightRequest="{OnPlatform Android='148', iOS='176'}"
-                            />
-                        </Frame>
-                        <Label
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Text="{Binding Path=Title, Mode=OneTime}"
-                            LineBreakMode="WordWrap"
-                            Style="{DynamicResource ListItemTextStyle}"
-                            FontSize="16"
-                            MaxLines="3"
-                            Margin="8,4,4,0"
-                            Padding="0"
+        <CollectionView.EmptyView>
+            <StackLayout>
+                <Label
+                    HorizontalOptions="CenterAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    Text="Empty"
+                />
+            </StackLayout>
+        </CollectionView.EmptyView>
+        <CollectionView.ItemTemplate>
+            <DataTemplate
+                x:DataType="viewmodels:AudioBookViewModel">
+                <Grid
+                    RowDefinitions="Auto,Auto,Auto"
+                    ColumnDefinitions="Auto,*"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
+                    Padding="10">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:IBooksViewModel}}, Path=StartPlay}"
+                            CommandParameter="{Binding .}"
                         />
-                        <Label
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            LineBreakMode="NoWrap"
-                            Style="{StaticResource SubtitleLabelStyle}"
-                            FontSize="12"
-                            Margin="8,0,4,0"
-                            Padding="0"
-                            Text="{Binding Path=Authors, Mode=OneTime}"
+                    </Grid.GestureRecognizers>
+                    <Frame
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        BorderColor="Gray"
+                        BackgroundColor="DimGray"
+                        Padding="2"
+                        Margin="0"
+                        HorizontalOptions="Center">
+                        <Image
+                            Aspect="Fill"
+                            Source="{Binding Path=ImageSource, Mode=OneTime}"
+                            WidthRequest="{OnPlatform Android='108', iOS='146'}"
+                            HeightRequest="{OnPlatform Android='148', iOS='176'}"
                         />
-                        <Label
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            LineBreakMode="NoWrap"
-                            Style="{StaticResource SubtitleLabelStyle}"
-                            FontSize="12"
-                            Text="{Binding
-                                    Path=Duration,
-                                    Converter={StaticResource SpanConverter},
-                                    ConverterParameter='1',
-                                    Mode=OneTime}"
-                            Margin="8,0,4,0"
-                            Padding="0"
-                        />
-                    </Grid>
-                </ViewCell>
+                    </Frame>
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Text="{Binding Path=Title, Mode=OneTime}"
+                        LineBreakMode="WordWrap"
+                        Style="{DynamicResource ListItemTextStyle}"
+                        FontSize="16"
+                        MaxLines="3"
+                        Margin="8,4,4,0"
+                        Padding="0"
+                    />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        LineBreakMode="NoWrap"
+                        Style="{StaticResource SubtitleLabelStyle}"
+                        FontSize="12"
+                        Margin="8,0,4,0"
+                        Padding="0"
+                        Text="{Binding Path=Authors, Mode=OneTime}"
+                    />
+                    <Label
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        LineBreakMode="NoWrap"
+                        Style="{StaticResource SubtitleLabelStyle}"
+                        FontSize="12"
+                        Text="{Binding
+                                Path=Duration,
+                                Converter={StaticResource SpanConverter},
+                                ConverterParameter='1',
+                                Mode=OneTime}"
+                        Margin="8,0,4,0"
+                        Padding="0"
+                    />
+                </Grid>
             </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
 </ContentPage>

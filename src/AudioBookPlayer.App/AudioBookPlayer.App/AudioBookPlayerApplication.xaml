@@ -173,9 +173,40 @@
                             x:Name="PART_PlayButton"
                             Command="{TemplateBinding Path=Play, Mode=OneWay}"
                             Style="{StaticResource PrimaryPlaybackButtonStyle}"
-                            Source="{FontImage FontFamily=FASolid, Size=18, Glyph='&#xF04B;'}"
-                            IsEnabled="{TemplateBinding CanPlay}"
-                        />
+                            IsEnabled="{TemplateBinding CanPlay}">
+                            <!--<VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="PlayingStates">
+                                    <VisualState x:Name="Playing">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Property="Source">
+                                                <Setter.Value>
+                                                    <FontImageSource
+                                                        FontFamily="FASolid"
+                                                        Size="18"
+                                                        Glyph="&#x25B6;"
+                                                    />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Paused">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Property="Source">
+                                                <Setter.Value>
+                                                    <FontImageSource
+                                                        FontFamily="FASolid"
+                                                        Size="18"
+                                                        Glyph="&#x23F8;"
+                                                    />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>-->
+                        </ImageButton>
                         <ImageButton
                             x:Name="PART_FastForwardButton"
                             Style="{StaticResource SecondaryPlaybackButtonStyle}"
@@ -187,32 +218,31 @@
                         <VisualStateGroup x:Name="PlayingStates">
                             <VisualState x:Name="Playing">
                                 <VisualState.Setters>
-                                    <!--<Setter
-                                        TargetName="PART_PlayButton"
+                                    <Setter
+                                        Target="PART_PlayButton"
+                                        TargetName=""
                                         Property="Source">
                                         <Setter.Value>
                                             <FontImageSource
-                                                FontFamily="IconsFont"
+                                                FontFamily="FASolid"
                                                 Size="18"
                                                 Glyph="&#x25B6;"
                                             />
                                         </Setter.Value>
-                                    </Setter>-->
+                                    </Setter>
                                 </VisualState.Setters>
                             </VisualState>
                             <VisualState x:Name="Paused">
                                 <VisualState.Setters>
-                                    <!--<Setter
+                                    <Setter
                                         TargetName="PART_PlayButton"
                                         Property="Source">
-                                        <Setter.Value>
-                                            <FontImageSource
-                                                FontFamily="IconsFont"
-                                                Size="18"
-                                                Glyph="&#x2389;"
-                                            />
-                                        </Setter.Value>
-                                    </Setter>-->
+                                        <FontImageSource
+                                            FontFamily="FASolid"
+                                            Size="18"
+                                            Glyph="&#x23F8;"
+                                        />
+                                    </Setter>
                                 </VisualState.Setters>
                             </VisualState>
                         </VisualStateGroup>

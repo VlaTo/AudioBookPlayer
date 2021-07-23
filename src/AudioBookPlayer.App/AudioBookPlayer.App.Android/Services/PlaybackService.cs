@@ -19,6 +19,7 @@ namespace AudioBookPlayer.App.Android.Services
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/android-audio
     // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/services/creating-a-service/bound-services
+    // https://developer.android.com/reference/android/media/MediaPlayer
     [Service]
     //[IntentFilter(new []{ IPlaybackService.ActionPlay })]
     public sealed class PlaybackService : Service, IPlaybackService, AudioManager.IOnAudioFocusChangeListener
@@ -144,6 +145,8 @@ namespace AudioBookPlayer.App.Android.Services
                 playingTimer = null;
             }
 
+            IsPlaying = player.IsPlaying;
+
             DoRaiseIsPlayingChanged();
         }
 
@@ -202,7 +205,7 @@ namespace AudioBookPlayer.App.Android.Services
 
                 DoRaiseIsPlayingChanged();
 
-                if (player.IsPlaying)
+                if (IsPlaying)
                 {
                     playingTimer = new Timer(OnTimer, null, TimeSpan.Zero, TimeSpan.FromSeconds(1.0d));
                 }
