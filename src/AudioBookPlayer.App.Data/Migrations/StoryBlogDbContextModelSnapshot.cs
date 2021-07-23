@@ -37,9 +37,6 @@ namespace AudioBookPlayer.App.Data.Migrations
                     b.Property<int>(nameof(SourceFile.Id)).ValueGeneratedOnAdd();
                     b.Property<int>(nameof(SourceFile.BookId)).IsRequired();
                     b.Property<string>(nameof(SourceFile.Filename));
-                    b.Property<DateTime>(nameof(SourceFile.Created));
-                    b.Property<DateTime>(nameof(SourceFile.Modified));
-                    b.Property<long>(nameof(SourceFile.Length));
 
                     b.HasKey(nameof(SourceFile.Id));
                     b.HasIndex(nameof(SourceFile.BookId));

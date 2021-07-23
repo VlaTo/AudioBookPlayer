@@ -120,6 +120,9 @@
   <data name="AllBooksTab" xml:space="preserve">
     <value>Все</value>
   </data>
+  <data name="BookmarksRemoveAllAction" xml:space="preserve">
+    <value>Удалить все закладки</value>
+  </data>
   <data name="ExitToastMessage" xml:space="preserve">
     <value>Нажмите НАЗАД для выхода</value>
   </data>

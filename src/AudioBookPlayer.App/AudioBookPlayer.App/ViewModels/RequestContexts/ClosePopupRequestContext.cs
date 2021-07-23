@@ -1,6 +1,6 @@
 ﻿using LibraProgramming.Xamarin.Interaction;
 
-namespace AudioBookPlayer.App.Core
+namespace AudioBookPlayer.App.ViewModels.RequestContexts
 {
     public class ClosePopupRequestContext : InteractionRequestContext
     {

@@ -53,10 +53,7 @@ namespace AudioBookPlayer.App.Data.Migrations
                         .Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BookId = table.Column<long>(nullable: false),
-                    Filename = table.Column<string>(nullable: true),
-                    Created = table.Column<DateTime>(nullable: false),
-                    Modified = table.Column<DateTime>(nullable: true),
-                    Length = table.Column<long>(nullable: false)
+                    Filename = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

@@ -120,6 +120,9 @@
   <data name="AllBooksTab" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="BookmarksRemoveAllAction" xml:space="preserve">
+    <value>Remove All</value>
+  </data>
   <data name="ExitToastMessage" xml:space="preserve">
     <value>Press BACK to exit</value>
   </data>

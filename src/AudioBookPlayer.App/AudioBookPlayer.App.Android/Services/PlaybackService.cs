@@ -8,7 +8,9 @@ using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Models;
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using Android.Content.Res;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 
@@ -25,6 +27,7 @@ namespace AudioBookPlayer.App.Android.Services
         private const int DefaultNotificationId = 0x9000;
 
         private readonly WeakEventManager eventManager;
+        private readonly Dictionary<string, int> pendingEvents;
         private AudioManager audioManager;
         private NotificationManager notificationManager;
         private MediaPlayer player;
@@ -34,6 +37,7 @@ namespace AudioBookPlayer.App.Android.Services
         private PendingIntent pendingIntent;
         private Timer playingTimer;
         private bool isPlaying;
+        private int updateCount;
 
         public AudioBook AudioBook
         {
@@ -46,6 +50,10 @@ namespace AudioBookPlayer.App.Android.Services
                 }
 
                 audioBook = value;
+                chapterIndex = -1;
+                Position = TimeSpan.Zero;
+
+                RaiseOrPostponeEvent(nameof(AudioBookChanged));
             }
         }
 
@@ -61,7 +69,14 @@ namespace AudioBookPlayer.App.Android.Services
             set
             {
                 chapterIndex = value;
-                ;
+                Position = TimeSpan.Zero;
+
+                if (-1 < chapterIndex)
+                {
+                    currentChapter = audioBook.Chapters[chapterIndex];
+                }
+
+                RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
             }
         }
 
@@ -110,6 +125,8 @@ namespace AudioBookPlayer.App.Android.Services
         public PlaybackService()
         {
             eventManager = new WeakEventManager();
+            pendingEvents = new Dictionary<string, int>();
+            updateCount = 0;
         }
 
         public void Stop()
@@ -120,23 +137,46 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             player.Stop();
-            playingTimer.Dispose();
-            playingTimer = null;
+
+            if (null != playingTimer)
+            {
+                playingTimer.Dispose();
+                playingTimer = null;
+            }
 
             DoRaiseIsPlayingChanged();
         }
 
         public void Play(TimeSpan position)
         {
-            var contentResolver = Application.Context.ContentResolver;
+            if (null == audioBook)
+            {
+                throw new Exception();
+            }
 
-            chapterIndex = 0;
-            currentChapter = audioBook.Chapters[chapterIndex];
+            if (0 > chapterIndex)
+            {
+                throw new Exception();
+            }
 
-            var fragment = currentChapter.Fragments[0];
-            var source = fragment.SourceFile;
-            var uri = global::Android.Net.Uri.Parse(source.ContentUri);
-            var descriptor = contentResolver.OpenAssetFileDescriptor(uri, "r");
+            if (audioBook.Chapters.Count <= chapterIndex)
+            {
+                throw new Exception();
+            }
+
+            if (currentChapter.Duration <= position)
+            {
+                throw new Exception();
+            }
+
+            var fragment = GetChapterFragment(position, currentChapter);
+
+            if (null == fragment)
+            {
+                return;
+            }
+
+            var descriptor = OpenFileDescriptor(fragment);
 
             player.Reset();
             player.SetDataSource(descriptor);
@@ -149,17 +189,17 @@ namespace AudioBookPlayer.App.Android.Services
 
             player.Prepare();
 
-            if (TimeSpan.Zero < position)
-            {
-                player.SeekTo((long) position.TotalMilliseconds, MediaPlayerSeekMode.Closest);
-            }
+            var pos = player.CurrentPosition;
 
-            DoRaiseChapterIndexChanged();
+            var offset = (currentChapter.Start + position).TotalMilliseconds;
+            player.SeekTo((long) offset, MediaPlayerSeekMode.Closest);
 
             player.Start();
 
             if (player.IsPlaying != IsPlaying)
             {
+                IsPlaying = player.IsPlaying;
+
                 DoRaiseIsPlayingChanged();
 
                 if (player.IsPlaying)
@@ -266,6 +306,12 @@ namespace AudioBookPlayer.App.Android.Services
 
             base.OnDestroy();
         }
+
+        public IDisposable BeginUpdate()
+        {
+            updateCount++;
+            return new UpdateToken(this);
+        }
         
         void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange)
         {
@@ -299,6 +345,80 @@ namespace AudioBookPlayer.App.Android.Services
                     break;
                 }
             }
+        }
+
+        private void EndUpdate()
+        {
+            if (0 < updateCount)
+            {
+                if (0 == --updateCount)
+                {
+                    RaisePendingEvents();
+                }
+            }
+        }
+
+        private void RaisePendingEvents()
+        {
+            RaiseAndRemovePendingEvent(nameof(AudioBookChanged));
+            RaiseAndRemovePendingEvent(nameof(ChapterIndexChanged));
+            RaiseAndRemovePendingEvent(nameof(PositionChanged));
+        }
+
+        private void RaiseAndRemovePendingEvent(string eventName)
+        {
+            if (pendingEvents.TryGetValue(eventName, out var count))
+            {
+                if (0 == count)
+                {
+                    return;
+                }
+
+                eventManager.HandleEvent(this, EventArgs.Empty, eventName);
+                pendingEvents.Remove(eventName);
+            }
+        }
+
+        private void RaiseOrPostponeEvent(string eventName)
+        {
+            if (0 == updateCount)
+            {
+                eventManager.HandleEvent(this, EventArgs.Empty, eventName);
+                return;
+            }
+
+            if (false == pendingEvents.TryGetValue(eventName, out var count))
+            {
+                count = 0;
+            }
+
+            pendingEvents[eventName] = ++count;
+        }
+
+        private static AudioBookChapterFragment GetChapterFragment(TimeSpan position, AudioBookChapter chapter)
+        {
+            for (var index = 0; index < chapter.Fragments.Count; index++)
+            {
+                var fragment = chapter.Fragments[index];
+
+                if (fragment.Duration > position)
+                {
+                    return fragment;
+                }
+
+                position -= fragment.Duration;
+            }
+
+            return null;
+        }
+
+        private static AssetFileDescriptor OpenFileDescriptor(AudioBookChapterFragment fragment)
+        {
+            var contentResolver = Application.Context.ContentResolver;
+            var source = fragment.SourceFile;
+            var uri = global::Android.Net.Uri.Parse(source.ContentUri);
+
+            return contentResolver.OpenAssetFileDescriptor(uri, "r");
         }
 
         private static AudioAttributes CreateAudioAttributes()
@@ -340,22 +460,25 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void DoRaiseIsPlayingChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(IsPlayingChanged));
+            //eventManager.HandleEvent(this, EventArgs.Empty, nameof(IsPlayingChanged));
+            RaiseOrPostponeEvent(nameof(IsPlayingChanged));
         }
 
-        private void DoRaiseAudioBookChanged()
+        /*private void DoRaiseAudioBookChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(AudioBookChanged));
-        }
+            RaiseOrPostponeEvent(nameof(AudioBookChanged));
+        }*/
 
-        private void DoRaiseChapterIndexChanged()
+        /*private void DoRaiseChapterIndexChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChapterIndexChanged));
-        }
+            //eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChapterIndexChanged));
+            RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
+        }*/
 
         private void DoRaisePositionChanged()
         {
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(PositionChanged));
+            //eventManager.HandleEvent(this, EventArgs.Empty, nameof(PositionChanged));
+            RaiseOrPostponeEvent(nameof(PositionChanged));
         }
 
         /*public async Task PlayAsync(
@@ -484,6 +607,34 @@ namespace AudioBookPlayer.App.Android.Services
             public override void OnPlay()
             {
                 base.OnPlay();
+            }
+        }
+
+        private sealed class UpdateToken : IDisposable
+        {
+            private readonly PlaybackService service;
+            private bool disposed;
+
+            public UpdateToken(PlaybackService service)
+            {
+                this.service = service;
+            }
+
+            public void Dispose()
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    service.EndUpdate();
+                }
+                finally
+                {
+                    disposed = true;
+                }
             }
         }
     }

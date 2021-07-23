@@ -4,6 +4,7 @@ using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System.Threading.Tasks;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -13,6 +14,7 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IBooksProvider booksProvider;
         private readonly IMediaLibrary mediaLibrary;
         private readonly IAudioBooksPublisher booksPublisher;
+        private readonly IPermissionRequestor permissionRequestor;
         private readonly ITaskExecutionMonitor updateExecutionMonitor;
         private readonly ITaskExecutionMonitor refreshExecutionMonitor;
         private bool isBusy;
@@ -32,11 +34,13 @@ namespace AudioBookPlayer.App.ViewModels
         public LibraryViewModel(
             IBooksProvider booksProvider,
             IMediaLibrary mediaLibrary,
-            IAudioBooksPublisher booksPublisher)
+            IAudioBooksPublisher booksPublisher,
+            IPermissionRequestor permissionRequestor)
         {
             this.booksProvider = booksProvider;
             this.mediaLibrary = mediaLibrary;
             this.booksPublisher = booksPublisher;
+            this.permissionRequestor = permissionRequestor;
 
             updateExecutionMonitor = new TaskExecutionMonitor(ExecuteLibraryUpdateAsync);
             refreshExecutionMonitor = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
@@ -46,8 +50,6 @@ namespace AudioBookPlayer.App.ViewModels
 
         void IInitialize.OnInitialize()
         {
-            System.Diagnostics.Debug.WriteLine($"[LibraryViewModel] [OnInitialize] Executed");
-
             updateExecutionMonitor.Start();
         }
 
@@ -67,6 +69,13 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async Task ExecuteLibraryRefreshAsync()
         {
+            var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
+
+            if (PermissionStatus.Denied == status)
+            {
+                return;
+            }
+
             IsBusy = true;
 
             try

@@ -20,8 +20,8 @@
             Command="{Binding Path=Refresh, Mode=OneTime}"
             Order="Secondary"
             Priority="0"
-            Text="{Static res:AppResources.LibraryPageRefreshAction}">
-        </ToolbarItem>
+            Text="{Static res:AppResources.LibraryPageRefreshAction}"
+        />
     </TabbedPage.ToolbarItems>
     <TabbedPage.Children>
         <views:RecentBooksPage Title="{Static res:AppResources.RecentBooksTab}" />

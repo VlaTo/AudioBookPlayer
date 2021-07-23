@@ -12,16 +12,10 @@
             get;
         }
 
-        public long Length
-        {
-            get;
-        }
-
-        public AudioBookSourceFile(AudioBook audioBook, string contentUri, long length)
+        public AudioBookSourceFile(AudioBook audioBook, string contentUri)
         {
             AudioBook = audioBook;
             ContentUri = contentUri;
-            Length = length;
         }
     }
 }
