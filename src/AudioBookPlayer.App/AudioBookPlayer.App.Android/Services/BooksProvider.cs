@@ -49,18 +49,17 @@ namespace AudioBookPlayer.App.Android.Services
                         {
                             var mediaInfo = factory.ExtractMediaInfo(stream);
                             var audioBook = GetOrCreateAudioBook(audioBooks, audioFile, mediaInfo);
-                            var chapterStart = audioBook.Duration;
 
                             foreach (var track in mediaInfo.Tracks)
                             {
-                                var chapter = new AudioBookChapter(audioBook, track.Title, chapterStart);
-                                var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString(), descriptor.Length);
-                                
-                                // System.Diagnostics.Debug.WriteLine($"[BooksProvider] [QueryBooksAsync] ({audioBook.Duration:g}, {track.Duration:g}) {audioBook.Chapters.Count}");
+                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration);
+                                var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString());
 
                                 chapter.Fragments.Add(new AudioBookChapterFragment(audioBook.Duration, track.Duration, sourceFile));
                                 audioBook.Chapters.Add(chapter);
                                 audioBook.SourceFiles.Add(sourceFile);
+
+                                //System.Diagnostics.Debug.WriteLine($"[BooksProvider] [QueryBooksAsync] ({chapter.Start:g}, {track.Duration:g}) {chapter.End:g}");
                             }
                         }
                     }

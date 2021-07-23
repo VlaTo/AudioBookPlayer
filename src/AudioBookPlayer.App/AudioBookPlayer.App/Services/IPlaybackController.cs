@@ -41,5 +41,7 @@ namespace AudioBookPlayer.App.Services
         void Play(TimeSpan position);
 
         void Stop();
+
+        IDisposable BeginUpdate();
     }
 }

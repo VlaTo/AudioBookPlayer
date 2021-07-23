@@ -1,29 +1,37 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Models;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {
-    /*public sealed class AudioBooksEventArgs : EventArgs
-    {
-        public AudioBook[] Books
-        {
-            get;
-        }
-
-        public AudioBooksEventArgs(AudioBook[] books)
-        {
-            Books = books;
-        }
-    }*/
-
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IMediaLibrary : IBooksProvider
     {
-        // event EventHandler<AudioBooksEventArgs> QueryBooksReady;
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="audioBook"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bookId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<IReadOnlyCollection<AudioBookPosition>> QueryBookmarksAsync(long bookId, CancellationToken cancellationToken = default);
     }
 }

@@ -8,6 +8,7 @@
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:requestContexts="clr-namespace:AudioBookPlayer.App.ViewModels.RequestContexts;assembly=AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.Views.PlayerControlPage"
     x:DataType="viewmodels:PlayerControlViewModel"
     core:ViewModelLocation.AutowireViewModel="True"
@@ -17,8 +18,15 @@
         <interactivity:InteractionRequestTrigger
             Request="{Binding Path=PickChapterRequest, Mode=OneTime}">
             <interactivity:CallMethodTriggerAction
-                x:TypeArguments="viewmodels:PickChapterRequestContext"
+                x:TypeArguments="requestContexts:PickChapterRequestContext"
                 MethodName="OnPickChapterRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+        <interactivity:InteractionRequestTrigger
+            Request="{Binding Path=BookmarkRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="requestContexts:BookmarkRequestContext"
+                MethodName="OnBookmarkRequest"
             />
         </interactivity:InteractionRequestTrigger>
     </interactivity:Interaction.RequestTriggers>
@@ -179,7 +187,7 @@
                 Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
             />
             <Slider
-                Minimum="{Binding Path=ChapterStart, Mode=OneWay}"
+                Minimum="0"
                 Maximum="{Binding Path=ChapterEnd, Mode=OneWay}"
                 Value="{Binding Path=ChapterPosition, Mode=TwoWay}"
                 HorizontalOptions="FillAndExpand"

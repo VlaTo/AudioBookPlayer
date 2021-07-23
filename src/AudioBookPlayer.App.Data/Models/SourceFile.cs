@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AudioBookPlayer.App.Data.Models
@@ -27,7 +26,7 @@ namespace AudioBookPlayer.App.Data.Models
             set;
         }
 
-        [DataType(DataType.DateTime)]
+        /*[DataType(DataType.DateTime)]
         public DateTime Created
         {
             get;
@@ -45,7 +44,7 @@ namespace AudioBookPlayer.App.Data.Models
         {
             get;
             set;
-        }
+        }*/
 
         [ForeignKey(nameof(BookId))]
         public Book Book

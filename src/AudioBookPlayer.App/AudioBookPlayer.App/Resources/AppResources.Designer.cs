@@ -70,6 +70,15 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Remove All.
+        /// </summary>
+        internal static string BookmarksRemoveAllAction {
+            get {
+                return ResourceManager.GetString("BookmarksRemoveAllAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Press BACK to exit.
         /// </summary>
         internal static string ExitToastMessage {

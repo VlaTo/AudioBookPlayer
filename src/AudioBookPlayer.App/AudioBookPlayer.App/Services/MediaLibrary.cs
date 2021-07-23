@@ -1,12 +1,10 @@
-﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Data;
+﻿using AudioBookPlayer.App.Data;
 using AudioBookPlayer.App.Data.Models;
 using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,23 +17,21 @@ namespace AudioBookPlayer.App.Services
     {
         private readonly IMediaLibraryDataContext context;
         private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
-        private readonly ApplicationSettings settings;
+        //private readonly ApplicationSettings settings;
 
         [PrefferedConstructor]
         public MediaLibrary(
-            ApplicationSettings settings,
+            //ApplicationSettings settings,
             IMediaLibraryDataContext context,
             IAudioBookFactoryProvider audioBookFactoryProvider)
         {
-            this.settings = settings;
+            //this.settings = settings;
             this.context = context;
             this.audioBookFactoryProvider = audioBookFactoryProvider;
         }
 
         public async Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
         {
-            //await context.DeleteAllAsync(cancellationToken);
-
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
                 .ThenInclude(ab => ab.Author)
@@ -124,6 +120,12 @@ namespace AudioBookPlayer.App.Services
             {
                 await AddNewBookAsync(audioBook, cancellationToken);
             }
+        }
+
+        public Task<IReadOnlyCollection<AudioBookPosition>> QueryBookmarksAsync(long bookId, CancellationToken cancellationToken = default)
+        {
+            var bookmarks = new AudioBookPosition[0];
+            return Task.FromResult<IReadOnlyCollection<AudioBookPosition>>(bookmarks);
         }
 
         /*private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation = default)
@@ -261,9 +263,6 @@ namespace AudioBookPlayer.App.Services
                     var sourceFile = new SourceFile
                     {
                         Filename = sourceFragment.SourceFile.ContentUri,
-                        //Created = file.CreationTimeUtc,
-                        //Modified = file.LastAccessTimeUtc,
-                        //Length = file.Length,
                         Book = book
                     };
 
@@ -277,7 +276,7 @@ namespace AudioBookPlayer.App.Services
                         SourceFile = sourceFile
                     };
 
-                    // Debug.WriteLine($"[MediaLibrary] [AddBookChaptersAsync] ({sourceChapter.Start:g}, {sourceChapter.Duration:g}) '{sourceChapter.Title}'");
+                    //Debug.WriteLine($"[MediaLibrary] [AddBookChaptersAsync] [{chapter.Position:D2}] {chapter.Offset:g}, {chapter.Length:g}");
 
                     book.SourceFiles.Add(sourceFile);
                     book.Chapters.Add(chapter);
@@ -348,7 +347,7 @@ namespace AudioBookPlayer.App.Services
                 }
             }
 
-            var source = new AudioBookSourceFile(audioBook, contentUri, sourceFile.Length);
+            var source = new AudioBookSourceFile(audioBook, contentUri);
 
             audioBook.SourceFiles.Add(source);
 
