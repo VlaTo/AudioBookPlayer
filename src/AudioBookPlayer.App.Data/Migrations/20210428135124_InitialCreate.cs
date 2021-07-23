@@ -32,9 +32,8 @@ namespace AudioBookPlayer.App.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(nullable: false),
                     Synopsis = table.Column<string>(nullable: true),
-                    Duration = table.Column<TimeSpan>(nullable: true),
-                    AddedToLibrary = table.Column<DateTime>(nullable: true),
-                    IsExcluded = table.Column<bool>(nullable: true)
+                    Duration = table.Column<TimeSpan>(nullable: false),
+                    DoNotShow = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

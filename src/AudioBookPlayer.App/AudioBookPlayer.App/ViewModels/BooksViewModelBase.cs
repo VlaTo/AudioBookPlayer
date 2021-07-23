@@ -46,11 +46,11 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected readonly IBooksProvider Provider;
+        protected readonly IMediaLibrary MediaLibrary;
 
-        protected BooksViewModelBase(IBooksProvider provider)
+        protected BooksViewModelBase(IMediaLibrary mediaLibrary)
         {
-            Provider = provider;
+            MediaLibrary = mediaLibrary;
             Books = new ObservableCollection<AudioBookViewModel>();
             StartPlay = new Command<AudioBookViewModel>(DoStartPlay);
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
@@ -92,17 +92,22 @@ namespace AudioBookPlayer.App.ViewModels
             return String.Join(sep, authors.Select(author => author.Name));
         }
 
-        protected void AddBookToList(AudioBook audioBook)
+        protected AudioBookViewModel CreateAudioBookModel(AudioBook book)
         {
-            Books.Add(new AudioBookViewModel
+            if (false == book.Id.HasValue)
             {
-                Id = audioBook.Id.Value,
-                Title = audioBook.Title,
-                Authors = GetAuthorsForBook(audioBook.Authors),
-                Synopsis = audioBook.Synopsis,
-                Duration = audioBook.Duration,
+                return null;
+            }
+
+            return new AudioBookViewModel
+            {
+                Id = book.Id.Value,
+                Title = book.Title,
+                Authors = GetAuthorsForBook(book.Authors),
+                Synopsis = book.Synopsis,
+                Duration = book.Duration,
                 //ImageSource = await audioBook.GetImageAsync(WellKnownMetaItemNames.Cover)
-            });
+            };
         }
     }
 }

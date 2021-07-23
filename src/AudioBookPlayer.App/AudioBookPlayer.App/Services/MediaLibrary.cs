@@ -128,6 +128,16 @@ namespace AudioBookPlayer.App.Services
             return Task.FromResult<IReadOnlyCollection<AudioBookPosition>>(bookmarks);
         }
 
+        public Task RecordBookActivityAsync(long bookId, BookActivity activity, CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<AudioBookActivity> GetLatestBookActivityAsync(long bookId, CancellationToken cancellationToken = default)
+        {
+            return Task.FromResult<AudioBookActivity>(null);
+        }
+
         /*private async Task EnumerateBooksAsync(string path, int level, CancellationToken cancellation = default)
         {
             if (!Directory.Exists(path))
@@ -208,7 +218,6 @@ namespace AudioBookPlayer.App.Services
             {
                 Title = source.Title,
                 DoNotShow = false,
-                AddedToLibrary = DateTime.UtcNow,
                 Synopsis = source.Synopsis,
                 Duration = source.Duration,
                 AuthorBooks = new List<AuthorBook>(),

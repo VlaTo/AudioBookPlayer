@@ -43,6 +43,12 @@ namespace AudioBookPlayer.App.Models
             set;
         }
 
+        public DateTime? AddedToLibrary
+        {
+            get;
+            set;
+        }
+
         public IList<AudioBookAuthor> Authors
         {
             get;

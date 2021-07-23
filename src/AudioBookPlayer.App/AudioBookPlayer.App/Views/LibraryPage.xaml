@@ -13,8 +13,6 @@
     BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
     IsBusy="{Binding Path=IsBusy, Mode=OneWay}"
     NavigationPage.HasNavigationBar="{OnPlatform Android=false, iOS=true}">
-    <TabbedPage.Resources>
-    </TabbedPage.Resources>
     <TabbedPage.ToolbarItems>
         <ToolbarItem
             Command="{Binding Path=Refresh, Mode=OneTime}"
