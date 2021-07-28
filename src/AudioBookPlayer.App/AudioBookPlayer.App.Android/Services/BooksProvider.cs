@@ -2,7 +2,8 @@
 using Android.OS;
 using Android.Provider;
 using AudioBookPlayer.App.Android.Core;
-using AudioBookPlayer.App.Models;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Media.Common;
 using System;

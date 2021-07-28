@@ -70,9 +70,10 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\DatabasePath.cs" />
-    <Compile Include="Services\IPlaybackService.cs" />
     <Compile Include="Services\BooksProvider.cs" />
+    <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
     <Compile Include="Services\PlaybackService.cs" />
     <Compile Include="Services\PlaybackServiceBinder.cs" />
@@ -129,6 +130,14 @@
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj">
       <Project>{5bcd7312-0694-4741-aa28-c761d166b0ab}</Project>
       <Name>LibraProgramming.Xamarin.Popups</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj">
+      <Project>{ba8eedc8-cf56-49e6-b28b-ccfdea8e8637}</Project>
+      <Name>AudioBookPlayer.App.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence\AudioBookPlayer.App.Persistence.csproj">
+      <Project>{12f02e38-b764-4b42-a664-23a90b5c3f95}</Project>
+      <Name>AudioBookPlayer.App.Persistence</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
       <Project>{975fc088-f460-4e2b-a7f7-a5dcc82ae56b}</Project>

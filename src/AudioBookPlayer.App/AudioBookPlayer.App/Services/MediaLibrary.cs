@@ -1,5 +1,4 @@
 ﻿using AudioBookPlayer.App.Data;
-using AudioBookPlayer.App.Data.Models;
 using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
@@ -8,8 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using BookImage = AudioBookPlayer.App.Data.Models.BookImage;
-using Chapter = AudioBookPlayer.App.Data.Models.Chapter;
+using AudioBookPlayer.App.Domain;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.Models;
+using BookImage = AudioBookPlayer.App.Persistence.Models.BookImage;
+using Chapter = AudioBookPlayer.App.Persistence.Models.Chapter;
 
 namespace AudioBookPlayer.App.Services
 {
@@ -122,13 +126,13 @@ namespace AudioBookPlayer.App.Services
             }
         }
 
-        public Task<IReadOnlyCollection<AudioBookPosition>> QueryBookmarksAsync(long bookId, CancellationToken cancellationToken = default)
+        public Task<IReadOnlyCollection<NamedAudioBookPosition>> QueryBookmarksAsync(long bookId, CancellationToken cancellationToken = default)
         {
-            var bookmarks = new AudioBookPosition[0];
-            return Task.FromResult<IReadOnlyCollection<AudioBookPosition>>(bookmarks);
+            var bookmarks = new NamedAudioBookPosition[0];
+            return Task.FromResult<IReadOnlyCollection<NamedAudioBookPosition>>(bookmarks);
         }
 
-        public Task RecordBookActivityAsync(long bookId, BookActivity activity, CancellationToken cancellationToken = default)
+        public Task RecordBookActivityAsync(long bookId, AudioBookActivityType activityType, CancellationToken cancellationToken = default)
         {
             return Task.CompletedTask;
         }

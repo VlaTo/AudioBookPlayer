@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain;
+using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Models
 {

@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 

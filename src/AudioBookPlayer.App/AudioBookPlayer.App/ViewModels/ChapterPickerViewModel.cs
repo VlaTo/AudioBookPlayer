@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Interaction;
@@ -12,7 +13,7 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class ChapterPickerViewModel : ViewModelBase, IInitialize
     {
-        private readonly IPlaybackController playbackController;
+        private readonly IPlaybackService playbackService;
         private readonly TaskExecutionMonitor chaptersLoader;
         private int chapterIndex;
         private ChapterViewModel selectedChapter;
@@ -41,7 +42,7 @@ namespace AudioBookPlayer.App.ViewModels
                         return;
                     }
 
-                    playbackController.ChapterIndex = FindChapterIndex(selectedChapter);
+                    playbackService.ChapterIndex = FindChapterIndex(selectedChapter);
 
                     DoClose(false);
                 }
@@ -58,9 +59,9 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public ChapterPickerViewModel(IPlaybackController playbackController)
+        public ChapterPickerViewModel(IPlaybackService playbackService)
         {
-            this.playbackController = playbackController;
+            this.playbackService = playbackService;
             chaptersLoader = new TaskExecutionMonitor(LoadChaptersAsync);
 
             Close = new Command(DoCancel);
@@ -96,7 +97,7 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 isInitializing = true;
 
-                var chapters = playbackController.AudioBook.Chapters;
+                var chapters = playbackService.AudioBook.Chapters;
                 ChapterViewModel selection = null;
 
                 for (var index = 0; index < chapters.Count; index++)
@@ -109,7 +110,7 @@ namespace AudioBookPlayer.App.ViewModels
 
                     Chapters.Add(model);
 
-                    if (index == playbackController.ChapterIndex)
+                    if (index == playbackService.ChapterIndex)
                     {
                         selection = model;
                     }

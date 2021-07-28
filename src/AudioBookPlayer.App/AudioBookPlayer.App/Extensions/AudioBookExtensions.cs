@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Models;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Extensions

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;

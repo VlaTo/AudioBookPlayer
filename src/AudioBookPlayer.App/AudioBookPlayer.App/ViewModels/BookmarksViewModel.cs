@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using Xamarin.Forms;
@@ -10,7 +11,7 @@ namespace AudioBookPlayer.App.ViewModels
     public sealed class BookmarksViewModel : ViewModelBase, IInitialize
     {
         private readonly IMediaLibrary mediaLibrary;
-        private readonly IPlaybackController playbackController;
+        private readonly IPlaybackService playbackService;
         private readonly TaskExecutionMonitor loadBookmarks;
 
         public ObservableCollection<BookmarkViewModel> Bookmarks
@@ -23,10 +24,10 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public BookmarksViewModel(IMediaLibrary mediaLibrary, IPlaybackController playbackController)
+        public BookmarksViewModel(IMediaLibrary mediaLibrary, IPlaybackService playbackService)
         {
             this.mediaLibrary = mediaLibrary;
-            this.playbackController = playbackController;
+            this.playbackService = playbackService;
 
             loadBookmarks = new TaskExecutionMonitor(LoadBookmarksAsync);
             Bookmarks = new ObservableCollection<BookmarkViewModel>();
@@ -40,7 +41,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async Task LoadBookmarksAsync()
         {
-            var bookId = playbackController.AudioBook.Id;
+            var bookId = playbackService.AudioBook.Id;
             var bookmarks = await mediaLibrary.QueryBookmarksAsync(bookId.Value);
 
             foreach (var bookmark in bookmarks)

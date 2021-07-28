@@ -122,7 +122,7 @@ namespace AudioBookPlayer.App.Controls
         private void OnIsPlayingPropertyChanged(bool oldValue, bool newValue)
         {
             var stateName = IsPlaying ? PauseStateName : PlayStateName;
-            VisualStateManager.GoToState(this, stateName);
+            VisualStateManager.GoToState(playButton, stateName);
         }
 
         private void OnFastForwardChanged(ICommand oldValue, ICommand newValue)

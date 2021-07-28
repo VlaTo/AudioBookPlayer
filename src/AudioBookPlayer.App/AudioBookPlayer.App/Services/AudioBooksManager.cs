@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Services;
 
 namespace AudioBookPlayer.App.Services
 {
