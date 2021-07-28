@@ -174,38 +174,40 @@
                             Command="{TemplateBinding Path=Play, Mode=OneWay}"
                             Style="{StaticResource PrimaryPlaybackButtonStyle}"
                             IsEnabled="{TemplateBinding CanPlay}">
-                            <!--<VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="PlayingStates">
-                                    <VisualState x:Name="Playing">
-                                        <VisualState.Setters>
-                                            <Setter
-                                                Property="Source">
-                                                <Setter.Value>
-                                                    <FontImageSource
-                                                        FontFamily="FASolid"
-                                                        Size="18"
-                                                        Glyph="&#x25B6;"
-                                                    />
-                                                </Setter.Value>
-                                            </Setter>
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                    <VisualState x:Name="Paused">
-                                        <VisualState.Setters>
-                                            <Setter
-                                                Property="Source">
-                                                <Setter.Value>
-                                                    <FontImageSource
-                                                        FontFamily="FASolid"
-                                                        Size="18"
-                                                        Glyph="&#x23F8;"
-                                                    />
-                                                </Setter.Value>
-                                            </Setter>
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>-->
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList x:Name="PlayingStates">
+                                    <VisualStateGroup>
+                                        <VisualState x:Name="Playing">
+                                            <VisualState.Setters>
+                                                <Setter
+                                                    Property="Source">
+                                                    <Setter.Value>
+                                                        <FontImageSource
+                                                            FontFamily="FASolid"
+                                                            Size="18"
+                                                            Glyph="&#x25B6;"
+                                                        />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState x:Name="Paused">
+                                            <VisualState.Setters>
+                                                <Setter
+                                                    Property="Source">
+                                                    <Setter.Value>
+                                                        <FontImageSource
+                                                            FontFamily="FASolid"
+                                                            Size="18"
+                                                            Glyph="&#x23F8;"
+                                                        />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
                         </ImageButton>
                         <ImageButton
                             x:Name="PART_FastForwardButton"
@@ -214,13 +216,19 @@
                             Padding="{OnPlatform Android='12,12,8,12', iOS='4'}"
                         />
                     </StackLayout>
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroup x:Name="PlayingStates">
+                </StackLayout>
+            </ControlTemplate>
+
+            <!-- PlaybackControl -->
+            <Style TargetType="controls:PlaybackControl">
+                <Setter Property="ControlTemplate" Value="{StaticResource Key=PlaybackControlTemplate}" />
+                <!--<Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList x:Name="PlayingStates">
+                        <VisualStateGroup>
                             <VisualState x:Name="Playing">
                                 <VisualState.Setters>
                                     <Setter
-                                        Target="PART_PlayButton"
-                                        TargetName=""
+                                        TargetName="PART_PlayButton"
                                         Property="Source">
                                         <Setter.Value>
                                             <FontImageSource
@@ -237,22 +245,19 @@
                                     <Setter
                                         TargetName="PART_PlayButton"
                                         Property="Source">
-                                        <FontImageSource
-                                            FontFamily="FASolid"
-                                            Size="18"
-                                            Glyph="&#x23F8;"
-                                        />
+                                        <Setter.Value>
+                                            <FontImageSource
+                                                FontFamily="FASolid"
+                                                Size="18"
+                                                Glyph="&#x23F8;"
+                                            />
+                                        </Setter.Value>
                                     </Setter>
                                 </VisualState.Setters>
                             </VisualState>
                         </VisualStateGroup>
-                    </VisualStateManager.VisualStateGroups>
-                </StackLayout>
-            </ControlTemplate>
-
-            <!-- PlaybackControl -->
-            <Style TargetType="controls:PlaybackControl">
-                <Setter Property="ControlTemplate" Value="{StaticResource Key=PlaybackControlTemplate}" />
+                    </VisualStateGroupList>
+                </Setter>-->
             </Style>
 
         </ResourceDictionary>        

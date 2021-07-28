@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Po
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Controls", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj", "{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App.Data", "src\AudioBookPlayer.App.Data\AudioBookPlayer.App.Data.csproj", "{366A92C9-98FD-4B12-A9A8-366FC89E9A7A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Media", "LibraProgramming.Media", "{BC547DE0-ED73-4614-B98A-24BD9BE0FACC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Common", "src\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj", "{3DEC16F4-061D-4A36-8756-8231AF121484}"
@@ -53,6 +51,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "src\ConsoleApp\ConsoleApp.csproj", "{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App.Domain", "src\AudioBookPlayer.App\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj", "{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App.Persistence", "src\AudioBookPlayer.App\AudioBookPlayer.App.Persistence\AudioBookPlayer.App.Persistence.csproj", "{12F02E38-B764-4B42-A664-23A90B5C3F95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,10 +96,6 @@ Global
 		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{366A92C9-98FD-4B12-A9A8-366FC89E9A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{366A92C9-98FD-4B12-A9A8-366FC89E9A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{366A92C9-98FD-4B12-A9A8-366FC89E9A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{366A92C9-98FD-4B12-A9A8-366FC89E9A7A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3DEC16F4-061D-4A36-8756-8231AF121484}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3DEC16F4-061D-4A36-8756-8231AF121484}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DEC16F4-061D-4A36-8756-8231AF121484}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -110,6 +108,14 @@ Global
 		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

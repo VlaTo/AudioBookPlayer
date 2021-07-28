@@ -4,6 +4,8 @@ using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
 
 namespace AudioBookPlayer.App.ViewModels
 {

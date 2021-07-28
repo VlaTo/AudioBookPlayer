@@ -1,16 +1,18 @@
-﻿using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Domain;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Models;
 using LibraProgramming.Xamarin.Interaction;
 
 namespace AudioBookPlayer.App.ViewModels.RequestContexts
 {
     public sealed class BookmarkRequestContext : InteractionRequestContext
     {
-        public BookPosition Bookmark
+        public AudioBookPosition Bookmark
         {
             get;
         }
 
-        public BookmarkRequestContext(BookPosition bookmark)
+        public BookmarkRequestContext(AudioBookPosition bookmark)
         {
             Bookmark = bookmark;
         }

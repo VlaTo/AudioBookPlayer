@@ -76,10 +76,10 @@
 
   <ItemGroup>
     <Folder Include="Controls\" />
+    <Folder Include="Core\Collections\" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AudioBookPlayer.App.Data\AudioBookPlayer.App.Data.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj" />
@@ -88,5 +88,7 @@
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
+    <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj" />
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence\AudioBookPlayer.App.Persistence.csproj" />
   </ItemGroup>
 </Project>

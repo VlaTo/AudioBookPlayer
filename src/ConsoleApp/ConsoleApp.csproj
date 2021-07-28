@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj" />
     <ProjectReference Include="..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
   </ItemGroup>

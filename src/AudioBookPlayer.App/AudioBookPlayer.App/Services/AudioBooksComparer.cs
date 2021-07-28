@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Models;
 using Xamarin.Forms.Internals;
 
