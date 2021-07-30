@@ -3,7 +3,7 @@ using LibraProgramming.Media.Common;
 
 namespace AudioBookPlayer.App.Services
 {
-    public interface IAudioBookFactory
+    public interface IMediaInfoProvider
     {
         MediaInfo ExtractMediaInfo(Stream stream);
     }

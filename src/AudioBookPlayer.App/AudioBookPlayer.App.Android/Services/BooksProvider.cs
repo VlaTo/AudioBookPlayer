@@ -9,28 +9,35 @@ using LibraProgramming.Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-//using MediaExtractor = Android.Media.MediaExtractor;
+using Android.Content;
+using Android.Graphics;
+using Android.Webkit;
+using AudioBookPlayer.App.Models;
+using LibraProgramming.Xamarin.Core.Extensions;
+using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class BooksProvider : IBooksProvider
     {
-        private readonly IAudioBookFactoryProvider factoryProvider;
+        private readonly IMediaInfoProviderFactory factory;
+        private readonly Uri collectionUri;
+        private readonly ContentResolver resolver;
 
-        public BooksProvider(IAudioBookFactoryProvider factoryProvider)
+        public BooksProvider(IMediaInfoProviderFactory factory)
         {
-            this.factoryProvider = factoryProvider;
+            this.factory = factory;
+            
+            collectionUri = GetExternalContentUri();
+            resolver = Application.Context.ContentResolver;
         }
 
         public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
         {
-            var collection = GetExternalContentUri();
-            var contentResolver = Application.Context.ContentResolver;
-            var scanner = new AudioBookFileScanner(contentResolver, collection);
+            var scanner = new AudioBookFileScanner(resolver, collectionUri);
             var audioFiles = scanner.QueryFiles();
             
             var audioBooks = new List<AudioBook>();
@@ -44,11 +51,11 @@ namespace AudioBookPlayer.App.Android.Services
                     using (var descriptor = scanner.OpenFile(audioFile))
                     {
                         var extension = Path.GetExtension(audioFile.Name);
-                        var factory = factoryProvider.CreateFactoryFor(extension);
+                        var provider = factory.CreateProviderFor(extension);
 
                         using (var stream = descriptor.CreateInputStream())
                         {
-                            var mediaInfo = factory.ExtractMediaInfo(stream);
+                            var mediaInfo = provider.ExtractMediaInfo(stream);
                             var audioBook = GetOrCreateAudioBook(audioBooks, audioFile, mediaInfo);
 
                             foreach (var track in mediaInfo.Tracks)
@@ -56,11 +63,36 @@ namespace AudioBookPlayer.App.Android.Services
                                 var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration);
                                 var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString());
 
-                                chapter.Fragments.Add(new AudioBookChapterFragment(audioBook.Duration, track.Duration, sourceFile));
+                                var fragment = new AudioBookChapterFragment(audioBook.Duration, track.Duration, sourceFile);
+
+                                chapter.Fragments.Add(fragment);
                                 audioBook.Chapters.Add(chapter);
                                 audioBook.SourceFiles.Add(sourceFile);
+                            }
 
-                                //System.Diagnostics.Debug.WriteLine($"[BooksProvider] [QueryBooksAsync] ({chapter.Start:g}, {track.Duration:g}) {chapter.End:g}");
+                            foreach (var kvp in mediaInfo.Meta)
+                            {
+                                if (String.Equals(WellKnownMediaTags.Cover, kvp.Key))
+                                {
+                                    for (var index = 0; index < kvp.Value.Count; index++)
+                                    {
+                                        if (kvp.Value[index] is MemoryValue item)
+                                        {
+                                            /*using (var input = item.Memory.AsStream())
+                                            {
+                                                var bitmap = await BitmapFactory.DecodeStreamAsync(input);
+                                                var bi = bitmap.GetBitmapInfo();
+                                                //MimeTypeMap.Singleton.
+                                                //bi.Format
+                                            }*/
+
+                                            var key = Guid.NewGuid().ToString("N");
+                                            var image = new InMemoryAudioBookImage(audioBook, key, item.Memory);
+                                            
+                                            audioBook.Images.Add(image);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -76,11 +108,9 @@ namespace AudioBookPlayer.App.Android.Services
         }
 
         private static Uri GetExternalContentUri()
-        {
-            return (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
+            => (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
                 ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
                 : MediaStore.Audio.Media.ExternalContentUri;
-        }
 
         private static AudioBook GetOrCreateAudioBook(
             List<AudioBook> audioBooks,
@@ -103,8 +133,6 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (false == audioBook.Id.HasValue)
             {
-                //audioBook.Id = 1;
-
                 if (String.IsNullOrEmpty(audioBook.Synopsis))
                 {
                     foreach (var (key, tags) in info.Meta)

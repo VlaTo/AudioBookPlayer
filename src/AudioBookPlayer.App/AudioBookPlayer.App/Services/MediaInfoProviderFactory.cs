@@ -1,12 +1,12 @@
 ﻿namespace AudioBookPlayer.App.Services
 {
-    internal sealed class AudioBookFactoryProvider : IAudioBookFactoryProvider
+    internal sealed class MediaInfoProviderFactory : IMediaInfoProviderFactory
     {
-        public AudioBookFactoryProvider()
+        public MediaInfoProviderFactory()
         {
         }
 
-        public IAudioBookFactory CreateFactoryFor(string extension)
+        public IMediaInfoProvider CreateProviderFor(string extension)
         {
             var ext = extension.ToLowerInvariant();
 
@@ -14,7 +14,7 @@
             {
                 case ".m4b":
                 {
-                    return new QuickTimeAudioBookFactory();
+                    return new QuickTimeMediaInfoProvider();
                 }
             }
 

@@ -75,7 +75,8 @@ namespace AudioBookPlayer.App.Domain.Models
             Title = title;
             Authors = new List<AudioBookAuthor>();
             Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
-            Images = new OwnedCollection<AudioBookImage>(OnImagesCollectionChanged);
+            //Images = new OwnedCollection<AudioBookImage>(OnImagesCollectionChanged);
+            Images = new List<AudioBookImage>();
             SourceFiles = new OwnedCollection<AudioBookSourceFile>(OnSourceFilesCollectionChanged);
         }
 

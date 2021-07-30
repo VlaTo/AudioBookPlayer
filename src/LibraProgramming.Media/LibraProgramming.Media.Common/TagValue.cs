@@ -12,12 +12,12 @@ namespace LibraProgramming.Media.Common
 
         public static StreamValue FromStream(Stream stream)
         {
-            if (null == stream)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
-
             return new StreamValue(stream);
+        }
+
+        public static MemoryValue FromMemory(ReadOnlyMemory<byte> memory)
+        {
+            return new MemoryValue(memory);
         }
 
         public static BinaryValue FromBinary(byte[] bytes)
@@ -76,6 +76,22 @@ namespace LibraProgramming.Media.Common
         internal BinaryValue(byte[] bytes)
         {
             Bytes = bytes;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public sealed class MemoryValue : TagValue
+    {
+        public ReadOnlyMemory<byte> Memory
+        {
+            get;
+        }
+
+        internal MemoryValue(ReadOnlyMemory<byte> memory)
+        {
+            Memory = memory;
         }
     }
 }

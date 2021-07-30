@@ -139,9 +139,8 @@ namespace AudioBookPlayer.App.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: false),
                     BookId = table.Column<long>(nullable: false),
-                    Blob = table.Column<byte[]>(nullable: true)
+                    ContentUri = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

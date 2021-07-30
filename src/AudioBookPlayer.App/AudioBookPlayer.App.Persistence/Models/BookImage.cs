@@ -15,21 +15,14 @@ namespace AudioBookPlayer.App.Persistence.Models
         }
 
         [Required]
-        [DataType(DataType.Text)]
-        public string Name
-        {
-            get; 
-            set;
-        }
-
-        [Required]
         public long BookId
         {
             get;
             set;
         }
 
-        public byte[] Blob
+        [DataType(DataType.ImageUrl)]
+        public string ContentUri
         {
             get;
             set;

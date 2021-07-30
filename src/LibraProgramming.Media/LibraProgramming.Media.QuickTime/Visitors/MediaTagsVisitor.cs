@@ -20,20 +20,14 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         {
             foreach (var meta in chunk.MetaInfoChunks)
             {
-                /*{
-                    var bytes = BitConverter.GetBytes(meta.Type).ToBigEndian();
-                    var key = bytes.ToChunkKey();
-                    Debug.WriteLine($"[MetaInformation] Key: '{key}'");
-                }*/
-
                 switch (meta.Type)
                 {
                     case AtomTypes.Covr:
                     {
                         if (DataType.Binary == meta.DataChunk.DataType)
                         {
-                            var stream = new MemoryStream(meta.DataChunk.Data);
-                            information.Add(WellKnownMediaTags.Cover, TagValue.FromStream(stream));
+                            var value = TagValue.FromMemory(meta.DataChunk.Data);
+                            information.Add(WellKnownMediaTags.Cover, value);
                         }
 
                         break;
