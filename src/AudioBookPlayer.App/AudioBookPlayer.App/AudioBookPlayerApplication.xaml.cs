@@ -29,7 +29,7 @@ namespace AudioBookPlayer.App
             executionMonitor = new TaskExecutionMonitor(RegisterExtraActionsAsync);
 
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IAudioBookFactoryProvider, AudioBookFactoryProvider>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaLibraryDataContext, SqLiteMediaLibraryDataContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);

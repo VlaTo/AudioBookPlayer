@@ -12,7 +12,7 @@ namespace AudioBookPlayer.App.Persistence
 {
     public class SqLiteMediaLibraryDataContext : DbContext, IMediaLibraryDataContext
     {
-        private const string databaseName = "library.db";
+        private const string DatabaseName = "library.db";
 
         private readonly IPlatformDatabasePath pathProvider;
 
@@ -83,37 +83,15 @@ namespace AudioBookPlayer.App.Persistence
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var databasePath = pathProvider.GetDatabasePath(databaseName);
+            var databasePath = pathProvider.GetDatabasePath(DatabaseName);
 
             switch (Device.RuntimePlatform)
             {
                 case Device.iOS:
                 {
                     SQLitePCL.Batteries_V2.Init();
-
-                    //databasePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "..", "Library", databaseName);
-
                     break;
                 }
-
-                /*case Device.Android:
-                {
-                    // /storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files
-                    //var folder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    var folder = "/storage/emulated/0/Android/data/com.libraprogramming.audiobookplayer.app/files";
-                    // LocalApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.local/share/library.db
-                    // ApplicationData - /data/user/0/com.libraprogramming.audiobookplayer.app/files/.config/library.db
-
-                    databasePath = Path.Combine(folder, databaseName);
-                    //databasePath = ":memory:";
-
-                    break;
-                }
-
-                default:
-                {
-                    throw new NotImplementedException("Platform not supported");
-                }*/
             }
 
             var builder = new SqliteConnectionStringBuilder
@@ -161,7 +139,7 @@ namespace AudioBookPlayer.App.Persistence
                 .HasForeignKey(ab => ab.AuthorId);
         }
         
-        private void CreateMigrationHistory()
+        /*private void CreateMigrationHistory()
         {
             using (var transaction = Database.BeginTransaction())
             {
@@ -170,6 +148,6 @@ namespace AudioBookPlayer.App.Persistence
 
                 transaction.Commit();
             }
-        }
+        }*/
     }
 }

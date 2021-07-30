@@ -89,6 +89,7 @@ namespace AudioBookPlayer.App.Android
             {
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
+                container.Register<ICoverProvider, CoverProvider>(InstanceLifetime.Singleton);
                 container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
                 container.Register<IRemoteControlService, NotificationService>(InstanceLifetime.Singleton);
                 container.Register<IPlaybackService>(GetPlaybackService, InstanceLifetime.Singleton);

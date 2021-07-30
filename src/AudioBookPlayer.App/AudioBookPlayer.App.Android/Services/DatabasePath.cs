@@ -8,16 +8,14 @@ namespace AudioBookPlayer.App.Android.Services
         public string GetDatabasePath(string databaseName)
         {
             var file = Application.Context.GetDatabasePath(databaseName);
+            //var file0 = Application.Context.GetFileStreamPath(databaseName);
+            //var dirs = Application.Context.GetExternalCacheDirs();
+            //var dir = Application.Context.GetExternalFilesDir(databaseName);
 
             if (false == file.Exists())
             {
                 var created = file.CreateNewFile();
             }
-            
-            /*if (false == Directory.Exists(file.Parent))
-            {
-                var folder = Directory.CreateDirectory(file.Parent);
-            }*/
 
             return file.AbsolutePath;
         }

@@ -1,27 +1,25 @@
-﻿using System.IO;
+﻿using AudioBookPlayer.App.Domain.Models;
+using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain;
-using AudioBookPlayer.App.Domain.Models;
+using LibraProgramming.Xamarin.Core.Extensions;
 
 namespace AudioBookPlayer.App.Models
 {
     public sealed class InMemoryAudioBookImage : AudioBookImage
     {
-        private readonly byte[] bytes;
+        private readonly ReadOnlyMemory<byte> memory;
 
-        public InMemoryAudioBookImage(AudioBook audioBook, string key, byte[] bytes)
+        public InMemoryAudioBookImage(AudioBook audioBook, string key, ReadOnlyMemory<byte> memory)
             : base(audioBook, key)
         {
-            this.bytes = bytes;
+            this.memory = memory;
         }
 
         public override Task<Stream> GetStreamSync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<Stream>(new MemoryStream(bytes));
+            return Task.FromResult(memory.AsStream());
         }
-
-        public override Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(bytes);
     }
 }

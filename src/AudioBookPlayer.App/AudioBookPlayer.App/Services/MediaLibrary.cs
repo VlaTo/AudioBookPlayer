@@ -1,5 +1,7 @@
-﻿using AudioBookPlayer.App.Data;
-using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,11 +9,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence;
-using AudioBookPlayer.App.Persistence.Models;
 using BookImage = AudioBookPlayer.App.Persistence.Models.BookImage;
 using Chapter = AudioBookPlayer.App.Persistence.Models.Chapter;
 
@@ -20,18 +17,11 @@ namespace AudioBookPlayer.App.Services
     internal sealed class MediaLibrary : IMediaLibrary
     {
         private readonly IMediaLibraryDataContext context;
-        private readonly IAudioBookFactoryProvider audioBookFactoryProvider;
-        //private readonly ApplicationSettings settings;
 
         [PrefferedConstructor]
-        public MediaLibrary(
-            //ApplicationSettings settings,
-            IMediaLibraryDataContext context,
-            IAudioBookFactoryProvider audioBookFactoryProvider)
+        public MediaLibrary(IMediaLibraryDataContext context)
         {
-            //this.settings = settings;
             this.context = context;
-            this.audioBookFactoryProvider = audioBookFactoryProvider;
         }
 
         public async Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
@@ -205,8 +195,8 @@ namespace AudioBookPlayer.App.Services
             {
                 var book = await AddBookAsync(source, cancellation);
 
-                await AddBookAuthorsAsync(book, source, cancellation);
-                await AddBookChaptersAsync(book, source, cancellation);
+                await AddAuthorsAsync(book, source, cancellation);
+                await AddChaptersAsync(book, source, cancellation);
                 //await AddBookImagesAsync(source, book, cancellation);
 
                 await context.SaveChangesAsync(cancellation);
@@ -235,7 +225,7 @@ namespace AudioBookPlayer.App.Services
             return book;
         }
 
-        private async Task AddBookAuthorsAsync(Book book, AudioBook source, CancellationToken cancellation)
+        private async Task AddAuthorsAsync(Book book, AudioBook source, CancellationToken cancellation)
         {
             for (var index = 0; index < source.Authors.Count; index++)
             {
@@ -264,7 +254,7 @@ namespace AudioBookPlayer.App.Services
             }
         }
 
-        private async Task AddBookChaptersAsync(Book book, AudioBook source, CancellationToken cancellation)
+        private async Task AddChaptersAsync(Book book, AudioBook source, CancellationToken cancellation)
         {
             for (var chapterIndex = 0; chapterIndex < source.Chapters.Count; chapterIndex++)
             {

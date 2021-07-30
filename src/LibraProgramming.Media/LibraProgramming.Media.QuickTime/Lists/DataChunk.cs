@@ -21,7 +21,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
             get;
         }
 
-        public byte[] Data => memory.ToArray();
+        public ReadOnlyMemory<byte> Data => memory;
 
         public string Text
         {
@@ -32,7 +32,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
                     throw new Exception();
                 }
 
-                return Encoding.UTF8.GetString(Data);
+                return Encoding.UTF8.GetString(memory.Span);
             }
         }
 

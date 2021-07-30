@@ -24,6 +24,6 @@ namespace AudioBookPlayer.App.Domain.Models
 
         public abstract Task<Stream> GetStreamSync(CancellationToken cancellationToken = default);
 
-        public abstract Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default);
+        //public abstract Task<byte[]> GetBytesAsync(CancellationToken cancellationToken = default);
     }
 }
