@@ -1,7 +1,6 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
-using LibraProgramming.Media.QuickTime.Extensions;
 using System;
-using System.Text;
+using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -11,6 +10,11 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Stsz)]
     internal sealed class StszChunk : Chunk
     {
+        public bool IsSameSize
+        {
+            get;
+        }
+
         public uint SampleSize
         {
             get;
@@ -21,9 +25,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             get;
         }
 
-        public StszChunk(uint sampleSize, uint[] sampleSizes)
+        private StszChunk(bool isSameSize, uint sampleSize, uint[] sampleSizes)
             : base(AtomTypes.Stsz)
         {
+            IsSameSize = isSameSize;
             SampleSize = sampleSize;
             SampleSizes = sampleSizes ?? Array.Empty<uint>();
         }
@@ -39,22 +44,33 @@ namespace LibraProgramming.Media.QuickTime.Chunks
             var (_, _) = ReadFlagsAndVersion(atom.Stream);
             var sampleSize = StreamHelper.ReadUInt32(atom.Stream);
             var numberOfSizes = StreamHelper.ReadUInt32(atom.Stream);
-            
-            var position = atom.Stream.Position;
-            
-            var sampleSizes = new uint[numberOfSizes];
 
-            using (var stream = new ReadOnlyAtomStream(atom.Stream, position, atom.Stream.Length - position))
+            if (0 < sampleSize)
             {
-                for (var index = 0; index < numberOfSizes; index++)
-                {
-                    //var blockSize = StreamHelper.ReadUInt32(atom.Stream);
-                    var blockSize = StreamHelper.ReadUInt32(stream);
-                    sampleSizes[index] = blockSize;
-                }
+                return new StszChunk(true, sampleSize, null);
             }
 
-            return new StszChunk(sampleSize, sampleSizes);
+            if (0 == sampleSize)
+            {
+                var length = atom.Stream.Length - atom.Stream.Position;
+                var sampleSizes = new uint[numberOfSizes];
+
+                using (var source = new ReadOnlyAtomStream(atom.Stream, 0L, length))
+                {
+                    using (var stream = new BufferedStream(source, 10240))
+                    {
+                        for (var index = 0; index < numberOfSizes; index++)
+                        {
+                            var blockSize = StreamHelper.ReadUInt32(stream);
+                            sampleSizes[index] = blockSize;
+                        }
+                    }
+                }
+
+                return new StszChunk(false, 0, sampleSizes);
+            }
+
+            throw new Exception();
         }
     }
 }

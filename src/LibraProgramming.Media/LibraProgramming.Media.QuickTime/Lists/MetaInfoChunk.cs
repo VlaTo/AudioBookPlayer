@@ -19,6 +19,9 @@ namespace LibraProgramming.Media.QuickTime.Lists
     [Chunk(AtomTypes.Wrt)]
     [Chunk(AtomTypes.Lyr)]
     [Chunk(AtomTypes.Trkn)]
+    [Chunk(AtomTypes.Desc)]
+    [Chunk(AtomTypes.Pub)]
+    [Chunk(AtomTypes.Des)]
     public class MetaInfoChunk : Chunk
     {
         public DataChunk DataChunk

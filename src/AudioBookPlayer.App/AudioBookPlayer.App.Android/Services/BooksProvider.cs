@@ -53,6 +53,12 @@ namespace AudioBookPlayer.App.Android.Services
                         var extension = Path.GetExtension(audioFile.Name);
                         var provider = factory.CreateProviderFor(extension);
 
+                        if (null == provider)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"No provider for file \"{audioFile.Name}\"");
+                            continue;
+                        }
+
                         using (var stream = descriptor.CreateInputStream())
                         {
                             var mediaInfo = provider.ExtractMediaInfo(stream);
@@ -99,8 +105,7 @@ namespace AudioBookPlayer.App.Android.Services
                 }
                 catch (Exception exception)
                 {
-                    Console.WriteLine(exception);
-                    throw;
+                    System.Diagnostics.Debug.WriteLine($"Error processing file: \"{audioFile.Name}\". {exception.Message}");
                 }
             }
 

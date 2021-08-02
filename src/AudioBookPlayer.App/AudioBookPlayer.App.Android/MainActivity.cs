@@ -15,7 +15,7 @@ using LibraPopups = LibraProgramming.Xamarin.Popups.Popup;
 
 namespace AudioBookPlayer.App.Android
 {
-    [Activity(Label = "AudioBookPlayer", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
+    [Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         internal PlaybackServiceConnection PlaybackServiceConnection
