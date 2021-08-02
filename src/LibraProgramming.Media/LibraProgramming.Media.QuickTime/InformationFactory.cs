@@ -10,8 +10,6 @@ namespace LibraProgramming.Media.QuickTime
 {
     internal sealed class InformationFactory : ChunkFactoryBase
     {
-        //private readonly IDictionary<uint, Func<Atom, Chunk>> cache;
-
         public static readonly InformationFactory Instance;
 
         private InformationFactory(IDictionary<uint, Func<Atom, Chunk>> cache)
@@ -22,22 +20,10 @@ namespace LibraProgramming.Media.QuickTime
         static InformationFactory()
         {
             var @namespace = typeof(InformationFactory).Namespace + ".Lists";
-            //var cache = new Dictionary<uint, Func<Atom, Chunk>>();
             var types = typeof(InformationFactory).Assembly
                 .GetTypes()
                 .Where(type => type.Namespace.StartsWith(@namespace))
                 .ToArray();
-
-            /*foreach (var type in types)
-            {
-                var attributes = type.GetCustomAttributes<ChunkAttribute>();
-
-                foreach (var attribute in attributes)
-                {
-                    var func = GetCreator(type);
-                    cache.Add(attribute.AtomType, func);
-                }
-            }*/
 
             Instance = new InformationFactory(CreateCache(types));
         }
@@ -68,13 +54,6 @@ namespace LibraProgramming.Media.QuickTime
             Debug.WriteLine($"public const uint {type.ToVariableName()} = 0x{atom.Type:X08};\t// information factory");
 
             return ContentChunk.ReadFrom(atom);
-            //throw new ArgumentNullException(nameof(atom));
         }
-
-        /*private static Func<Atom, Chunk> GetCreator(Type type)
-        {
-            var method = type.GetMethod("ReadFrom", BindingFlags.Static | BindingFlags.Public);
-            return method.CreateDelegate<Func<Atom, Chunk>>();
-        }*/
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -107,7 +108,7 @@ namespace AudioBookPlayer.App.Android.Core
 
         public IEnumerable<AudioBookFile> QueryFiles()
         {
-            const string sortOrder = MediaStore.Audio.IAudioColumns.Track + " ASC";
+            const string sortOrder = MediaStore.Audio.Media.InterfaceConsts.Id + " ASC";
             var columns = CreateProjectionColumns();
 
             if (null == contentResolver)
@@ -121,8 +122,8 @@ namespace AudioBookPlayer.App.Android.Core
             var cursor = contentResolver.Query(
                 collection,
                 projection,
-                null,
-                null,
+                $"{MediaStore.Audio.IAudioColumns.IsAudiobook} = ?",
+                new []{ "1" },
                 sortOrder
             );
 
@@ -132,12 +133,12 @@ namespace AudioBookPlayer.App.Android.Core
             {
                 var audioBookFile = CreateAudioBookFile(cursor, columns);
 
-                if (false == audioBookFile.IsAudioBook)
-                {
-                    continue;
-                }
+                Debug.WriteLine($"[AudioBookFileScanner] '{audioBookFile.Artist}', '{audioBookFile.Title}', '{audioBookFile.Name}'");
 
-                yield return audioBookFile;
+                if (audioBookFile.IsAudioBook)
+                {
+                    yield return audioBookFile;
+                }
 
                 success = cursor.MoveToNext();
             }

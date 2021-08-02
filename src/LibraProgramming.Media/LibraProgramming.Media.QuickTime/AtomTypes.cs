@@ -78,5 +78,8 @@
         public const uint Wrt = 0xA9777274;
         public const uint Lyr = 0xA96C7972;
         public const uint Trkn = 0x74726B6E;
+        public const uint Desc = 0x64657363;
+        public const uint Pub = 0xA9707562;
+        public const uint Des = 0xA9646573;
     }
 }
