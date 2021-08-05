@@ -1,18 +1,19 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Models;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Persistence;
 using AudioBookPlayer.App.Services;
+using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain;
-using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.ViewModels.RequestContexts;
-using LibraProgramming.Xamarin.Interaction;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -20,12 +21,11 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        private readonly IMediaLibrary mediaLibrary;
+        private readonly IBooksService booksService;
         private readonly IPlaybackService playbackService;
-        private readonly IRemoteControlService remoteControlService;
+        private readonly INotificationService notificationService;
 
         private readonly TaskExecutionMonitor loadBookMonitor;
-        //private AudioBook book;
         private string bookId;
         private string bookTitle;
         private string bookSubtitle;
@@ -39,7 +39,7 @@ namespace AudioBookPlayer.App.ViewModels
         private TimeSpan bookDuration;
         private TimeSpan bookProgress;
         private TimeSpan chapterDuration;
-        private ImageSource imageSource;
+        private Func<CancellationToken, Task<Stream>> imageSource;
         private bool canPlay;
         private bool isPlaying;
 
@@ -70,7 +70,7 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref bookSubtitle, value);
         }
 
-        public ImageSource ImageSource
+        public Func<CancellationToken, Task<Stream>> ImageSource
         {
             get => imageSource;
             set => SetProperty(ref imageSource, value);
@@ -209,13 +209,13 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public PlayerControlViewModel(
-            IMediaLibrary mediaLibrary,
+            IBooksService booksService,
             IPlaybackService playbackService,
-            IRemoteControlService remoteControlService)
+            INotificationService notificationService)
         {
-            this.mediaLibrary = mediaLibrary;
+            this.booksService = booksService;
             this.playbackService = playbackService;
-            this.remoteControlService = remoteControlService;
+            this.notificationService = notificationService;
 
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
 
@@ -283,8 +283,6 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 playbackService.Play();
             }
-
-            await mediaLibrary.RecordBookActivityAsync(playbackService.AudioBook.Id.Value, AudioBookActivityType.Playing);
         }
 
         private void DoSmallFastForwardCommand()
@@ -349,11 +347,11 @@ namespace AudioBookPlayer.App.ViewModels
                 return;
             }
 
-            var id = long.Parse(BookId, CultureInfo.InvariantCulture);
+            var actualBookId = long.Parse(BookId, CultureInfo.InvariantCulture);
 
             if (playbackService.IsPlaying)
             {
-                if (playbackService.AudioBook.Id == id)
+                if (playbackService.AudioBook.Id == actualBookId)
                 {
                     UpdateAudioBookProperties();
                     ChapterIndex = playbackService.ChapterIndex;
@@ -364,8 +362,8 @@ namespace AudioBookPlayer.App.ViewModels
 
                 playbackService.Pause();
             }
-            
-            var book = await mediaLibrary.GetBookAsync(id);
+
+            var book = await booksService.GetAudioBookAsync(actualBookId);
 
             if (null != book)
             {
@@ -408,11 +406,11 @@ namespace AudioBookPlayer.App.ViewModels
 
             if (IsPlaying)
             {
-                remoteControlService.ShowInformation(playbackService.AudioBook);
+                notificationService.ShowInformation(playbackService.AudioBook);
             }
             else
             {
-                remoteControlService.HideInformation();
+                notificationService.HideInformation();
             }
         }
 
@@ -468,15 +466,16 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateAudioBookProperties()
         {
-            //var images = await book.GetImageAsync(WellKnownMediaTags.Cover);
-
             CanPlay = 0 < playbackService.AudioBook.Chapters.Count;
             BookTitle = playbackService.AudioBook.Title;
             BookSubtitle = GetBookAuthors();
-            //ImageSource = images;
 
             BookDuration = playbackService.AudioBook.Duration;
             BookPosition = TimeSpan.Zero;
+
+            ImageSource = 0 < playbackService.AudioBook.Images.Count
+                ? (Func<CancellationToken, Task<Stream>>)playbackService.AudioBook.Images[0].GetStreamSync
+                : null;
         }
     }
 }

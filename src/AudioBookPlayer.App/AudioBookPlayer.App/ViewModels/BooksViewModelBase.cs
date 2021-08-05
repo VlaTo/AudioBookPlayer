@@ -1,13 +1,12 @@
-﻿using AudioBookPlayer.App.Models;
-using AudioBookPlayer.App.Services;
+﻿using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Persistence;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Domain.Data;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -48,11 +47,11 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected readonly IMediaLibrary MediaLibrary;
+        protected readonly ApplicationDbContext DbContext;
 
-        protected BooksViewModelBase(IMediaLibrary mediaLibrary)
+        protected BooksViewModelBase(ApplicationDbContext dbContext)
         {
-            MediaLibrary = mediaLibrary;
+            DbContext = dbContext;
             Books = new ObservableCollection<AudioBookViewModel>();
             StartPlay = new Command<AudioBookViewModel>(DoStartPlay);
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
@@ -100,16 +99,22 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 return null;
             }
-
-            return new AudioBookViewModel
+            
+            var model = new AudioBookViewModel
             {
                 Id = book.Id.Value,
                 Title = book.Title,
                 Authors = GetAuthorsForBook(book.Authors),
                 Synopsis = book.Synopsis,
-                Duration = book.Duration,
-                //ImageSource = await audioBook.GetImageAsync(WellKnownMetaItemNames.Cover)
+                Duration = book.Duration
             };
+
+            if (0 < book.Images.Count)
+            {
+                model.ImageSource = book.Images[0].GetStreamSync;
+            }
+
+            return model;
         }
     }
 }

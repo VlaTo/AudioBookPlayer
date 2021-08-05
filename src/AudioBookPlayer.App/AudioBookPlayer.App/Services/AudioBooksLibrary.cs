@@ -1,19 +1,24 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence;
+using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using System;
 using System.Collections.Generic;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Models;
+using System.Threading;
+using System.Threading.Tasks;
+using AudioBookPlayer.App.Core;
 using Xamarin.Forms.Internals;
 
 namespace AudioBookPlayer.App.Services
 {
-    internal enum ChangeAction
+    public enum ChangeAction
     {
         Add,
         Update,
         Remove
     }
 
-    internal sealed class LibraryChange
+    public sealed class LibraryChange
     {
         public ChangeAction Action
         {
@@ -47,8 +52,16 @@ namespace AudioBookPlayer.App.Services
             new LibraryChange(ChangeAction.Add, source: source);
     }
 
-    internal sealed class AudioBooksComparer
+    public sealed class AudioBooksLibrary
     {
+        private readonly IUnitOfWorkFactory factory;
+
+        [PrefferedConstructor]
+        public AudioBooksLibrary(IUnitOfWorkFactory factory)
+        {
+            this.factory = factory;
+        }
+
         public IReadOnlyList<LibraryChange> GetChanges(IReadOnlyList<AudioBook> libraryBooks, IReadOnlyList<AudioBook> actualBooks)
         {
             var changes = new List<LibraryChange>();
@@ -88,6 +101,41 @@ namespace AudioBookPlayer.App.Services
             }
 
             return changes;
+        }
+
+
+        public async Task<bool> TryApplyChangesAsync(IReadOnlyList<LibraryChange> changes, CancellationToken cancellationToken = default)
+        {
+            var changesApplied = 0;
+
+            using (var unitOfWork = factory.CreateUnitOfWork(true))
+            {
+                for (var changeIndex = 0; changeIndex < changes.Count; changeIndex++)
+                {
+                    var change = changes[changeIndex];
+
+                    switch (change.Action)
+                    {
+                        case ChangeAction.Add:
+                        {
+                            await unitOfWork.Books.AddAsync(change.Source);
+
+                            changesApplied++;
+
+                            break;
+                        }
+
+                        default:
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                await unitOfWork.CommitAsync(cancellationToken);
+            }
+
+            return 0 < changesApplied;
         }
 
         private static int FindBookIndex(IReadOnlyList<AudioBook> books, AudioBook originalBook)

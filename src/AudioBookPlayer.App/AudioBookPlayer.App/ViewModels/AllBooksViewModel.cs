@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Persistence;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using System;
+using System.Collections.Generic;
+using System.Reactive;
 
 namespace AudioBookPlayer.App.ViewModels
 {
@@ -16,9 +15,9 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public AllBooksViewModel(
-            IMediaLibrary mediaLibrary,
+            ApplicationDbContext dbContext,
             IAudioBooksConsumer booksConsumer)
-            : base(mediaLibrary)
+            : base(dbContext)
         {
             this.booksConsumer = booksConsumer;
 

@@ -1,9 +1,10 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Provider;
 using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Media.Common;
 using System;
@@ -11,11 +12,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.Content;
-using Android.Graphics;
-using Android.Webkit;
 using AudioBookPlayer.App.Models;
-using LibraProgramming.Xamarin.Core.Extensions;
 using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
 
@@ -44,18 +41,18 @@ namespace AudioBookPlayer.App.Android.Services
 
             foreach (var audioFile in audioFiles)
             {
-                var (mimeType, mimeInfo) = scanner.GetMimeInfo(audioFile);
+                var (mimeType, _) = scanner.GetMimeInfo(audioFile);
 
                 try
                 {
                     using (var descriptor = scanner.OpenFile(audioFile))
                     {
                         var extension = Path.GetExtension(audioFile.Name);
-                        var provider = factory.CreateProviderFor(extension);
+                        var provider = factory.CreateProviderFor(extension, mimeType);
 
                         if (null == provider)
                         {
-                            System.Diagnostics.Debug.WriteLine($"No provider for file \"{audioFile.Name}\"");
+                            System.Diagnostics.Debug.WriteLine($"No provider for file \"{audioFile.Name}\" with type \"{mimeType}\"");
                             continue;
                         }
 
@@ -93,7 +90,7 @@ namespace AudioBookPlayer.App.Android.Services
                                             }*/
 
                                             var key = Guid.NewGuid().ToString("N");
-                                            var image = new InMemoryAudioBookImage(audioBook, key, item.Memory);
+                                            var image = new StreamAudioBookImage(audioBook, item.Memory);
                                             
                                             audioBook.Images.Add(image);
                                         }

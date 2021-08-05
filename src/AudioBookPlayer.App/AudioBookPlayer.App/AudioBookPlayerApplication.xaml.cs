@@ -8,10 +8,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Persistence;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using IUnitOfWorkFactory = AudioBookPlayer.App.Core.IUnitOfWorkFactory;
 
 namespace AudioBookPlayer.App
 {
@@ -30,8 +32,11 @@ namespace AudioBookPlayer.App
 
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IMediaLibraryDataContext, SqLiteMediaLibraryDataContext>(InstanceLifetime.Singleton);
+            //DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<ApplicationDbContext, SqLiteDbContext>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IUnitOfWorkFactory, UnitOfWorkFactory>(InstanceLifetime.CreateNew);
+            DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
+            DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.CreateNew);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
             var audioBooksHub = new AudioBooksHub();
@@ -113,7 +118,7 @@ namespace AudioBookPlayer.App
         
         private void InitializeDatabase()
         {
-            var db = DependencyContainer.GetInstance<IMediaLibraryDataContext>();
+            var db = DependencyContainer.GetInstance<ApplicationDbContext>();
 
             try
             {

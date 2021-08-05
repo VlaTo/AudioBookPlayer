@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AudioBookPlayer.App.Data.Migrations
 {
-    [DbContext(typeof(SqLiteMediaLibraryDataContext))]
+    [DbContext(typeof(SqLiteDbContext))]
     [Migration("20210428135124_InitialCreate")]
     public partial class InitialMigration
     {

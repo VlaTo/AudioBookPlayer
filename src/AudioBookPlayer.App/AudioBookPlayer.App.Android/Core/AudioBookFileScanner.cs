@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.Content.Res;
 using Android.Database;
 using Android.Provider;
 using AudioBookPlayer.App.Android.Core.Attributes;
 using AudioBookPlayer.App.Android.Core.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using Xamarin.Forms.Internals;
 using Exception = Java.Lang.Exception;
 using String = System.String;
@@ -123,7 +121,7 @@ namespace AudioBookPlayer.App.Android.Core
                 collection,
                 projection,
                 $"{MediaStore.Audio.IAudioColumns.IsAudiobook} = ?",
-                new []{ "1" },
+                new []{ 1.ToString() },
                 sortOrder
             );
 
@@ -135,10 +133,7 @@ namespace AudioBookPlayer.App.Android.Core
 
                 Debug.WriteLine($"[AudioBookFileScanner] '{audioBookFile.Artist}', '{audioBookFile.Title}', '{audioBookFile.Name}'");
 
-                if (audioBookFile.IsAudioBook)
-                {
-                    yield return audioBookFile;
-                }
+                yield return audioBookFile;
 
                 success = cursor.MoveToNext();
             }

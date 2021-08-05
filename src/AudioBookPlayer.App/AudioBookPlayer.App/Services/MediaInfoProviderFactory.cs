@@ -2,11 +2,7 @@
 {
     internal sealed class MediaInfoProviderFactory : IMediaInfoProviderFactory
     {
-        public MediaInfoProviderFactory()
-        {
-        }
-
-        public IMediaInfoProvider CreateProviderFor(string extension)
+        public IMediaInfoProvider CreateProviderFor(string extension, string mimeType)
         {
             var ext = extension.ToLowerInvariant();
 
@@ -14,7 +10,7 @@
             {
                 case ".m4b":
                 {
-                    return new QuickTimeMediaInfoProvider();
+                    return new QuickTimeMediaInfoProvider(mimeType);
                 }
             }
 

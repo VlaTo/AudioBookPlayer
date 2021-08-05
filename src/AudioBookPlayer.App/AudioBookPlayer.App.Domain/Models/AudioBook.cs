@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using AudioBookPlayer.App.Domain.Collections;
+using AudioBookPlayer.App.Domain.Data;
 
 namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class AudioBook
+    public sealed class AudioBook : IEntity
     {
         private TimeSpan? duration;
 

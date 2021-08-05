@@ -2,6 +2,6 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
   <item android:drawable="@color/launcher_background"/>
   <item>
-    <bitmap android:gravity="center" android:src="@drawable/logo" />
+    <bitmap android:gravity="center" android:src="@drawable/ic_logo" />
   </item>
 </layer-list>

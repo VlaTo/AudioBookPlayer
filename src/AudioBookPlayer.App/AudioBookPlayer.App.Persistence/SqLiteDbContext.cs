@@ -3,67 +3,59 @@ using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Threading;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.Persistence
 {
-    public class SqLiteMediaLibraryDataContext : DbContext, IMediaLibraryDataContext
+    public class SqLiteDbContext : ApplicationDbContext
     {
         private const string DatabaseName = "library.db";
 
         private readonly IPlatformDatabasePath pathProvider;
 
-        public DbSet<Author> Authors
+        public sealed override DbSet<Author> Authors
         {
             get;
             set;
         }
 
-        public DbSet<Book> Books
+        public sealed override DbSet<Book> Books
         {
             get;
             set;
         }
 
-        public DbSet<SourceFile> SourceFiles
+        public sealed override DbSet<SourceFile> SourceFiles
         {
             get;
             set;
         }
 
-        public DbSet<AuthorBook> AuthorBooks
+        public sealed override DbSet<AuthorBook> AuthorBooks
         {
             get;
             set;
         }
 
-        public DbSet<BookImage> BookImages
+        public sealed override DbSet<BookImage> BookImages
         {
             get;
             set;
         }
 
-        public DbSet<Chapter> Chapters
+        public sealed override DbSet<Chapter> Chapters
         {
             get;
             set;
         }
 
         [PrefferedConstructor]
-        protected SqLiteMediaLibraryDataContext(IPlatformDatabasePath pathProvider)
+        protected SqLiteDbContext(IPlatformDatabasePath pathProvider)
         {
             this.pathProvider = pathProvider;
         }
 
-        public SqLiteMediaLibraryDataContext(DbContextOptions options)
-            : base(options)
-        {
-        }
-
-        public void Initialize()
+        public override void Initialize()
         {
             //Database.EnsureDeleted();
             Database.EnsureCreated();
@@ -71,7 +63,7 @@ namespace AudioBookPlayer.App.Persistence
             //Database.Migrate();
         }
 
-        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        /*public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
             return Database.BeginTransactionAsync(cancellationToken);
         }
@@ -79,7 +71,7 @@ namespace AudioBookPlayer.App.Persistence
         async Task<bool> IMediaLibraryDataContext.SaveChangesAsync(CancellationToken cancellation)
         {
             return 0 < await base.SaveChangesAsync(cancellation);
-        }
+        }*/
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

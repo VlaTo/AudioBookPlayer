@@ -5,6 +5,7 @@ using Android.OS;
 using Android.Runtime;
 using AudioBookPlayer.App.Android.Services;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;
@@ -89,9 +90,9 @@ namespace AudioBookPlayer.App.Android
             {
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
-                container.Register<ICoverProvider, CoverProvider>(InstanceLifetime.Singleton);
-                container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
-                container.Register<IRemoteControlService, NotificationService>(InstanceLifetime.Singleton);
+                container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);
+                //container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
+                container.Register<INotificationService, NotificationService>(InstanceLifetime.Singleton);
                 container.Register<IPlaybackService>(GetPlaybackService, InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
                 container.Register<IPlatformDatabasePath, DatabasePath>();

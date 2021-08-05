@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Interaction;

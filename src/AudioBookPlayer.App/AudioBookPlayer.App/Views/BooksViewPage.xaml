@@ -93,12 +93,17 @@
                         Padding="2"
                         Margin="0"
                         HorizontalOptions="Center">
+                        <!-- Source="{Binding Path=ImageSource, Mode=OneTime}" -->
                         <Image
                             Aspect="Fill"
-                            Source="{Binding Path=ImageSource, Mode=OneTime}"
                             WidthRequest="{OnPlatform Android='108', iOS='146'}"
-                            HeightRequest="{OnPlatform Android='148', iOS='176'}"
-                        />
+                            HeightRequest="{OnPlatform Android='148', iOS='176'}">
+                            <Image.Source>
+                                <StreamImageSource
+                                    Stream="{Binding Path=ImageSource, Mode=OneTime}"
+                                />
+                            </Image.Source>
+                        </Image>
                     </Frame>
                     <Label
                         Grid.Row="0"

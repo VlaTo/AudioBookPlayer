@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Models;
 
-namespace AudioBookPlayer.App.Domain.Services
+namespace AudioBookPlayer.App.Domain.Data
 {
     public interface IBooksProvider
     {
