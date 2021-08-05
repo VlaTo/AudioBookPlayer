@@ -1,10 +1,7 @@
-﻿using AudioBookPlayer.App.Models;
-using AudioBookPlayer.App.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {

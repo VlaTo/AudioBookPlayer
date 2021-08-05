@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -10,7 +13,7 @@ namespace AudioBookPlayer.App.ViewModels
         private string title;
         private string synopsis;
         private TimeSpan duration;
-        private ImageSource imageSource;
+        private Func<CancellationToken, Task<Stream>> imageSource;
 
         public long Id
         {
@@ -42,7 +45,7 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref duration, value);
         }
 
-        public ImageSource ImageSource
+        public Func<CancellationToken, Task<Stream>> ImageSource
         {
             get => imageSource;
             set => SetProperty(ref imageSource, value);

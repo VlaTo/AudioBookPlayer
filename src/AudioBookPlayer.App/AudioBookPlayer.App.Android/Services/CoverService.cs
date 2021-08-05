@@ -1,49 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Provider;
-using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Domain.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed class CoverProvider : ICoverProvider
+    internal sealed class CoverService : ICoverService
     {
-        private const string FileMode = "w";
+        private const string WriteMode = "w";
+        private const string ReadMode = "r";
 
         private readonly Uri collectionUri;
         private readonly ContentResolver resolver;
 
-        public CoverProvider()
+        public CoverService()
         {
             collectionUri = GetExternalContentUri();
             resolver = Application.Context.ContentResolver;
         }
 
-        public async Task<string> AddCoverAsync(long bookId, Stream stream)
+        public async Task<string> AddImageAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             var displayName = Guid.NewGuid().ToString("N");
             var mimeType = await GetMimeTypeAsync(stream);
             var values = new ContentValues();
 
-            values.Put(MediaStore.IMediaColumns.DocumentId, bookId);
+            // values.Put(MediaStore.IMediaColumns.DocumentId, bookId);
             values.Put(MediaStore.IMediaColumns.DisplayName, displayName);
             values.Put(MediaStore.IMediaColumns.MimeType, mimeType);
             values.Put(MediaStore.IMediaColumns.IsPending, true);
 
             var contentUri = resolver.Insert(collectionUri, values);
 
-            using (var afd = resolver.OpenAssetFileDescriptor(contentUri, FileMode))
+            using (var afd = resolver.OpenAssetFileDescriptor(contentUri, WriteMode))
             {
                 using (var output = afd.CreateOutputStream())
                 {
-                    await stream.CopyToAsync(output);
-                    await output.FlushAsync();
+                    await stream.CopyToAsync(output, cancellationToken);
+                    await output.FlushAsync(cancellationToken);
                 }
             }
 
@@ -53,6 +54,14 @@ namespace AudioBookPlayer.App.Android.Services
             resolver.Update(contentUri, values, null);
 
             return contentUri.ToString();
+        }
+
+        public Task<Stream> GetImageAsync(string contentUri, CancellationToken cancellationToken = default)
+        {
+            var uri = Uri.Parse(contentUri);
+            var afd = resolver.OpenAssetFileDescriptor(uri, ReadMode);
+
+            return Task.FromResult(afd.CreateInputStream());
         }
 
         private static Uri GetExternalContentUri()

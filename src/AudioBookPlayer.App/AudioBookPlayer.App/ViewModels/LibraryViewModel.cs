@@ -1,12 +1,11 @@
-﻿using System;
-using System.Threading;
-using AudioBookPlayer.App.Core;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction.Contracts;
+using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Services;
-using LibraProgramming.Media.Common;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -15,9 +14,9 @@ namespace AudioBookPlayer.App.ViewModels
     public sealed class LibraryViewModel : ViewModelBase, IInitialize
     {
         private readonly IBooksProvider booksProvider;
-        private readonly IMediaLibrary mediaLibrary;
+        private readonly IBooksService booksService;
+        private readonly AudioBooksLibrary booksLibrary;
         private readonly IAudioBooksPublisher booksPublisher;
-        private readonly ICoverProvider coverProvider;
         private readonly IPermissionRequestor permissionRequestor;
         private readonly ITaskExecutionMonitor updateExecutionMonitor;
         private readonly ITaskExecutionMonitor refreshExecutionMonitor;
@@ -37,15 +36,15 @@ namespace AudioBookPlayer.App.ViewModels
         [PrefferedConstructor]
         public LibraryViewModel(
             IBooksProvider booksProvider,
-            IMediaLibrary mediaLibrary,
+            IBooksService booksService,
+            AudioBooksLibrary booksLibrary,
             IAudioBooksPublisher booksPublisher,
-            ICoverProvider coverProvider,
             IPermissionRequestor permissionRequestor)
         {
             this.booksProvider = booksProvider;
-            this.mediaLibrary = mediaLibrary;
+            this.booksService = booksService;
+            this.booksLibrary = booksLibrary;
             this.booksPublisher = booksPublisher;
-            this.coverProvider = coverProvider;
             this.permissionRequestor = permissionRequestor;
 
             updateExecutionMonitor = new TaskExecutionMonitor(ExecuteQueryLibraryAsync);
@@ -79,16 +78,21 @@ namespace AudioBookPlayer.App.ViewModels
 
             try
             {
-                var libraryBooks = await mediaLibrary.QueryBooksAsync();
+                // 1. Get books from device and library
                 var actualBooks = await booksProvider.QueryBooksAsync();
-                var comparer = new AudioBooksComparer();
+                var libraryBooks = await booksService.QueryBooksAsync();
+                // 2. Compare collections, get differences
+                var changes = booksLibrary.GetChanges(libraryBooks, actualBooks);
+                // 3. Apply differences to library
+                if (0 < changes.Count)
+                {
+                    var success = await booksLibrary.TryApplyChangesAsync(changes, CancellationToken.None);
 
-                var changes = comparer.GetChanges(libraryBooks, actualBooks);
-
-                var manager = new AudioBooksManager(mediaLibrary, coverProvider);
-
-                await manager.ApplyChangesAsync(changes, CancellationToken.None);
-                await DoQueryLibraryAsync(CancellationToken.None);
+                    if (success)
+                    {
+                        await DoQueryLibraryAsync(CancellationToken.None);
+                    }
+                }
             }
             finally
             {
@@ -110,16 +114,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async Task DoQueryLibraryAsync(CancellationToken cancellationToken = default)
         {
-            var books = await mediaLibrary.QueryBooksAsync(cancellationToken);
-
-            /*foreach (var book in books)
-            {
-                foreach (var cover in book.Images)
-                {
-                    if(String.Equals(WellKnownMediaTags.Cover, )) cover.Key
-                }
-            }*/
-
+            var books = await booksService.QueryBooksAsync(cancellationToken);
             booksPublisher.OnNext(books);
         }
     }

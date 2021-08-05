@@ -18965,26 +18965,26 @@ namespace AudioBookPlayer.App.Android
 			// aapt resource value: 0x7F07006B
 			public const int design_snackbar_background = 2131165291;
 			
-			// aapt resource value: 0x7F070070
-			public const int icon_about = 2131165296;
-			
 			// aapt resource value: 0x7F070071
-			public const int icon_feed = 2131165297;
-			
-			// aapt resource value: 0x7F07006C
-			public const int ic_mtrl_checked_circle = 2131165292;
-			
-			// aapt resource value: 0x7F07006D
-			public const int ic_mtrl_chip_checked_black = 2131165293;
-			
-			// aapt resource value: 0x7F07006E
-			public const int ic_mtrl_chip_checked_circle = 2131165294;
-			
-			// aapt resource value: 0x7F07006F
-			public const int ic_mtrl_chip_close_circle = 2131165295;
+			public const int icon_about = 2131165297;
 			
 			// aapt resource value: 0x7F070072
-			public const int logo = 2131165298;
+			public const int icon_feed = 2131165298;
+			
+			// aapt resource value: 0x7F07006C
+			public const int ic_logo = 2131165292;
+			
+			// aapt resource value: 0x7F07006D
+			public const int ic_mtrl_checked_circle = 2131165293;
+			
+			// aapt resource value: 0x7F07006E
+			public const int ic_mtrl_chip_checked_black = 2131165294;
+			
+			// aapt resource value: 0x7F07006F
+			public const int ic_mtrl_chip_checked_circle = 2131165295;
+			
+			// aapt resource value: 0x7F070070
+			public const int ic_mtrl_chip_close_circle = 2131165296;
 			
 			// aapt resource value: 0x7F070073
 			public const int material_ic_calendar_black_24dp = 2131165299;
@@ -20542,14 +20542,14 @@ namespace AudioBookPlayer.App.Android
 		public partial class Mipmap
 		{
 			
-			// aapt resource value: 0x7F0C0000
-			public const int icon = 2131492864;
-			
 			// aapt resource value: 0x7F0C0001
-			public const int icon_round = 2131492865;
+			public const int icon = 2131492865;
 			
 			// aapt resource value: 0x7F0C0002
-			public const int launcher_foreground = 2131492866;
+			public const int icon_round = 2131492866;
+			
+			// aapt resource value: 0x7F0C0000
+			public const int ic_logo = 2131492864;
 			
 			static Mipmap()
 			{

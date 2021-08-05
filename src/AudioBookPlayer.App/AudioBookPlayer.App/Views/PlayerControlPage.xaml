@@ -136,8 +136,8 @@
                 HasShadow="True"
                 IsClippedToBounds="True"
                 Padding="0">
+                <!-- Source="{Binding Path=ImageSource, Mode=OneWay}" -->
                 <Image
-                    Source="{Binding Path=ImageSource, Mode=OneWay}"
                     Aspect="AspectFill"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="Fill">
@@ -146,6 +146,11 @@
                             Command="{Binding Path=ChangeCover, Mode=OneWay}"
                         />
                     </Image.GestureRecognizers>
+                    <Image.Source>
+                        <StreamImageSource
+                            Stream="{Binding Path=ImageSource, Mode=OneWay}"
+                        />
+                    </Image.Source>
                 </Image>
             </Frame>
         </Grid>

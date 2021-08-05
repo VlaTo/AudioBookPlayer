@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Models;
+
+namespace AudioBookPlayer.App.Persistence
+{
+    public sealed class BookmarksRepository : IBookmarkRepository
+    {
+        private readonly ApplicationDbContext context;
+
+        public BookmarksRepository(ApplicationDbContext context)
+        {
+            this.context = context;
+        }
+
+        public Task AddAsync(NamedAudioBookPosition model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<NamedAudioBookPosition> GetAsync(long id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveAsync(NamedAudioBookPosition model)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<NamedAudioBookPosition>> FindAsync(Expression<Func<NamedAudioBookPosition, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<NamedAudioBookPosition>> QueryAsync(long bookId, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

@@ -12,7 +12,7 @@ using Application = Android.App.Application;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed class NotificationService : Java.Lang.Object, IRemoteControlService
+    internal sealed class NotificationService : Java.Lang.Object, INotificationService
     {
         private const string DefaultChannelId = "AUDIOBOOKPLAYER_1";
         private const int DefaultNotificationId = 0x9000;

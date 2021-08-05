@@ -1,8 +1,7 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Subjects;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {

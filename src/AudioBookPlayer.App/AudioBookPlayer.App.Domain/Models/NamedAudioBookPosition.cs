@@ -1,6 +1,8 @@
-﻿namespace AudioBookPlayer.App.Domain.Models
+﻿using AudioBookPlayer.App.Domain.Data;
+
+namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class NamedAudioBookPosition
+    public sealed class NamedAudioBookPosition : IEntity
     {
         public string Name
         {

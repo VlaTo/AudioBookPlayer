@@ -2,7 +2,7 @@
 
 namespace AudioBookPlayer.App.Services
 {
-    public interface IRemoteControlService
+    public interface INotificationService
     {
         void ShowInformation(AudioBook audioBook);
 

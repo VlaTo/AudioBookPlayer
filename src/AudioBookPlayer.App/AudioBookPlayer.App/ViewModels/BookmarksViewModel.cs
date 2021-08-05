@@ -1,16 +1,15 @@
-﻿using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
+﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction.Contracts;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class BookmarksViewModel : ViewModelBase, IInitialize
     {
-        private readonly IMediaLibrary mediaLibrary;
+        private readonly IUnitOfWorkFactory factory;
         private readonly IPlaybackService playbackService;
         private readonly TaskExecutionMonitor loadBookmarks;
 
@@ -24,9 +23,9 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public BookmarksViewModel(IMediaLibrary mediaLibrary, IPlaybackService playbackService)
+        public BookmarksViewModel(IUnitOfWorkFactory factory, IPlaybackService playbackService)
         {
-            this.mediaLibrary = mediaLibrary;
+            this.factory = factory;
             this.playbackService = playbackService;
 
             loadBookmarks = new TaskExecutionMonitor(LoadBookmarksAsync);
@@ -42,22 +41,39 @@ namespace AudioBookPlayer.App.ViewModels
         private async Task LoadBookmarksAsync()
         {
             var bookId = playbackService.AudioBook.Id;
-            var bookmarks = await mediaLibrary.QueryBookmarksAsync(bookId.Value);
 
-            foreach (var bookmark in bookmarks)
+            using (var unitOfWork = factory.CreateUnitOfWork(false))
             {
-                var model = new BookmarkViewModel
-                {
-                    Title = bookmark.Name
-                };
+                var bookmarks = await unitOfWork.Bookmarks.QueryAsync(bookId.Value);
 
-                Bookmarks.Add(model);
+                foreach (var bookmark in bookmarks)
+                {
+                    var model = new BookmarkViewModel
+                    {
+                        Title = bookmark.Name
+                    };
+
+                    Bookmarks.Add(model);
+                }
             }
         }
 
         private void DoRemoveAll()
         {
-            ;
+            using (var unitOfWork = factory.CreateUnitOfWork(true))
+            {
+                /*var bookmarks = await unitOfWork.Bookmarks.QueryAsync(bookId.Value);
+
+                foreach (var bookmark in bookmarks)
+                {
+                    var model = new BookmarkViewModel
+                    {
+                        Title = bookmark.Name
+                    };
+
+                    Bookmarks.Add(model);
+                }*/
+            }
         }
     }
 }

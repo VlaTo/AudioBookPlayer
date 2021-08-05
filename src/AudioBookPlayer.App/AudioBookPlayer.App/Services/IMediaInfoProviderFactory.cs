@@ -9,7 +9,8 @@
         /// 
         /// </summary>
         /// <param name="extension"></param>
+        /// <param name="mimeType"></param>
         /// <returns></returns>
-        IMediaInfoProvider CreateProviderFor(string extension);
+        IMediaInfoProvider CreateProviderFor(string extension, string mimeType);
     }
 }

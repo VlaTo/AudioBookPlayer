@@ -1,6 +1,4 @@
-﻿using AudioBookPlayer.App.Domain;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Models;
+﻿using AudioBookPlayer.App.Domain.Models;
 using LibraProgramming.Xamarin.Interaction;
 
 namespace AudioBookPlayer.App.ViewModels.RequestContexts
