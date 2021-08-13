@@ -17,27 +17,27 @@ namespace AudioBookPlayer.App.Persistence
             this.context = context;
         }
 
-        public Task AddAsync(NamedAudioBookPosition model)
+        public Task AddAsync(BookmarkPosition model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<NamedAudioBookPosition> GetAsync(long id)
+        public Task<BookmarkPosition> GetAsync(long id)
         {
             throw new NotImplementedException();
         }
 
-        public Task RemoveAsync(NamedAudioBookPosition model)
+        public Task RemoveAsync(BookmarkPosition model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<NamedAudioBookPosition>> FindAsync(Expression<Func<NamedAudioBookPosition, bool>> predicate)
+        public Task<IEnumerable<BookmarkPosition>> FindAsync(Expression<Func<BookmarkPosition, bool>> predicate)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<NamedAudioBookPosition>> QueryAsync(long bookId, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<BookmarkPosition>> QueryAsync(long bookId, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using AudioBookPlayer.App.Core.Attributes;
+﻿using AudioBookPlayer.App.Core.Attributes;
 using AudioBookPlayer.App.ViewModels;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
-using Xamarin.Forms;
+using System;
+using System.Diagnostics;
 using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Views

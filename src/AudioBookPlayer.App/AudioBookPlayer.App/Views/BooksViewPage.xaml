@@ -8,7 +8,9 @@
     xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
-    xmlns:views="clr-namespace:AudioBookPlayer.App.Views">
+    xmlns:views="clr-namespace:AudioBookPlayer.App.Views"
+    xmlns:ext="clr-namespace:AudioBookPlayer.App.Extensions"
+    xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App">
     <ContentPage.Resources>
         <ResourceDictionary>
             
@@ -94,15 +96,16 @@
                         Margin="0"
                         HorizontalOptions="Center">
                         <!-- Source="{Binding Path=ImageSource, Mode=OneTime}" -->
+                        <!-- Source="{ext:CoverImageSource ContentUri={Binding Path=ImageSource, Mode=OneWay}}" -->
                         <Image
                             Aspect="Fill"
                             WidthRequest="{OnPlatform Android='108', iOS='146'}"
                             HeightRequest="{OnPlatform Android='148', iOS='176'}">
-                            <Image.Source>
-                                <StreamImageSource
-                                    Stream="{Binding Path=ImageSource, Mode=OneTime}"
+                             <Image.Source>
+                                <controls:CoverImageSource
+                                    Source="{Binding Path=ImageSource, Mode=OneWay}"
                                 />
-                            </Image.Source>
+                            </Image.Source> 
                         </Image>
                     </Frame>
                     <Label

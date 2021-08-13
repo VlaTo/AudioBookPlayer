@@ -2,7 +2,7 @@
 
 namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class NamedAudioBookPosition : IEntity
+    public sealed class BookmarkPosition : IEntity
     {
         public string Name
         {
@@ -14,7 +14,7 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public NamedAudioBookPosition(AudioBookPosition audioBookPosition, string name = null)
+        public BookmarkPosition(AudioBookPosition audioBookPosition, string name = null)
         {
             AudioBookPosition = audioBookPosition;
             Name = name;
