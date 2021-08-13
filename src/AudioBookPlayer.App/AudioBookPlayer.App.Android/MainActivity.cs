@@ -88,6 +88,8 @@ namespace AudioBookPlayer.App.Android
         {
             public void RegisterTypes(DependencyContainer container)
             {
+                // Xamarin.Forms.Internals.Registrar.Registered.Register();
+
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);

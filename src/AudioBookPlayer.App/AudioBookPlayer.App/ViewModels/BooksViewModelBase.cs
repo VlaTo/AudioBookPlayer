@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using AudioBookPlayer.App.Domain.Data;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels

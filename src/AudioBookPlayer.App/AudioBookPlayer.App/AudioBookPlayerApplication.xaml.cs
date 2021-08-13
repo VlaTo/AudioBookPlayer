@@ -1,5 +1,6 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Data;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
@@ -8,9 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using IUnitOfWorkFactory = AudioBookPlayer.App.Core.IUnitOfWorkFactory;
@@ -32,6 +30,7 @@ namespace AudioBookPlayer.App
 
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
+            DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
             //DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
             DependencyContainer.Register<ApplicationDbContext, SqLiteDbContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IUnitOfWorkFactory, UnitOfWorkFactory>(InstanceLifetime.CreateNew);

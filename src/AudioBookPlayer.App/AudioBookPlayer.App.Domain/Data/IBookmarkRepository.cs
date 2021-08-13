@@ -5,8 +5,8 @@ using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Domain.Data
 {
-    public interface IBookmarkRepository : IRepository<NamedAudioBookPosition>
+    public interface IBookmarkRepository : IRepository<BookmarkPosition>
     {
-        Task<IEnumerable<NamedAudioBookPosition>> QueryAsync(long bookId, CancellationToken cancellationToken = default);
+        Task<IEnumerable<BookmarkPosition>> QueryAsync(long bookId, CancellationToken cancellationToken = default);
     }
 }
