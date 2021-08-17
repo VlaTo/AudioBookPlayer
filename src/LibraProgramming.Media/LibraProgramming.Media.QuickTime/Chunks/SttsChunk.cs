@@ -37,15 +37,15 @@ namespace LibraProgramming.Media.QuickTime.Chunks
     [Chunk(AtomTypes.Stts)]
     internal sealed class SttsChunk : Chunk
     {
-        public TimeToSample[] Entries
+        public TimeToSample[] TimeToSamples
         {
             get;
         }
 
-        public SttsChunk(TimeToSample[] entries)
+        public SttsChunk(TimeToSample[] timeToSamples)
             : base(AtomTypes.Stts)
         {
-            Entries = entries ?? Array.Empty<TimeToSample>();
+            TimeToSamples = timeToSamples ?? Array.Empty<TimeToSample>();
         }
 
         [ChunkCreator]
@@ -58,23 +58,25 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             var (_, _) = ReadFlagsAndVersion(atom.Stream);
             var numberOfTimes = StreamHelper.ReadUInt32(atom.Stream);
-            
-            var position = atom.Stream.Position;
-            var entries = new TimeToSample[numberOfTimes];
+            var timeToSamples = new TimeToSample[numberOfTimes];
 
-            using (var source = new ReadOnlyAtomStream(atom.Stream, 0, atom.Stream.Length - position))
+            var start = atom.Stream.Position;
+            var length = atom.Stream.Length - start;
+
+            using (var source = new ReadOnlyAtomStream(atom.Stream, start, length))
             {
-                using (var stream = new BufferedStream(source, 10240))
+                var bufferSize = Math.Min((int) source.Length, 10240);
+                using (var stream = new BufferedStream(source, bufferSize))
                 {
                     for (var index = 0; index < numberOfTimes; index++)
                     {
-                        var entry = TimeToSample.ReadFromStream(stream);
-                        entries[index] = entry;
+                        var timeToSample = TimeToSample.ReadFromStream(stream);
+                        timeToSamples[index] = timeToSample;
                     }
                 }
             }
 
-            return new SttsChunk(entries);
+            return new SttsChunk(timeToSamples);
         }
     }
 }

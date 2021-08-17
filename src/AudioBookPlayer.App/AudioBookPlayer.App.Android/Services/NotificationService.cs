@@ -40,6 +40,8 @@ namespace AudioBookPlayer.App.Android.Services
 
         public void ShowInformation(AudioBook audioBook)
         {
+            return;
+
             var intent = new Intent(Application.Context, typeof(MainActivity));
 
             pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.OneShot);

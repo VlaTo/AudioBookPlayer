@@ -179,23 +179,23 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         {
             var info = trackInfos.Peek();
 
-            info.Entries = chunk.Entries;
+            info.TimeToSamples = chunk.TimeToSamples;
 
-            /*Console.WriteLine($"[STTS] //entries: {chunk.Entries.Length}");
+            /*Console.WriteLine($"[STTS] //entries: {chunk.TimeToSamples.Length}");
 
-            var count = chunk.Entries.Length;
+            var count = chunk.TimeToSamples.Length;
 
             Console.WriteLine(" -index-   samples  duration");
 
             for (var index = 0; index < Math.Min(3, count); index++)
             {
-                var description = chunk.Entries[index];
+                var description = chunk.TimeToSamples[index];
                 Console.WriteLine($"[{index:d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
 
             if (3 < count)
             {
-                var description = chunk.Entries[count - 1];
+                var description = chunk.TimeToSamples[count - 1];
                 Console.WriteLine("...");
                 Console.WriteLine($"[{(count - 1):d8}] {description.SampleCount:d8} {description.Duration:d8}");
             }
@@ -304,8 +304,8 @@ namespace LibraProgramming.Media.QuickTime.Visitors
         {
             for (var index = 0; index < trackInfo.Offsets.Length; index++)
             {
-                var timeToSample = trackInfo.Entries[index];
-                var track = new QuickTimeMediaTrack(/*extractor*/);
+                var timeToSample = trackInfo.TimeToSamples[index];
+                var track = new QuickTimeMediaTrack();
                 
                 var offset = trackInfo.Offsets[index];
                 var position = stream.Seek(offset, SeekOrigin.Begin);
@@ -328,9 +328,9 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                     var chunksCount = 0;
                     var samples = new List<uint>();
 
-                    for (var index1 = 0; index1 < primaryTrack.Entries.Length; index1++)
+                    for (var index1 = 0; index1 < primaryTrack.TimeToSamples.Length; index1++)
                     {
-                        var entry = primaryTrack.Entries[index1]; // STTS
+                        var entry = primaryTrack.TimeToSamples[index1]; // STTS
 
                         for (var offset1 = 0; offset1 < entry.SampleCount; offset1++)
                         {
@@ -406,7 +406,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
                 set;
             }
 
-            public TimeToSample[] Entries
+            public TimeToSample[] TimeToSamples
             {
                 get;
                 set;
@@ -428,7 +428,7 @@ namespace LibraProgramming.Media.QuickTime.Visitors
             {
                 Chapters = Array.Empty<uint>();
                 Offsets = Array.Empty<uint>();
-                Entries = Array.Empty<TimeToSample>();
+                TimeToSamples = Array.Empty<TimeToSample>();
             }
         }
     }
