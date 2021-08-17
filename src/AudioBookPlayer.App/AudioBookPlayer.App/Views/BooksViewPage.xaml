@@ -95,17 +95,15 @@
                         Padding="2"
                         Margin="0"
                         HorizontalOptions="Center">
-                        <!-- Source="{Binding Path=ImageSource, Mode=OneTime}" -->
-                        <!-- Source="{ext:CoverImageSource ContentUri={Binding Path=ImageSource, Mode=OneWay}}" -->
                         <Image
                             Aspect="Fill"
                             WidthRequest="{OnPlatform Android='108', iOS='146'}"
                             HeightRequest="{OnPlatform Android='148', iOS='176'}">
-                             <Image.Source>
-                                <controls:CoverImageSource
-                                    Source="{Binding Path=ImageSource, Mode=OneWay}"
+                            <Image.Source>
+                                <StreamImageSource
+                                    Stream="{Binding Path=ImageSource, Mode=OneWay}"
                                 />
-                            </Image.Source> 
+                            </Image.Source>
                         </Image>
                     </Frame>
                     <Label

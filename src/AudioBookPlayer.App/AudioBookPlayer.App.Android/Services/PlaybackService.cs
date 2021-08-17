@@ -48,6 +48,13 @@ namespace AudioBookPlayer.App.Android.Services
                 chapterIndex = -1;
                 CurrentPosition = TimeSpan.Zero;
 
+                /*System.Diagnostics.Debug.WriteLine($"Book: \"{audioBook.Title}\"");
+                for (var index = 0; index < audioBook.Chapters.Count; index++)
+                {
+                    var chapter = audioBook.Chapters[index];
+                    System.Diagnostics.Debug.WriteLine($"  [{index}] \"{chapter.Title}\" ({chapter.Start:g} - {chapter.End:g})");
+                }*/
+
                 RaiseOrPostponeEvent(nameof(AudioBookChanged));
             }
         }
@@ -87,6 +94,8 @@ namespace AudioBookPlayer.App.Android.Services
                 chapterIndex = value;
                 chapter = audioBook.Chapters[chapterIndex];
                 CurrentPosition = TimeSpan.Zero;
+
+                System.Diagnostics.Debug.WriteLine($"[ChapterIndex] Set value: {chapterIndex}");
 
                 RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
 
@@ -406,18 +415,17 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (null != chapter)
             {
-                var value = position - chapter.Start;
+                //var value = position - chapter.Start;
 
-                if (value > chapter.Duration)
+                if (position > chapter.End)
                 {
                     chapterIndex++;
                     chapter = audioBook.Chapters[chapterIndex];
-                    value = position - chapter.Start;
 
                     RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
                 }
 
-                position = value;
+                position -= chapter.Start;
             }
 
             CurrentPosition = position;
