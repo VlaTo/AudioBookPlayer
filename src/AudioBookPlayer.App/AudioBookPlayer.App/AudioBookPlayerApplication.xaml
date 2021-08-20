@@ -20,6 +20,7 @@
             <Color x:Key="LightPrimaryTextColor">Black</Color>
             <Color x:Key="LightSecondaryTextColor">DimGray</Color>
             <Color x:Key="LightPrimaryColor">#2196F3</Color>
+            <Color x:Key="LightPlaybackButtonBackgroundColor">#2196F3</Color>
 
             <!-- Dark Theme -->
             <Color x:Key="DarkContentPageBackgroundColor">#1E1E1E</Color>
@@ -30,6 +31,7 @@
             <Color x:Key="DarkPrimaryTextColor">White</Color>
             <Color x:Key="DarkSecondaryTextColor">DimGray</Color>
             <Color x:Key="DarkPrimaryColor">DimGray</Color>
+            <Color x:Key="DarkPlaybackButtonBackgroundColor">#2A2A2A</Color>
 
             <Style
                 TargetType="ContentPage"
@@ -123,7 +125,7 @@
                 TargetType="ImageButton">
                 <Setter
                     Property="BackgroundColor"
-                    Value="{AppThemeBinding Light={StaticResource LightPrimaryButtonBackgroundColor}, Dark={StaticResource DarkPrimaryButtonBackgroundColor}}"
+                    Value="{AppThemeBinding Light={StaticResource LightPlaybackButtonBackgroundColor}, Dark={StaticResource DarkPlaybackButtonBackgroundColor}}"
                 />
                 <Setter Property="CornerRadius" Value="32" />
                 <Setter Property="BorderColor" Value="White" />
@@ -173,40 +175,30 @@
                             x:Name="PART_PlayButton"
                             Command="{TemplateBinding Path=Play, Mode=OneWay}"
                             Style="{StaticResource PrimaryPlaybackButtonStyle}"
-                            IsEnabled="{TemplateBinding CanPlay}">
+                            IsEnabled="{TemplateBinding Path=CanPlay}">
                             <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList x:Name="PlayingStates">
-                                    <VisualStateGroup>
-                                        <VisualState x:Name="Playing">
-                                            <VisualState.Setters>
-                                                <Setter
-                                                    Property="Source">
-                                                    <Setter.Value>
-                                                        <FontImageSource
-                                                            FontFamily="FASolid"
-                                                            Size="18"
-                                                            Glyph="&#x25B6;"
-                                                        />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                        <VisualState x:Name="Paused">
-                                            <VisualState.Setters>
-                                                <Setter
-                                                    Property="Source">
-                                                    <Setter.Value>
-                                                        <FontImageSource
-                                                            FontFamily="FASolid"
-                                                            Size="18"
-                                                            Glyph="&#x23F8;"
-                                                        />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
+                                <VisualStateGroup x:Name="PlayStates">
+                                    <VisualState x:Name="Play">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Property="Source"
+                                                Value="{FontImage FontFamily=FASolid, Size=18, Glyph='&#xF04B;'}"
+                                            />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pause">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Property="Source"
+                                                Value="{FontImage FontFamily=FASolid, Size=18, Glyph='&#xF04C;'}"
+                                            />
+                                            <Setter
+                                                Property="Padding"
+                                                Value="{OnPlatform Android='18,16,18,16', iOS='4'}"
+                                            />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
                             </VisualStateManager.VisualStateGroups>
                         </ImageButton>
                         <ImageButton

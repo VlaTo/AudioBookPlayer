@@ -13,18 +13,19 @@
     <!--<item name="colorPrimaryDark">#1976D2</item>-->
     <!-- colorAccent is used as the default value for colorControlActivated
          which is used to tint widgets -->
-    <!--<item name="colorAccent">#FF4081</item>-->
-    <item name="windowNoTitle">true</item>
-    <item name="windowActionBar">false</item>
+    <!--<item name="colorAccent">#333333</item>-->
+    <item name="colorPrimaryDark">#333333</item>
+    <item name="android:windowNoTitle">true</item>
+    <item name="android:windowActionBar">true</item>
     <item name="windowActionModeOverlay">true</item>
   </style>
 
-  <style name="MainSplash" parent="Theme.AppCompat.Light.NoActionBar">
+  <style name="MainSplash" parent="MainTheme">
     <item name="android:windowBackground">@drawable/splash_screen</item>
-    <item name="android:windowNoTitle">true</item>
     <item name="android:windowFullscreen">true</item>
+    <item name="android:windowActionBar">false</item>
     <item name="android:windowContentOverlay">@null</item>
-    <item name="android:windowActionBar">true</item>
+    <item name="android:windowActionModeOverlay">false</item>
   </style>
 
 </resources>

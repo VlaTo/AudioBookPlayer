@@ -105,8 +105,13 @@ namespace AudioBookPlayer.App.Controls
             base.OnApplyTemplate();
 
 
+            UpdatePlayButtonState();
+        }
+
+        private void UpdatePlayButtonState()
+        {
             var stateName = IsPlaying ? PauseStateName : PlayStateName;
-            VisualStateManager.GoToState(this, stateName);
+            VisualStateManager.GoToState(playButton, stateName);
         }
 
         private void OnPlayButtonClicked(object sender, EventArgs e)
@@ -121,8 +126,7 @@ namespace AudioBookPlayer.App.Controls
 
         private void OnIsPlayingPropertyChanged(bool oldValue, bool newValue)
         {
-            var stateName = IsPlaying ? PauseStateName : PlayStateName;
-            VisualStateManager.GoToState(playButton, stateName);
+            UpdatePlayButtonState();
         }
 
         private void OnFastForwardChanged(ICommand oldValue, ICommand newValue)

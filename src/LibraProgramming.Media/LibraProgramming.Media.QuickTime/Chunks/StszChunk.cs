@@ -55,9 +55,11 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 var length = atom.Stream.Length - atom.Stream.Position;
                 var sampleSizes = new uint[numberOfSizes];
 
+                // possible problem with start offset here as in Chunks\SttsChunk.cs:66
                 using (var source = new ReadOnlyAtomStream(atom.Stream, 0L, length))
                 {
-                    using (var stream = new BufferedStream(source, 10240))
+                    var bufferSize = Math.Min((int)source.Length, 10240);
+                    using (var stream = new BufferedStream(source, bufferSize))
                     {
                         for (var index = 0; index < numberOfSizes; index++)
                         {
