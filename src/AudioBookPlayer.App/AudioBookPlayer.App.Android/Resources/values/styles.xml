@@ -17,15 +17,16 @@
     <item name="colorPrimaryDark">#333333</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowActionBar">true</item>
-    <item name="windowActionModeOverlay">true</item>
+    <!--<item name="windowActionModeOverlay">true</item>-->
   </style>
 
-  <style name="MainSplash" parent="MainTheme">
+  <style name="MainSplash" parent="android:Theme">
+    <item name="android:windowNoTitle">true</item>
     <item name="android:windowBackground">@drawable/splash_screen</item>
-    <item name="android:windowFullscreen">true</item>
-    <item name="android:windowActionBar">false</item>
+    <!--<item name="android:windowFullscreen">true</item>-->
+    <!--<item name="android:windowActionBar">false</item>
     <item name="android:windowContentOverlay">@null</item>
-    <item name="android:windowActionModeOverlay">false</item>
+    <item name="android:windowActionModeOverlay">false</item>-->
   </style>
 
 </resources>
