@@ -25,8 +25,9 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IPlaybackService playbackService;
         private readonly IActivityTrackerService activityTrackerService;
         private readonly INotificationService notificationService;
-
         private readonly TaskExecutionMonitor loadBookMonitor;
+        private readonly TaskExecutionMonitor trackBookActivity;
+
         private string bookId;
         private string bookTitle;
         private string bookSubtitle;
@@ -221,6 +222,7 @@ namespace AudioBookPlayer.App.ViewModels
             this.notificationService = notificationService;
 
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
+            trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
 
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -276,7 +278,7 @@ namespace AudioBookPlayer.App.ViewModels
             Debug.WriteLine($"[PlayerControlViewModel] [DoSmallRewindCommand] Execute");
         }
 
-        private async void DoPlayCommand()
+        private void DoPlayCommand()
         {
             if (IsPlaying)
             {
@@ -403,6 +405,20 @@ namespace AudioBookPlayer.App.ViewModels
             return builder.ToString();
         }
 
+        private Task DoTrackBookActivityAsync()
+        {
+            var position = new AudioBookPosition(
+                playbackService.AudioBook.Id.Value,
+                ChapterIndex,
+                TimeSpan.FromMilliseconds(ChapterPosition)
+            );
+
+            return activityTrackerService.TrackActivityAsync(
+                IsPlaying ? ActivityType.Play : ActivityType.Pause,
+                position
+            );
+        }
+
         private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
         {
             IsPlaying = playbackService.IsPlaying;
@@ -416,16 +432,7 @@ namespace AudioBookPlayer.App.ViewModels
                 notificationService.HideInformation();
             }
 
-            /*var position = new AudioBookPosition(
-                playbackService.AudioBook.Id.Value,
-                ChapterIndex,
-                TimeSpan.FromMilliseconds(ChapterPosition)
-            );
-
-            activityTrackerService.TrackActivityAsync(
-                IsPlaying ? ActivityType.Play : ActivityType.Pause,
-                position
-            );*/
+            trackBookActivity.Start();
         }
 
         private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)

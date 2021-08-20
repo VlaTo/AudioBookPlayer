@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Xamarin.Forms;
 using Application = Android.App.Application;
+using Uri = global::Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -26,8 +27,10 @@ namespace AudioBookPlayer.App.Android.Services
         private AudioFocusRequestor audioFocusRequestor;
         private MediaPlayer player;
         private AudioBook audioBook;
-        private AudioBookChapter chapter;
-        private int chapterIndex;
+        private AudioBookChapter currentChapter;
+        private AudioBookChapterFragment currentFragment;
+        private int currentChapterIndex;
+        private int currentFragmentIndex;
         private TimeSpan currentPosition;
         private Timer playingTimer;
         private bool isPlaying;
@@ -45,7 +48,8 @@ namespace AudioBookPlayer.App.Android.Services
                 }
 
                 audioBook = value;
-                chapterIndex = -1;
+                currentChapterIndex = -1;
+                currentFragmentIndex = -1;
                 CurrentPosition = TimeSpan.Zero;
 
                 /*System.Diagnostics.Debug.WriteLine($"Book: \"{audioBook.Title}\"");
@@ -71,7 +75,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         public int ChapterIndex
         {
-            get => chapterIndex;
+            get => currentChapterIndex;
             set
             {
                 if (value < 0 || value >= audioBook.Chapters.Count)
@@ -79,7 +83,7 @@ namespace AudioBookPlayer.App.Android.Services
                     throw new ArgumentException("Wrong chapter index", nameof(value));
                 }
 
-                if (value == chapterIndex)
+                if (value == currentChapterIndex)
                 {
                     return;
                 }
@@ -91,11 +95,13 @@ namespace AudioBookPlayer.App.Android.Services
                     PausePlaying();
                 }
 
-                chapterIndex = value;
-                chapter = audioBook.Chapters[chapterIndex];
+                currentChapterIndex = value;
+                currentFragmentIndex = 0;
+                currentChapter = audioBook.Chapters[currentChapterIndex];
+                currentFragment = currentChapter.Fragments[currentFragmentIndex];
                 CurrentPosition = TimeSpan.Zero;
 
-                System.Diagnostics.Debug.WriteLine($"[ChapterIndex] Set value: {chapterIndex}");
+                System.Diagnostics.Debug.WriteLine($"[ChapterIndex] Set value: {currentChapterIndex}");
 
                 RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
 
@@ -159,7 +165,7 @@ namespace AudioBookPlayer.App.Android.Services
         public override void OnCreate()
         {
             audioBook = null;
-            chapter = null;
+            currentChapter = null;
             currentPosition = TimeSpan.Zero;
 
             base.OnCreate();
@@ -184,7 +190,7 @@ namespace AudioBookPlayer.App.Android.Services
         public override void OnDestroy()
         {
             audioManager = null;
-            chapter = null;
+            currentChapter = null;
             audioBook = null;
 
             if (player.IsPlaying)
@@ -207,17 +213,27 @@ namespace AudioBookPlayer.App.Android.Services
                 throw new Exception();
             }
 
-            if (0 > chapterIndex)
+            if (0 > currentChapterIndex)
             {
                 throw new Exception();
             }
 
-            if (audioBook.Chapters.Count <= chapterIndex)
+            if (audioBook.Chapters.Count <= currentChapterIndex)
             {
                 throw new Exception();
             }
 
-            if (chapter.Duration <= currentPosition)
+            if (currentChapter.Duration <= currentPosition)
+            {
+                throw new Exception();
+            }
+
+            if (0 > currentFragmentIndex)
+            {
+                throw new Exception();
+            }
+
+            if (currentChapter.Fragments.Count <= currentFragmentIndex)
             {
                 throw new Exception();
             }
@@ -257,14 +273,17 @@ namespace AudioBookPlayer.App.Android.Services
 
         private bool OpenDataSource()
         {
-            var fragment = GetChapterFragment(currentPosition, chapter);
+            /*var fragmentIndex = GetChapterFragmentIndex(currentChapter, currentPosition);
 
-            if (null == fragment)
+            if (0 > fragmentIndex)
             {
                 return false;
             }
 
-            var descriptor = OpenFileDescriptor(fragment);
+            currentFragmentIndex = fragmentIndex;
+            currentFragment = currentChapter.Fragments[fragmentIndex];*/
+
+            var descriptor = OpenFileDescriptor(currentFragment);
 
             player.Reset();
             player.SetDataSource(descriptor);
@@ -282,7 +301,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void StartPlaying()
         {
-            var offset = (chapter.Start + currentPosition).TotalMilliseconds;
+            var offset = (currentChapter.Start + currentPosition).TotalMilliseconds;
             
             player.SeekTo((long)offset, MediaPlayerSeekMode.Closest);
             player.Start();
@@ -383,7 +402,50 @@ namespace AudioBookPlayer.App.Android.Services
             pendingEvents[eventName] = ++count;
         }
 
-        private static AudioBookChapterFragment GetChapterFragment(TimeSpan position, AudioBookChapter chapter)
+        private bool NextFragment()
+        {
+            var index = currentFragmentIndex + 1;
+
+            if (index >= currentChapter.Fragments.Count)
+            {
+                return false;
+            }
+
+            currentFragmentIndex = index;
+            currentFragment = currentChapter.Fragments[index];
+
+            return true;
+        }
+
+        private bool NextChapter()
+        {
+            var index = currentChapterIndex;
+
+            //if()
+            return false;
+        }
+
+        private static int GetChapterFragmentIndex(AudioBookChapter chapter, TimeSpan position)
+        {
+            if (chapter.Duration >= position)
+            {
+                for (var index = 0; index < chapter.Fragments.Count; index++)
+                {
+                    var fragment = chapter.Fragments[index];
+
+                    if (fragment.Duration > position)
+                    {
+                        return index;
+                    }
+
+                    position -= fragment.Duration;
+                }
+            }
+
+            return -1;
+        }
+
+        /*private AudioBookChapterFragment GetChapterFragment(TimeSpan position, AudioBookChapter chapter)
         {
             for (var index = 0; index < chapter.Fragments.Count; index++)
             {
@@ -391,6 +453,7 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (fragment.Duration > position)
                 {
+                    currentFragmentIndex
                     return fragment;
                 }
 
@@ -398,13 +461,13 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             return null;
-        }
+        }*/
 
-        private static AssetFileDescriptor OpenFileDescriptor(AudioBookChapterFragment fragment)
+        private AssetFileDescriptor OpenFileDescriptor(AudioBookChapterFragment fragment)
         {
             var contentResolver = Application.Context.ContentResolver;
             var source = fragment.SourceFile;
-            var uri = global::Android.Net.Uri.Parse(source.ContentUri);
+            var uri = Uri.Parse(source.ContentUri);
 
             return contentResolver.OpenAssetFileDescriptor(uri, "r");
         }
@@ -413,19 +476,35 @@ namespace AudioBookPlayer.App.Android.Services
         {
             var position = TimeSpan.FromMilliseconds(player.CurrentPosition);
 
-            if (null != chapter)
+            if (null != currentChapter)
             {
                 //var value = position - chapter.Start;
-
-                if (position > chapter.End)
+                if (position > currentFragment.End)
                 {
-                    chapterIndex++;
-                    chapter = audioBook.Chapters[chapterIndex];
+                    var fragmentIndex = currentFragmentIndex + 1;
+                    var sourceFile = currentFragment.SourceFile;
+
+                    if (fragmentIndex < currentChapter.Fragments.Count)
+                    {
+                        currentFragmentIndex = fragmentIndex;
+                        currentFragment = currentChapter.Fragments[fragmentIndex];
+
+                        if (currentFragment.SourceFile != sourceFile)
+                        {
+
+                        }
+                    }
+                }
+
+                if (position > currentChapter.End)
+                {
+                    currentChapterIndex++;
+                    currentChapter = audioBook.Chapters[currentChapterIndex];
 
                     RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
                 }
 
-                position -= chapter.Start;
+                position -= currentChapter.Start;
             }
 
             CurrentPosition = position;
