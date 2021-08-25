@@ -78,6 +78,7 @@
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
     <Compile Include="Services\PlaybackService.cs" />
+    <Compile Include="Services\PlaybackService.FailedState.cs" />
     <Compile Include="Services\PlaybackService.NoInitializedState.cs" />
     <Compile Include="Services\PlaybackService.PausedState.cs" />
     <Compile Include="Services\PlaybackService.PlayerState.cs" />

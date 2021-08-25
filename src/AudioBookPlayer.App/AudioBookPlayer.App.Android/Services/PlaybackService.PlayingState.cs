@@ -17,9 +17,9 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void SetAudioBook(AudioBook audioBook)
             {
-                if (Service.SetAudioBookInternal(audioBook))
+                if (Service.TrySetAudioBook(audioBook))
                 {
-                    Service.StopPlayingInternal();
+                    Service.StopPlaying();
 
                     if (0 == audioBook.Chapters.Count)
                     {
@@ -31,7 +31,11 @@ namespace AudioBookPlayer.App.Android.Services
                     }
 
                     Service.CurrentPosition = TimeSpan.Zero;
-                    Service.StartPlayingInternal(true);
+
+                    if (false == Service.TryStartPlaying(true))
+                    {
+                        Service.State = new FailedState(Service);
+                    }
                 }
             }
 
@@ -43,19 +47,33 @@ namespace AudioBookPlayer.App.Android.Services
 
                     if (sourceChanged)
                     {
-                        Service.StopPlayingInternal();
+                        Service.StopPlaying();
+                        Service.SetDataSource();
 
-                        if (Service.OpenDataSource())
+                        /*Service.CurrentPosition = TimeSpan.Zero;
+
+                        if (Service.TryStartPlaying(true))
                         {
-                            Service.CurrentPosition = TimeSpan.Zero;
-                            Service.StartPlayingInternal(true);
-                        }
+
+                        }*/
                     }
                     else
                     {
-                        Service.PausePlayingInternal();
-                        Service.CurrentPosition = TimeSpan.Zero;
-                        Service.StartPlayingInternal(true);
+                        Service.PausePlaying();
+
+                        /*Service.CurrentPosition = TimeSpan.Zero;
+
+                        if (Service.TryStartPlaying(true))
+                        {
+
+                        }*/
+                    }
+
+                    Service.CurrentPosition = TimeSpan.Zero;
+
+                    if (false == Service.TryStartPlaying(true))
+                    {
+                        Service.State = new FailedState(Service);
                     }
                 }
             }
@@ -67,7 +85,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void Pause()
             {
-                Service.PausePlayingInternal();
+                Service.PausePlaying();
                 Service.State = new PausedState(Service);
             }
         }
