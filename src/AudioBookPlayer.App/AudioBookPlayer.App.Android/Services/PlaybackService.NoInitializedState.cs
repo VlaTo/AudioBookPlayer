@@ -17,7 +17,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void SetAudioBook(AudioBook audioBook)
             {
-                if (Service.SetAudioBookInternal(audioBook))
+                if (Service.TrySetAudioBook(audioBook))
                 {
                     if (0 == audioBook.Chapters.Count)
                     {
@@ -48,12 +48,15 @@ namespace AudioBookPlayer.App.Android.Services
             public override void Play()
             {
                 Service.InitializePlayer();
-                
-                if (Service.OpenDataSource())
+                Service.SetDataSource();
+
+                if (Service.TryStartPlaying(true))
                 {
-                    Service.StartPlayingInternal(true);
                     Service.State = new PlayingState(Service);
+                    return;
                 }
+
+                Service.State = new FailedState(Service);
             }
 
             public override void Pause()

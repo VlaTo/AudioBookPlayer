@@ -22,8 +22,9 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (null == audioFocusRequest)
             {
-                audioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.GainTransientMayDuck)
+                audioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
                     .SetAudioAttributes(audioAttributes)
+                    .SetOnAudioFocusChangeListener(this)
                     .Build();
             }
 
@@ -31,7 +32,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (AudioFocusRequest.Granted != result)
             {
-                System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Audio focus not acquired!");
+                System.Diagnostics.Debug.WriteLine("[AndroidPlaybackService] [Acquire] Audio focus not acquired!");
             }
 
             return result;
@@ -48,16 +49,12 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (AudioFocusRequest.Granted != result)
             {
-                System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [StartPlayFile] Audio focus not acquired!");
+                System.Diagnostics.Debug.WriteLine("[AndroidPlaybackService] [Release] Cannot release Audio focus.");
             }
 
             audioFocusRequest = null;
         }
 
-        void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange)
-        {
-            System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] change: {focusChange}");
-            callback.Invoke(focusChange);
-        }
+        void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange) => callback.Invoke(focusChange);
     }
 }
