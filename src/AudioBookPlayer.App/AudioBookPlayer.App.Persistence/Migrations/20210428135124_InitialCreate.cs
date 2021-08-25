@@ -45,26 +45,36 @@ namespace AudioBookPlayer.App.Data.Migrations
             );
 
             migrationBuilder.CreateTable(
-                "sources",
+                "fragments",
                 table => new
                 {
                     Id = table
                         .Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     BookId = table.Column<long>(nullable: false),
-                    Filename = table.Column<string>(nullable: true)
+                    ChapterId = table.Column<long>(nullable: false),
+                    ContentUri = table.Column<string>(nullable: true),
+                    Start = table.Column<TimeSpan>(nullable: false),
+                    Length = table.Column<TimeSpan>(nullable: false),
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey(
-                        name: "PK_sources",
+                        name: "PK_fragments",
                         columns: x => x.Id
                     );
                     table.ForeignKey(
-                        name: "FK_sources_books_Id",
+                        name: "FK_fragments_books_Id",
                         column: x => x.BookId,
                         principalTable: "books",
                         principalColumn: nameof(Book.Id),
+                        onDelete: ReferentialAction.Cascade
+                    );
+                    table.ForeignKey(
+                        name: "FK_fragments_chapters_Id",
+                        column: x => x.ChapterId,
+                        principalTable: "chapters",
+                        principalColumn: nameof(Chapter.Id),
                         onDelete: ReferentialAction.Cascade
                     );
                 }
@@ -80,8 +90,8 @@ namespace AudioBookPlayer.App.Data.Migrations
                     Position = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: false),
                     BookId = table.Column<long>(nullable: false),
-                    SourceFileId = table.Column<long>(nullable: false),
-                    Offset = table.Column<TimeSpan>(nullable: false),
+                    PartId = table.Column<long>(nullable: true),
+                    Start = table.Column<TimeSpan>(nullable: false),
                     Length = table.Column<TimeSpan>(nullable: false)
                 },
                 constraints: table =>
@@ -98,10 +108,36 @@ namespace AudioBookPlayer.App.Data.Migrations
                         onDelete: ReferentialAction.Cascade
                     );
                     table.ForeignKey(
-                        name: "FK_chapters_sourcefile_Id",
-                        column: x => x.SourceFileId,
-                        principalTable: "sources",
-                        principalColumn: nameof(SourceFile.Id),
+                        name: "FK_chapters_part_Id",
+                        column: x => x.PartId,
+                        principalTable: "parts",
+                        principalColumn: nameof(Part.Id),
+                        onDelete: ReferentialAction.Cascade
+                    );
+                }
+            );
+
+            migrationBuilder.CreateTable(
+                "parts",
+                table => new
+                {
+                    Id = table
+                        .Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(nullable: false),
+                    BookId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey(
+                        name: "PK_parts",
+                        columns: x => x.Id
+                    );
+                    table.ForeignKey(
+                        name: "FK_chapters_book_Id",
+                        column: x => x.BookId,
+                        principalTable: "books",
+                        principalColumn: nameof(Book.Id),
                         onDelete: ReferentialAction.Cascade
                     );
                 }

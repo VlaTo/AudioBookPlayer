@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AudioBookPlayer.App.Persistence.Models
 {
-    [Table("sources")]
-    public class SourceFile
+    [Table("fragments")]
+    public class ChapterFragment
     {
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id
@@ -20,34 +21,42 @@ namespace AudioBookPlayer.App.Persistence.Models
             set;
         }
 
-        public string Filename
+        [Required]
+        public long ChapterId
         {
             get;
             set;
         }
 
-        /*[DataType(DataType.DateTime)]
-        public DateTime Created
+        public string ContentUri
         {
             get;
             set;
         }
 
-        [DataType(DataType.DateTime)]
-        public DateTime Modified
+        [DataType(DataType.Duration)]
+        public TimeSpan Start
         {
             get;
             set;
         }
 
-        public long Length
+        [DataType(DataType.Duration)]
+        public TimeSpan Length
         {
             get;
             set;
-        }*/
+        }
 
         [ForeignKey(nameof(BookId))]
         public Book Book
+        {
+            get;
+            set;
+        }
+
+        [ForeignKey(nameof(ChapterId))]
+        public Chapter Chapter
         {
             get;
             set;

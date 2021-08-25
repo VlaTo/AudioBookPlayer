@@ -131,8 +131,6 @@ namespace AudioBookPlayer.App.Android.Core
             {
                 var audioBookFile = CreateAudioBookFile(cursor, columns);
 
-                Debug.WriteLine($"[AudioBookFileScanner] '{audioBookFile.Artist}', '{audioBookFile.Title}', '{audioBookFile.Name}'");
-
                 yield return audioBookFile;
 
                 success = cursor.MoveToNext();

@@ -25,7 +25,7 @@ namespace AudioBookPlayer.App.Persistence
             set;
         }
 
-        public sealed override DbSet<SourceFile> SourceFiles
+        public sealed override DbSet<ChapterFragment> ChapterFragments
         {
             get;
             set;
@@ -44,6 +44,12 @@ namespace AudioBookPlayer.App.Persistence
         }
 
         public sealed override DbSet<Chapter> Chapters
+        {
+            get;
+            set;
+        }
+        
+        public sealed override DbSet<Part> Parts
         {
             get;
             set;
@@ -98,37 +104,42 @@ namespace AudioBookPlayer.App.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // SourceFiles
-            modelBuilder.Entity<SourceFile>()
-                .HasIndex(sf => new {sf.Id, sf.BookId})
+            // ChapterFragments
+            modelBuilder.Entity<ChapterFragment>()
+                .HasIndex(chapterFragment => new {chapterFragment.BookId, chapterFragment.ChapterId})
                 .IsUnique();
 
             // BookImages
             modelBuilder.Entity<BookImage>()
-                .HasIndex(bi => new {bi.Id, bi.BookId})
+                .HasIndex(bookImage => new {bookImage.Id, bookImage.BookId})
+                .IsUnique();
+
+            // Parts
+            modelBuilder.Entity<Part>()
+                .HasIndex(part => new { part.Id, part.BookId })
                 .IsUnique();
 
             // Chapters
             modelBuilder.Entity<Chapter>()
-                .HasIndex(bi => new {bi.Id, bi.BookId})
+                .HasIndex(chapter => new {chapter.Id, chapter.BookId})
                 .IsUnique();
 
             modelBuilder.Entity<Chapter>()
-                .HasIndex(bi => new {bi.Position});
+                .HasIndex(chapter => new {chapter.Position});
 
             // AuthorBooks
             modelBuilder.Entity<AuthorBook>()
-                .HasKey(ab => new {ab.AuthorId, ab.BookId});
+                .HasKey(authorBook => new {authorBook.AuthorId, authorBook.BookId});
 
             modelBuilder.Entity<AuthorBook>()
-                .HasOne(ab => ab.Book)
-                .WithMany(b => b.AuthorBooks)
-                .HasForeignKey(ab => ab.BookId);
+                .HasOne(authorBook => authorBook.Book)
+                .WithMany(book => book.AuthorBooks)
+                .HasForeignKey(authorBook => authorBook.BookId);
 
             modelBuilder.Entity<AuthorBook>()
-                .HasOne(ab => ab.Author)
-                .WithMany(a => a.AuthorBooks)
-                .HasForeignKey(ab => ab.AuthorId);
+                .HasOne(authorBook => authorBook.Author)
+                .WithMany(author => author.AuthorBooks)
+                .HasForeignKey(authorBook => authorBook.AuthorId);
         }
         
         /*private void CreateMigrationHistory()

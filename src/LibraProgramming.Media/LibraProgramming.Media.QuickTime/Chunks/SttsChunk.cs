@@ -65,14 +65,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
 
             using (var source = new ReadOnlyAtomStream(atom.Stream, start, length))
             {
-                var bufferSize = Math.Min((int) source.Length, 10240);
-                using (var stream = new BufferedStream(source, bufferSize))
+                for (var index = 0; index < numberOfTimes; index++)
                 {
-                    for (var index = 0; index < numberOfTimes; index++)
-                    {
-                        var timeToSample = TimeToSample.ReadFromStream(stream);
-                        timeToSamples[index] = timeToSample;
-                    }
+                    var timeToSample = TimeToSample.ReadFromStream(source);
+                    timeToSamples[index] = timeToSample;
                 }
             }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -35,16 +36,15 @@ namespace AudioBookPlayer.App.Persistence.Models
             get;
             set;
         }
-        
-        [Required]
-        public long SourceFileId
+
+        public long PartId
         {
             get;
             set;
         }
 
         [DataType(DataType.Duration)]
-        public TimeSpan Offset
+        public TimeSpan Start
         {
             get;
             set;
@@ -63,9 +63,15 @@ namespace AudioBookPlayer.App.Persistence.Models
             get;
             set;
         }
+        
+        [ForeignKey(nameof(PartId))]
+        public Part Part
+        {
+            get;
+            set;
+        }
 
-        [ForeignKey(nameof(SourceFileId))]
-        public SourceFile SourceFile
+        public ICollection<ChapterFragment> ChapterFragments
         {
             get;
             set;

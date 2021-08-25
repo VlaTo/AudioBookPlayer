@@ -32,19 +32,19 @@ namespace AudioBookPlayer.App.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                 })
-                .Entity("AudioBookPlayer.App.Data.Models.SourceFile", b =>
+                .Entity("AudioBookPlayer.App.Data.Models.ChapterFragment", b =>
                 {
-                    b.Property<int>(nameof(SourceFile.Id)).ValueGeneratedOnAdd();
-                    b.Property<int>(nameof(SourceFile.BookId)).IsRequired();
-                    b.Property<string>(nameof(SourceFile.Filename));
+                    b.Property<int>(nameof(ChapterFragment.Id)).ValueGeneratedOnAdd();
+                    b.Property<int>(nameof(ChapterFragment.BookId)).IsRequired();
+                    b.Property<string>(nameof(ChapterFragment.ContentUri));
 
-                    b.HasKey(nameof(SourceFile.Id));
-                    b.HasIndex(nameof(SourceFile.BookId));
+                    b.HasKey(nameof(ChapterFragment.Id));
+                    b.HasIndex(nameof(ChapterFragment.BookId));
                     b.ToTable("sources");
 
-                    b.HasOne("AudioBookPlayer.App.Data.Models.Book", nameof(SourceFile.Book))
-                        .WithMany(nameof(Book.SourceFiles))
-                        .HasForeignKey(nameof(SourceFile.BookId))
+                    b.HasOne("AudioBookPlayer.App.Data.Models.Book", nameof(ChapterFragment.Book))
+                        .WithMany(nameof(Book.ChapterFragments))
+                        .HasForeignKey(nameof(ChapterFragment.BookId))
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -31,10 +31,36 @@
                 CornerRadius="8">
                 <StackLayout
                     Orientation="Vertical">
+                    <BoxView
+                        Color="DarkGray"
+                        CornerRadius="3"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Start"
+                        Margin="0,0,0,8"
+                        WidthRequest="66"
+                        HeightRequest="6">
+                    </BoxView>
                     <CollectionView
-                        ItemsSource="{Binding Path=Chapters, Mode=OneWay}"
+                        ItemsSource="{Binding Path=ChapterGroups, Mode=OneWay}"
                         SelectedItem="{Binding Path=SelectedChapter, Mode=TwoWay}"
+                        IsGrouped="True"
                         SelectionMode="Single">
+                        <CollectionView.GroupHeaderTemplate>
+                            <DataTemplate x:DataType="viewmodels:ChapterGroupViewModel">
+                                <StackLayout
+                                    Orientation="Horizontal">
+                                    <Label
+                                        TextColor="DimGray"
+                                        Text="{Binding Path=Title, Mode=OneTime}"
+                                        VerticalOptions="CenterAndExpand" 
+                                        HorizontalOptions="StartAndExpand"
+                                        HorizontalTextAlignment="Start"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.GroupHeaderTemplate>
                         <CollectionView.ItemTemplate>
                             <DataTemplate
                                 x:DataType="viewmodels:ChapterViewModel">

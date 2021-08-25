@@ -22,7 +22,7 @@ namespace AudioBookPlayer.App.Domain.Models
             ContentUri = contentUri;
         }
 
-        public override Task<Stream> GetStreamSync(CancellationToken cancellationToken = default)
+        public override Task<Stream> GetStreamAsync(CancellationToken cancellationToken = default)
         {
             var stream = provider.GetImageAsync(ContentUri, cancellationToken);
             return stream;

@@ -55,6 +55,11 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
+        public IList<AudioBookPart> Parts
+        {
+            get;
+        }
+
         public IList<AudioBookChapter> Chapters
         {
             get;
@@ -75,9 +80,9 @@ namespace AudioBookPlayer.App.Domain.Models
             Id = id;
             Title = title;
             Authors = new List<AudioBookAuthor>();
-            Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
-            //Images = new OwnedCollection<AudioBookImage>(OnImagesCollectionChanged);
+            Parts = new List<AudioBookPart>();
             Images = new List<AudioBookImage>();
+            Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
             SourceFiles = new OwnedCollection<AudioBookSourceFile>(OnSourceFilesCollectionChanged);
         }
 
@@ -89,11 +94,6 @@ namespace AudioBookPlayer.App.Domain.Models
         private void OnSourceFilesCollectionChanged(CollectionChange action, int index)
         {
             ;
-        }
-
-        private void OnImagesCollectionChanged(CollectionChange action, int index)
-        {
-            throw new NotImplementedException();
         }
     }
 }

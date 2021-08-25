@@ -17,7 +17,7 @@ namespace AudioBookPlayer.App.Models
             this.memory = memory;
         }
 
-        public override Task<Stream> GetStreamSync(CancellationToken cancellationToken = default)
+        public override Task<Stream> GetStreamAsync(CancellationToken cancellationToken = default)
         {
             var stream = memory.AsStream();
             return Task.FromResult(stream);

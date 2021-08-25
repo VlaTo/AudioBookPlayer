@@ -43,17 +43,23 @@ namespace AudioBookPlayer.App.Domain.Models
 
         public TimeSpan End => Start + Duration;
 
+        public AudioBookPart Part
+        {
+            get;
+        }
+
         public IList<AudioBookChapterFragment> Fragments
         {
             get;
         }
 
-        public AudioBookChapter(AudioBook audioBook, string title, TimeSpan start)
+        public AudioBookChapter(AudioBook audioBook, string title, TimeSpan start, AudioBookPart part = null)
         {
             AudioBook = audioBook;
             Title = title;
             Start = start;
             Fragments = new OwnedCollection<AudioBookChapterFragment>(OnCollectionChanged);
+            Part = part;
         }
 
         private void OnCollectionChanged(CollectionChange action, int index)
