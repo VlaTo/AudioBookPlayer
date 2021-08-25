@@ -50,7 +50,13 @@ namespace AudioBookPlayer.App.Persistence.Models
             set;
         }
 
-        public ICollection<SourceFile> SourceFiles
+        public ICollection<ChapterFragment> ChapterFragments
+        {
+            get;
+            set;
+        }
+
+        public ICollection<Part> Parts
         {
             get;
             set;

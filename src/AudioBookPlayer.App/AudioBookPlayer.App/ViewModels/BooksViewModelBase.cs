@@ -110,7 +110,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             if (0 < book.Images.Count)
             {
-                model.ImageSource = book.Images[0].GetStreamSync;
+                model.ImageSource = book.Images[0].GetStreamAsync;
             }
 
             return model;

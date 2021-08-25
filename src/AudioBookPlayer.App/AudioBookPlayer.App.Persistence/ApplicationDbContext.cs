@@ -17,7 +17,7 @@ namespace AudioBookPlayer.App.Persistence
             set;
         }
 
-        public abstract DbSet<SourceFile> SourceFiles
+        public abstract DbSet<ChapterFragment> ChapterFragments
         {
             get;
             set;
@@ -36,6 +36,12 @@ namespace AudioBookPlayer.App.Persistence
         }
 
         public abstract DbSet<Chapter> Chapters
+        {
+            get;
+            set;
+        }
+
+        public abstract DbSet<Part> Parts
         {
             get;
             set;

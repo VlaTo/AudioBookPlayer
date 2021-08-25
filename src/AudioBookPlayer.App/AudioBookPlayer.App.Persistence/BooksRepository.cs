@@ -5,10 +5,12 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Extensions;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace AudioBookPlayer.App.Persistence
 {
@@ -32,14 +34,16 @@ namespace AudioBookPlayer.App.Persistence
                 Synopsis = model.Synopsis,
                 Duration = model.Duration,
                 AuthorBooks = new List<AuthorBook>(),
-                SourceFiles = new List<SourceFile>(),
+                ChapterFragments = new List<ChapterFragment>(),
                 Images = new List<BookImage>(),
+                Parts = new List<Part>(),
                 Chapters = new List<Chapter>()
             };
 
-            await context.Books.AddAsync(book);
+            EnsureKeyAssigned(await context.Books.AddAsync(book));
 
             await AddAuthorsAsync(book, model.Authors, CancellationToken.None);
+            await AddPartsAsync(book, model.Parts, CancellationToken.None);
             await AddChaptersAsync(book, model.Chapters, CancellationToken.None);
             await AddCoverImagesAsync(book, model.Images, CancellationToken.None);
 
@@ -51,9 +55,13 @@ namespace AudioBookPlayer.App.Persistence
             var book = await context.Books
                 .Include(book => book.AuthorBooks)
                 .ThenInclude(ab => ab.Author)
+                .Include(book => book.Parts)
+                .ThenInclude(part => part.Chapters)
                 .Include(book => book.Chapters)
-                .ThenInclude(chapter => chapter.SourceFile)
-                .Include(book => book.SourceFiles)
+                .ThenInclude(chapter => chapter.ChapterFragments)
+                .Include(book => book.Chapters)
+                .ThenInclude(chapter => chapter.Part)
+                .Include(book => book.ChapterFragments)
                 .Include(book => book.Images)
                 .Where(book => book.Id == id)
                 .AsNoTracking()
@@ -82,9 +90,13 @@ namespace AudioBookPlayer.App.Persistence
             var books = await context.Books
                 .Include(book => book.AuthorBooks)
                 .ThenInclude(ab => ab.Author)
+                .Include(book => book.Parts)
+                .ThenInclude(part => part.Chapters)
                 .Include(book => book.Chapters)
-                .ThenInclude(chapter => chapter.SourceFile)
-                .Include(book => book.SourceFiles)
+                .ThenInclude(chapter => chapter.ChapterFragments)
+                .Include(book => book.Chapters)
+                .ThenInclude(chapter => chapter.Part)
+                .Include(book => book.ChapterFragments)
                 .Include(book => book.Images)
                 .Where(book => !book.DoNotShow)
                 .OrderBy(book => book.Id)
@@ -130,36 +142,68 @@ namespace AudioBookPlayer.App.Persistence
             }
         }
 
+        private async Task AddPartsAsync(Book book, IList<AudioBookPart> parts, CancellationToken cancellationToken)
+        {
+            for (var partIndex = 0; partIndex < parts.Count; partIndex++)
+            {
+                var source = parts[partIndex];
+                var part = new Part
+                {
+                    Book = book,
+                    Title = source.Title,
+                    Chapters = new List<Chapter>()
+                };
+
+                book.Parts.Add(part);
+
+                EnsureKeyAssigned(await context.Parts.AddAsync(part, cancellationToken));
+            }
+        }
+
         private async Task AddChaptersAsync(Book book, IList<AudioBookChapter> chapters, CancellationToken cancellation)
         {
             for (var chapterIndex = 0; chapterIndex < chapters.Count; chapterIndex++)
             {
                 var sourceChapter = chapters[chapterIndex];
+                var chapter = new Chapter
+                {
+                    Position = chapterIndex,
+                    Title = sourceChapter.Title,
+                    Start = sourceChapter.Start,
+                    Length = sourceChapter.Duration,
+                    Book = book,
+                    ChapterFragments = new List<ChapterFragment>()
+                };
+
+                if (null != sourceChapter.Part)
+                {
+                    var part = GetPart(book, sourceChapter.Part.Title);
+
+                    if (null != part)
+                    {
+                        part.Chapters.Add(chapter);
+                    }
+                }
+
+                book.Chapters.Add(chapter);
+
+                EnsureKeyAssigned(await context.Chapters.AddAsync(chapter, cancellation));
 
                 for (var index = 0; index < sourceChapter.Fragments.Count; index++)
                 {
                     var sourceFragment = sourceChapter.Fragments[index];
-                    var sourceFile = new SourceFile
+                    var fragment = new ChapterFragment
                     {
-                        Filename = sourceFragment.SourceFile.ContentUri,
+                        ContentUri = sourceFragment.SourceFile.ContentUri,
+                        Start = sourceFragment.Start,
+                        Length = sourceFragment.Duration,
                         Book = book
                     };
 
-                    var chapter = new Chapter
-                    {
-                        Position = chapterIndex,
-                        Title = sourceChapter.Title,
-                        Offset = sourceChapter.Start,
-                        Length = sourceChapter.Duration,
-                        Book = book,
-                        SourceFile = sourceFile
-                    };
+                    chapter.ChapterFragments.Add(fragment);
+                    book.ChapterFragments.Add(fragment);
 
-                    book.SourceFiles.Add(sourceFile);
-                    book.Chapters.Add(chapter);
-
-                    await context.SourceFiles.AddAsync(sourceFile, cancellation);
-                    await context.Chapters.AddAsync(chapter, cancellation);
+                    EnsureKeyAssigned(await context.ChapterFragments.AddAsync(fragment, cancellation));
                 }
             }
         }
@@ -172,8 +216,13 @@ namespace AudioBookPlayer.App.Persistence
             for (var imageIndex = 0; imageIndex < images.Count; imageIndex++)
             {
                 var sourceImage = images[imageIndex];
-                var stream = await sourceImage.GetStreamSync(cancellationToken);
-                var contentUri = await coverService.AddImageAsync(stream, cancellationToken);
+                string contentUri;
+                
+                await using (var stream = await sourceImage.GetStreamAsync(cancellationToken))
+                {
+                    contentUri = await coverService.AddImageAsync(stream, cancellationToken);
+                }
+
                 var bookImage = new BookImage
                 {
                     Book = book,
@@ -182,12 +231,7 @@ namespace AudioBookPlayer.App.Persistence
 
                 book.Images.Add(bookImage);
 
-                var entry = await context.BookImages.AddAsync(bookImage, cancellationToken);
-
-                if (EntityState.Added == entry.State)
-                {
-                    ;
-                }
+                EnsureKeyAssigned(await context.BookImages.AddAsync(bookImage, cancellationToken));
             }
         }
 
@@ -206,12 +250,22 @@ namespace AudioBookPlayer.App.Persistence
 
             foreach (var bookChapter in source.Chapters.OrderBy(chapter => chapter.Position))
             {
-                var chapter = new AudioBookChapter(audioBook, bookChapter.Title, bookChapter.Offset);
-                var sourceFile = GetOrCreateSourceFile(audioBook, bookChapter.SourceFile);
-                var fragment = new AudioBookChapterFragment(bookChapter.Offset, bookChapter.Length, sourceFile);
+                var part = audioBook.GetOrCreatePart(bookChapter.Part?.Title);
+                var chapter = new AudioBookChapter(audioBook, bookChapter.Title, bookChapter.Start, part);
+
+                if (null != part)
+                {
+                    part.Chapters.Add(chapter);
+                }
+
+                foreach (var chapterFragment in bookChapter.ChapterFragments)
+                {
+                    var sourceFile = GetOrCreateSourceFile(audioBook, chapterFragment);
+                    var fragment = new AudioBookChapterFragment(chapterFragment.Start, chapterFragment.Length, sourceFile);
+                    chapter.Fragments.Add(fragment);
+                }
 
                 audioBook.Chapters.Add(chapter);
-                chapter.Fragments.Add(fragment);
             }
 
             foreach (var bookImage in source.Images)
@@ -223,9 +277,9 @@ namespace AudioBookPlayer.App.Persistence
             return audioBook;
         }
 
-        private static AudioBookSourceFile GetOrCreateSourceFile(AudioBook audioBook, SourceFile sourceFile)
+        private static AudioBookSourceFile GetOrCreateSourceFile(AudioBook audioBook, ChapterFragment chapterFragment)
         {
-            var contentUri = sourceFile.Filename;
+            var contentUri = chapterFragment.ContentUri;
 
             foreach (var bookSourceFile in audioBook.SourceFiles)
             {
@@ -240,6 +294,29 @@ namespace AudioBookPlayer.App.Persistence
             audioBook.SourceFiles.Add(source);
 
             return source;
+        }
+
+        private static Part GetPart(Book book, string title)
+        {
+            return book.Parts.FirstOrDefault(
+                part => String.Equals(part.Title, title, StringComparison.InvariantCulture)
+            );
+        }
+
+        private static void EnsureKeyAssigned<T>(EntityEntry<T> entry)
+            where T : class
+        {
+            if (null == entry)
+            {
+                throw new Exception();
+            }
+
+            /*if (EntityState.Added == entry.State && entry.IsKeySet)
+            {
+                return;
+            }
+
+            throw new Exception();*/
         }
     }
 }

@@ -17,6 +17,6 @@ namespace AudioBookPlayer.App.Domain.Models
             AudioBook = audioBook;
         }
 
-        public abstract Task<Stream> GetStreamSync(CancellationToken cancellationToken = default);
+        public abstract Task<Stream> GetStreamAsync(CancellationToken cancellationToken = default);
     }
 }

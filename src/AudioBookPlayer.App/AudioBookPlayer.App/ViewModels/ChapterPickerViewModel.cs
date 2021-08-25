@@ -18,7 +18,7 @@ namespace AudioBookPlayer.App.ViewModels
         private ChapterViewModel selectedChapter;
         private bool isInitializing;
 
-        public ObservableCollection<ChapterViewModel> Chapters
+        public ObservableCollection<IChapterViewModel> ChapterGroups
         {
             get;
         }
@@ -41,7 +41,10 @@ namespace AudioBookPlayer.App.ViewModels
                         return;
                     }
 
-                    playbackService.ChapterIndex = FindChapterIndex(selectedChapter);
+                    if (null != selectedChapter)
+                    {
+                        playbackService.ChapterIndex = selectedChapter.Index;
+                    }
 
                     DoClose(false);
                 }
@@ -65,9 +68,10 @@ namespace AudioBookPlayer.App.ViewModels
 
             Close = new Command(DoCancel);
             CloseRequest = new InteractionRequest<ClosePopupRequestContext>();
-            Chapters = new ObservableCollection<ChapterViewModel>();
-            ChapterIndex = -1;
-            SelectedChapter = null;
+            ChapterGroups = new ObservableCollection<IChapterViewModel>();
+            
+            chapterIndex = -1;
+            selectedChapter = null;
         }
 
         public void OnInitialize()
@@ -77,9 +81,10 @@ namespace AudioBookPlayer.App.ViewModels
 
         private int FindChapterIndex(ChapterViewModel model)
         {
-            for (var index = 0; index < Chapters.Count; index++)
+
+            for (var index = 0; index < ChapterGroups.Count; index++)
             {
-                var current = Chapters[index];
+                var current = ChapterGroups[index];
 
                 if (ReferenceEquals(current, model))
                 {
@@ -96,24 +101,60 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 isInitializing = true;
 
-                var chapters = playbackService.AudioBook.Chapters;
                 ChapterViewModel selection = null;
 
-                for (var index = 0; index < chapters.Count; index++)
+                var localIndex = 0;
+
+                for (var partIndex = 0; partIndex < playbackService.AudioBook.Parts.Count; partIndex++)
                 {
-                    var chapter = chapters[index];
-                    var model = new ChapterViewModel
+                    var part = playbackService.AudioBook.Parts[partIndex];
+                    var groupEntry = new ChapterGroupViewModel
                     {
-                        Title = chapter.Title
+                        Title = part.Title
                     };
 
-                    Chapters.Add(model);
+                    ChapterGroups.Add(groupEntry);
 
-                    if (index == playbackService.ChapterIndex)
+                    for (var index = 0; index < part.Chapters.Count; index++)
                     {
-                        selection = model;
+                        var chapter = part.Chapters[index];
+                        var chapterViewModel = new ChapterViewModel(localIndex)
+                        {
+                            Title = chapter.Title
+                        };
+
+                        groupEntry.Entries.Add(chapterViewModel);
+
+                        if (localIndex++ == playbackService.ChapterIndex)
+                        {
+                            selection = chapterViewModel;
+                        }
                     }
                 }
+
+
+                /*else
+                {
+                    HasGroups = false;
+
+                    var chapters = playbackService.AudioBook.Chapters;
+
+                    for (var index = 0; index < chapters.Count; index++)
+                    {
+                        var chapter = chapters[index];
+                        var model = new ChapterViewModel
+                        {
+                            Title = chapter.Title
+                        };
+
+                        ViewModels.Add(model);
+
+                        if (index == playbackService.ChapterIndex)
+                        {
+                            selection = model;
+                        }
+                    }
+                }*/
 
                 if (null != selection)
                 {

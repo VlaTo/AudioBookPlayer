@@ -1,6 +1,5 @@
 ﻿using LibraProgramming.Media.QuickTime.Components;
 using System;
-using System.IO;
 
 namespace LibraProgramming.Media.QuickTime.Chunks
 {
@@ -58,14 +57,10 @@ namespace LibraProgramming.Media.QuickTime.Chunks
                 // possible problem with start offset here as in Chunks\SttsChunk.cs:66
                 using (var source = new ReadOnlyAtomStream(atom.Stream, 0L, length))
                 {
-                    var bufferSize = Math.Min((int)source.Length, 10240);
-                    using (var stream = new BufferedStream(source, bufferSize))
+                    for (var index = 0; index < numberOfSizes; index++)
                     {
-                        for (var index = 0; index < numberOfSizes; index++)
-                        {
-                            var blockSize = StreamHelper.ReadUInt32(stream);
-                            sampleSizes[index] = blockSize;
-                        }
+                        var blockSize = StreamHelper.ReadUInt32(source);
+                        sampleSizes[index] = blockSize;
                     }
                 }
 

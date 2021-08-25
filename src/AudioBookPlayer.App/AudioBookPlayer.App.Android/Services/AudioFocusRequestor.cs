@@ -1,4 +1,5 @@
-﻿using Android.Media;
+﻿using System;
+using Android.Media;
 using Android.Runtime;
 
 namespace AudioBookPlayer.App.Android.Services
@@ -7,12 +8,14 @@ namespace AudioBookPlayer.App.Android.Services
     {
         private readonly AudioManager audioManager;
         private readonly AudioAttributes audioAttributes;
+        private readonly Action<AudioFocus> callback;
         private AudioFocusRequestClass audioFocusRequest;
 
-        public AudioFocusRequestor(AudioManager audioManager, AudioAttributes audioAttributes)
+        public AudioFocusRequestor(AudioManager audioManager, AudioAttributes audioAttributes, Action<AudioFocus> callback)
         {
             this.audioManager = audioManager;
             this.audioAttributes = audioAttributes;
+            this.callback = callback;
         }
 
         public AudioFocusRequest Acquire()
@@ -53,36 +56,8 @@ namespace AudioBookPlayer.App.Android.Services
 
         void AudioManager.IOnAudioFocusChangeListener.OnAudioFocusChange([GeneratedEnum] AudioFocus focusChange)
         {
-            switch (focusChange)
-            {
-                case AudioFocus.Gain:
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Start playing");
-
-                    break;
-                }
-
-                case AudioFocus.Loss:
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Stop playing");
-
-                    break;
-                }
-
-                case AudioFocus.LossTransient:
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Payse playing");
-
-                    break;
-                }
-
-                case AudioFocus.LossTransientCanDuck:
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] Mute playing");
-
-                    break;
-                }
-            }
+            System.Diagnostics.Debug.WriteLine($"[AndroidPlaybackService] [OnAudioFocusChange] change: {focusChange}");
+            callback.Invoke(focusChange);
         }
     }
 }

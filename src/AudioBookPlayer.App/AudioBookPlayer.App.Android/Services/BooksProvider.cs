@@ -10,8 +10,10 @@ using LibraProgramming.Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Extensions;
 using AudioBookPlayer.App.Models;
 using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
@@ -56,22 +58,50 @@ namespace AudioBookPlayer.App.Android.Services
                             continue;
                         }
 
-                        using (var stream = descriptor.CreateInputStream())
+                        using (var stream = new BufferedStream(descriptor.CreateInputStream(), 20480))
                         {
                             var mediaInfo = provider.ExtractMediaInfo(stream);
                             var audioBook = GetOrCreateAudioBook(audioBooks, audioFile, mediaInfo);
+                            var sourceFiles = new Dictionary<string, TimeSpan>();
 
                             foreach (var track in mediaInfo.Tracks)
                             {
-                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration);
-                                var sourceFile = new AudioBookSourceFile(audioBook, audioFile.ContentUri.ToString());
+                                var contentUri = audioFile.ContentUri.ToString();
+                                var part = audioBook.GetOrCreatePart(audioFile.Title);
+                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration, part);
+                                var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
 
-                                var fragment = new AudioBookChapterFragment(audioBook.Duration, track.Duration, sourceFile);
+                                if (null != part)
+                                {
+                                    part.Chapters.Add(chapter);
+                                }
+
+                                if (false == sourceFiles.TryGetValue(contentUri, out var duration))
+                                {
+                                    duration = TimeSpan.Zero;
+                                }
+
+                                var fragment = new AudioBookChapterFragment(duration, track.Duration, sourceFile);
 
                                 chapter.Fragments.Add(fragment);
                                 audioBook.Chapters.Add(chapter);
                                 audioBook.SourceFiles.Add(sourceFile);
+
+                                sourceFiles[contentUri] = duration + track.Duration;
                             }
+
+                            /*foreach (var chapter in audioBook.Chapters)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync] Chapter: \"{chapter.Title}\" from: {chapter.Start:g} end: {chapter.End:g} (duration: {chapter.Duration:g})");
+                                for (var index = 0; index < chapter.Fragments.Count; index++)
+                                {
+                                    var fragment = chapter.Fragments[index];
+                                    System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync]   [{index}]: \"{fragment.SourceFile.ContentUri}\" from: {fragment.Start:g} end: {fragment.End:g} (duration: {fragment.Duration:g})");
+                                }
+                            }
+
+                            System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync] AudioBook duration: {audioBook.Duration:g}");
+                            System.Diagnostics.Debug.WriteLine(null);*/
 
                             foreach (var kvp in mediaInfo.Meta)
                             {
@@ -81,17 +111,7 @@ namespace AudioBookPlayer.App.Android.Services
                                     {
                                         if (kvp.Value[index] is MemoryValue item)
                                         {
-                                            /*using (var input = item.Memory.AsStream())
-                                            {
-                                                var bitmap = await BitmapFactory.DecodeStreamAsync(input);
-                                                var bi = bitmap.GetBitmapInfo();
-                                                //MimeTypeMap.Singleton.
-                                                //bi.Format
-                                            }*/
-
-                                            var key = Guid.NewGuid().ToString("N");
                                             var image = new StreamAudioBookImage(audioBook, item.Memory);
-                                            
                                             audioBook.Images.Add(image);
                                         }
                                     }

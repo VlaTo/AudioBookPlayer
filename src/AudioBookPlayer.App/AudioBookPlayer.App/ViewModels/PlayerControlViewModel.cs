@@ -374,15 +374,16 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 using (playbackService.BatchUpdate())
                 {
-                    var index = 0 < book.Chapters.Count ? 0 : -1;
+                    //var index = 0 < book.Chapters.Count ? 0 : -1;
 
                     playbackService.AudioBook = book;
-                    playbackService.ChapterIndex = index;
+                    //playbackService.ChapterIndex = index;
                 }
             }
             else
             {
                 // should we clear book properties?
+
             }
         }
 
@@ -495,7 +496,7 @@ namespace AudioBookPlayer.App.ViewModels
             BookPosition = TimeSpan.Zero;
 
             ImageSource = 0 < playbackService.AudioBook.Images.Count
-                ? (Func<CancellationToken, Task<Stream>>)playbackService.AudioBook.Images[0].GetStreamSync
+                ? (Func<CancellationToken, Task<Stream>>)playbackService.AudioBook.Images[0].GetStreamAsync
                 : null;
         }
     }

@@ -78,9 +78,13 @@
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
     <Compile Include="Services\PlaybackService.cs" />
+    <Compile Include="Services\PlaybackService.NoInitializedState.cs" />
+    <Compile Include="Services\PlaybackService.PausedState.cs" />
+    <Compile Include="Services\PlaybackService.PlayerState.cs" />
+    <Compile Include="Services\PlaybackService.PlayingState.cs" />
+    <Compile Include="Services\PlaybackService.UpdateToken.cs" />
     <Compile Include="Services\PlaybackServiceBinder.cs" />
     <Compile Include="Services\PlaybackServiceConnection.cs" />
-    <Compile Include="Services\StorageSourceService.cs" />
     <Compile Include="Services\ToastService.cs" />
     <Compile Include="SplashActivity.cs" />
   </ItemGroup>
