@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Core\Collections\**" />
+    <EmbeddedResource Remove="Core\Collections\**" />
+    <None Remove="Core\Collections\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Resources\Fonts\fa-brands-400.ttf" />
     <None Remove="Resources\Fonts\fa-regular-400.ttf" />
     <None Remove="Resources\Fonts\fa-solid-900.ttf" />
@@ -75,10 +81,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Collections\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj" />
@@ -89,6 +91,5 @@
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
     <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj" />
     <ProjectReference Include="..\AudioBookPlayer.App.Persistence.LiteDb\AudioBookPlayer.App.Persistence.LiteDb.csproj" />
-    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj" />
   </ItemGroup>
 </Project>

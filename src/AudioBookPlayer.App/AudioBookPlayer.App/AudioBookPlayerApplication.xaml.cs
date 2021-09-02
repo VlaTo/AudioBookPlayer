@@ -1,18 +1,15 @@
-﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.SqLite;
-using AudioBookPlayer.App.Services;
-using LibraProgramming.Xamarin.Dependency.Container;
-using LibraProgramming.Xamarin.Popups.Services;
-using Microsoft.Data.Sqlite;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Persistence.LiteDb;
+using AudioBookPlayer.App.Services;
+using LibraProgramming.Xamarin.Dependency.Container;
+using LibraProgramming.Xamarin.Popups.Services;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using IUnitOfWorkFactory = AudioBookPlayer.App.Core.IUnitOfWorkFactory;
 
 namespace AudioBookPlayer.App
 {
@@ -122,11 +119,6 @@ namespace AudioBookPlayer.App
             try
             {
                 db.Initialize();
-            }
-            catch (SqliteException exception)
-            {
-                Console.WriteLine(exception);
-                throw;
             }
             catch (Exception exception)
             {

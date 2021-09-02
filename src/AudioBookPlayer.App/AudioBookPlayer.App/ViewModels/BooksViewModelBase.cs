@@ -1,12 +1,11 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence.SqLite;
+using AudioBookPlayer.App.Persistence.LiteDb;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using AudioBookPlayer.App.Persistence.LiteDb;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
