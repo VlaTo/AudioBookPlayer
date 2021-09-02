@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    x:Class="AudioBookPlayer.App.Views.BooksViewPage"
+    core:ViewModelLocation.AutowireViewModel="True"
+    xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:views="clr-namespace:AudioBookPlayer.App.Views"
+    xmlns:ext="clr-namespace:AudioBookPlayer.App.Extensions"
+    xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App">
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            
+            <core:TimeSpanConverter x:Key="SpanConverter" />
+            <core:ImageBlobConverter x:Key="BlobConverter" />
+
+            <Style
+                x:Key="NoBooksLabelStyle"
+                TargetType="Label">
+                <Setter
+                    Property="FontSize">
+                    <Setter.Value>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="iOS" Value="14" />
+                            <On Platform="Android" Value="16" />
+                        </OnPlatform>
+                    </Setter.Value>
+                </Setter>
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Dark={StaticResource DarkSecondaryTextColor}, Light={StaticResource LightSecondaryTextColor}}"
+                />
+            </Style>
+
+            <Style
+                x:Key="SubtitleLabelStyle"
+                TargetType="Label">
+                <Setter
+                    Property="TextColor"
+                    Value="{AppThemeBinding Dark={StaticResource DarkSecondaryTextColor}, Light={StaticResource LightSecondaryTextColor}}">
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
+            x:DataType="viewmodels:IBooksViewModel"
+            Request="{Binding Path=StartPlayRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="viewmodels:StartPlayInteractionRequestContext"
+                MethodName="OnPlayBookRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
+    <!--
+      x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
+      https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
+    -->
+    <CollectionView
+        x:DataType="viewmodels:IBooksViewModel"
+        ItemsSource="{Binding Path=Books, Mode=OneWay}"
+        SelectionMode="None">
+        <CollectionView.EmptyView>
+            <StackLayout>
+                <Label
+                    HorizontalOptions="CenterAndExpand"
+                    VerticalOptions="CenterAndExpand"
+                    Text="Empty"
+                />
+            </StackLayout>
+        </CollectionView.EmptyView>
+        <CollectionView.ItemTemplate>
+            <DataTemplate
+                x:DataType="viewmodels:AudioBookViewModel">
+                <Grid
+                    RowDefinitions="Auto,Auto,Auto"
+                    ColumnDefinitions="Auto,*"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
+                    Padding="10">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:IBooksViewModel}}, Path=StartPlay}"
+                            CommandParameter="{Binding .}"
+                        />
+                    </Grid.GestureRecognizers>
+                    <Frame
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        BorderColor="Gray"
+                        BackgroundColor="DimGray"
+                        Padding="2"
+                        Margin="0"
+                        HorizontalOptions="Center">
+                        <Image
+                            Aspect="Fill"
+                            WidthRequest="{OnPlatform Android='108', iOS='146'}"
+                            HeightRequest="{OnPlatform Android='148', iOS='176'}">
+                            <Image.Source>
+                                <StreamImageSource
+                                    Stream="{Binding Path=ImageSource, Mode=OneWay}"
+                                />
+                            </Image.Source>
+                        </Image>
+                    </Frame>
+                    <Label
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Text="{Binding Path=Title, Mode=OneTime}"
+                        LineBreakMode="WordWrap"
+                        Style="{DynamicResource ListItemTextStyle}"
+                        FontSize="16"
+                        MaxLines="3"
+                        Margin="8,4,4,0"
+                        Padding="0"
+                    />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        LineBreakMode="NoWrap"
+                        Style="{StaticResource SubtitleLabelStyle}"
+                        FontSize="12"
+                        Margin="8,0,4,0"
+                        Padding="0"
+                        Text="{Binding Path=Authors, Mode=OneTime}"
+                    />
+                    <Label
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        LineBreakMode="NoWrap"
+                        Style="{StaticResource SubtitleLabelStyle}"
+                        FontSize="12"
+                        Text="{Binding
+                                Path=Duration,
+                                Converter={StaticResource SpanConverter},
+                                ConverterParameter='1',
+                                Mode=OneTime}"
+                        Margin="8,0,4,0"
+                        Padding="0"
+                    />
+                </Grid>
+            </DataTemplate>
+        </CollectionView.ItemTemplate>
+    </CollectionView>
+</ContentPage>

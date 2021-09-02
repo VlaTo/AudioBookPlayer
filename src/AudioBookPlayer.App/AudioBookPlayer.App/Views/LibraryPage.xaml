@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:views="clr-namespace:AudioBookPlayer.App.Views"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
+    x:Class="AudioBookPlayer.App.Views.LibraryPage"
+    x:DataType="viewmodels:LibraryViewModel"
+    core:ViewModelLocation.AutowireViewModel="True"
+    Title="{Static res:AppResources.LibraryPageTitle}"
+    BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
+    IsBusy="{Binding Path=IsBusy, Mode=OneWay}"
+    NavigationPage.HasNavigationBar="{OnPlatform Android=false, iOS=true}">
+    <TabbedPage.ToolbarItems>
+        <ToolbarItem
+            Command="{Binding Path=Refresh, Mode=OneTime}"
+            Order="Secondary"
+            Priority="0"
+            Text="{Static res:AppResources.LibraryPageRefreshAction}"
+        />
+    </TabbedPage.ToolbarItems>
+    <TabbedPage.Children>
+        <views:RecentBooksPage Title="{Static res:AppResources.RecentBooksTab}" />
+        <views:AllBooksPage Title="{Static res:AppResources.AllBooksTab}" />
+    </TabbedPage.Children>
+</TabbedPage>

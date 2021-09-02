@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
+    x:Class="AudioBookPlayer.App.Views.SettingsPage"
+    core:ViewModelLocation.AutowireViewModel="True">
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
+            Request="{Binding Path=SelectLibraryRootFolderRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="viewmodels:SourceFolderRequestContext"
+                MethodName="OnSelectFolderRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
+    <TableView
+        Intent="Settings">
+        <TableRoot>
+            <TableSection
+                Title="{Static res:AppResources.LibrarySettingsSectionTitle}"
+                TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}">
+                <TextCell
+                    Text="{Static res:AppResources.LibraryRootFolderTitle}"
+                    Detail="{Binding Path=LibraryRootFolder, Mode=OneWay, TargetNullValue={Static res:AppResources.LibraryNullRootFolder}}"
+                    Command="{Binding Path=SelectLibraryRootFolder, Mode=OneTime}"
+                    TextColor="{AppThemeBinding Light={StaticResource LightPrimaryTextColor}, Dark={StaticResource DarkPrimaryTextColor}}"
+                    DetailColor="{AppThemeBinding Light={StaticResource LightSecondaryTextColor}, Dark={StaticResource DarkSecondaryTextColor}}"
+                />
+            </TableSection>
+        </TableRoot>
+    </TableView>
+</ContentPage>

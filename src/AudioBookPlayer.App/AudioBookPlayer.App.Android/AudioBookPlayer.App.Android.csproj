@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D49B5969-3355-4CB5-9D08-C38CC9619DAD}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TemplateGuid>{6968b3a4-1835-46a3-ac5c-1ae33b475983}</TemplateGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>AudioBookPlayer.App.Android</RootNamespace>
+    <AssemblyName>AudioBookPlayer.App.Android</AssemblyName>
+    <Deterministic>True</Deterministic>
+    <AndroidApplication>True</AndroidApplication>
+    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
+    <AndroidResgenClass>Resource</AndroidResgenClass>
+    <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
+    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
+    <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
+    <TargetFrameworkVersion>v11.0</TargetFrameworkVersion>
+    <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
+    <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidClientHandler</AndroidHttpClientHandlerType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <BundleAssemblies>false</BundleAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidManagedSymbols>true</AndroidManagedSymbols>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Android" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AndroidAudioBookPlayerApplication.cs" />
+    <Compile Include="Core\Attributes\ColumnAttribute.cs" />
+    <Compile Include="Core\AudioBookFileScanner.cs" />
+    <Compile Include="Core\Extensions\FileDateTime.cs" />
+    <Compile Include="Core\Extensions\TypeExtensions.cs" />
+    <Compile Include="MainActivity.cs" />
+    <Compile Include="Resources\Resource.designer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\AudioFocusRequestor.cs" />
+    <Compile Include="Services\CoverImageProvider.cs" />
+    <Compile Include="Services\CoverService.cs" />
+    <Compile Include="Services\DatabasePath.cs" />
+    <Compile Include="Services\BooksProvider.cs" />
+    <Compile Include="Services\NotificationService.cs" />
+    <Compile Include="Services\PermissionRequestor.cs" />
+    <Compile Include="Services\PlaybackService.cs" />
+    <Compile Include="Services\PlaybackService.FailedState.cs" />
+    <Compile Include="Services\PlaybackService.NoInitializedState.cs" />
+    <Compile Include="Services\PlaybackService.PausedState.cs" />
+    <Compile Include="Services\PlaybackService.PlayerState.cs" />
+    <Compile Include="Services\PlaybackService.PlayingState.cs" />
+    <Compile Include="Services\PlaybackService.UpdateToken.cs" />
+    <Compile Include="Services\PlaybackServiceBinder.cs" />
+    <Compile Include="Services\PlaybackServiceConnection.cs" />
+    <Compile Include="Services\ToastService.cs" />
+    <Compile Include="SplashActivity.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AboutResources.txt" />
+    <None Include="Assets\AboutAssets.txt" />
+    <None Include="Properties\AndroidManifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <LinkDescription Include="LinkerSettings.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\values\styles.xml" />
+    <AndroidResource Include="Resources\values\colors.xml" />
+    <AndroidResource Include="Resources\mipmap-anydpi-v26\icon.xml" />
+    <AndroidResource Include="Resources\mipmap-anydpi-v26\icon_round.xml" />
+    <AndroidResource Include="Resources\drawable\icon_about.png" />
+    <AndroidResource Include="Resources\drawable\icon_feed.png" />
+    <AndroidResource Include="Resources\values\strings.xml" />
+    <AndroidResource Include="Resources\values-ru\strings.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj">
+      <Project>{3dec16f4-061d-4a36-8756-8231af121484}</Project>
+      <Name>LibraProgramming.Media.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj">
+      <Project>{0ecc3056-6412-4a3a-acc2-ffa6c31d51d0}</Project>
+      <Name>LibraProgramming.Xamarin.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Core\LibraProgramming.Xamarin.Core.csproj">
+      <Project>{0afaf077-1a9d-4ddb-a7cb-a91f1b6805e8}</Project>
+      <Name>LibraProgramming.Xamarin.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj">
+      <Project>{6bdaf869-7279-4917-8722-838ef064b563}</Project>
+      <Name>LibraProgramming.Xamarin.Dependency.Container</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj">
+      <Project>{5bcd7312-0694-4741-aa28-c761d166b0ab}</Project>
+      <Name>LibraProgramming.Xamarin.Popups</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj">
+      <Project>{ba8eedc8-cf56-49e6-b28b-ccfdea8e8637}</Project>
+      <Name>AudioBookPlayer.App.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj">
+      <Project>{12f02e38-b764-4b42-a664-23a90b5c3f95}</Project>
+      <Name>AudioBookPlayer.App.Persistence</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
+      <Project>{975fc088-f460-4e2b-a7f7-a5dcc82ae56b}</Project>
+      <Name>AudioBookPlayer.App</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\splash_screen.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ic_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\mipmap-hdpi\ic_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\mipmap-mdpi\ic_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\mipmap-xhdpi\ic_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\mipmap-xxhdpi\ic_logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_logo.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties XamarinHotReloadDebuggerTimeoutExceptionAudioBookPlayerAppAndroidHideInfoBar="True" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

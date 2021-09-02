@@ -1,23 +1,40 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30711.63
+VisualStudioVersion = 16.0.31320.298
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "AudioBookPlayer.App\AudioBookPlayer.App\AudioBookPlayer.App.csproj", "{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App", "src\AudioBookPlayer.App\AudioBookPlayer.App\AudioBookPlayer.App.csproj", "{975FC088-F460-4E2B-A7F7-A5DCC82AE56B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Android", "src\AudioBookPlayer.App\AudioBookPlayer.App.Android\AudioBookPlayer.App.Android.csproj", "{D49B5969-3355-4CB5-9D08-C38CC9619DAD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Media", "LibraProgramming.Media", "{B61F02FD-9138-4E59-8F83-E824772DA180}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Modules", "LibraProgramming.Modules", "{10BCC8F8-6F58-45B3-8438-3FA9E6584C16}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46118F59-9312-4ECA-B34A-81F653F23FFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Core", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Core\LibraProgramming.Xamarin.Core.csproj", "{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Dependency.Container", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj", "{6BDAF869-7279-4917-8722-838EF064B563}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Interaction", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Interaction\LibraProgramming.Xamarin.Interaction.csproj", "{7D97FD84-A190-41A1-8DE9-0ECE34C4419D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Interactivity", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj", "{E0313451-65AA-403C-A2E6-B8238D132D3B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Popups", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj", "{5BCD7312-0694-4741-AA28-C761D166B0AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Xamarin.Controls", "src\LibraProgramming.Modules\LibraProgramming.Xamarin.Controls\LibraProgramming.Xamarin.Controls.csproj", "{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LibraProgramming.Media", "LibraProgramming.Media", "{BC547DE0-ED73-4614-B98A-24BD9BE0FACC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Common", "src\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj", "{3DEC16F4-061D-4A36-8756-8231AF121484}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.QuickTime", "src\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj", "{E65C4175-B586-4190-9FF3-2D35B8B29CAB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72853205-2748-4969-A2CF-2B370CBA4081}"
 	ProjectSection(SolutionItems) = preProject
-		a2002011001-e02.wav = a2002011001-e02.wav
 		audioformats_2.14_letter.pdf = audioformats_2.14_letter.pdf
-		ff-16b-2c-44100hz.aac = ff-16b-2c-44100hz.aac
-		ff-16b-2c-44100hz.ac3 = ff-16b-2c-44100hz.ac3
-		ff-16b-2c-44100hz.m4a = ff-16b-2c-44100hz.m4a
-		ff-16b-2c-44100hz.mp3 = ff-16b-2c-44100hz.mp3
-		ff-16b-2c-44100hz.wav = ff-16b-2c-44100hz.wav
+		ftyp.txt = ftyp.txt
+		logo-1.pdn = logo-1.pdn
+		logo.pdn = logo.pdn
+		qtff.pdf = qtff.pdf
+		qtm-layout.txt = qtm-layout.txt
 		screenshot-0001.jpg = screenshot-0001.jpg
 		screenshot-0002.png = screenshot-0002.png
 		screenshot-0003.jpg = screenshot-0003.jpg
@@ -27,13 +44,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		screenshot-0007.jpg = screenshot-0007.jpg
 		screenshot-0008.png = screenshot-0008.png
 		screenshot-0009.png = screenshot-0009.png
+		screenshot-0010.png = screenshot-0010.png
+		screenshot-0011.jpg = screenshot-0011.jpg
+		screenshot-0012.webp = screenshot-0012.webp
+		screenshot-0013.png = screenshot-0013.png
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "AudioBookPlayer.App\ConsoleApp\ConsoleApp.csproj", "{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "src\ConsoleApp\ConsoleApp.csproj", "{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Common", "AudioBookPlayer.App\LibraProgramming.Media\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj", "{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App.Domain", "src\AudioBookPlayer.App\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj", "{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.QuickTime", "AudioBookPlayer.App\LibraProgramming.Media\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj", "{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.App.Persistence.SqLite", "src\AudioBookPlayer.App\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj", "{12F02E38-B764-4B42-A664-23A90B5C3F95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.App.Persistence.LiteDb", "src\AudioBookPlayer.App\AudioBookPlayer.App.Persistence.LiteDb\AudioBookPlayer.App.Persistence.LiteDb.csproj", "{67DC373C-9724-44D3-BF6E-25A8D42ACCF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,37 +64,79 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8416D71-EC62-4FF7-B517-E22D7AA6C2DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AF6BC1DA-6CA9-4C05-A0DD-671872B4C00D}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C972C49B-ACB2-4D46-9C72-BAF7E8BBDEA8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{975FC088-F460-4E2B-A7F7-A5DCC82AE56B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{975FC088-F460-4E2B-A7F7-A5DCC82AE56B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{975FC088-F460-4E2B-A7F7-A5DCC82AE56B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{975FC088-F460-4E2B-A7F7-A5DCC82AE56B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D49B5969-3355-4CB5-9D08-C38CC9619DAD}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BDAF869-7279-4917-8722-838EF064B563}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BDAF869-7279-4917-8722-838EF064B563}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BDAF869-7279-4917-8722-838EF064B563}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BDAF869-7279-4917-8722-838EF064B563}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D97FD84-A190-41A1-8DE9-0ECE34C4419D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D97FD84-A190-41A1-8DE9-0ECE34C4419D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D97FD84-A190-41A1-8DE9-0ECE34C4419D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D97FD84-A190-41A1-8DE9-0ECE34C4419D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0313451-65AA-403C-A2E6-B8238D132D3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0313451-65AA-403C-A2E6-B8238D132D3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0313451-65AA-403C-A2E6-B8238D132D3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0313451-65AA-403C-A2E6-B8238D132D3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5BCD7312-0694-4741-AA28-C761D166B0AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BCD7312-0694-4741-AA28-C761D166B0AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BCD7312-0694-4741-AA28-C761D166B0AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BCD7312-0694-4741-AA28-C761D166B0AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DEC16F4-061D-4A36-8756-8231AF121484}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DEC16F4-061D-4A36-8756-8231AF121484}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DEC16F4-061D-4A36-8756-8231AF121484}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DEC16F4-061D-4A36-8756-8231AF121484}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E65C4175-B586-4190-9FF3-2D35B8B29CAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E65C4175-B586-4190-9FF3-2D35B8B29CAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E65C4175-B586-4190-9FF3-2D35B8B29CAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E65C4175-B586-4190-9FF3-2D35B8B29CAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F46FEF83-036A-4311-9D70-BF7E7FDB0B8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA8EEDC8-CF56-49E6-B28B-CCFDEA8E8637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12F02E38-B764-4B42-A664-23A90B5C3F95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67DC373C-9724-44D3-BF6E-25A8D42ACCF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67DC373C-9724-44D3-BF6E-25A8D42ACCF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67DC373C-9724-44D3-BF6E-25A8D42ACCF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67DC373C-9724-44D3-BF6E-25A8D42ACCF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{BB9B1E1A-B6A3-4CEC-B66D-375567991B49} = {B61F02FD-9138-4E59-8F83-E824772DA180}
-		{47F0A3D8-ABE2-4821-A337-3AC55B31D0A8} = {B61F02FD-9138-4E59-8F83-E824772DA180}
+		{0AFAF077-1A9D-4DDB-A7CB-A91F1B6805E8} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{6BDAF869-7279-4917-8722-838EF064B563} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{7D97FD84-A190-41A1-8DE9-0ECE34C4419D} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{E0313451-65AA-403C-A2E6-B8238D132D3B} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{5BCD7312-0694-4741-AA28-C761D166B0AB} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{0ECC3056-6412-4A3A-ACC2-FFA6C31D51D0} = {10BCC8F8-6F58-45B3-8438-3FA9E6584C16}
+		{3DEC16F4-061D-4A36-8756-8231AF121484} = {BC547DE0-ED73-4614-B98A-24BD9BE0FACC}
+		{E65C4175-B586-4190-9FF3-2D35B8B29CAB} = {BC547DE0-ED73-4614-B98A-24BD9BE0FACC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {603387A9-3A67-490A-A12C-C4714C61DCDC}
+		SolutionGuid = {6E8D67C9-7670-4A39-B9A0-6928EAFA01F4}
 	EndGlobalSection
 EndGlobal

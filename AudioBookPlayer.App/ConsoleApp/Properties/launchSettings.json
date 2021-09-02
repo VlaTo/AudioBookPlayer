@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "ConsoleApp": {
-      "commandName": "Project",
-      "commandLineArgs": "D:\\Temp\\book.m4b D:\\Temp\\audio.wav"
-    }
-  }
-}
