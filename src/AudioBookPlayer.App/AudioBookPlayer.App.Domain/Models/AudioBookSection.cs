@@ -2,7 +2,7 @@
 
 namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class AudioBookPart
+    public sealed class AudioBookSection
     {
         public AudioBook AudioBook
         {
@@ -19,7 +19,7 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public AudioBookPart(AudioBook audioBook, string title)
+        public AudioBookSection(AudioBook audioBook, string title)
         {
             Chapters = new List<AudioBookChapter>();
             AudioBook = audioBook;

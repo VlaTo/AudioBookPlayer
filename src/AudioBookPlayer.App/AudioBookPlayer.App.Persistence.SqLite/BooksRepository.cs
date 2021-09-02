@@ -1,18 +1,18 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Extensions;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
+using AudioBookPlayer.App.Persistence.SqLite.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
-using AudioBookPlayer.App.Domain.Extensions;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace AudioBookPlayer.App.Persistence
+namespace AudioBookPlayer.App.Persistence.SqLite
 {
     public sealed class BooksRepository : IBooksRepository
     {
@@ -43,7 +43,7 @@ namespace AudioBookPlayer.App.Persistence
             EnsureKeyAssigned(await context.Books.AddAsync(book));
 
             await AddAuthorsAsync(book, model.Authors, CancellationToken.None);
-            await AddPartsAsync(book, model.Parts, CancellationToken.None);
+            await AddPartsAsync(book, model.Sections, CancellationToken.None);
             await AddChaptersAsync(book, model.Chapters, CancellationToken.None);
             await AddCoverImagesAsync(book, model.Images, CancellationToken.None);
 
@@ -142,7 +142,7 @@ namespace AudioBookPlayer.App.Persistence
             }
         }
 
-        private async Task AddPartsAsync(Book book, IList<AudioBookPart> parts, CancellationToken cancellationToken)
+        private async Task AddPartsAsync(Book book, IList<AudioBookSection> parts, CancellationToken cancellationToken)
         {
             for (var partIndex = 0; partIndex < parts.Count; partIndex++)
             {
@@ -175,9 +175,9 @@ namespace AudioBookPlayer.App.Persistence
                     ChapterFragments = new List<ChapterFragment>()
                 };
 
-                if (null != sourceChapter.Part)
+                if (null != sourceChapter.Section)
                 {
-                    var part = GetPart(book, sourceChapter.Part.Title);
+                    var part = GetPart(book, sourceChapter.Section.Title);
 
                     if (null != part)
                     {

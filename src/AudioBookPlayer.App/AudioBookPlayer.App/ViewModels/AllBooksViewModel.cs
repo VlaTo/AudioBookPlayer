@@ -1,5 +1,5 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.LiteDb;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System;
@@ -15,7 +15,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         public AllBooksViewModel(
-            ApplicationDbContext dbContext,
+            LiteDbContext dbContext,
             IAudioBooksConsumer booksConsumer)
             : base(dbContext)
         {

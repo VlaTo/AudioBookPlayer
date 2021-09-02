@@ -1,28 +1,35 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AudioBookPlayer.App.Persistence.Models
+namespace AudioBookPlayer.App.Persistence.SqLite.Models
 {
-    [Table("book-images")]
-    public class BookImage
+    [Table("parts")]
+    public class Part
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id
         {
-            get; 
+            get;
             set;
         }
 
         [Required]
+        [DataType(DataType.Text)]
+        public string Title
+        {
+            get;
+            set;
+        }
+
         public long BookId
         {
             get;
             set;
         }
 
-        [DataType(DataType.ImageUrl)]
-        public string ContentUri
+        public ICollection<Chapter> Chapters
         {
             get;
             set;

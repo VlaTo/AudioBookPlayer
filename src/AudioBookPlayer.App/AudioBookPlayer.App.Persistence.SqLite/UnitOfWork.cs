@@ -1,12 +1,12 @@
-﻿using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
+﻿using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace AudioBookPlayer.App.Persistence
+namespace AudioBookPlayer.App.Persistence.SqLite
 {
     public sealed class UnitOfWork : IUnitOfWork
     {
@@ -49,6 +49,8 @@ namespace AudioBookPlayer.App.Persistence
                 transaction = null;
             }
         }
+
+
 
         public void Dispose()
         {

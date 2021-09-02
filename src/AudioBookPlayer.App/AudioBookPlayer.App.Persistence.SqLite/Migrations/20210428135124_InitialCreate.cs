@@ -1,8 +1,8 @@
 ﻿using System;
-using AudioBookPlayer.App.Persistence.Models;
+using AudioBookPlayer.App.Persistence.SqLite.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace AudioBookPlayer.App.Data.Migrations
+namespace AudioBookPlayer.App.Persistence.SqLite.Migrations
 {
     public partial class InitialMigration : Migration
     {

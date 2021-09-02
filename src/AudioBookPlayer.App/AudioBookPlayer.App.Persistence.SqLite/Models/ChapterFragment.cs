@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AudioBookPlayer.App.Persistence.Models
+namespace AudioBookPlayer.App.Persistence.SqLite.Models
 {
     [Table("fragments")]
     public class ChapterFragment

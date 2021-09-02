@@ -1,6 +1,6 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.SqLite;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Persistence.LiteDb;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using IUnitOfWorkFactory = AudioBookPlayer.App.Core.IUnitOfWorkFactory;
@@ -32,16 +33,19 @@ namespace AudioBookPlayer.App
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
             //DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<ApplicationDbContext, SqLiteDbContext>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IUnitOfWorkFactory, UnitOfWorkFactory>(InstanceLifetime.CreateNew);
+            //DependencyContainer.Register<ApplicationDbContext, SqLiteDbContext>(InstanceLifetime.Singleton);
+            //DependencyContainer.Register<IUnitOfWorkFactory, UnitOfWorkFactory>(InstanceLifetime.CreateNew);
+            DependencyContainer.Register<LiteDbContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
-            DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.CreateNew);
+            DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
             var audioBooksHub = new AudioBooksHub();
 
             DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
             DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
+
+            InitializeDatabase();
 
             MainPage = new AppShell();
         }
@@ -58,7 +62,7 @@ namespace AudioBookPlayer.App
         protected override void OnResume()
         {
         }
-        
+
         private Task RegisterExtraActionsAsync()
         {
             var actions = new List<AppAction>();
@@ -89,10 +93,6 @@ namespace AudioBookPlayer.App
             {
                 Debug.Fail($"Can't register extra AppActions");
             }
-
-            await Task.Delay(TimeSpan.FromSeconds(3.0d));
-
-            InitializeDatabase();
         }
         
         private void OnExtraAppAction(object sender, AppActionEventArgs e)
@@ -117,7 +117,7 @@ namespace AudioBookPlayer.App
         
         private void InitializeDatabase()
         {
-            var db = DependencyContainer.GetInstance<ApplicationDbContext>();
+            var db = DependencyContainer.GetInstance<LiteDbContext>();
 
             try
             {

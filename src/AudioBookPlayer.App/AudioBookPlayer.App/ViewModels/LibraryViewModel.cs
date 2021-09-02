@@ -86,7 +86,7 @@ namespace AudioBookPlayer.App.ViewModels
                 // 3. Apply differences to library
                 if (0 < changes.Count)
                 {
-                    var success = await booksLibrary.TryApplyChangesAsync(changes, CancellationToken.None);
+                    var success = await booksLibrary.TryApplyChangesAsync(booksService, changes, CancellationToken.None);
 
                     if (success)
                     {

@@ -1,7 +1,7 @@
-﻿using AudioBookPlayer.App.Persistence.Models;
+﻿using AudioBookPlayer.App.Persistence.SqLite.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AudioBookPlayer.App.Persistence
+namespace AudioBookPlayer.App.Persistence.SqLite
 {
     public abstract class ApplicationDbContext : DbContext
     {

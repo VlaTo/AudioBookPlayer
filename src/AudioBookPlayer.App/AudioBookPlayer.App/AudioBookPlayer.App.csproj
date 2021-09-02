@@ -88,6 +88,7 @@
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Interactivity\LibraProgramming.Xamarin.Interactivity.csproj" />
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Popups\LibraProgramming.Xamarin.Popups.csproj" />
     <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj" />
-    <ProjectReference Include="..\AudioBookPlayer.App.Persistence\AudioBookPlayer.App.Persistence.csproj" />
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.LiteDb\AudioBookPlayer.App.Persistence.LiteDb.csproj" />
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj" />
   </ItemGroup>
 </Project>

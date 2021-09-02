@@ -55,7 +55,7 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public IList<AudioBookPart> Parts
+        public IList<AudioBookSection> Sections
         {
             get;
         }
@@ -80,10 +80,35 @@ namespace AudioBookPlayer.App.Domain.Models
             Id = id;
             Title = title;
             Authors = new List<AudioBookAuthor>();
-            Parts = new List<AudioBookPart>();
+            Sections = new List<AudioBookSection>();
             Images = new List<AudioBookImage>();
             Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
             SourceFiles = new OwnedCollection<AudioBookSourceFile>(OnSourceFilesCollectionChanged);
+        }
+
+        public static bool AreSame(AudioBook one, AudioBook other)
+        {
+            if (ReferenceEquals(one, null))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(other, null))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(one, other))
+            {
+                return true;
+            }
+
+            if (one.Id.HasValue)
+            {
+                return other.Id.HasValue && other.Id == one.Id.Value;
+            }
+
+            return false;
         }
 
         private void OnChaptersCollectionChanged(CollectionChange action, int index)
