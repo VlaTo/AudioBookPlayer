@@ -1,11 +1,11 @@
-﻿using AudioBookPlayer.App.Persistence.Models;
+﻿using AudioBookPlayer.App.Persistence.SqLite.Models;
 using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xamarin.Forms;
 
-namespace AudioBookPlayer.App.Persistence
+namespace AudioBookPlayer.App.Persistence.SqLite
 {
     public class SqLiteDbContext : ApplicationDbContext
     {

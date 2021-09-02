@@ -105,9 +105,9 @@ namespace AudioBookPlayer.App.ViewModels
 
                 var localIndex = 0;
 
-                for (var partIndex = 0; partIndex < playbackService.AudioBook.Parts.Count; partIndex++)
+                for (var partIndex = 0; partIndex < playbackService.AudioBook.Sections.Count; partIndex++)
                 {
-                    var part = playbackService.AudioBook.Parts[partIndex];
+                    var part = playbackService.AudioBook.Sections[partIndex];
                     var groupEntry = new ChapterGroupViewModel
                     {
                         Title = part.Title

@@ -1,12 +1,11 @@
-﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence;
+﻿using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Models;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Services;
 using Xamarin.Forms.Internals;
 
 namespace AudioBookPlayer.App.Services
@@ -54,14 +53,6 @@ namespace AudioBookPlayer.App.Services
 
     public sealed class AudioBooksLibrary
     {
-        private readonly IUnitOfWorkFactory factory;
-
-        [PrefferedConstructor]
-        public AudioBooksLibrary(IUnitOfWorkFactory factory)
-        {
-            this.factory = factory;
-        }
-
         public IReadOnlyList<LibraryChange> GetChanges(IReadOnlyList<AudioBook> libraryBooks, IReadOnlyList<AudioBook> actualBooks)
         {
             var changes = new List<LibraryChange>();
@@ -104,12 +95,10 @@ namespace AudioBookPlayer.App.Services
         }
 
 
-        public async Task<bool> TryApplyChangesAsync(IReadOnlyList<LibraryChange> changes, CancellationToken cancellationToken = default)
+        public async Task<bool> TryApplyChangesAsync(IBooksService booksService, IReadOnlyList<LibraryChange> changes, CancellationToken cancellationToken = default)
         {
             var changesApplied = 0;
 
-            using (var unitOfWork = factory.CreateUnitOfWork(true))
-            {
                 for (var changeIndex = 0; changeIndex < changes.Count; changeIndex++)
                 {
                     var change = changes[changeIndex];
@@ -118,7 +107,7 @@ namespace AudioBookPlayer.App.Services
                     {
                         case ChangeAction.Add:
                         {
-                            await unitOfWork.Books.AddAsync(change.Source);
+                            await booksService.SaveBookAsync(change.Source, cancellationToken);
 
                             changesApplied++;
 
@@ -131,9 +120,6 @@ namespace AudioBookPlayer.App.Services
                         }
                     }
                 }
-
-                await unitOfWork.CommitAsync(cancellationToken);
-            }
 
             return 0 < changesApplied;
         }

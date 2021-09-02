@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Models;
 
-namespace AudioBookPlayer.App.Persistence
+namespace AudioBookPlayer.App.Persistence.SqLite
 {
     public sealed class BookmarksRepository : IBookmarkRepository
     {

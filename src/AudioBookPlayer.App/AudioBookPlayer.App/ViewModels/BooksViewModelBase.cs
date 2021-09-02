@@ -1,11 +1,12 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.SqLite;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using AudioBookPlayer.App.Persistence.LiteDb;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -46,9 +47,9 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected readonly ApplicationDbContext DbContext;
+        protected readonly LiteDbContext DbContext;
 
-        protected BooksViewModelBase(ApplicationDbContext dbContext)
+        protected BooksViewModelBase(LiteDbContext dbContext)
         {
             DbContext = dbContext;
             Books = new ObservableCollection<AudioBookViewModel>();

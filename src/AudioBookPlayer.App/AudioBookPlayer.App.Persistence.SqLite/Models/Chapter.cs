@@ -3,14 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AudioBookPlayer.App.Persistence.Models
+namespace AudioBookPlayer.App.Persistence.SqLite.Models
 {
-    [Table("books")]
-    public class Book
+    [Table("chapters")]
+    public sealed class Chapter
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id
+        {
+            get;
+            set;
+        }
+
+        public int Position
         {
             get;
             set;
@@ -24,51 +30,48 @@ namespace AudioBookPlayer.App.Persistence.Models
             set;
         }
 
-        public ICollection<AuthorBook> AuthorBooks
+        [Required]
+        public long BookId
         {
             get;
             set;
         }
 
-        [DataType(DataType.MultilineText)]
-        public string Synopsis
+        public long PartId
         {
             get;
             set;
         }
 
         [DataType(DataType.Duration)]
-        public TimeSpan Duration
+        public TimeSpan Start
         {
             get;
             set;
         }
 
-        public bool DoNotShow
+        [DataType(DataType.Duration)]
+        public TimeSpan Length
+        {
+            get;
+            set;
+        }
+        
+        [ForeignKey(nameof(BookId))]
+        public Book Book
+        {
+            get;
+            set;
+        }
+        
+        [ForeignKey(nameof(PartId))]
+        public Part Part
         {
             get;
             set;
         }
 
         public ICollection<ChapterFragment> ChapterFragments
-        {
-            get;
-            set;
-        }
-
-        public ICollection<Part> Parts
-        {
-            get;
-            set;
-        }
-
-        public ICollection<BookImage> Images
-        {
-            get;
-            set;
-        }
-
-        public ICollection<Chapter> Chapters
         {
             get;
             set;

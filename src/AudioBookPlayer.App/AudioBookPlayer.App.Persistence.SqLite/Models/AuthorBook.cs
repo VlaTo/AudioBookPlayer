@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AudioBookPlayer.App.Persistence.Models
+namespace AudioBookPlayer.App.Persistence.SqLite.Models
 {
     [Table("author-books")]
     public class AuthorBook

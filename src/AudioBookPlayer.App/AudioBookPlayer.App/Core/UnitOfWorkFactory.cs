@@ -1,6 +1,6 @@
 ﻿using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence;
+using AudioBookPlayer.App.Persistence.SqLite;
 
 namespace AudioBookPlayer.App.Core
 {

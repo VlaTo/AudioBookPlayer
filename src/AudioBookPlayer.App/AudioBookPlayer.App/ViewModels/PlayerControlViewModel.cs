@@ -1,6 +1,5 @@
 ﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence;
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
@@ -50,9 +49,6 @@ namespace AudioBookPlayer.App.ViewModels
             get => bookId;
             set
             {
-                
-                Debug.WriteLine($"[PlayerControlViewModel] Set BookId: {value}");
-
                 if (SetProperty(ref bookId, value))
                 {
                     loadBookMonitor.Start();
@@ -368,16 +364,20 @@ namespace AudioBookPlayer.App.ViewModels
                 playbackService.Pause();
             }
 
-            var book = await booksService.GetAudioBookAsync(actualBookId);
+            var book = await booksService.GetBookAsync(actualBookId);
 
             if (null != book)
             {
                 using (playbackService.BatchUpdate())
                 {
-                    //var index = 0 < book.Chapters.Count ? 0 : -1;
-
-                    playbackService.AudioBook = book;
-                    //playbackService.ChapterIndex = index;
+                    if (AudioBook.AreSame(playbackService.AudioBook, book))
+                    {
+                        UpdateAudioBookProperties();
+                    }
+                    else
+                    {
+                        playbackService.AudioBook = book;
+                    }
                 }
             }
             else

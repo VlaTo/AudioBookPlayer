@@ -7,6 +7,8 @@ namespace AudioBookPlayer.App.Domain.Services
 {
     public interface IBooksService : IBooksProvider
     {
-        Task<AudioBook> GetAudioBookAsync(long bookId, CancellationToken cancellationToken = default);
+        Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default);
+
+        Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
     }
 }

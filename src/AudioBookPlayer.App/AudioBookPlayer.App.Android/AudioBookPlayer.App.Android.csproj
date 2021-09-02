@@ -132,7 +132,7 @@
       <Project>{ba8eedc8-cf56-49e6-b28b-ccfdea8e8637}</Project>
       <Name>AudioBookPlayer.App.Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioBookPlayer.App.Persistence\AudioBookPlayer.App.Persistence.csproj">
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj">
       <Project>{12f02e38-b764-4b42-a664-23a90b5c3f95}</Project>
       <Name>AudioBookPlayer.App.Persistence</Name>
     </ProjectReference>

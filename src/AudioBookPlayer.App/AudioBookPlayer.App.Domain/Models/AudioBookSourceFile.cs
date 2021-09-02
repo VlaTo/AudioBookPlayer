@@ -43,10 +43,10 @@ namespace AudioBookPlayer.App.Domain.Models
 
         public override int GetHashCode() => HashCode.Combine(AudioBook, ContentUri);
 
-        public static bool operator ==(AudioBookSourceFile first, AudioBookSourceFile second) =>
+        /*public static bool operator ==(AudioBookSourceFile first, AudioBookSourceFile second) =>
             !ReferenceEquals(first, null) && first.Equals(second);
 
         public static bool operator !=(AudioBookSourceFile first, AudioBookSourceFile second) =>
-            ReferenceEquals(first, null) || !first.Equals(second);
+            ReferenceEquals(first, null) || !first.Equals(second);*/
     }
 }

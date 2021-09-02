@@ -18,6 +18,7 @@ namespace AudioBookPlayer.App.Android.Services
     // https://github.com/jamesmontemagno/AndroidStreamingAudio/tree/master/Part%201%20-%20Simple%20Streaming
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/services/creating-a-service/bound-services
     // https://developer.android.com/reference/android/media/MediaPlayer
+    // https://stackoverflow.com/questions/60252047/xamarin-having-trouble-correctly-implementing-audiomanager-audiofocus-activity?rq=1
     [Service]
     public sealed partial class PlaybackService : Service, IPlaybackService
     {
@@ -163,8 +164,9 @@ namespace AudioBookPlayer.App.Android.Services
             base.OnCreate();
 
             audioAttributes = new AudioAttributes.Builder()
+                .SetUsage(AudioUsageKind.Media)
                 .SetContentType(AudioContentType.Music)
-                .SetLegacyStreamType(Stream.Music)
+                //.SetLegacyStreamType(Stream.Music)
                 .Build();
             audioManager = (AudioManager) Application.Context.GetSystemService(Context.AudioService);
             audioFocusRequestor = new AudioFocusRequestor(audioManager, audioAttributes, OnAudioFocusChanged);
@@ -189,7 +191,7 @@ namespace AudioBookPlayer.App.Android.Services
             chapter = null;
             audioBook = null;
 
-            if (player.IsPlaying)
+            if (player is { IsPlaying: true })
             {
                 player.Stop();
             }
@@ -284,7 +286,7 @@ namespace AudioBookPlayer.App.Android.Services
         private void StopPlaying()
         {
             player.Stop();
-            audioFocusRequestor.Release();
+            //audioFocusRequestor.Release();
 
             if (null != playingTimer)
             {
