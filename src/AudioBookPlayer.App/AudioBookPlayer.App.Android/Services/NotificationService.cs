@@ -7,19 +7,31 @@ using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
 using System;
+using AndroidX.Core.App;
+using AndroidX.Media.Session;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed class NotificationService : Java.Lang.Object, INotificationService
+    internal sealed class NotificationService : Java.Lang.Object
     {
         private const string DefaultChannelId = "AUDIOBOOKPLAYER_1";
         private const int DefaultNotificationId = 0x9000;
+        private const int ActionStop = -1;
+        private const int ActionPrev = 1;
+        private const int ActionPlay = 2;
+        private const int ActionNext = 3;
 
         private readonly WeakEventManager eventManager;
-        private NotificationManager notificationManager;
-        private PendingIntent pendingIntent;
+        private readonly NotificationManager notificationManager;
+        private readonly MediaSessionCompat.Token mediaSessionToken;
+        private readonly MediaControllerCompat mediaController;
+        private readonly PendingIntent closePendingIntent;
+        private NotificationChannel notificationChannel;
+        private NotificationCompat.Action previousChapterAction;
+        private NotificationCompat.Action playCurrentAction;
+        private NotificationCompat.Action nextChapterAction;
 
         public event EventHandler Play
         {
@@ -33,28 +45,27 @@ namespace AudioBookPlayer.App.Android.Services
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        public NotificationService()
+        public NotificationService(MediaSessionCompat.Token mediaSessionToken)
         {
+            this.mediaSessionToken = mediaSessionToken;
+            
             eventManager = new WeakEventManager();
+            notificationManager = (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
+            mediaController = new MediaControllerCompat(Application.Context, mediaSessionToken);
+            closePendingIntent = MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionStop);
         }
 
         public void ShowInformation(AudioBook audioBook)
         {
-            return;
-
-            var intent = new Intent(Application.Context, typeof(MainActivity));
-
-            pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.OneShot);
-            notificationManager = (NotificationManager) Application.Context.GetSystemService(Context.NotificationService);
-
             // 1. create media session
-            var componentName = new ComponentName(Application.Context, Class);
-            var mediaSessionCompat = new MediaSessionCompat(Application.Context, "AudioTag1", componentName, pendingIntent);
-            var mediaCallback = new MediaCallback(DoPlay, DoPause);
-            var playbackState = new PlaybackStateCompat.Builder()
-                .SetActions(PlaybackStateCompat.ActionPlayPause)
-                .Build();
-            mediaSessionCompat.SetMetadata(
+            //var componentName = new ComponentName(Application.Context, Class);
+            //var mediaSessionCompat = new MediaSessionCompat(Application.Context, "AudioTag1", componentName, pendingIntent);
+            //var mediaController = new MediaControllerCompat(Application.Context, mediaSessionToken);
+            //var mediaCallback = new MediaCallback(DoPlay, DoPause);
+            //var playbackState = new PlaybackStateCompat.Builder()
+            //    .SetActions(PlaybackStateCompat.ActionPlayPause)
+            //    .Build();
+            /*mediaSessionCompat.SetMetadata(
                 new MediaMetadataCompat.Builder()
                     .PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample Title")
                     .PutString(MediaMetadataCompat.MetadataKeyAuthor, "Sample Author")
@@ -65,10 +76,10 @@ namespace AudioBookPlayer.App.Android.Services
             mediaSessionCompat.SetFlags((int)MediaSessionFlags.HandlesTransportControls);
             mediaSessionCompat.SetPlaybackState(playbackState);
 
-            var mediaSession = (MediaSession)mediaSessionCompat.MediaSession;
+            var mediaSession = (MediaSession)mediaSessionCompat.MediaSession;*/
 
             // 2. create notification channel
-            NotificationChannel notificationChannel = null;
+            /*NotificationChannel notificationChannel = null;
 
             if (BuildVersionCodes.O <= Build.VERSION.SdkInt)
             {
@@ -76,26 +87,60 @@ namespace AudioBookPlayer.App.Android.Services
                 var channelName = resources?.GetString(Resource.String.notification_channel_name);
                 var channelDescription = resources?.GetString(Resource.String.notification_channel_description);
 
-                notificationChannel = new NotificationChannel(DefaultChannelId, channelName, NotificationImportance.Default)
-                {
-                    Description = channelDescription
-                };
+                notificationChannel = notificationManager.GetNotificationChannel(DefaultChannelId);
 
-                notificationManager.CreateNotificationChannel(notificationChannel);
+                if (null == notificationChannel)
+                {
+                    notificationChannel = new NotificationChannel(
+                        DefaultChannelId,
+                        channelName,
+                        NotificationImportance.Default)
+                    {
+                        Description = channelDescription
+                    };
+
+                    notificationManager.CreateNotificationChannel(notificationChannel);
+                }
+            }*/
+            var nc = GetOrCreateNotificationChannel();
+
+            if (null == nc)
+            {
+                return;
             }
 
-            var playAction = new Notification.Action.Builder(null, "Play", pendingIntent).Build();
+            var notificationBuilder = new NotificationCompat.Builder(Application.Context, nc.Id);
+
+            var playActionIndex = 0;
+
+            if (true)
+            {
+                notificationBuilder.AddAction(GetOrCreatePreviousChapterAction());
+                playActionIndex++;
+            }
+
+            if (true)
+            {
+                notificationBuilder.AddAction(GetOrCreatePlayCurrentAction());
+            }
+
             // 3. create notification
-            var style = new Notification.MediaStyle()
-                .SetMediaSession(mediaSession.SessionToken)
-                .SetShowActionsInCompactView(0);
-            var notification = new Notification.Builder(Application.Context, notificationChannel?.Id)
-                .SetStyle(style)
+            var mediaStyle = new AndroidX.Media.App.NotificationCompat.MediaStyle()
+                .SetMediaSession(mediaSessionToken)
+                .SetShowActionsInCompactView(playActionIndex)
+                .SetCancelButtonIntent(closePendingIntent)
+                .SetShowCancelButton(true);
+
+            //var notification = new NotificationCompat.Builder(Application.Context, nc.Id)
+            var notification = notificationBuilder
+                .SetStyle(mediaStyle)
                 .SetSmallIcon(Resource.Drawable.icon_feed)
                 .SetContentTitle("Audio Book Title")
                 .SetContentText("Sample Content Text")
-                .SetContentIntent(pendingIntent)
-                .AddAction(playAction)
+                .AddAction(GetOrCreatePlayCurrentAction())
+                .SetContentIntent(mediaController.SessionActivity)
+                .SetOnlyAlertOnce(true)
+                .SetVisibility(NotificationCompat.VisibilityPublic)
                 .Build();
 
             // 4. show/update notification
@@ -105,6 +150,77 @@ namespace AudioBookPlayer.App.Android.Services
         public void HideInformation()
         {
             ;
+        }
+
+        private NotificationChannel GetOrCreateNotificationChannel()
+        {
+            if (null == notificationChannel)
+            {
+                if (BuildVersionCodes.O >= Build.VERSION.SdkInt)
+                {
+                    return null;
+                }
+
+                notificationChannel = notificationManager.GetNotificationChannel(DefaultChannelId);
+
+                if (null == notificationChannel)
+                {
+                    var resources = Application.Context.Resources;
+                    var channelName = resources?.GetString(Resource.String.notification_channel_name);
+                    var channelDescription = resources?.GetString(Resource.String.notification_channel_description);
+
+                    notificationChannel = new NotificationChannel(DefaultChannelId, channelName, NotificationImportance.Low)
+                    {
+                        Description = channelDescription
+                    };
+
+                    notificationManager.CreateNotificationChannel(notificationChannel);
+                }
+            }
+
+            return notificationChannel;
+        }
+
+        private NotificationCompat.Action GetOrCreatePreviousChapterAction()
+        {
+            if (null == previousChapterAction)
+            {
+                previousChapterAction = new NotificationCompat.Action(
+                    Resource.Drawable.icon_feed,
+                    Application.Context.Resources.GetString(Resource.String.notification_action_prev),
+                    MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPrev)
+                );
+            }
+
+            return previousChapterAction;
+        }
+
+        private NotificationCompat.Action GetOrCreatePlayCurrentAction()
+        {
+            if (null == playCurrentAction)
+            {
+                playCurrentAction = new NotificationCompat.Action(
+                    Resource.Drawable.icon_feed,
+                    Application.Context.Resources.GetString(Resource.String.notification_action_play),
+                    MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPlay)
+                );
+            }
+
+            return playCurrentAction;
+        }
+
+        private NotificationCompat.Action GetOrCreateNextChapterAction()
+        {
+            if (null == nextChapterAction)
+            {
+                nextChapterAction = new NotificationCompat.Action(
+                    Resource.Drawable.icon_feed,
+                    Application.Context.Resources.GetString(Resource.String.notification_action_play),
+                    MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPlay)
+                );
+            }
+
+            return playCurrentAction;
         }
 
         private void DoPlay()

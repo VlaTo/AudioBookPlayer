@@ -23,7 +23,7 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IBooksService booksService;
         private readonly IPlaybackService playbackService;
         private readonly IActivityTrackerService activityTrackerService;
-        private readonly INotificationService notificationService;
+        // private readonly INotificationService notificationService;
         private readonly TaskExecutionMonitor loadBookMonitor;
         private readonly TaskExecutionMonitor trackBookActivity;
 
@@ -209,13 +209,12 @@ namespace AudioBookPlayer.App.ViewModels
         public PlayerControlViewModel(
             IBooksService booksService,
             IPlaybackService playbackService,
-            IActivityTrackerService activityTrackerService,
-            INotificationService notificationService)
+            IActivityTrackerService activityTrackerService)
         {
             this.booksService = booksService;
             this.playbackService = playbackService;
             this.activityTrackerService = activityTrackerService;
-            this.notificationService = notificationService;
+            // this.notificationService = notificationService;
 
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
             trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
@@ -426,11 +425,11 @@ namespace AudioBookPlayer.App.ViewModels
             
             if (IsPlaying)
             {
-                notificationService.ShowInformation(playbackService.AudioBook);
+                //notificationService.ShowInformation(playbackService.AudioBook);
             }
             else
             {
-                notificationService.HideInformation();
+                //notificationService.HideInformation();
             }
 
             trackBookActivity.Start();

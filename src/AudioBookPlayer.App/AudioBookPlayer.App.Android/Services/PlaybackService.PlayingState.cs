@@ -1,4 +1,5 @@
 ﻿using System;
+using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Android.Services
@@ -13,6 +14,14 @@ namespace AudioBookPlayer.App.Android.Services
             public PlayingState(PlaybackService service)
                 : base(service)
             {
+            }
+
+            public override void Enter()
+            {
+                Service.mediaSession.Active = true;
+                //Service.mediaSession.SetPlaybackState(PlaybackStateCompat.FromPlaybackState());
+
+                Service.ShowNotification();
             }
 
             public override void SetAudioBook(AudioBook audioBook)

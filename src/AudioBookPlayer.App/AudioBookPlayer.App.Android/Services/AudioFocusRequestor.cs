@@ -25,7 +25,7 @@ namespace AudioBookPlayer.App.Android.Services
                 audioFocusRequest = new AudioFocusRequestClass.Builder(AudioFocus.Gain)
                     .SetAudioAttributes(audioAttributes)
                     .SetOnAudioFocusChangeListener(this)
-                    .SetWillPauseWhenDucked(true)
+                    .SetWillPauseWhenDucked(false)
                     .Build();
             }
 

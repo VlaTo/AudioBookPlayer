@@ -8,6 +8,7 @@ using AudioBookPlayer.App.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Android.Support.V4.Media.Session;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 using Uri = global::Android.Net.Uri;
@@ -26,6 +27,8 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly Dictionary<string, int> pendingEvents;
 
         private AudioManager audioManager;
+        private MediaSessionCompat mediaSession;
+        private NotificationService notificationService;
         private AudioFocusRequestor audioFocusRequestor;
         private AudioAttributes audioAttributes;
         private MediaPlayer player;
@@ -170,6 +173,14 @@ namespace AudioBookPlayer.App.Android.Services
                 .Build();
             audioManager = (AudioManager) Application.Context.GetSystemService(Context.AudioService);
             audioFocusRequestor = new AudioFocusRequestor(audioManager, audioAttributes, OnAudioFocusChanged);
+            
+            var componentName = new ComponentName(Application.Context, Class);
+            //var intent = new Intent(Application.Context, typeof(MainActivity));
+            //var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.OneShot);
+            // var mediaSession = new MediaSessionCompat(Application.Context, "", componentName, pendingIntent);
+
+            mediaSession = new MediaSessionCompat(Application.Context, componentName.PackageName);
+            notificationService = new NotificationService(mediaSession.SessionToken);
         }
 
         public override IBinder OnBind(Intent intent)
@@ -338,6 +349,11 @@ namespace AudioBookPlayer.App.Android.Services
             RaiseOrPostponeEvent(nameof(ChapterIndexChanged));
 
             return true;
+        }
+
+        private void ShowNotification()
+        {
+            notificationService.ShowInformation(audioBook);
         }
 
         private bool HasSourceUriChanged() => null != fragment && currentSourceUri != fragment.SourceFile.ContentUri;
