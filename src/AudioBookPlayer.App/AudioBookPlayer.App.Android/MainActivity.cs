@@ -20,10 +20,7 @@ namespace AudioBookPlayer.App.Android
     [Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        private AudioBookPlaybackServiceConnection audioBookPlaybackServiceConnection;
-
-        internal AudioBookPlaybackServiceConnection AudioBookPlaybackServiceConnection =>
-            audioBookPlaybackServiceConnection ??= DependencyService.Get<AudioBookPlaybackServiceConnection>();
+        internal AudioBookPlaybackServiceConnection AudioBookPlaybackServiceConnection => DependencyService.Get<AudioBookPlaybackServiceConnection>();
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
@@ -34,11 +31,10 @@ namespace AudioBookPlayer.App.Android
         protected override void OnStart()
         {
             var intent = new Intent(this, typeof(AudioBookPlaybackService));
-            var connector = new AudioBookPlaybackServiceConnection();
 
             base.OnStart();
 
-            BindService(intent, connector, Bind.AutoCreate);
+            BindService(intent, AudioBookPlaybackServiceConnection, Bind.AutoCreate);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Services;
+using LibraProgramming.Xamarin.Dependency.Container;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -20,6 +21,7 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
+        private readonly IAudioBookPlaybackServiceConnector connector;
         private readonly IBooksService booksService;
         private readonly IPlaybackService playbackService;
         private readonly IActivityTrackerService activityTrackerService;
@@ -206,13 +208,19 @@ namespace AudioBookPlayer.App.ViewModels
         }
 
         [PrefferedConstructor]
-        public PlayerControlViewModel(
+        // ReSharper disable once UnusedMember.Global
+        public PlayerControlViewModel(IBooksService booksService, IActivityTrackerService activityTrackerService)
+            : this(booksService, DependencyService.Get<IAudioBookPlaybackServiceConnector>(), activityTrackerService)
+        {
+        }
+
+        private PlayerControlViewModel(
             IBooksService booksService,
-            IPlaybackService playbackService,
+            IAudioBookPlaybackServiceConnector connector,
             IActivityTrackerService activityTrackerService)
         {
             this.booksService = booksService;
-            this.playbackService = playbackService;
+            this.connector = connector;
             this.activityTrackerService = activityTrackerService;
             // this.notificationService = notificationService;
 
@@ -244,10 +252,10 @@ namespace AudioBookPlayer.App.ViewModels
             Elapsed = TimeSpan.Zero;
             Left = TimeSpan.Zero;
 
-            playbackService.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
-            playbackService.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
-            playbackService.ChapterIndexChanged += OnPlaybackControllerChapterIndexChanged;
-            playbackService.CurrentPositionChanged += OnPlaybackControllerPositionChanged;
+            // playbackService.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
+            // playbackService.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
+            // playbackService.ChapterIndexChanged += OnPlaybackControllerChapterIndexChanged;
+            // playbackService.CurrentPositionChanged += OnPlaybackControllerPositionChanged;
         }
 
         public void OnInitialize()

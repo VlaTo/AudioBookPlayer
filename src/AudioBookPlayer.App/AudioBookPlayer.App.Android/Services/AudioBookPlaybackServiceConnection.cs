@@ -28,9 +28,9 @@ namespace AudioBookPlayer.App.Android.Services
         }
 
 #nullable enable
-        public void OnServiceConnected(ComponentName? name, IBinder? service)
+        public void OnServiceConnected(ComponentName? name, IBinder? binder)
         {
-            Binder = service as AudioBookPlaybackServiceBinder;
+            Binder = binder as AudioBookPlaybackServiceBinder;
             IsConnected = null != Binder;
 
             if (IsConnected)
@@ -50,6 +50,5 @@ namespace AudioBookPlayer.App.Android.Services
             IsConnected = false;
         }
 #nullable restore
-
     }
 }

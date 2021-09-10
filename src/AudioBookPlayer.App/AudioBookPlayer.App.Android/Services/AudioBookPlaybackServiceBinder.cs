@@ -1,4 +1,5 @@
 ﻿using Android.OS;
+using AudioBookPlayer.App.Services;
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -7,18 +8,19 @@ namespace AudioBookPlayer.App.Android.Services
         /// <summary>
         /// 
         /// </summary>
-        public AudioBookPlaybackService Service
+        public IAudioBookPlaybackService Service
         {
             get;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="service"></param>
         public AudioBookPlaybackServiceBinder(AudioBookPlaybackService service)
         {
             Service = service;
+        }
+
+        public void Unbind()
+        {
+            ;
         }
     }
 }
