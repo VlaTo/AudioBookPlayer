@@ -20,7 +20,7 @@ namespace AudioBookPlayer.App.Android.Services
     // https://docs.microsoft.com/en-us/xamarin/android/app-fundamentals/services/creating-a-service/bound-services
     // https://developer.android.com/reference/android/media/MediaPlayer
     // https://stackoverflow.com/questions/60252047/xamarin-having-trouble-correctly-implementing-audiomanager-audiofocus-activity?rq=1
-    [Service]
+    //[Service]
     public sealed partial class PlaybackService : Service, IPlaybackService
     {
         private readonly WeakEventManager eventManager;

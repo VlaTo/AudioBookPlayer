@@ -71,7 +71,10 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AudioBookPlaybackService.cs" />
+    <Compile Include="Services\AudioBookPlaybackServiceBinder.cs" />
+    <Compile Include="Services\AudioBookPlaybackServiceConnection.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
+    <Compile Include="Services\Builders\NotificationBuilder.cs" />
     <Compile Include="Services\CoverImageProvider.cs" />
     <Compile Include="Services\CoverService.cs" />
     <Compile Include="Services\DatabasePath.cs" />
@@ -163,6 +166,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_logo.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

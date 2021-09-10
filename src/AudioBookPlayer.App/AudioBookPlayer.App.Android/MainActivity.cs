@@ -10,6 +10,7 @@ using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container;
+using Xamarin.Forms;
 using Forms = Xamarin.Forms.Forms;
 using LibraControls = LibraProgramming.Xamarin.Controls.Controls;
 using LibraPopups = LibraProgramming.Xamarin.Popups.Popup;
@@ -19,11 +20,10 @@ namespace AudioBookPlayer.App.Android
     [Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        internal PlaybackServiceConnection PlaybackServiceConnection
-        {
-            get; 
-            private set;
-        }
+        private AudioBookPlaybackServiceConnection audioBookPlaybackServiceConnection;
+
+        internal AudioBookPlaybackServiceConnection AudioBookPlaybackServiceConnection =>
+            audioBookPlaybackServiceConnection ??= DependencyService.Get<AudioBookPlaybackServiceConnection>();
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
@@ -33,16 +33,12 @@ namespace AudioBookPlayer.App.Android
 
         protected override void OnStart()
         {
+            var intent = new Intent(this, typeof(AudioBookPlaybackService));
+            var connector = new AudioBookPlaybackServiceConnection();
+
             base.OnStart();
 
-            if (null == PlaybackServiceConnection)
-            {
-                PlaybackServiceConnection = new PlaybackServiceConnection(this);
-            }
-
-            var intent = new Intent(this, typeof(PlaybackService));
-
-            BindService(intent, PlaybackServiceConnection, Bind.AutoCreate);
+            BindService(intent, connector, Bind.AutoCreate);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -103,9 +99,9 @@ namespace AudioBookPlayer.App.Android
             private static IPlaybackService GetPlaybackService()
             {
                 var mainActivity = (MainActivity) Xamarin.Essentials.Platform.CurrentActivity;
-                var connection = mainActivity.PlaybackServiceConnection;
+                var connection = mainActivity.AudioBookPlaybackServiceConnection;
 
-                return connection.Binder.Service;
+                return null;
             }
         }
     }
