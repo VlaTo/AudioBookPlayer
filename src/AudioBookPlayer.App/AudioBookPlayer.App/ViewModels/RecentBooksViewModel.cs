@@ -1,7 +1,6 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using System.Collections.Generic;
 
 namespace AudioBookPlayer.App.ViewModels
 {
@@ -13,22 +12,19 @@ namespace AudioBookPlayer.App.ViewModels
         {
         }
 
-        private void DoBindAudioBooks(IEnumerable<AudioBook> audioBooks)
+        protected override bool FilterSourceBook(AudioBook source) => true;
+
+        protected override void BindSourceBooks(AudioBook[] audioBooks)
         {
-            Books.Clear();
-
-            foreach (var audioBook in audioBooks)
+            try
             {
-                /*var latest = await MediaLibrary.GetLatestBookActivityAsync(audioBook.Id.Value);
-                var temp = DateTime.Now - latest.when;
-                if (temp.TotalDays > 7)
-                {
-                    continue;
-                }*/
+                IsBusy = true;
 
-                var model = CreateAudioBookModel(audioBook);
-
-                Books.Add(model);
+                base.BindSourceBooks(audioBooks);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
     }

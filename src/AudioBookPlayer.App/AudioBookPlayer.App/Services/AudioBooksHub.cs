@@ -5,7 +5,7 @@ using System.Reactive.Subjects;
 
 namespace AudioBookPlayer.App.Services
 {
-    internal sealed class AudioBooksHub : IAudioBooksPublisher, IAudioBooksConsumer
+    /*internal sealed class AudioBooksHub : IAudioBooksPublisher, IAudioBooksConsumer
     {
         private readonly Subject<IEnumerable<AudioBook>> subject;
 
@@ -33,5 +33,5 @@ namespace AudioBookPlayer.App.Services
         {
             return subject.Subscribe(observer);
         }
-    }
+    }*/
 }

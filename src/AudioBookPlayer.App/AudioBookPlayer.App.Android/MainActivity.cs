@@ -43,10 +43,7 @@ namespace AudioBookPlayer.App.Android
         protected override void OnStart()
         {
             base.OnStart();
-
-            var connector = DependencyService.Get<IMediaBrowserServiceConnector>();
-
-            connector.Connect();
+            DependencyService.Get<IMediaBrowserServiceConnector>().Connect();
         }
 
         protected override void OnResume()
@@ -69,25 +66,12 @@ namespace AudioBookPlayer.App.Android
             public void RegisterTypes(DependencyContainer container)
             {
                 // Xamarin.Forms.Internals.Registrar.Registered.Register();
-
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);
-                //container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
-                //container.Register<INotificationService, NotificationService>(InstanceLifetime.Singleton);
-                //container.Register<IPlaybackService>(GetPlaybackService, InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
                 container.Register<IDatabasePathProvider, DatabasePathProvider>();
-                //container.Register<IAudioBookPlaybackServiceConnector, AudioBookPlaybackServiceConnector>(InstanceLifetime.Singleton);
             }
-
-            /*private static IPlaybackService GetPlaybackService()
-            {
-                var mainActivity = (MainActivity) Xamarin.Essentials.Platform.CurrentActivity;
-                var connection = mainActivity.AudioBookPlaybackServiceConnection;
-
-                return null;
-            }*/
         }
     }
 }

@@ -29,21 +29,16 @@ namespace AudioBookPlayer.App
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
-            //DependencyContainer.Register<IMediaLibrary, MediaLibrary>(InstanceLifetime.Singleton);
-            //DependencyContainer.Register<ApplicationDbContext, SqLiteDbContext>(InstanceLifetime.Singleton);
-            //DependencyContainer.Register<IUnitOfWorkFactory, UnitOfWorkFactory>(InstanceLifetime.CreateNew);
             DependencyContainer.Register<LiteDbContext>(InstanceLifetime.Singleton);
             DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
             DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
-            var audioBooksHub = new AudioBooksHub();
+            // var audioBooksHub = new AudioBooksHub();
 
-            DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
-            DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
+            //DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
+            //DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
             DependencyContainer.Register(() => DependencyService.Get<IMediaBrowserServiceConnector>(), InstanceLifetime.CreateNew);
-
-            //InitializeDatabase();
 
             MainPage = new AppShell();
         }

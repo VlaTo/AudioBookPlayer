@@ -330,8 +330,6 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoSnoozeCommand()
         {
-            mediaBrowserServiceConnector.GetRoot();
-
             var position = TimeSpan.FromMilliseconds(ChapterPosition);
             Debug.WriteLine($"[PlayerControlViewModel] [DoSnoozeCommand] Current: {position:g}");
         }

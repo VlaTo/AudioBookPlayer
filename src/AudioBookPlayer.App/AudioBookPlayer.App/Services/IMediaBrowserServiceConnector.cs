@@ -20,8 +20,14 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        void Connect();
+        IObservable<AudioBook[]> Library
+        {
+            get;
+        }
 
-        IObservable<AudioBook> GetRoot();
+        /// <summary>
+        /// 
+        /// </summary>
+        void Connect();
     }
 }

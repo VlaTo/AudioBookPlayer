@@ -10,13 +10,15 @@ using AndroidX.Media;
 using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Domain.Services;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using AudioBookPlayer.App.Android.Services.Builders;
+using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Models;
 using Application = Android.App.Application;
 
 // https://developer.android.com/guide/topics/media/media-controls
 // https://github.com/android/uamp/blob/f60b902643407ba234a316abe91410da7c08a4af/common/src/main/java/com/example/android/uamp/media/MusicService.kt
-
-#pragma warning disable CS8632
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -25,20 +27,18 @@ namespace AudioBookPlayer.App.Android.Services
     /// </summary>
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    // ReSharper disable once UnusedMember.Global
     public sealed class AudioBookPlaybackService : MediaBrowserServiceCompat
     {
         private readonly IBooksService booksService;
         private readonly ComponentName componentName;
+        private readonly PackageValidator packageValidator;
         private MediaSessionCompat mediaSession;
         private MediaControllerCompat mediaController;
         private PlaybackStateCompat.Builder playbackState;
-        //private NotificationBuilder notificationBuilder;
-        private NotificationManagerCompat notificationManager;
         private MediaSessionCallback mediaSessionCallback;
         private MediaControllerCallback mediaControllerCallback;
-        private PackageValidator packageValidator;
 
+        // ReSharper disable once UnusedMember.Global
         public AudioBookPlaybackService()
             : this(
                 AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksService>()
@@ -117,16 +117,7 @@ namespace AudioBookPlayer.App.Android.Services
                 for (var index = 0; index < books.Count; index++)
                 {
                     var book = books[index];
-                    var description = new MediaDescriptionCompat.Builder()
-                        .SetMediaId(book.Id.Value.ToString())
-                        .SetTitle(book.Title)
-                        .SetSubtitle(String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, book.Authors))
-                        .SetDescription(book.Synopsis)
-                        .Build();
-                    var item = new MediaBrowserCompat.MediaItem(
-                        description,
-                        MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable
-                    );
+                    var item = MediaItemBuilder.From(book, MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable);
 
                     list.Add(item);
                 }
@@ -205,5 +196,3 @@ namespace AudioBookPlayer.App.Android.Services
         }
     }
 }
-
-#pragma warning restore CS8632

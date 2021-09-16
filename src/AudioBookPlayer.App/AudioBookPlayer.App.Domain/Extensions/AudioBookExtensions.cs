@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Domain.Extensions
@@ -27,6 +29,12 @@ namespace AudioBookPlayer.App.Domain.Extensions
             audioBook.Sections.Add(target);
 
             return target;
+        }
+
+        [return: NotNull]
+        public static string GetAuthors([NotNull]this AudioBook audioBook)
+        {
+            return String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, audioBook.Authors);
         }
     }
 }

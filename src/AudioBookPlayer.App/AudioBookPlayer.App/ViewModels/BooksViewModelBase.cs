@@ -33,10 +33,17 @@ namespace AudioBookPlayer.App.ViewModels
     internal abstract class BooksViewModelBase : ViewModelBase, IBooksViewModel
     {
         private readonly IDisposable subscription;
+        private bool isBusy;
 
         public ObservableCollection<AudioBookViewModel> Books
         {
             get;
+        }
+
+        public bool IsBusy
+        {
+            get => isBusy;
+            set => SetProperty(ref isBusy, value);
         }
 
         public InteractionRequest<StartPlayInteractionRequestContext> StartPlayRequest
@@ -62,6 +69,7 @@ namespace AudioBookPlayer.App.ViewModels
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
 
             subscription = browserServiceConnector.Connected.Subscribe(OnMediaBrowserConnected);
+            var token = browserServiceConnector.Library.Subscribe(BindSourceBooks);
         }
 
         protected virtual void DoStartPlay(AudioBookViewModel book)
@@ -80,7 +88,14 @@ namespace AudioBookPlayer.App.ViewModels
             return String.Join(sep, authors.Select(author => author.Name));
         }
 
-        protected AudioBookViewModel CreateAudioBookModel(AudioBook book)
+        protected abstract bool FilterSourceBook(AudioBook source);
+
+        protected virtual void OnConnected()
+        {
+            //var token = BrowserServiceConnector.Library.Subscribe(BindSourceBooks);
+        }
+
+        protected AudioBookViewModel BuildAudioBookModel(AudioBook book)
         {
             if (false == book.Id.HasValue)
             {
@@ -104,9 +119,23 @@ namespace AudioBookPlayer.App.ViewModels
             return model;
         }
 
-        protected virtual void OnConnected()
+        protected virtual void BindSourceBooks(AudioBook[] audioBooks)
         {
-            System.Diagnostics.Debug.WriteLine("[BooksViewModelBase] [OnConnected] Execute");
+            Books.Clear();
+
+            for (var index = 0; index < audioBooks.Length; index++)
+            {
+                var source = audioBooks[index];
+
+                if (false == FilterSourceBook(source))
+                {
+                    continue;
+                }
+
+                var model = BuildAudioBookModel(source);
+
+                Books.Add(model);
+            }
         }
 
         private void OnMediaBrowserConnected(Unit _) => OnConnected();

@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Android.Services;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
-using Java.Util;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 using Observable = System.Reactive.Linq.Observable;
@@ -24,7 +23,7 @@ namespace AudioBookPlayer.App.Android.Services
     internal sealed class MediaBrowserServiceConnector : Java.Lang.Object, IMediaBrowserServiceConnector
     {
         private readonly MediaBrowserCompat mediaBrowser;
-        private readonly ConnectionCallback connectionCallback;
+        //private readonly ConnectionCallback connectionCallback;
         //private readonly SubscriptionCallback subscriptionCallback;
 
         public bool IsConnected => mediaBrowser.IsConnected;
@@ -36,19 +35,28 @@ namespace AudioBookPlayer.App.Android.Services
             get;
         }
 
+        public IObservable<AudioBook[]> Library
+        {
+            get;
+        }
+
         public MediaBrowserServiceConnector()
         {
             var serviceName = Java.Lang.Class.FromType(typeof(AudioBookPlaybackService)).Name;
             var componentName = new ComponentName(Application.Context, serviceName);
-            var subject = new Subject<Unit>();
-
-            var connectable = subject.Take(1).Publish();
             
-            connectable.Connect();
+            var connected = new Subject<Unit>();
+            var library = new Subject<AudioBook[]>();
+            var connectionCallback = new ConnectionCallback(this, connected, library);
+            var publishConnected = connected.Take(1).Publish();
+            var libraryConnected = library.Publish();
+            
+            publishConnected.Connect();
+            libraryConnected.Connect();
 
-            Connected = connectable.AsObservable();
+            Connected = publishConnected.AsObservable();
+            Library = libraryConnected.AsObservable();
 
-            connectionCallback = new ConnectionCallback(this, subject);
             mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
         }
 
@@ -62,51 +70,55 @@ namespace AudioBookPlayer.App.Android.Services
             mediaBrowser.Connect();
         }
 
-        public IObservable<AudioBook> GetRoot()
+        /*public IObservable<AudioBook[]> GetLibrary()
         {
-            return Observable.Create<AudioBook>(observer =>
+            if (false==mediaBrowser.IsConnected)
             {
-                if (mediaBrowser.IsConnected)
-                {
-                    var id = mediaBrowser.Root;
-                    var callback = new SubscriptionCallback(this, observer);
+                return Observable.Empty<AudioBook[]>();
+            }
 
-                    mediaBrowser.Subscribe(id, callback);
-                }
-                else
-                {
-                    observer.OnCompleted();
-                }
+            return Observable.Create<AudioBook[]>(observer =>
+            {
+                var callback = new SubscriptionCallback(this, observer);
+
+                mediaBrowser.Subscribe(mediaBrowser.Root, callback);
 
                 return Disposable.Empty;
             });
-        }
+        }*/
 
         // ConnectionCallback class
         private sealed class ConnectionCallback : MediaBrowserCompat.ConnectionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
-            private readonly IObserver<Unit> observer;
+            private readonly IObserver<Unit> connected;
+            private readonly IObserver<AudioBook[]> library;
             private readonly MediaControllerCallback controllerCallback;
+            private MediaControllerCompat mediaController;
 
-            public ConnectionCallback(MediaBrowserServiceConnector connector, IObserver<Unit> observer)
+            public ConnectionCallback(
+                MediaBrowserServiceConnector connector,
+                IObserver<Unit> connected,
+                IObserver<AudioBook[]> library)
             {
                 this.connector = connector;
-                this.observer = observer;
+                this.connected = connected;
+                this.library = library;
 
                 controllerCallback = new MediaControllerCallback(connector);
             }
 
             public override void OnConnected()
             {
-                //connector.GetRoot();
-
-                var mediaController = new MediaControllerCompat(Application.Context, connector.SessionToken);
-                
+                mediaController = new MediaControllerCompat(Application.Context, connector.SessionToken);
                 mediaController.RegisterCallback(controllerCallback);
 
-                observer.OnNext(Unit.Default);
-                observer.OnCompleted();
+                connected.OnNext(Unit.Default);
+                connected.OnCompleted();
+
+                var callback = new SubscriptionCallback(connector, library);
+
+                connector.mediaBrowser.Subscribe(connector.mediaBrowser.Root, callback);
             }
 
             public override void OnConnectionSuspended()
@@ -116,13 +128,15 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void OnConnectionFailed()
             {
-                System.Diagnostics.Debug.WriteLine("[ConnectionCallback] [OnConnectionFailed] Execute");
+                connected.OnError(new Exception());
             }
 
             protected override void Dispose(bool disposing)
             {
-                System.Diagnostics.Debug.WriteLine("[ConnectionCallback] [Dispose] Execute");
-                base.Dispose(disposing);
+                if (disposing)
+                {
+                    mediaController.UnregisterCallback(controllerCallback);
+                }
             }
 
             // MediaControllerCallback class
@@ -193,9 +207,9 @@ namespace AudioBookPlayer.App.Android.Services
         private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
-            private readonly IObserver<AudioBook> observer;
+            private readonly IObserver<AudioBook[]> observer;
 
-            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<AudioBook> observer)
+            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<AudioBook[]> observer)
             {
                 this.connector = connector;
                 this.observer = observer;
@@ -203,22 +217,36 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
             {
+                var books = new AudioBook[children.Count];
+
                 for (var index = 0; index < children.Count; index++)
                 {
                     var source = children[index];
                     var id = long.TryParse(source.MediaId, out var value) ? new long?(value) : null;
-                    var audioBook = new AudioBook(source.Description.Title, id)
+                    
+                    books[index] = new AudioBook(source.Description.Title, id)
                     {
-                        Synopsis = source.Description.Description
+                         source.Description.Description
                     };
-
-                    observer.OnNext(audioBook);
                 }
+
+                observer.OnNext(books);
             }
 
             public override void OnError(string parentId)
             {
-                System.Diagnostics.Debug.WriteLine("[SubscriptionCallback] [OnError] Execute");
+                observer.OnError(new Exception());
+            }
+
+            private long? GetBookId([NotNull] MediaBrowserCompat.MediaItem source)
+            {
+                if (String.IsNullOrEmpty(source.MediaId))
+                {
+                    return null;
+                }
+
+                int delimiterPosition=source.MediaId.IndexOf()
+                if(source.MediaId.StartsWith("audiobook"))
             }
         }
     }

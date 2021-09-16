@@ -75,6 +75,8 @@
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AudioBookPlaybackService.cs" />
+    <Compile Include="Services\Builders\AudioBookBuilder.cs" />
+    <Compile Include="Services\Builders\MediaItemBuilder.cs" />
     <Compile Include="Services\MediaBrowserServiceConnector.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\Builders\NotificationBuilder.cs" />
