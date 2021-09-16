@@ -1,14 +1,16 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Media.Session;
 using Android.OS;
+using Android.Runtime;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AndroidX.Core.App;
 using AndroidX.Media;
-using AudioBookPlayer.App.Android.Services.Builders;
-using AudioBookPlayer.App.Services;
+using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Domain.Services;
 using System;
-using Xamarin.Forms;
+using System.Globalization;
 using Application = Android.App.Application;
 
 // https://developer.android.com/guide/topics/media/media-controls
@@ -18,47 +20,86 @@ using Application = Android.App.Application;
 
 namespace AudioBookPlayer.App.Android.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Service(Enabled = true, Exported = true)]
-    [IntentFilter(new []{ "android.media.browse.MediaBrowserService" })]
+    [IntentFilter(new []{ ServiceInterface })]
     // ReSharper disable once UnusedMember.Global
-    public sealed class AudioBookPlaybackService : MediaBrowserServiceCompat, IAudioBookPlaybackService
+    public sealed class AudioBookPlaybackService : MediaBrowserServiceCompat
     {
+        private readonly IBooksService booksService;
+        private readonly ComponentName componentName;
         private MediaSessionCompat mediaSession;
-        private MediaSessionCompat.Token mediaSessionToken;
         private MediaControllerCompat mediaController;
-        private NotificationBuilder notificationBuilder;
+        private PlaybackStateCompat.Builder playbackState;
+        //private NotificationBuilder notificationBuilder;
         private NotificationManagerCompat notificationManager;
+        private MediaSessionCallback mediaSessionCallback;
+        private MediaControllerCallback mediaControllerCallback;
+        private PackageValidator packageValidator;
 
-        public AudioBookPlaybackServiceBinder Binder
+        public AudioBookPlaybackService()
+            : this(
+                AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksService>()
+            )
         {
-            get;
-            private set;
         }
 
-        public override MediaSessionCompat.Token SessionToken
+        private AudioBookPlaybackService(
+            IBooksService booksService)
         {
-            get => mediaSessionToken;
-            set
-            {
-                mediaSessionToken = value;
-            }
+            this.booksService = booksService;
+
+            componentName = new ComponentName(Application.Context, Class);
+            packageValidator = new PackageValidator(Application.Context);
+        }
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+
+            var intent = PackageManager.GetLaunchIntentForPackage(componentName.PackageName);
+            var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
+
+            mediaSession = new MediaSessionCompat(Application.Context, nameof(AudioBookPlaybackService), componentName, pendingIntent);
+            mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
+
+            playbackState = new PlaybackStateCompat.Builder().SetActions(PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionPlayPause);
+            mediaSessionCallback = new MediaSessionCallback(this, mediaSession);
+
+            mediaSession.SetPlaybackState(playbackState.Build());
+            mediaSession.SetCallback(mediaSessionCallback);
+
+            SessionToken = mediaSession.SessionToken;
+
+            mediaController = new MediaControllerCompat(Application.Context, mediaSession);
+            mediaControllerCallback = new MediaControllerCallback();
+            mediaController.RegisterCallback(mediaControllerCallback);
+
+            // notificationBuilder = new NotificationBuilder();
+            // notificationManager = NotificationManagerCompat.From(Application.Context);
+
         }
 
         public override BrowserRoot OnGetRoot(string clientPackageName, int clientUid, Bundle rootHints)
         {
-            System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnGetRoot] Requestor package: \"{clientPackageName}\"; client: {clientUid}");
-
-            if (null != rootHints)
+            if (packageValidator.IsCallerAllowed(clientPackageName, clientUid))
             {
+                if (null == rootHints || rootHints.IsEmpty)
+                {
+                    return new BrowserRoot("/", null);
+                }
+
                 if (rootHints.GetBoolean(BrowserRoot.ExtraRecent))
                 {
                     var bundle = new Bundle();
+
                     bundle.PutBoolean(BrowserRoot.ExtraRecent, true);
                     bundle.PutBoolean("android.media.browse.SEARCH_SUPPORTED", true);
+
                     return new BrowserRoot("__RECENT__", bundle);
                 }
-
-                return new BrowserRoot("/", null);
             }
 
             return new BrowserRoot("@empty@", null);
@@ -66,45 +107,36 @@ namespace AudioBookPlayer.App.Android.Services
 
         public override void OnLoadChildren(string parentId, Result result)
         {
-            System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnLoadChildren] parent id: \"{parentId}\"");
+            //System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnLoadChildren] parent id: \"{parentId}\"");
 
-            var desc = new MediaDescriptionCompat.Builder()
-                .SetTitle("Sample title")
-                .SetSubtitle("Sample subtitle")
-                .SetDescription("Sample description")
-                .Build();
-
-            var item = new MediaBrowserCompat.MediaItem(desc, MediaBrowserCompat.MediaItem.FlagBrowsable);
-
-            result.SendResult(item);
-        }
-
-        public override void OnCreate()
-        {
-            System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService] [OnCreate] Executing");
-
-            base.OnCreate();
-
-            var componentName = new ComponentName(Application.Context, Class);
-            var intent = PackageManager.GetLaunchIntentForPackage(componentName.PackageName);
-            var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.NoCreate);
-
-            mediaSession = new MediaSessionCompat(
-                Application.Context,
-                componentName.PackageName,
-                componentName, pendingIntent)
+            if (String.Equals(parentId, "/"))
             {
-                Active = true
-            };
+                var books = booksService.QueryBooks();
+                var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
-            SessionToken = mediaSession.SessionToken;
+                for (var index = 0; index < books.Count; index++)
+                {
+                    var book = books[index];
+                    var description = new MediaDescriptionCompat.Builder()
+                        .SetMediaId(book.Id.Value.ToString())
+                        .SetTitle(book.Title)
+                        .SetSubtitle(String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, book.Authors))
+                        .SetDescription(book.Synopsis)
+                        .Build();
+                    var item = new MediaBrowserCompat.MediaItem(
+                        description,
+                        MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable
+                    );
 
-            mediaController = new MediaControllerCompat(Application.Context, mediaSession);
-            mediaController.RegisterCallback(new MediaControllerCallback());
+                    list.Add(item);
+                }
 
-            notificationBuilder = new NotificationBuilder();
-            notificationManager = NotificationManagerCompat.From(Application.Context);
+                result.SendResult(list);
 
+                return;
+            }
+
+            result.SendResult(null);
         }
 
         public override void OnDestroy()
@@ -115,41 +147,60 @@ namespace AudioBookPlayer.App.Android.Services
             mediaSession.Dispose();
         }
 
-        public override IBinder OnBind(Intent intent)
+        // MediaSessionCallback
+        private sealed class MediaSessionCallback : MediaSessionCompat.Callback
         {
-            System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService] [OnBind] Executing");
+            private readonly AudioBookPlaybackService playbackService;
+            private readonly MediaSessionCompat mediaSession;
 
-            var componentName = new ComponentName(Application.Context, Class);
-
-            if (String.Equals(componentName.PackageName, intent.Component?.PackageName))
+            public MediaSessionCallback(AudioBookPlaybackService playbackService, MediaSessionCompat mediaSession)
             {
-                Binder = new AudioBookPlaybackServiceBinder(this);
-
-                return Binder;
+                this.playbackService = playbackService;
+                this.mediaSession = mediaSession;
             }
 
-            return base.OnBind(intent);
-        }
-
-        public override bool OnUnbind(Intent? intent)
-        {
-            if (null != Binder)
+            public override void OnCommand(string command, Bundle extras, ResultReceiver cb)
             {
-                Binder.Unbind();
-                Binder = null;
+                base.OnCommand(command, extras, cb);
             }
 
-            return base.OnUnbind(intent);
+            public override void OnCustomAction(string action, Bundle extras)
+            {
+                base.OnCustomAction(action, extras);
+            }
+
+            public override void OnPrepare()
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [OnPrepare] Execute");
+
+                var metadata = new MediaMetadataCompat.Builder();
+                metadata.PutString(MediaMetadataCompat.MetadataKeyMediaId, "media_1");
+                metadata.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
+                metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
+                metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
+                metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
+                metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
+
+                mediaSession.SetMetadata(metadata.Build());
+
+                if (false == mediaSession.Active)
+                {
+                    mediaSession.Active = true;
+                }
+            }
         }
 
         // MediaControllerCallback class
         private sealed class MediaControllerCallback : MediaControllerCompat.Callback
         {
+            public override void OnSessionReady()
+            {
+                System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService.MediaControllerCallback] [OnSessionReady] Execute");
+            }
+
             public override void OnPlaybackStateChanged(PlaybackStateCompat state)
             {
-                System.Diagnostics.Debug.WriteLine($"[{nameof(MediaControllerCallback)}.OnPlaybackStateChanged] state: \"{state.State}\"");
-
-                base.OnPlaybackStateChanged(state);
+                System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] Playback state: \"{state.State}\"");
             }
         }
     }

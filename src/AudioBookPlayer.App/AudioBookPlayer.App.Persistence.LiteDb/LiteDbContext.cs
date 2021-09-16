@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq.Expressions;
-using AudioBookPlayer.App.Persistence.LiteDb.Models;
+﻿using AudioBookPlayer.App.Persistence.LiteDb.Models;
 using LibraProgramming.Xamarin.Core;
 using LiteDB;
 
@@ -10,19 +8,16 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
     {
         private const string databaseFilename = "library.ldb";
 
-        private readonly IPlatformDatabasePath databasePath;
-        private LiteDatabase database;
+        private readonly IDatabasePathProvider pathProvider;
+        private readonly LiteDatabase database;
 
-        public LiteDbContext(IPlatformDatabasePath databasePath)
+        public LiteDbContext(IDatabasePathProvider pathProvider)
         {
-            this.databasePath = databasePath;
-        }
+            this.pathProvider = pathProvider;
 
-        public void Initialize()
-        {
             var connectionString = new ConnectionString
             {
-                Filename = databasePath.GetDatabasePath(databaseFilename)
+                Filename = pathProvider.GetDatabasePath(databaseFilename)
             };
 
             database = new LiteDatabase(connectionString);

@@ -35,7 +35,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (IsConnected)
             {
-                mainActivity.OnPlaybackServiceConnected();
+                //mainActivity.OnPlaybackServiceConnected();
             }
             else
             {
@@ -48,7 +48,7 @@ namespace AudioBookPlayer.App.Android.Services
             Binder = null;
             IsConnected = false;
 
-            mainActivity.OnPlaybackServiceDisconnected();
+            //mainActivity.OnPlaybackServiceDisconnected();
         }
 #nullable restore
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Android.Services

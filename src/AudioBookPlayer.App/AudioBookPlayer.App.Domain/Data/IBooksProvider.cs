@@ -8,5 +8,7 @@ namespace AudioBookPlayer.App.Domain.Data
     public interface IBooksProvider
     {
         Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default);
+
+        IReadOnlyList<AudioBook> QueryBooks();
     }
 }

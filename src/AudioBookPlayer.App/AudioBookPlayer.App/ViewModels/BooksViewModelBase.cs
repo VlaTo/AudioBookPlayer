@@ -1,11 +1,12 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence.LiteDb;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
+using AudioBookPlayer.App.Services;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -31,6 +32,8 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     internal abstract class BooksViewModelBase : ViewModelBase, IBooksViewModel
     {
+        private readonly IDisposable subscription;
+
         public ObservableCollection<AudioBookViewModel> Books
         {
             get;
@@ -46,14 +49,19 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected readonly LiteDbContext DbContext;
-
-        protected BooksViewModelBase(LiteDbContext dbContext)
+        protected IMediaBrowserServiceConnector BrowserServiceConnector
         {
-            DbContext = dbContext;
+            get;
+        }
+
+        protected BooksViewModelBase(IMediaBrowserServiceConnector browserServiceConnector)
+        {
+            BrowserServiceConnector = browserServiceConnector;
             Books = new ObservableCollection<AudioBookViewModel>();
             StartPlay = new Command<AudioBookViewModel>(DoStartPlay);
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
+
+            subscription = browserServiceConnector.Connected.Subscribe(OnMediaBrowserConnected);
         }
 
         protected virtual void DoStartPlay(AudioBookViewModel book)
@@ -65,26 +73,6 @@ namespace AudioBookPlayer.App.ViewModels
                 ;
             });
         }
-
-        /*protected virtual void OnQueryBooksReady(object sender, AudioBooksEventArgs e)
-        {
-            executionMonitor.Start(e.Books);
-            
-            Books.Clear();
-
-            foreach (var book in e.Books)
-            {
-                Books.Add(new AudioBookViewModel
-                {
-                    Id = book.Id.GetValueOrDefault(-1L),
-                    Title = book.Title,
-                    Authors = GetAuthorsForBook(book.Authors),
-                    Synopsis = book.Synopsis,
-                    Duration = book.Duration,
-                    ImageBlob = await book.GetImageAsync(WellKnownMetaItemNames.Cover)
-                });
-            }
-        }*/
 
         protected string GetAuthorsForBook(ICollection<AudioBookAuthor> authors)
         {
@@ -115,5 +103,12 @@ namespace AudioBookPlayer.App.ViewModels
 
             return model;
         }
+
+        protected virtual void OnConnected()
+        {
+            System.Diagnostics.Debug.WriteLine("[BooksViewModelBase] [OnConnected] Execute");
+        }
+
+        private void OnMediaBrowserConnected(Unit _) => OnConnected();
     }
 }

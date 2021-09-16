@@ -34,6 +34,26 @@ namespace AudioBookPlayer.App.Services
             return books;
         }
 
+        public IReadOnlyList<AudioBook> QueryBooks()
+        {
+            using (var unitOfWork = new UnitOfWork(context, coverService, false))
+            {
+                var books = unitOfWork.Books.QueryBooks();
+
+                for (var index = 0; index < books.Count; index++)
+                {
+                    var book = books[index];
+
+                    if (book.Id.HasValue)
+                    {
+                        cache.Put(book.Id.Value, book);
+                    }
+                }
+
+                return books;
+            }
+        }
+
         public async Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default)
         {
             if (cache.Has(bookId))

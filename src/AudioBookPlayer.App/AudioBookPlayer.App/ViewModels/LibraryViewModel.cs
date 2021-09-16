@@ -1,4 +1,7 @@
-﻿using AudioBookPlayer.App.Core;
+﻿using System;
+using System.IO;
+using System.Reactive;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
@@ -17,9 +20,11 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly IBooksService booksService;
         private readonly AudioBooksLibrary booksLibrary;
         private readonly IAudioBooksPublisher booksPublisher;
+        private readonly IMediaBrowserServiceConnector browserServiceConnector;
         private readonly IPermissionRequestor permissionRequestor;
         private readonly ITaskExecutionMonitor updateExecutionMonitor;
         private readonly ITaskExecutionMonitor refreshExecutionMonitor;
+        private IDisposable browserServiceSubscription;
         private bool isBusy;
 
         public bool IsBusy
@@ -34,17 +39,14 @@ namespace AudioBookPlayer.App.ViewModels
         }
 
         [PrefferedConstructor]
-        public LibraryViewModel(
-            IBooksProvider booksProvider,
-            IBooksService booksService,
-            AudioBooksLibrary booksLibrary,
-            IAudioBooksPublisher booksPublisher,
-            IPermissionRequestor permissionRequestor)
+        public LibraryViewModel(IMediaBrowserServiceConnector browserServiceConnector, IPermissionRequestor permissionRequestor)
         {
-            this.booksProvider = booksProvider;
-            this.booksService = booksService;
-            this.booksLibrary = booksLibrary;
-            this.booksPublisher = booksPublisher;
+            //this.booksProvider = booksProvider;
+            //this.booksService = booksService;
+            //this.booksLibrary = booksLibrary;
+            //this.booksPublisher = booksPublisher;
+
+            this.browserServiceConnector = browserServiceConnector;
             this.permissionRequestor = permissionRequestor;
 
             updateExecutionMonitor = new TaskExecutionMonitor(ExecuteQueryLibraryAsync);
@@ -55,7 +57,9 @@ namespace AudioBookPlayer.App.ViewModels
 
         void IInitialize.OnInitialize()
         {
-            updateExecutionMonitor.Start();
+            //updateExecutionMonitor.Start();
+
+            browserServiceSubscription = browserServiceConnector.Connected.Subscribe(OnBrowserConnected, OnBrowserError);
         }
 
         private async Task ExecuteQueryLibraryAsync()
@@ -100,6 +104,21 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
+        private void OnBrowserConnected(Unit _)
+        {
+            System.Diagnostics.Debug.WriteLine("[LibraryViewModel] [OnBrowserConnected] Execute");
+            
+            var token = browserServiceConnector.GetRoot().Subscribe(audioBook =>
+            {
+                System.Diagnostics.Debug.WriteLine($"[LibraryViewModel] [OnBrowserConnected] Book: [{audioBook.Id}] \"{audioBook.Title}\"");
+            });
+        }
+
+        private void OnBrowserError(Exception _)
+        {
+            ;
+        }
+
         private async void DoLibraryRefreshAsync()
         {
             var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
@@ -112,10 +131,21 @@ namespace AudioBookPlayer.App.ViewModels
             refreshExecutionMonitor.Start();
         }
 
-        private async Task DoQueryLibraryAsync(CancellationToken cancellationToken = default)
+        private Task DoQueryLibraryAsync(CancellationToken cancellationToken = default)
         {
-            var books = await booksService.QueryBooksAsync(cancellationToken);
-            booksPublisher.OnNext(books);
+
+            browserServiceConnector.GetRoot().Subscribe(audioBook =>
+            {
+                System.Diagnostics.Debug.WriteLine($"[LibraryViewModel] [DoQueryLibraryAsync] {audioBook.Id.Value}");
+            }, error =>
+            {
+
+            });
+
+            //var books = await booksService.QueryBooksAsync(cancellationToken);
+            //booksPublisher.OnNext(books);
+
+            return Task.CompletedTask;
         }
     }
 }

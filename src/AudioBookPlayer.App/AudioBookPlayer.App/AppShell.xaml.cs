@@ -9,8 +9,6 @@ namespace AudioBookPlayer.App
 {
     public partial class AppShell
     {
-        // private readonly IPlatformToastService toastService;
-
         public AppShell()
         {
             InitializeComponent();
@@ -26,7 +24,7 @@ namespace AudioBookPlayer.App
 
         private void OnMultiTapToExitBehaviorOnShowHintMessage(object sender, EventArgs e)
         {
-            var toastService = AudioBookPlayerApplication.Current.DependencyContainer.GetInstance<IPlatformToastService>();
+            var toastService = AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IPlatformToastService>();
             toastService.ShowShortMessage(AppResources.ExitToastMessage);
         }
     }

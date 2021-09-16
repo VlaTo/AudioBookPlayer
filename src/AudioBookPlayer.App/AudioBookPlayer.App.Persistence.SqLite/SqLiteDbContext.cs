@@ -11,7 +11,7 @@ namespace AudioBookPlayer.App.Persistence.SqLite
     {
         private const string DatabaseName = "library.db";
 
-        private readonly IPlatformDatabasePath pathProvider;
+        private readonly IDatabasePathProvider pathProviderProvider;
 
         public sealed override DbSet<Author> Authors
         {
@@ -56,9 +56,9 @@ namespace AudioBookPlayer.App.Persistence.SqLite
         }
 
         [PrefferedConstructor]
-        protected SqLiteDbContext(IPlatformDatabasePath pathProvider)
+        protected SqLiteDbContext(IDatabasePathProvider pathProviderProvider)
         {
-            this.pathProvider = pathProvider;
+            this.pathProviderProvider = pathProviderProvider;
         }
 
         public override void Initialize()
@@ -81,7 +81,7 @@ namespace AudioBookPlayer.App.Persistence.SqLite
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var databasePath = pathProvider.GetDatabasePath(DatabaseName);
+            var databasePath = pathProviderProvider.GetDatabasePath(DatabaseName);
 
             switch (Device.RuntimePlatform)
             {

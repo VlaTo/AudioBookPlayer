@@ -1,27 +1,16 @@
 ﻿using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Persistence.LiteDb;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using System;
 using System.Collections.Generic;
-using System.Reactive;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     internal sealed class RecentBooksViewModel : BooksViewModelBase
     {
-        private readonly IAudioBooksConsumer booksConsumer;
-        private IDisposable subscription;
-
         [PrefferedConstructor]
-        public RecentBooksViewModel(
-            LiteDbContext dbContext,
-            IAudioBooksConsumer booksConsumer)
-            : base(dbContext)
+        public RecentBooksViewModel(IMediaBrowserServiceConnector browserServiceConnector)
+            : base(browserServiceConnector)
         {
-            this.booksConsumer = booksConsumer;
-
-            subscription = booksConsumer.Subscribe(Observer.Create<IEnumerable<AudioBook>>(DoBindAudioBooks));
         }
 
         private void DoBindAudioBooks(IEnumerable<AudioBook> audioBooks)

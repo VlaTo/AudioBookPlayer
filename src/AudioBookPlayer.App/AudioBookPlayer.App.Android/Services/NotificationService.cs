@@ -1,11 +1,8 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Media.Session;
 using Android.OS;
-using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Services;
 using System;
 using AndroidX.Core.App;
 using AndroidX.Media.Session;

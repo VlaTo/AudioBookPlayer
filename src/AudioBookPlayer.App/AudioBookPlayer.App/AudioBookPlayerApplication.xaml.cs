@@ -15,7 +15,7 @@ namespace AudioBookPlayer.App
 {
     public partial class AudioBookPlayerApplication
     {
-        internal new static AudioBookPlayerApplication Current => (AudioBookPlayerApplication) Application.Current;
+        public static AudioBookPlayerApplication Instance => (AudioBookPlayerApplication)Current;
 
         private readonly TaskExecutionMonitor executionMonitor;
 
@@ -41,8 +41,9 @@ namespace AudioBookPlayer.App
 
             DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
             DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
+            DependencyContainer.Register(() => DependencyService.Get<IMediaBrowserServiceConnector>(), InstanceLifetime.CreateNew);
 
-            InitializeDatabase();
+            //InitializeDatabase();
 
             MainPage = new AppShell();
         }
@@ -112,7 +113,7 @@ namespace AudioBookPlayer.App
             }
         }
         
-        private void InitializeDatabase()
+        /*private void InitializeDatabase()
         {
             var db = DependencyContainer.GetInstance<LiteDbContext>();
 
@@ -125,6 +126,6 @@ namespace AudioBookPlayer.App
                 Console.WriteLine(exception);
                 throw;
             }
-        }
+        }*/
     }
 }

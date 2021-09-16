@@ -6,9 +6,9 @@ namespace AudioBookPlayer.App.Android.Services
     /// <summary>
     /// Android platform Database path provider implementation.
     /// </summary>
-    internal sealed class DatabasePath : IPlatformDatabasePath
+    internal sealed class DatabasePathProvider : IDatabasePathProvider
     {
-        /// <inheritdoc cref="IPlatformDatabasePath.GetDatabasePath" />
+        /// <inheritdoc cref="IDatabasePathProvider.GetDatabasePath" />
         public string GetDatabasePath(string databaseName)
         {
             var databasePath = Application.Context.GetDatabasePath(databaseName);

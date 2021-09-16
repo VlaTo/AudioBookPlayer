@@ -75,6 +75,21 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
             return Task.FromResult<IReadOnlyList<AudioBook>>(new ReadOnlyCollection<AudioBook>(entities));
         }
 
+        public IReadOnlyList<AudioBook> QueryBooks()
+        {
+            var books = context.Books().FindAll();
+            var entities = new List<AudioBook>();
+
+            foreach (var book in books)
+            {
+                var builder = AudioBookBuilder.Create(coverService);
+                var entity = builder.MapFrom(book);
+                entities.Add(entity);
+            }
+
+            return new ReadOnlyCollection<AudioBook>(entities);
+        }
+
         private static void EnsureKeyAssigned(AudioBook audioBook, BsonValue id)
         {
             if (false == audioBook.Id.HasValue)

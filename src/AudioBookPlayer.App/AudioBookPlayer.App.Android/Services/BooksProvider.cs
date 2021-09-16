@@ -129,6 +129,88 @@ namespace AudioBookPlayer.App.Android.Services
             return Task.FromResult<IReadOnlyList<AudioBook>>(audioBooks);
         }
 
+        public IReadOnlyList<AudioBook> QueryBooks()
+        {
+            var scanner = new AudioBookFileScanner(resolver, collectionUri);
+            var audioFiles = scanner.QueryFiles();
+            
+            var audioBooks = new List<AudioBook>();
+
+            foreach (var audioFile in audioFiles)
+            {
+                var (mimeType, _) = scanner.GetMimeInfo(audioFile);
+
+                try
+                {
+                    using (var descriptor = scanner.OpenFile(audioFile))
+                    {
+                        var extension = Path.GetExtension(audioFile.Name);
+                        var provider = factory.CreateProviderFor(extension, mimeType);
+
+                        if (null == provider)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"No provider for file \"{audioFile.Name}\" with type \"{mimeType}\"");
+                            continue;
+                        }
+
+                        using (var stream = new BufferedStream(descriptor.CreateInputStream(), 20480))
+                        {
+                            var mediaInfo = provider.ExtractMediaInfo(stream);
+                            var audioBook = GetOrCreateAudioBook(audioBooks, audioFile, mediaInfo);
+                            var sourceFiles = new Dictionary<string, TimeSpan>();
+
+                            foreach (var track in mediaInfo.Tracks)
+                            {
+                                var contentUri = audioFile.ContentUri.ToString();
+                                var part = audioBook.GetOrCreatePart(audioFile.Title);
+                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration, part);
+                                var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
+
+                                if (null != part)
+                                {
+                                    part.Chapters.Add(chapter);
+                                }
+
+                                if (false == sourceFiles.TryGetValue(contentUri, out var duration))
+                                {
+                                    duration = TimeSpan.Zero;
+                                }
+
+                                var fragment = new AudioBookChapterFragment(duration, track.Duration, sourceFile);
+
+                                chapter.Fragments.Add(fragment);
+                                audioBook.Chapters.Add(chapter);
+                                audioBook.SourceFiles.Add(sourceFile);
+
+                                sourceFiles[contentUri] = duration + track.Duration;
+                            }
+
+                            foreach (var kvp in mediaInfo.Meta)
+                            {
+                                if (String.Equals(WellKnownMediaTags.Cover, kvp.Key))
+                                {
+                                    for (var index = 0; index < kvp.Value.Count; index++)
+                                    {
+                                        if (kvp.Value[index] is MemoryValue item)
+                                        {
+                                            var image = new StreamAudioBookImage(audioBook, item.Memory);
+                                            audioBook.Images.Add(image);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception exception)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error processing file: \"{audioFile.Name}\". {exception.Message}");
+                }
+            }
+
+            return audioBooks;
+        }
+
         private static Uri GetExternalContentUri()
             => (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
                 ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)

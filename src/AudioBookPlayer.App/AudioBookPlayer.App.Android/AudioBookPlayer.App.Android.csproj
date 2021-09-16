@@ -58,6 +58,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="System.Reactive">
+      <Version>5.0.0</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2012" />
     <PackageReference Include="Xamarin.Essentials" Version="1.6.1" />
   </ItemGroup>
@@ -67,17 +70,17 @@
     <Compile Include="Core\AudioBookFileScanner.cs" />
     <Compile Include="Core\Extensions\FileDateTime.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
+    <Compile Include="Core\PackageValidator.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AudioBookPlaybackService.cs" />
-    <Compile Include="Services\AudioBookPlaybackServiceBinder.cs" />
-    <Compile Include="Services\AudioBookPlaybackServiceConnection.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\Builders\NotificationBuilder.cs" />
     <Compile Include="Services\CoverImageProvider.cs" />
     <Compile Include="Services\CoverService.cs" />
-    <Compile Include="Services\DatabasePath.cs" />
+    <Compile Include="Services\DatabasePathProvider.cs" />
     <Compile Include="Services\BooksProvider.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
@@ -136,10 +139,6 @@
       <Project>{ba8eedc8-cf56-49e6-b28b-ccfdea8e8637}</Project>
       <Name>AudioBookPlayer.App.Domain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.SqLite\AudioBookPlayer.App.Persistence.SqLite.csproj">
-      <Project>{12f02e38-b764-4b42-a664-23a90b5c3f95}</Project>
-      <Name>AudioBookPlayer.App.Persistence</Name>
-    </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
       <Project>{975fc088-f460-4e2b-a7f7-a5dcc82ae56b}</Project>
       <Name>AudioBookPlayer.App</Name>
@@ -167,6 +166,11 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\ic_logo.png" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\xml\allowed_media_browser_callers.xml">
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

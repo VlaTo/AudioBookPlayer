@@ -20,21 +20,10 @@ namespace AudioBookPlayer.App.Android
     [Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
-        internal AudioBookPlaybackServiceConnection AudioBookPlaybackServiceConnection => DependencyService.Get<AudioBookPlaybackServiceConnection>();
-
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-
-        protected override void OnStart()
-        {
-            var intent = new Intent(this, typeof(AudioBookPlaybackService));
-
-            base.OnStart();
-
-            BindService(intent, AudioBookPlaybackServiceConnection, Bind.AutoCreate);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -47,8 +36,17 @@ namespace AudioBookPlayer.App.Android
             Forms.Init(this, savedInstanceState);
             LibraControls.Init(this, savedInstanceState);
             LibraPopups.Init(this, savedInstanceState);
-
+            
             LoadApplication(new AudioBookPlayerApplication(new AndroidInitializer()));
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+
+            var connector = DependencyService.Get<IMediaBrowserServiceConnector>();
+
+            connector.Connect();
         }
 
         protected override void OnResume()
@@ -61,16 +59,6 @@ namespace AudioBookPlayer.App.Android
         {
             base.OnNewIntent(intent);
             Xamarin.Essentials.Platform.OnNewIntent(intent);
-        }
-
-        internal void OnPlaybackServiceConnected()
-        {
-            System.Diagnostics.Debug.WriteLine("[MainActivity] [OnPlaybackServiceConnected] Executed");
-        }
-
-        internal void OnPlaybackServiceDisconnected()
-        {
-            System.Diagnostics.Debug.WriteLine("[MainActivity] [OnPlaybackServiceDisconnected] Executed");
         }
 
         /// <summary>
@@ -87,18 +75,19 @@ namespace AudioBookPlayer.App.Android
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);
                 //container.Register<IStorageSourceService, StorageSourceService>(InstanceLifetime.Singleton);
                 //container.Register<INotificationService, NotificationService>(InstanceLifetime.Singleton);
-                container.Register<IPlaybackService>(GetPlaybackService, InstanceLifetime.Singleton);
+                //container.Register<IPlaybackService>(GetPlaybackService, InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
-                container.Register<IPlatformDatabasePath, DatabasePath>();
+                container.Register<IDatabasePathProvider, DatabasePathProvider>();
+                //container.Register<IAudioBookPlaybackServiceConnector, AudioBookPlaybackServiceConnector>(InstanceLifetime.Singleton);
             }
 
-            private static IPlaybackService GetPlaybackService()
+            /*private static IPlaybackService GetPlaybackService()
             {
                 var mainActivity = (MainActivity) Xamarin.Essentials.Platform.CurrentActivity;
                 var connection = mainActivity.AudioBookPlaybackServiceConnection;
 
                 return null;
-            }
+            }*/
         }
     }
 }

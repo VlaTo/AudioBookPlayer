@@ -21,11 +21,13 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        private readonly IAudioBookPlaybackServiceConnector connector;
+        private readonly IMediaBrowserServiceConnector connector;
         private readonly IBooksService booksService;
+        private readonly IMediaBrowserServiceConnector mediaBrowserServiceConnector;
         private readonly IPlaybackService playbackService;
         private readonly IActivityTrackerService activityTrackerService;
         // private readonly INotificationService notificationService;
+        private readonly TaskExecutionMonitor serviceConnectMonitor;
         private readonly TaskExecutionMonitor loadBookMonitor;
         private readonly TaskExecutionMonitor trackBookActivity;
 
@@ -209,21 +211,29 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         // ReSharper disable once UnusedMember.Global
-        public PlayerControlViewModel(IBooksService booksService, IActivityTrackerService activityTrackerService)
-            : this(booksService, DependencyService.Get<IAudioBookPlaybackServiceConnector>(), activityTrackerService)
+        public PlayerControlViewModel(
+            IBooksService booksService,
+            IActivityTrackerService activityTrackerService)
+            : this(
+                booksService,
+                DependencyService.Get<IMediaBrowserServiceConnector>(),
+                activityTrackerService
+            )
         {
         }
 
         private PlayerControlViewModel(
             IBooksService booksService,
-            IAudioBookPlaybackServiceConnector connector,
+            IMediaBrowserServiceConnector mediaBrowserServiceConnector,
             IActivityTrackerService activityTrackerService)
         {
             this.booksService = booksService;
-            this.connector = connector;
             this.activityTrackerService = activityTrackerService;
-            // this.notificationService = notificationService;
 
+            //audioBookPlaybackServiceConnector = DependencyService.Get<IAudioBookPlaybackServiceConnector>();
+            this.mediaBrowserServiceConnector = mediaBrowserServiceConnector;
+
+            serviceConnectMonitor = new TaskExecutionMonitor(DoServiceConnectAsync);
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
             trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
 
@@ -260,7 +270,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         public void OnInitialize()
         {
-            Debug.WriteLine($"[PlayerControlViewModel] [OnInitialize] Execute");
+            serviceConnectMonitor.Start();
         }
 
         private void DoPickChapter()
@@ -320,6 +330,8 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoSnoozeCommand()
         {
+            mediaBrowserServiceConnector.GetRoot();
+
             var position = TimeSpan.FromMilliseconds(ChapterPosition);
             Debug.WriteLine($"[PlayerControlViewModel] [DoSnoozeCommand] Current: {position:g}");
         }
@@ -348,6 +360,12 @@ namespace AudioBookPlayer.App.ViewModels
             playbackService.ChapterIndex = index;
         }
 
+        private Task DoServiceConnectAsync()
+        {
+            mediaBrowserServiceConnector.Connect();
+            return Task.CompletedTask;
+        }
+
         private async Task DoLoadBookAsync()
         {
             if (String.IsNullOrEmpty(BookId))
@@ -357,7 +375,7 @@ namespace AudioBookPlayer.App.ViewModels
 
             var actualBookId = long.Parse(BookId, CultureInfo.InvariantCulture);
 
-            if (playbackService.IsPlaying)
+            /*if (playbackService.IsPlaying)
             {
                 if (playbackService.AudioBook.Id == actualBookId)
                 {
@@ -369,13 +387,13 @@ namespace AudioBookPlayer.App.ViewModels
                 }
 
                 playbackService.Pause();
-            }
+            }*/
 
             var book = await booksService.GetBookAsync(actualBookId);
 
             if (null != book)
             {
-                using (playbackService.BatchUpdate())
+                /*using (playbackService.BatchUpdate())
                 {
                     if (AudioBook.AreSame(playbackService.AudioBook, book))
                     {
@@ -385,7 +403,7 @@ namespace AudioBookPlayer.App.ViewModels
                     {
                         playbackService.AudioBook = book;
                     }
-                }
+                }*/
             }
             else
             {

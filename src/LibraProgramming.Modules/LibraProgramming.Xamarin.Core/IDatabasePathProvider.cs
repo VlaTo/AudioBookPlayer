@@ -3,7 +3,7 @@
     /// <summary>
     /// Platform-dependent Database path provider abstraction.
     /// </summary>
-    public interface IPlatformDatabasePath
+    public interface IDatabasePathProvider
     {
         /// <summary>
         /// Gets Database path for the platform.
