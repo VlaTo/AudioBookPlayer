@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
 {
-    public partial class BooksRepository
+    /*public partial class BooksRepository
     {
         /// <summary>
         /// Maps business-object <see cref="AudioBook" /> to DTO-object <see cref="Book" />.
@@ -37,7 +37,7 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
                     Synopsis = entity.Synopsis,
                 };
 
-                FixDateCreated(book, entity.AddedToLibrary);
+                FixDateCreated(book, entity.Created);
                 AddAuthors(book, entity.Authors);
                 AddSections(book, entity.Sections);
 
@@ -150,5 +150,5 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
                 chapter.Fragments = fragments;
             }
         }
-    }
+    }*/
 }

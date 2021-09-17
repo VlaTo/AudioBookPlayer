@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using LibraProgramming.Xamarin.Core;
 
-namespace AudioBookPlayer.App.Services
+namespace LibraProgramming.Xamarin.Core
 {
-    internal sealed class InMemoryCache<TKey, TValue> : ICache<TKey, TValue>
+    public sealed class InMemoryCache<TKey, TValue> : ICache<TKey, TValue>
     {
         private readonly Dictionary<TKey, TValue> cache;
 

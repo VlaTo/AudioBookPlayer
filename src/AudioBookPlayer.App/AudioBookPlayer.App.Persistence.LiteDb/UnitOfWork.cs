@@ -1,9 +1,5 @@
-﻿using AudioBookPlayer.App.Domain.Data;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.LiteDb.Repositories;
+﻿using AudioBookPlayer.App.Persistence.LiteDb.Repositories;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb
 {
@@ -12,15 +8,16 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
         private readonly LiteDbContext context;
         private bool hasTransaction;
 
-        public IBooksRepository Books { get; }
+        public IBooksRepository Books
+        {
+            get;
+        }
 
-        public IBookmarkRepository Bookmarks { get; }
-
-        public UnitOfWork(LiteDbContext context, ICoverService coverService, bool useTransaction)
+        public UnitOfWork(LiteDbContext context, bool useTransaction)
         {
             this.context = context;
 
-            Books = new BooksRepository(context, coverService);
+            Books = new BooksRepository(context);
 
             if (useTransaction)
             {
@@ -36,34 +33,34 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
             }
         }
 
-        public Task CommitAsync(CancellationToken cancellationToken = default)
+        public void Commit()
         {
-            if (hasTransaction)
+            if (false == hasTransaction)
             {
-                if (context.CommitTransaction())
-                {
-                    hasTransaction = false;
-                    return Task.CompletedTask;
-                }
+                return;
+            }
 
+            if (false == context.CommitTransaction())
+            {
                 throw new Exception();
             }
 
-            return Task.CompletedTask;
+            hasTransaction = false;
         }
 
         private void Rollback()
         {
-            if (hasTransaction)
+            if (false == hasTransaction)
             {
-                if (context.RollbackTransaction())
-                {
-                    hasTransaction = false;
-                    return;
-                }
+                return;
+            }
 
+            if (false == context.RollbackTransaction())
+            {
                 throw new Exception();
             }
+
+            hasTransaction = false;
         }
     }
 }

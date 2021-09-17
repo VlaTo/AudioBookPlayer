@@ -3,18 +3,16 @@ using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Android.Services;
+using AudioBookPlayer.App.Android.Services.Builders;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Xamarin.Forms;
 using Application = Android.App.Application;
-using Observable = System.Reactive.Linq.Observable;
 
 [assembly: Dependency(typeof(MediaBrowserServiceConnector))]
 
@@ -42,7 +40,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         public MediaBrowserServiceConnector()
         {
-            var serviceName = Java.Lang.Class.FromType(typeof(AudioBookPlaybackService)).Name;
+            var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
             var componentName = new ComponentName(Application.Context, serviceName);
             
             var connected = new Subject<Unit>();
@@ -208,11 +206,13 @@ namespace AudioBookPlayer.App.Android.Services
         {
             private readonly MediaBrowserServiceConnector connector;
             private readonly IObserver<AudioBook[]> observer;
+            private readonly AudioBookBuilder builder;
 
             public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<AudioBook[]> observer)
             {
                 this.connector = connector;
                 this.observer = observer;
+                builder = new PublicAudioBookBuilder();
             }
 
             public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
@@ -222,12 +222,7 @@ namespace AudioBookPlayer.App.Android.Services
                 for (var index = 0; index < children.Count; index++)
                 {
                     var source = children[index];
-                    var id = long.TryParse(source.MediaId, out var value) ? new long?(value) : null;
-                    
-                    books[index] = new AudioBook(source.Description.Title, id)
-                    {
-                         source.Description.Description
-                    };
+                    books[index] = builder.BuildAudioBookFrom(source);
                 }
 
                 observer.OnNext(books);
@@ -238,16 +233,6 @@ namespace AudioBookPlayer.App.Android.Services
                 observer.OnError(new Exception());
             }
 
-            private long? GetBookId([NotNull] MediaBrowserCompat.MediaItem source)
-            {
-                if (String.IsNullOrEmpty(source.MediaId))
-                {
-                    return null;
-                }
-
-                int delimiterPosition=source.MediaId.IndexOf()
-                if(source.MediaId.StartsWith("audiobook"))
-            }
         }
     }
 }

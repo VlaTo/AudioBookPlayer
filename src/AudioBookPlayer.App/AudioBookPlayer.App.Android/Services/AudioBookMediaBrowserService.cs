@@ -5,31 +5,29 @@ using Android.OS;
 using Android.Runtime;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
-using AndroidX.Core.App;
 using AndroidX.Media;
 using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Android.Services.Builders;
 using AudioBookPlayer.App.Domain.Services;
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using AudioBookPlayer.App.Android.Services.Builders;
-using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Persistence.LiteDb;
 using Application = Android.App.Application;
 
 // https://developer.android.com/guide/topics/media/media-controls
 // https://github.com/android/uamp/blob/f60b902643407ba234a316abe91410da7c08a4af/common/src/main/java/com/example/android/uamp/media/MusicService.kt
+// https://github.com/xamarin/monodroid-samples/tree/master/android5.0/MediaBrowserService
 
 namespace AudioBookPlayer.App.Android.Services
 {
     /// <summary>
-    /// 
+    /// Provides audiobooks library and handles playing them.
     /// </summary>
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    public sealed class AudioBookPlaybackService : MediaBrowserServiceCompat
+    public sealed class AudioBookMediaBrowserService : MediaBrowserServiceCompat, IAudioBooksMediaBrowserService
     {
-        private readonly IBooksService booksService;
+        private readonly ICoverService coverService;
         private readonly ComponentName componentName;
         private readonly PackageValidator packageValidator;
         private MediaSessionCompat mediaSession;
@@ -37,19 +35,19 @@ namespace AudioBookPlayer.App.Android.Services
         private PlaybackStateCompat.Builder playbackState;
         private MediaSessionCallback mediaSessionCallback;
         private MediaControllerCallback mediaControllerCallback;
+        private BooksService booksService;
 
         // ReSharper disable once UnusedMember.Global
-        public AudioBookPlaybackService()
+        public AudioBookMediaBrowserService()
             : this(
-                AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksService>()
+                AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<ICoverService>()
             )
         {
         }
 
-        private AudioBookPlaybackService(
-            IBooksService booksService)
+        private AudioBookMediaBrowserService(ICoverService coverService)
         {
-            this.booksService = booksService;
+            this.coverService = coverService;
 
             componentName = new ComponentName(Application.Context, Class);
             packageValidator = new PackageValidator(Application.Context);
@@ -62,7 +60,7 @@ namespace AudioBookPlayer.App.Android.Services
             var intent = PackageManager.GetLaunchIntentForPackage(componentName.PackageName);
             var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
-            mediaSession = new MediaSessionCompat(Application.Context, nameof(AudioBookPlaybackService), componentName, pendingIntent);
+            mediaSession = new MediaSessionCompat(Application.Context, nameof(AudioBookMediaBrowserService), componentName, pendingIntent);
             mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
 
             playbackState = new PlaybackStateCompat.Builder().SetActions(PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionPlayPause);
@@ -77,6 +75,10 @@ namespace AudioBookPlayer.App.Android.Services
             mediaControllerCallback = new MediaControllerCallback();
             mediaController.RegisterCallback(mediaControllerCallback);
 
+            var dbContext = new LiteDbContext(new DatabasePathProvider());
+
+            booksService = new BooksService(dbContext, coverService);
+
             // notificationBuilder = new NotificationBuilder();
             // notificationManager = NotificationManagerCompat.From(Application.Context);
 
@@ -88,7 +90,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null == rootHints || rootHints.IsEmpty)
                 {
-                    return new BrowserRoot("/", null);
+                    return new BrowserRoot(IAudioBooksMediaBrowserService.LibraryRoot, null);
                 }
 
                 if (rootHints.GetBoolean(BrowserRoot.ExtraRecent))
@@ -105,26 +107,55 @@ namespace AudioBookPlayer.App.Android.Services
             return new BrowserRoot("@empty@", null);
         }
 
+        // Root: "/"
+        // Concrete book: "/audiobook:1" (preview)
+        // Book chapters: "/audiobook:1/chapters" (list of chapters)
+        // Book sections: "/audiobook:1/sections" (list of sections)
+        // Concrete section: "/audiobook:1/section:0" (preview)
+        // Section chapters: "/audiobook:1/section:0/chapters" (list of chapters)
+        // Concrete chapter: "/audiobook:1/chapter:0" (preview)
         public override void OnLoadChildren(string parentId, Result result)
         {
             //System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnLoadChildren] parent id: \"{parentId}\"");
 
-            if (String.Equals(parentId, "/"))
+            if (String.Equals(parentId, IAudioBooksMediaBrowserService.LibraryRoot))
             {
                 var books = booksService.QueryBooks();
+                var builder = new PublicMediaItemBuilder();
                 var list = new JavaList<MediaBrowserCompat.MediaItem>();
+                var flags = MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable;
 
                 for (var index = 0; index < books.Count; index++)
                 {
-                    var book = books[index];
-                    var item = MediaItemBuilder.From(book, MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable);
-
+                    var item = builder.BuildBookPreviewMediaItem(books[index], flags);
                     list.Add(item);
                 }
 
                 result.SendResult(list);
 
                 return;
+            }
+
+            if (parentId.StartsWith(IAudioBooksMediaBrowserService.LibraryRoot))
+            {
+                var path = parentId.Substring(IAudioBooksMediaBrowserService.LibraryRoot.Length);
+
+                if (MediaBookId.TryParse(path, out var mediaBookId))
+                {
+                    var book = booksService.GetBook(mediaBookId.Id);
+                    var builder = new PublicMediaItemBuilder();
+                    var list = new JavaList<MediaBrowserCompat.MediaItem>();
+
+                    for (var index = 0; index < book.Chapters.Count; index++)
+                    {
+                        var item = builder.BuildMediaItemFrom(
+                            book.Chapters[index],
+                            MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable
+                        );
+                        list.Add(item);
+                    }
+                }
+
             }
 
             result.SendResult(null);
@@ -141,12 +172,12 @@ namespace AudioBookPlayer.App.Android.Services
         // MediaSessionCallback
         private sealed class MediaSessionCallback : MediaSessionCompat.Callback
         {
-            private readonly AudioBookPlaybackService playbackService;
+            private readonly AudioBookMediaBrowserService mediaBrowserService;
             private readonly MediaSessionCompat mediaSession;
 
-            public MediaSessionCallback(AudioBookPlaybackService playbackService, MediaSessionCompat mediaSession)
+            public MediaSessionCallback(AudioBookMediaBrowserService mediaBrowserService, MediaSessionCompat mediaSession)
             {
-                this.playbackService = playbackService;
+                this.mediaBrowserService = mediaBrowserService;
                 this.mediaSession = mediaSession;
             }
 

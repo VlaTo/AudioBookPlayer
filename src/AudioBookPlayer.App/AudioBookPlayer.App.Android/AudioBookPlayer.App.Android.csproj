@@ -74,9 +74,14 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\AudioBookPlaybackService.cs" />
+    <Compile Include="Services\AudioBookMediaBrowserService.cs" />
+    <Compile Include="Services\BooksService.cs" />
     <Compile Include="Services\Builders\AudioBookBuilder.cs" />
+    <Compile Include="Services\Builders\MediaBookId.cs" />
     <Compile Include="Services\Builders\MediaItemBuilder.cs" />
+    <Compile Include="Services\Builders\PublicAudioBookBuilder.cs" />
+    <Compile Include="Services\Builders\PublicMediaItemBuilder.cs" />
+    <Compile Include="Services\IAudioBooksMediaBrowserService.cs" />
     <Compile Include="Services\MediaBrowserServiceConnector.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\Builders\NotificationBuilder.cs" />
@@ -140,6 +145,10 @@
     <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj">
       <Project>{ba8eedc8-cf56-49e6-b28b-ccfdea8e8637}</Project>
       <Name>AudioBookPlayer.App.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.App.Persistence.LiteDb\AudioBookPlayer.App.Persistence.LiteDb.csproj">
+      <Project>{67dc373c-9724-44d3-bf6e-25a8d42accf8}</Project>
+      <Name>AudioBookPlayer.App.Persistence.LiteDb</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.App\AudioBookPlayer.App.csproj">
       <Project>{975fc088-f460-4e2b-a7f7-a5dcc82ae56b}</Project>

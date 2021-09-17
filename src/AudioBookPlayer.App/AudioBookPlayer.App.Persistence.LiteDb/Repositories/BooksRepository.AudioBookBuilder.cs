@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
 {
-    public partial class BooksRepository
+    /*public partial class BooksRepository
     {
         /// <summary>
         /// Maps DTO object <see cref="Book" /> to the business-object <see cref="AudioBook" />.
@@ -43,7 +43,7 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
             
             private static void FixAddedToLibrary(AudioBook audioBook, DateTime source)
             {
-                audioBook.AddedToLibrary = source.ToLocalTime();
+                audioBook.Created = source.ToLocalTime();
             }
             
             private static void AddAuthors(IList<AudioBookAuthor> authors, string[] source)
@@ -162,5 +162,5 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
                 }
             }
         }
-    }
+    }*/
 }

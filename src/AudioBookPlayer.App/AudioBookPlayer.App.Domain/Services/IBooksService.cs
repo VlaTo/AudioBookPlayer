@@ -10,5 +10,7 @@ namespace AudioBookPlayer.App.Domain.Services
         Task<AudioBook> GetBookAsync(long bookId, CancellationToken cancellationToken = default);
 
         Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
+
+        AudioBook GetBook(BookId bookId);
     }
 }

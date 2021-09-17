@@ -8,13 +8,10 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
     {
         private const string databaseFilename = "library.ldb";
 
-        private readonly IDatabasePathProvider pathProvider;
         private readonly LiteDatabase database;
 
         public LiteDbContext(IDatabasePathProvider pathProvider)
         {
-            this.pathProvider = pathProvider;
-
             var connectionString = new ConnectionString
             {
                 Filename = pathProvider.GetDatabasePath(databaseFilename)

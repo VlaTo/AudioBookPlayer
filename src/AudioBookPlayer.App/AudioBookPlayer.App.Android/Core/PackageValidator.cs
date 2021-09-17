@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Xml;
 using Android.Content;
@@ -70,69 +71,71 @@ namespace AudioBookPlayer.App.Android.Core
 			return validCertificates;
 		}
 
-		public bool IsCallerAllowed(string callingPackage, int callingUid)
-		{
-			if (Process.SystemUid == callingUid || Process.MyUid() == callingUid)
-			{
-				return true;
-			}
+        public bool IsCallerAllowed([NotNull] string callingPackageName, int callingUid)
+        {
+            if (Process.SystemUid == callingUid || Process.MyUid() == callingUid)
+            {
+                return true;
+            }
 
-			var packageManager = context.PackageManager;
-			PackageInfo packageInfo;
+            var packageManager = context.PackageManager;
+            PackageInfo packageInfo;
 
-			try
-			{
-				packageInfo = packageManager?.GetPackageInfo(callingPackage, PackageInfoFlags.Signatures);
-			}
-			catch (PackageManager.NameNotFoundException e)
-			{
-				//LogHelper.Warn(Tag, e, "Package manager can't find package: ", callingPackage);
-				return false;
-			}
-			
+            try
+            {
+                packageInfo = packageManager?.GetPackageInfo(callingPackageName, PackageInfoFlags.Signatures);
+            }
+            catch (PackageManager.NameNotFoundException e)
+            {
+                //LogHelper.Warn(Tag, e, "Package manager can't find package: ", callingPackage);
+                return false;
+            }
+
             if (packageInfo.Signatures.Count != 1)
-			{
-				//LogHelper.Warn(Tag, "Caller has more than one signature certificate!");
-				return false;
-			}
-			
+            {
+                //LogHelper.Warn(Tag, "Caller has more than one signature certificate!");
+                return false;
+            }
+
             var signature = Base64.EncodeToString(packageInfo.Signatures[0].ToByteArray(), Base64Flags.NoWrap);
 
-			List<CallerInfo> validCallers = certificates[signature];
-			if (validCallers == null)
-			{
-				//LogHelper.Verbose(Tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
-				if (certificates.Count == 0)
-				{
-					/*LogHelper.Warn(Tag, "The list of valid certificates is empty. Either your file ",
-						"res/xml/allowed_media_browser_callers.xml is empty or there was an error ",
-						"while reading it. Check previous log messages.");*/
-				}
-				return false;
-			}
+            List<CallerInfo> validCallers = certificates[signature];
+            if (validCallers == null)
+            {
+                //LogHelper.Verbose(Tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
+                if (certificates.Count == 0)
+                {
+                    /*LogHelper.Warn(Tag, "The list of valid certificates is empty. Either your file ",
+                        "res/xml/allowed_media_browser_callers.xml is empty or there was an error ",
+                        "while reading it. Check previous log messages.");*/
+                }
 
-			// Check if the package name is valid for the certificate:
-			var expectedPackages = new StringBuilder();
+                return false;
+            }
 
-			foreach (var info in validCallers)
-			{
-				if (callingPackage == info.PackageName)
-				{
-					//LogHelper.Verbose(Tag, "Valid caller: ", info.Name, " package=", info.PackageName, " release=", info.Release);
-					return true;
-				}
-				expectedPackages.Append(info.PackageName).Append(' ');
-			}
+            // Check if the package name is valid for the certificate:
+            var expectedPackages = new StringBuilder();
 
-			/*LogHelper.Info(Tag, "Caller has a valid certificate, but its package doesn't match any ",
-				"expected package for the given certificate. Caller's package is ", callingPackage,
-				". Expected packages as defined in res/xml/allowed_media_browser_callers.xml are (",
-				expectedPackages, "). This caller's certificate is: \n", signature);*/
+            foreach (var info in validCallers)
+            {
+                if (callingPackageName == info.PackageName)
+                {
+                    //LogHelper.Verbose(Tag, "Valid caller: ", info.Name, " package=", info.PackageName, " release=", info.Release);
+                    return true;
+                }
 
-			return false;
-		}
+                expectedPackages.Append(info.PackageName).Append(' ');
+            }
 
-		private class CallerInfo
+            /*LogHelper.Info(Tag, "Caller has a valid certificate, but its package doesn't match any ",
+                "expected package for the given certificate. Caller's package is ", callingPackage,
+                ". Expected packages as defined in res/xml/allowed_media_browser_callers.xml are (",
+                expectedPackages, "). This caller's certificate is: \n", signature);*/
+
+            return false;
+        }
+
+        private class CallerInfo
 		{
 			public string Name { get; set; }
 			public string PackageName { get; set; }

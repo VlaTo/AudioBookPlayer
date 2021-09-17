@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Services
 {
-    internal sealed class BooksService : IBooksService
+    /*internal sealed class BooksService : IBooksService
     {
         private readonly LiteDbContext context;
         private readonly ICoverService coverService;
@@ -102,5 +102,5 @@ namespace AudioBookPlayer.App.Services
                 await unitOfWork.CommitAsync(cancellationToken);
             }
         }
-    }
+    }*/
 }

@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Core\LibraProgramming.Xamarin.Core.csproj" />
-    <ProjectReference Include="..\..\LibraProgramming.Modules\LibraProgramming.Xamarin.Dependency.Container\LibraProgramming.Xamarin.Dependency.Container.csproj" />
-    <ProjectReference Include="..\AudioBookPlayer.App.Domain\AudioBookPlayer.App.Domain.csproj" />
   </ItemGroup>
 
 </Project>

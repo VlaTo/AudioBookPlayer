@@ -1,53 +1,24 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using Android.Support.V4.Media;
-using AudioBookPlayer.App.Domain.Data;
-using AudioBookPlayer.App.Domain.Extensions;
+﻿using Android.Support.V4.Media;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Persistence.LiteDb.Models;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AudioBookPlayer.App.Android.Services.Builders
 {
-    internal static class MediaItemBuilder
+    internal abstract class MediaItemBuilder
     {
         [return: NotNull]
-        public static MediaBrowserCompat.MediaItem From([NotNull] AudioBook source, int flags)
-        {
-            var iconUri = GetBookImageUri(source, 0);
-            var duration = source.Duration.ToString("g", CultureInfo.CurrentUICulture);
-            var description = new MediaDescriptionCompat.Builder()
-                .SetMediaId(GetBookMediaId(source))
-                .SetTitle(source.Title)
-                .SetSubtitle(duration)
-                .SetDescription(source.GetAuthors());
+        public abstract MediaBrowserCompat.MediaItem BuildBookPreviewMediaItem([NotNull] Book source, int flags);
 
-            if (null != iconUri)
-            {
-                description.SetIconUri(iconUri);
-            }
-
-            return new MediaBrowserCompat.MediaItem(description.Build(), flags);
-        }
+        [return: NotNull]
+        public abstract MediaBrowserCompat.MediaItem BuildMediaItemFrom([NotNull] AudioBookChapter source, int flags);
 
         [return: MaybeNull]
-        public static string GetBookMediaId([NotNull] AudioBook audioBook)
+        public static global::Android.Net.Uri GetBookImageUri([NotNull] Book book, int imageIndex)
         {
-            if (false == audioBook.Id.HasValue)
+            if (book.Images.Length > imageIndex)
             {
-                return null;
-            }
-
-            return $"audiobook:{audioBook.Id.Value:D}";
-        }
-
-        [return: MaybeNull]
-        public static global::Android.Net.Uri GetBookImageUri([NotNull] AudioBook audioBook, int imageIndex)
-        {
-            if (audioBook.Images.Count > imageIndex)
-            {
-                if (audioBook.Images[imageIndex] is IHasContentUri has)
-                {
-                    return global::Android.Net.Uri.Parse(has.ContentUri);
-                }
+                return global::Android.Net.Uri.Parse(book.Images[imageIndex]);
             }
 
             return null;

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using AudioBookPlayer.App.Domain.Collections;
+using System.Linq;
 using AudioBookPlayer.App.Domain.Data;
 
 namespace AudioBookPlayer.App.Domain.Models
 {
     public sealed class AudioBook : IEntity
     {
-        private TimeSpan? duration;
-
-        public long? Id
+        public BookId Id
         {
             get;
             set;
@@ -20,31 +18,13 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public TimeSpan Duration
-        {
-            get
-            {
-                if (false == duration.HasValue)
-                {
-                    duration = TimeSpan.Zero;
-
-                    foreach (var chapter in Chapters)
-                    {
-                        duration += chapter.Duration;
-                    }
-                }
-
-                return duration.Value;
-            }
-        }
-
         public string Synopsis
         {
             get;
             set;
         }
 
-        public DateTime? AddedToLibrary
+        public DateTime? Created
         {
             get;
             set;
@@ -75,50 +55,20 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public AudioBook(string title, long? id = null)
+        public AudioBook(BookId id, string title)
         {
             Id = id;
             Title = title;
             Authors = new List<AudioBookAuthor>();
             Sections = new List<AudioBookSection>();
             Images = new List<AudioBookImage>();
-            Chapters = new OwnedCollection<AudioBookChapter>(OnChaptersCollectionChanged);
-            SourceFiles = new OwnedCollection<AudioBookSourceFile>(OnSourceFilesCollectionChanged);
+            Chapters = new List<AudioBookChapter>();
+            SourceFiles = new List<AudioBookSourceFile>();
         }
 
-        public static bool AreSame(AudioBook one, AudioBook other)
+        public TimeSpan GetDuration()
         {
-            if (ReferenceEquals(one, null))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(other, null))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(one, other))
-            {
-                return true;
-            }
-
-            if (one.Id.HasValue)
-            {
-                return other.Id.HasValue && other.Id == one.Id.Value;
-            }
-
-            return false;
-        }
-
-        private void OnChaptersCollectionChanged(CollectionChange action, int index)
-        {
-            duration = null;
-        }
-
-        private void OnSourceFilesCollectionChanged(CollectionChange action, int index)
-        {
-            ;
+            return Chapters.Aggregate(TimeSpan.Zero, (current, chapter) => current + chapter.Duration);
         }
     }
 }
