@@ -42,7 +42,7 @@ namespace AudioBookPlayer.App.ViewModels
         {
             var bookId = playbackService.AudioBook.Id;
 
-            using (var unitOfWork = factory.CreateUnitOfWork(false))
+            /*using (var unitOfWork = factory.CreateUnitOfWork(false))
             {
                 var bookmarks = await unitOfWork.Bookmarks.QueryAsync(bookId.Value);
 
@@ -55,7 +55,7 @@ namespace AudioBookPlayer.App.ViewModels
 
                     Bookmarks.Add(model);
                 }
-            }
+            }*/
         }
 
         private void DoRemoveAll()

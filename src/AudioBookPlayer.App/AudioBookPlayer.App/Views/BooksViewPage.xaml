@@ -3,14 +3,11 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:core="clr-namespace:AudioBookPlayer.App.Core"
+    xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.BooksViewPage"
     core:ViewModelLocation.AutowireViewModel="True"
-    xmlns:behaviors="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
-    xmlns:views="clr-namespace:AudioBookPlayer.App.Views"
-    xmlns:ext="clr-namespace:AudioBookPlayer.App.Extensions"
-    xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App">
+    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels">
     <ContentPage.Resources>
         <ResourceDictionary>
             
@@ -74,9 +71,9 @@
         </CollectionView.EmptyView>
         <CollectionView.ItemTemplate>
             <DataTemplate
-                x:DataType="viewmodels:AudioBookViewModel">
+                x:DataType="viewmodels:BookPreviewViewModel">
                 <Grid
-                    RowDefinitions="Auto,Auto,Auto"
+                    RowDefinitions="Auto,Auto,Auto,*"
                     ColumnDefinitions="Auto,*"
                     BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
                     Padding="10">
@@ -89,7 +86,7 @@
                     <Frame
                         Grid.Column="0"
                         Grid.Row="0"
-                        Grid.RowSpan="3"
+                        Grid.RowSpan="4"
                         BorderColor="Gray"
                         BackgroundColor="DimGray"
                         Padding="2"
@@ -138,6 +135,16 @@
                                 Converter={StaticResource SpanConverter},
                                 ConverterParameter='1',
                                 Mode=OneTime}"
+                        Margin="8,0,4,0"
+                        Padding="0"
+                    />
+                    <Label
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        LineBreakMode="NoWrap"
+                        Style="{StaticResource SubtitleLabelStyle}"
+                        FontSize="12"
+                        Text="{Binding Path=Position, StringFormat={Static res:AppResources.LibraryPageListenedTitle}}"
                         Margin="8,0,4,0"
                         Padding="0"
                     />

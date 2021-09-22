@@ -4,7 +4,6 @@ using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -15,10 +14,10 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly IBooksProvider booksProvider;
         private readonly IBooksService booksService;
-        private readonly AudioBooksLibrary booksLibrary;
-        private readonly IMediaBrowserServiceConnector browserServiceConnector;
-        private readonly IPermissionRequestor permissionRequestor;
-        private readonly ITaskExecutionMonitor refreshExecutionMonitor;
+        //private readonly AudioBooksLibrary booksLibrary;
+        private readonly IMediaBrowserServiceConnector connector;
+        private readonly IPermissionRequestor permissions;
+        private readonly ITaskExecutionMonitor refreshExecution;
         private IDisposable browserServiceSubscription;
         private bool isBusy;
 
@@ -34,24 +33,28 @@ namespace AudioBookPlayer.App.ViewModels
         }
 
         [PrefferedConstructor]
-        public LibraryViewModel(IMediaBrowserServiceConnector browserServiceConnector, IPermissionRequestor permissionRequestor)
+        public LibraryViewModel(
+            IMediaBrowserServiceConnector connector,
+            IPermissionRequestor permissions)
         {
             //this.booksProvider = booksProvider;
             //this.booksService = booksService;
             //this.booksLibrary = booksLibrary;
             //this.booksPublisher = booksPublisher;
 
-            this.browserServiceConnector = browserServiceConnector;
-            this.permissionRequestor = permissionRequestor;
+            this.connector = connector;
+            this.permissions = permissions;
 
-            refreshExecutionMonitor = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
+            refreshExecution = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
 
             Refresh = new Command(DoLibraryRefreshAsync);
         }
 
         private async Task ExecuteLibraryRefreshAsync()
         {
-            IsBusy = true;
+            connector.Refresh();
+
+            /*IsBusy = true;
 
             try
             {
@@ -74,19 +77,19 @@ namespace AudioBookPlayer.App.ViewModels
             finally
             {
                 IsBusy = false;
-            }
+            }*/
         }
 
         private async void DoLibraryRefreshAsync()
         {
-            var status = await permissionRequestor.CheckAndRequestMediaPermissionsAsync();
+            var status = await permissions.CheckAndRequestMediaPermissionsAsync();
 
             if (PermissionStatus.Denied == status)
             {
                 return;
             }
 
-            refreshExecutionMonitor.Start();
+            refreshExecution.Start();
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using AudioBookPlayer.App.Domain.Data;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.LiteDb.Models;
+﻿using AudioBookPlayer.App.Persistence.LiteDb.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading;

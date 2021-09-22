@@ -129,6 +129,9 @@
   <data name="LibraryNullRootFolder" xml:space="preserve">
     <value>(нет значения)</value>
   </data>
+  <data name="LibraryPageListenedTitle" xml:space="preserve">
+    <value>Прослушано: {0:P}</value>
+  </data>
   <data name="LibraryPageRefreshAction" xml:space="preserve">
     <value>Обновить библиотеку</value>
   </data>

@@ -19,6 +19,11 @@ namespace LibraProgramming.Xamarin.Core
         /// <summary>
         /// 
         /// </summary>
+        public bool IsCompleted => tcs.Task.IsCompleted;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public TaskCompletionSource()
         {
             tcs = new TaskCompletionSource<object>();

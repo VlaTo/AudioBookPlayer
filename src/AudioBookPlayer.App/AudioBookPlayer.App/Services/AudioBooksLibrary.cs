@@ -51,7 +51,7 @@ namespace AudioBookPlayer.App.Services
             new LibraryChange(ChangeAction.Add, source: source);
     }
 
-    public sealed class AudioBooksLibrary
+    /*public sealed class AudioBooksLibrary
     {
         public IReadOnlyList<LibraryChange> GetChanges(IReadOnlyList<AudioBook> libraryBooks, IReadOnlyList<AudioBook> actualBooks)
         {
@@ -153,5 +153,5 @@ namespace AudioBookPlayer.App.Services
         {
             return false;
         }
-    }
+    }*/
 }

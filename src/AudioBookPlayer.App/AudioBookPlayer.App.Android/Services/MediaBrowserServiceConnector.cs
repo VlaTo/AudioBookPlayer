@@ -5,14 +5,21 @@ using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Android.Services;
 using AudioBookPlayer.App.Android.Services.Builders;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
+using AudioBookPlayer.App.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
+using AudioBookPlayer.App.Android.Core;
+using LibraProgramming.Xamarin.Core;
 using Xamarin.Forms;
 using Application = Android.App.Application;
+using ResultReceiver = Android.OS.ResultReceiver;
 
 [assembly: Dependency(typeof(MediaBrowserServiceConnector))]
 
@@ -20,11 +27,15 @@ namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class MediaBrowserServiceConnector : Java.Lang.Object, IMediaBrowserServiceConnector
     {
+        //private readonly ICoverService coverService;
+        private readonly MediaControllerCallback mediaControllerCallback;
         private readonly MediaBrowserCompat mediaBrowser;
-        //private readonly ConnectionCallback connectionCallback;
-        //private readonly SubscriptionCallback subscriptionCallback;
+        private MediaControllerCompat mediaController;
+        private TaskCompletionSource connect;
+        private TaskCompletionSource<IReadOnlyList<BookPreviewViewModel>> library;
+        private TaskCompletionSource<CurrentBookViewModel> getBook;
 
-        public bool IsConnected => mediaBrowser.IsConnected;
+        public bool IsConnected => mediaBrowser is { IsConnected: true };
 
         public MediaSessionCompat.Token SessionToken => mediaBrowser.SessionToken;
 
@@ -33,29 +44,68 @@ namespace AudioBookPlayer.App.Android.Services
             get;
         }
 
-        public IObservable<AudioBook[]> Library
+        public IObservable<BookPreviewViewModel[]> Library
         {
             get;
         }
 
+        public MediaControllerCompat MediaController
+        {
+            get => mediaController;
+            private set
+            {
+                if (ReferenceEquals(mediaController, value))
+                {
+                    return;
+                }
+
+                if (null != mediaController)
+                {
+                    mediaController.UnregisterCallback(mediaControllerCallback);
+                }
+
+                mediaController = value;
+                
+                if (null != mediaController)
+                {
+                    mediaController.RegisterCallback(mediaControllerCallback);
+                }
+            }
+        }
+
+        /*public MediaBrowserServiceConnector()
+            : this(AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<ICoverService>())
+        {
+        }*/
+
         public MediaBrowserServiceConnector()
         {
-            var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
+            /*var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
             var componentName = new ComponentName(Application.Context, serviceName);
-            
+
             var connected = new Subject<Unit>();
-            var library = new Subject<AudioBook[]>();
-            var connectionCallback = new ConnectionCallback(this, connected, library);
+            var library = new Subject<BookPreviewViewModel[]>();
             var publishConnected = connected.Take(1).Publish();
             var libraryConnected = library.Publish();
-            
-            publishConnected.Connect();
-            libraryConnected.Connect();
 
-            Connected = publishConnected.AsObservable();
-            Library = libraryConnected.AsObservable();
+            publishConnected.Connect();
+            libraryConnected.Connect();*/
+            
+            //this.coverService = coverService;
+
+            var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
+            var componentName = new ComponentName(Application.Context, serviceName);
+            var connectionCallback = new ServiceConnectionCallback(this, OnConnected);
 
             mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
+            mediaControllerCallback = new MediaControllerCallback(this);
+
+            //Connected = publishConnected.AsObservable();
+            //Library = libraryConnected.AsObservable();
+
+            //connect = new TaskCompletionSource();
+            //connectionCallback = new ServiceConnectionCallback(this, connect);
+            //mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
         }
 
         public void Connect()
@@ -68,116 +118,202 @@ namespace AudioBookPlayer.App.Android.Services
             mediaBrowser.Connect();
         }
 
-        /*public IObservable<AudioBook[]> GetLibrary()
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
+        public Task ConnectAsync()
         {
-            if (false==mediaBrowser.IsConnected)
+            var temp = new TaskCompletionSource();
+
+            if (Interlocked.CompareExchange(ref connect, temp, null) == null)
             {
-                return Observable.Empty<AudioBook[]>();
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [ConnectAsync] Starting connect");
+                mediaBrowser.Connect();
             }
 
-            return Observable.Create<AudioBook[]>(observer =>
+            return connect.Task;
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.GetLibraryAsync" />
+        public Task<IReadOnlyList<BookPreviewViewModel>> GetLibraryAsync(ICoverService coverService)
+        {
+            var temp = new TaskCompletionSource<IReadOnlyList<BookPreviewViewModel>>();
+
+            if (Interlocked.CompareExchange(ref library, temp, null) == null)
             {
-                var callback = new SubscriptionCallback(this, observer);
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetLibraryAsync] Started");
 
-                mediaBrowser.Subscribe(mediaBrowser.Root, callback);
+                var mediaId = mediaBrowser.Root;
+                var options = new Bundle();
+                var callback = new MediaBrowserSubscriptionCallback(this);
 
-                return Disposable.Empty;
-            });
-        }*/
+                void Unsubscribe()
+                {
+                    mediaBrowser.Unsubscribe(mediaId, callback);
+                    Interlocked.CompareExchange(ref library, null, temp);
+
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetLibraryAsync] Done");
+                }
+
+                callback.ChildrenLoadedImpl = (parentId, children) =>
+                {
+                    var builder = new PreviewBookBuilder(coverService);
+                    var models = new BookPreviewViewModel[children.Count];
+
+                    for (var index = 0; index < children.Count; index++)
+                    {
+                        var mediaItem = children[index];
+                        models[index] = builder.BuildBookFrom(mediaItem);
+                    }
+
+                    library.SetResult(models);
+
+                    Unsubscribe();
+                    //mediaBrowser.Unsubscribe(mediaId, callback);
+                    //Interlocked.CompareExchange(ref library, null, temp);
+                };
+
+                callback.ErrorImpl = parentId =>
+                {
+                    library.TrySetException(new Exception());
+
+                    Unsubscribe();
+                    //mediaBrowser.Unsubscribe(mediaId, callback);
+                    //Interlocked.CompareExchange(ref library, null, temp);
+                };
+
+                mediaBrowser.Subscribe(mediaId, options, callback);
+            }
+
+            return library.Task;
+        }
+
+        public void Refresh()
+        {
+            // --- Sending command 'MEDIA_TEST_1' ---
+            System.Diagnostics.Debug.WriteLine("[ConnectionCallback] [OnConnected] Sending command");
+
+            var bundle = new Bundle();
+            bundle.PutString("Test", "Value1");
+
+            var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
+            {
+                System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
+            }));
+            var cb = new ResultReceiver(handler);
+
+            mediaController.SendCommand("MEDIA_TEST_1", bundle, cb);
+        }
+
+        public Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService)
+        {
+            var temp = new TaskCompletionSource<CurrentBookViewModel>();
+
+            if (Interlocked.CompareExchange(ref getBook, temp, null) == null)
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetBookAsync] Started");
+
+                var mediaId = MediaPath.Combine(MediaPath.Root, id).ToAbsolute();
+                var path = mediaId.ToString();
+                var options = new Bundle();
+                var callback = new MediaBrowserSubscriptionCallback(this);
+
+                void Unsubscribe()
+                {
+                    mediaBrowser.Unsubscribe(path, callback);
+                    Interlocked.CompareExchange(ref getBook, null, temp);
+
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetBookAsync] Done");
+                }
+
+                callback.ChildrenLoadedImpl = (parentId, children) =>
+                {
+                    var builder = new PreviewBookBuilder(coverService);
+                    var models = new BookPreviewViewModel[children.Count];
+
+                    for (var index = 0; index < children.Count; index++)
+                    {
+                        var mediaItem = children[index];
+                        models[index] = builder.BuildBookFrom(mediaItem);
+                    }
+
+                    Unsubscribe();
+
+                    library.SetResult(models);
+                };
+
+                callback.ErrorImpl = parentId =>
+                {
+                    Unsubscribe();
+
+                    library.TrySetException(new Exception());
+
+                };
+
+                mediaBrowser.Subscribe(path, options, callback);
+            }
+
+            return getBook.Task;
+        }
+
+        private void OnConnected(ConnectStatus status)
+        {
+            switch (status)
+            {
+                case ConnectStatus.Success:
+                {
+                    connect.Complete();
+                    break;
+                }
+
+                case ConnectStatus.Cancelled:
+                {
+                    connect.Cancel();
+                    break;
+                }
+
+                case ConnectStatus.Failed:
+                {
+                    connect.Fail(new Exception());
+                    break;
+                }
+            }
+        }
 
         // ConnectionCallback class
-        private sealed class ConnectionCallback : MediaBrowserCompat.ConnectionCallback
+        private sealed class ServiceConnectionCallback : MediaBrowserCompat.ConnectionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
-            private readonly IObserver<Unit> connected;
-            private readonly IObserver<AudioBook[]> library;
-            private readonly MediaControllerCallback controllerCallback;
-            private MediaControllerCompat mediaController;
+            private readonly Action<ConnectStatus> connectCallback;
 
-            public ConnectionCallback(
-                MediaBrowserServiceConnector connector,
-                IObserver<Unit> connected,
-                IObserver<AudioBook[]> library)
+            public ServiceConnectionCallback(MediaBrowserServiceConnector connector, Action<ConnectStatus> connectCallback)
             {
                 this.connector = connector;
-                this.connected = connected;
-                this.library = library;
-
-                controllerCallback = new MediaControllerCallback(connector);
+                this.connectCallback = connectCallback;
             }
 
             public override void OnConnected()
             {
-                mediaController = new MediaControllerCompat(Application.Context, connector.SessionToken);
-                mediaController.RegisterCallback(controllerCallback);
+                var mediaController = new MediaControllerCompat(Application.Context, connector.SessionToken);
 
-                connected.OnNext(Unit.Default);
-                connected.OnCompleted();
-
-                var callback = new SubscriptionCallback(connector, library);
-
-                connector.mediaBrowser.Subscribe(connector.mediaBrowser.Root, callback);
+                connector.MediaController = mediaController;
+                connectCallback.Invoke(ConnectStatus.Success);
             }
 
             public override void OnConnectionSuspended()
             {
-                System.Diagnostics.Debug.WriteLine("[ConnectionCallback] [OnConnectionSuspended] Execute");
+                connectCallback.Invoke(ConnectStatus.Cancelled);
             }
 
             public override void OnConnectionFailed()
             {
-                connected.OnError(new Exception());
+                connectCallback.Invoke(ConnectStatus.Failed);
             }
+        }
 
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    mediaController.UnregisterCallback(controllerCallback);
-                }
-            }
-
-            // MediaControllerCallback class
-            private sealed class MediaControllerCallback : MediaControllerCompat.Callback
-            {
-                private readonly MediaBrowserServiceConnector connector;
-
-                public MediaControllerCallback(MediaBrowserServiceConnector connector)
-                {
-                    this.connector = connector;
-                }
-
-                public override void OnPlaybackStateChanged(PlaybackStateCompat state)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnPlaybackStateChanged] Execute");
-                    base.OnPlaybackStateChanged(state);
-                }
-
-                public override void OnMetadataChanged(MediaMetadataCompat metadata)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnMetadataChanged] Execute");
-                }
-
-                public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueChanged] Execute");
-                }
-
-                public override void OnSessionDestroyed()
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionDestroyed] Execute");
-                }
-
-                public override void OnSessionEvent(string e, Bundle extras)
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionEvent] Execute");
-                }
-
-                public override void OnSessionReady()
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Execute");
-                }
-            }
+        private enum ConnectStatus
+        {
+            Failed = -1,
+            Success,
+            Cancelled
         }
 
         // ItemCallback class
@@ -205,24 +341,25 @@ namespace AudioBookPlayer.App.Android.Services
         private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
-            private readonly IObserver<AudioBook[]> observer;
-            private readonly AudioBookBuilder builder;
+            private readonly IObserver<BookPreviewViewModel[]> observer;
+            private readonly PreviewBookBuilder builder;
 
-            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<AudioBook[]> observer)
+            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<BookPreviewViewModel[]> observer, ICoverService coverService)
             {
                 this.connector = connector;
                 this.observer = observer;
-                builder = new PublicAudioBookBuilder();
+
+                builder = new PreviewBookBuilder(coverService);
             }
 
             public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
             {
-                var books = new AudioBook[children.Count];
+                var books = new BookPreviewViewModel[children.Count];
 
                 for (var index = 0; index < children.Count; index++)
                 {
                     var source = children[index];
-                    books[index] = builder.BuildAudioBookFrom(source);
+                    books[index] = builder.BuildBookFrom(source);
                 }
 
                 observer.OnNext(books);
@@ -232,7 +369,129 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 observer.OnError(new Exception());
             }
-
         }
+
+        private sealed class MediaBrowserSubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
+        {
+            private readonly MediaBrowserServiceConnector connector;
+
+            public Bundle Options
+            {
+                get;
+                private set;
+            }
+
+            public Action<string, IList<MediaBrowserCompat.MediaItem>> ChildrenLoadedImpl
+            {
+                get;
+                set;
+            }
+
+            public Action<string> ErrorImpl
+            {
+                get;
+                set;
+            }
+
+            public MediaBrowserSubscriptionCallback(MediaBrowserServiceConnector connector)
+            {
+                this.connector = connector;
+
+                ChildrenLoadedImpl = Stub.Empty<string, IList<MediaBrowserCompat.MediaItem>>();
+                ErrorImpl = Stub.Empty<string>();
+            }
+
+            public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
+            {
+                DoChildrenLoaded(parentId, children, Bundle.Empty);
+            }
+
+            public override void OnError(string parentId)
+            {
+                DoError(parentId, Bundle.Empty);
+            }
+
+            public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children, Bundle options)
+            {
+                DoChildrenLoaded(parentId, children, options);
+            }
+
+            public override void OnError(string parentId, Bundle options)
+            {
+                DoError(parentId, options);
+            }
+            
+            private void DoChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children, Bundle options)
+            {
+                Options = options;
+                ChildrenLoadedImpl.Invoke(parentId, children);
+            }
+
+            private void DoError(string parentId, Bundle options)
+            {
+                Options = options;
+                ErrorImpl.Invoke(parentId);
+            }
+        }
+
+        // ActionHandlerCallback class
+        private sealed class ActionHandlerCallback : Java.Lang.Object, Handler.ICallback
+        {
+            private readonly Action<Message> handler;
+
+            public ActionHandlerCallback(Action<Message> handler)
+            {
+                this.handler = handler;
+            }
+
+            public bool HandleMessage(Message msg)
+            {
+                handler.Invoke(msg);
+                return true;
+            }
+        }
+
+        // MediaControllerCallback class
+        private sealed class MediaControllerCallback : MediaControllerCompat.Callback
+        {
+            private readonly MediaBrowserServiceConnector connector;
+
+            public MediaControllerCallback(MediaBrowserServiceConnector connector)
+            {
+                this.connector = connector;
+            }
+
+            public override void OnPlaybackStateChanged(PlaybackStateCompat state)
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnPlaybackStateChanged] Execute");
+                base.OnPlaybackStateChanged(state);
+            }
+
+            public override void OnMetadataChanged(MediaMetadataCompat metadata)
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnMetadataChanged] Execute");
+            }
+
+            public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueChanged] Execute");
+            }
+
+            public override void OnSessionDestroyed()
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionDestroyed] Execute");
+            }
+
+            public override void OnSessionEvent(string e, Bundle extras)
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionEvent] Execute");
+            }
+
+            public override void OnSessionReady()
+            {
+                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Execute");
+            }
+        }
+
     }
 }

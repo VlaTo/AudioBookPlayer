@@ -68,7 +68,7 @@ namespace AudioBookPlayer.App.Android.Services
                             {
                                 var contentUri = audioFile.ContentUri.ToString();
                                 var part = audioBook.GetOrCreatePart(audioFile.Title);
-                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration, part);
+                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.GetDuration(), part);
                                 var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
 
                                 if (null != part)
@@ -163,7 +163,7 @@ namespace AudioBookPlayer.App.Android.Services
                             {
                                 var contentUri = audioFile.ContentUri.ToString();
                                 var part = audioBook.GetOrCreatePart(audioFile.Title);
-                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.Duration, part);
+                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.GetDuration(), part);
                                 var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
 
                                 if (null != part)
@@ -226,7 +226,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (0 > audioBookIndex)
             {
-                audioBook = new AudioBook(audioFile.Album);
+                audioBook = new AudioBook(BookId.Empty, audioFile.Album);
                 audioBook.Authors.Add(new AudioBookAuthor(audioFile.Artist));
                 audioBooks.Add(audioBook);
             }
@@ -235,7 +235,7 @@ namespace AudioBookPlayer.App.Android.Services
                 audioBook = audioBooks[audioBookIndex];
             }
 
-            if (false == audioBook.Id.HasValue)
+            if (BookId.Empty == audioBook.Id)
             {
                 if (String.IsNullOrEmpty(audioBook.Synopsis))
                 {

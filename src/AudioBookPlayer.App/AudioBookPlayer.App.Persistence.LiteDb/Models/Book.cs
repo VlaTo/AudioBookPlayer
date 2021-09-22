@@ -69,7 +69,7 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Models
         {
             return Sections
                 .SelectMany(section => section.Chapters)
-                .Aggregate(TimeSpan.Zero, (duration, chapter) => duration + chapter.GetDuration());
+                .Aggregate(TimeSpan.Zero, (duration, chapter) => duration + chapter.Duration);
         }
     }
 }

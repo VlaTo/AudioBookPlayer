@@ -1,11 +1,10 @@
 ﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
 
 namespace AudioBookPlayer.App.Domain.Models
 {
-    public abstract class AudioBookImage : IEntity
+    public abstract class AudioBookImage
     {
         public AudioBook AudioBook
         {

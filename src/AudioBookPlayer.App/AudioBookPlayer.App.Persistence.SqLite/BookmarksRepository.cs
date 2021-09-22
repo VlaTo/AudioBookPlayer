@@ -8,7 +8,7 @@ using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Persistence.SqLite
 {
-    public sealed class BookmarksRepository : IBookmarkRepository
+    /*public sealed class BookmarksRepository : IBookmarkRepository
     {
         private readonly ApplicationDbContext context;
 
@@ -41,5 +41,5 @@ namespace AudioBookPlayer.App.Persistence.SqLite
         {
             throw new NotImplementedException();
         }
-    }
+    }*/
 }

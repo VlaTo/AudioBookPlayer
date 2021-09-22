@@ -1,12 +1,14 @@
-﻿using AudioBookPlayer.App.Domain.Models;
+﻿using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Interaction;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
 using System.Reactive;
-using AudioBookPlayer.App.Services;
+using System.Threading.Tasks;
+using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
+using LibraProgramming.Xamarin.Interaction.Contracts;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -16,12 +18,12 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     public sealed class StartPlayInteractionRequestContext : InteractionRequestContext
     {
-        public long BookId
+        public BookId BookId
         {
             get;
         }
 
-        public StartPlayInteractionRequestContext(long bookId)
+        public StartPlayInteractionRequestContext(BookId bookId)
         {
             BookId = bookId;
         }
@@ -30,12 +32,13 @@ namespace AudioBookPlayer.App.ViewModels
     /// <summary>
     /// 
     /// </summary>
-    internal abstract class BooksViewModelBase : ViewModelBase, IBooksViewModel
+    internal abstract class BooksViewModelBase : ViewModelBase, IInitialize, IBooksViewModel
     {
         private readonly IDisposable subscription;
+        private readonly TaskExecutionMonitor loadBooksExecution;
         private bool isBusy;
 
-        public ObservableCollection<AudioBookViewModel> Books
+        public ObservableCollection<BookPreviewViewModel> Books
         {
             get;
         }
@@ -51,7 +54,7 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public Command<AudioBookViewModel> StartPlay
+        public Command<BookPreviewViewModel> StartPlay
         {
             get;
         }
@@ -61,18 +64,33 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        protected BooksViewModelBase(IMediaBrowserServiceConnector browserServiceConnector)
+        protected ICoverService CoverService
         {
-            BrowserServiceConnector = browserServiceConnector;
-            Books = new ObservableCollection<AudioBookViewModel>();
-            StartPlay = new Command<AudioBookViewModel>(DoStartPlay);
-            StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
-
-            subscription = browserServiceConnector.Connected.Subscribe(OnMediaBrowserConnected);
-            var token = browserServiceConnector.Library.Subscribe(BindSourceBooks);
+            get;
         }
 
-        protected virtual void DoStartPlay(AudioBookViewModel book)
+        protected BooksViewModelBase(
+            IMediaBrowserServiceConnector browserServiceConnector,
+            ICoverService coverService)
+        {
+            BrowserServiceConnector = browserServiceConnector;
+            CoverService = coverService;
+            Books = new ObservableCollection<BookPreviewViewModel>();
+            StartPlay = new Command<BookPreviewViewModel>(DoStartPlay);
+            StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
+
+            loadBooksExecution = new TaskExecutionMonitor(DoLoadBooksAsync);
+
+            //subscription = browserServiceConnector.Connected.Subscribe(OnMediaBrowserConnected);
+            //var token = browserServiceConnector.Library.Subscribe(BindSourceBooks);
+        }
+
+        public virtual void OnInitialize()
+        {
+            loadBooksExecution.Start();
+        }
+
+        protected virtual void DoStartPlay(BookPreviewViewModel book)
         {
             var context = new StartPlayInteractionRequestContext(book.Id);
 
@@ -82,20 +100,14 @@ namespace AudioBookPlayer.App.ViewModels
             });
         }
 
-        protected string GetAuthorsForBook(ICollection<AudioBookAuthor> authors)
-        {
-            var sep = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-            return String.Join(sep, authors.Select(author => author.Name));
-        }
-
-        protected abstract bool FilterSourceBook(AudioBook source);
+        protected abstract bool FilterSourceBook(BookPreviewViewModel model);
 
         protected virtual void OnConnected()
         {
             //var token = BrowserServiceConnector.Library.Subscribe(BindSourceBooks);
         }
 
-        protected AudioBookViewModel BuildAudioBookModel(AudioBook book)
+        /*protected AudioBookViewModel BuildAudioBookModel(AudioBook book)
         {
             if (false == book.Id.HasValue)
             {
@@ -117,25 +129,33 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             return model;
-        }
+        }*/
 
-        protected virtual void BindSourceBooks(AudioBook[] audioBooks)
+
+        protected virtual void BindSourceBooks(IReadOnlyList<BookPreviewViewModel> models)
         {
             Books.Clear();
 
-            for (var index = 0; index < audioBooks.Length; index++)
+            for (var index = 0; index < models.Count; index++)
             {
-                var source = audioBooks[index];
+                var model = models[index];
 
-                if (false == FilterSourceBook(source))
+                if (false == FilterSourceBook(model))
                 {
                     continue;
                 }
 
-                var model = BuildAudioBookModel(source);
-
                 Books.Add(model);
             }
+        }
+
+        private async Task DoLoadBooksAsync()
+        {
+            await BrowserServiceConnector.ConnectAsync();
+
+            var library = await BrowserServiceConnector.GetLibraryAsync(CoverService);
+
+            BindSourceBooks(library);
         }
 
         private void OnMediaBrowserConnected(Unit _) => OnConnected();

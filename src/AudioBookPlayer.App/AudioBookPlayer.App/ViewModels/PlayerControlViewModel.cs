@@ -1,5 +1,5 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
@@ -12,8 +12,6 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Services;
-using LibraProgramming.Xamarin.Dependency.Container;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -21,9 +19,8 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        private readonly IMediaBrowserServiceConnector connector;
         private readonly IBooksService booksService;
-        private readonly IMediaBrowserServiceConnector mediaBrowserServiceConnector;
+        private readonly IMediaBrowserServiceConnector connector;
         private readonly IPlaybackService playbackService;
         private readonly IActivityTrackerService activityTrackerService;
         // private readonly INotificationService notificationService;
@@ -213,25 +210,12 @@ namespace AudioBookPlayer.App.ViewModels
         // ReSharper disable once UnusedMember.Global
         public PlayerControlViewModel(
             IBooksService booksService,
-            IActivityTrackerService activityTrackerService)
-            : this(
-                booksService,
-                DependencyService.Get<IMediaBrowserServiceConnector>(),
-                activityTrackerService
-            )
-        {
-        }
-
-        private PlayerControlViewModel(
-            IBooksService booksService,
-            IMediaBrowserServiceConnector mediaBrowserServiceConnector,
+            IMediaBrowserServiceConnector connector,
             IActivityTrackerService activityTrackerService)
         {
             this.booksService = booksService;
             this.activityTrackerService = activityTrackerService;
-
-            //audioBookPlaybackServiceConnector = DependencyService.Get<IAudioBookPlaybackServiceConnector>();
-            this.mediaBrowserServiceConnector = mediaBrowserServiceConnector;
+            this.connector = connector;
 
             serviceConnectMonitor = new TaskExecutionMonitor(DoServiceConnectAsync);
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
@@ -275,7 +259,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPickChapter()
         {
-            if (null != playbackService.AudioBook && playbackService.AudioBook.Id.HasValue)
+            /*if (null != playbackService.AudioBook && playbackService.AudioBook.Id.HasValue)
             {
                 var context = new PickChapterRequestContext(playbackService.AudioBook.Id.Value);
 
@@ -283,7 +267,7 @@ namespace AudioBookPlayer.App.ViewModels
                 {
                     Debug.WriteLine($"[PlayerControlViewModel] [DoPickChapter] Callback");
                 });
-            }
+            }*/
         }
 
         private void DoSmallRewindCommand()
@@ -315,7 +299,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoBookmarkCurrentCommand()
         {
-            var bookmark = new AudioBookPosition(
+            /*var bookmark = new AudioBookPosition(
                 playbackService.AudioBook.Id.Value,
                 ChapterIndex,
                 TimeSpan.FromMilliseconds(ChapterPosition)
@@ -325,7 +309,7 @@ namespace AudioBookPlayer.App.ViewModels
             BookmarkRequest.Raise(context, () =>
             {
                 Debug.WriteLine($"[PlayerControlViewModel] [DoBookmarkCurrentCommand] Callback");
-            });
+            });*/
         }
 
         private void DoSnoozeCommand()
@@ -360,54 +344,39 @@ namespace AudioBookPlayer.App.ViewModels
 
         private Task DoServiceConnectAsync()
         {
-            mediaBrowserServiceConnector.Connect();
+            //mediaBrowserServiceConnector.Connect();
             return Task.CompletedTask;
         }
 
-        private async Task DoLoadBookAsync()
+        private Task DoLoadBookAsync()
         {
-            if (String.IsNullOrEmpty(BookId))
+            if (Domain.Models.BookId.TryParse(BookId, out var id))
             {
-                return;
-            }
+                /*var book = booksService.GetBook(id);
 
-            var actualBookId = long.Parse(BookId, CultureInfo.InvariantCulture);
-
-            /*if (playbackService.IsPlaying)
-            {
-                if (playbackService.AudioBook.Id == actualBookId)
+                if (null != book)
                 {
-                    UpdateAudioBookProperties();
-                    ChapterIndex = playbackService.ChapterIndex;
-                    UpdateChapterProperties();
 
-                    return;
+                    using (playbackService.BatchUpdate())
+                    {
+                        if (AudioBook.AreSame(playbackService.AudioBook, book))
+                        {
+                            UpdateAudioBookProperties();
+                        }
+                        else
+                        {
+                            playbackService.AudioBook = book;
+                        }
+                    }
                 }
-
-                playbackService.Pause();
-            }*/
-
-            var book = await booksService.GetBookAsync(actualBookId);
-
-            if (null != book)
-            {
-                /*using (playbackService.BatchUpdate())
+                else
                 {
-                    if (AudioBook.AreSame(playbackService.AudioBook, book))
-                    {
-                        UpdateAudioBookProperties();
-                    }
-                    else
-                    {
-                        playbackService.AudioBook = book;
-                    }
+                    // should we clear book properties?
+
                 }*/
             }
-            else
-            {
-                // should we clear book properties?
 
-            }
+            return Task.CompletedTask;
         }
 
         private string GetBookAuthors()
@@ -431,7 +400,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private Task DoTrackBookActivityAsync()
         {
-            var position = new AudioBookPosition(
+            /*var position = new AudioBookPosition(
                 playbackService.AudioBook.Id.Value,
                 ChapterIndex,
                 TimeSpan.FromMilliseconds(ChapterPosition)
@@ -440,7 +409,9 @@ namespace AudioBookPlayer.App.ViewModels
             return activityTrackerService.TrackActivityAsync(
                 IsPlaying ? ActivityType.Play : ActivityType.Pause,
                 position
-            );
+            );*/
+
+            return Task.CompletedTask;
         }
 
         private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
@@ -515,7 +486,7 @@ namespace AudioBookPlayer.App.ViewModels
             BookTitle = playbackService.AudioBook.Title;
             BookSubtitle = GetBookAuthors();
 
-            BookDuration = playbackService.AudioBook.Duration;
+            //BookDuration = playbackService.AudioBook.Duration;
             BookPosition = TimeSpan.Zero;
 
             ImageSource = 0 < playbackService.AudioBook.Images.Count

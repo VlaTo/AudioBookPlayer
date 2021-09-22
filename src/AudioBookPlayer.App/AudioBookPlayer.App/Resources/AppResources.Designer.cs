@@ -97,6 +97,15 @@ namespace AudioBookPlayer.App.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Listened: {0:P}.
+        /// </summary>
+        internal static string LibraryPageListenedTitle {
+            get {
+                return ResourceManager.GetString("LibraryPageListenedTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Refresh.
         /// </summary>
         internal static string LibraryPageRefreshAction {

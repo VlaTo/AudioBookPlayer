@@ -1,8 +1,6 @@
-﻿using AudioBookPlayer.App.Domain.Data;
-
-namespace AudioBookPlayer.App.Domain.Models
+﻿namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class BookmarkPosition : IEntity
+    public sealed class BookmarkPosition
     {
         public string Name
         {

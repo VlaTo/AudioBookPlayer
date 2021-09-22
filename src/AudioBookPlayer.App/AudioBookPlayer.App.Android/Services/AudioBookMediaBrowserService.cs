@@ -9,9 +9,8 @@ using AndroidX.Media;
 using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Android.Services.Builders;
 using AudioBookPlayer.App.Domain.Services;
-using System;
-using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Persistence.LiteDb;
+using System;
 using Application = Android.App.Application;
 
 // https://developer.android.com/guide/topics/media/media-controls
@@ -25,7 +24,7 @@ namespace AudioBookPlayer.App.Android.Services
     /// </summary>
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    public sealed class AudioBookMediaBrowserService : MediaBrowserServiceCompat, IAudioBooksMediaBrowserService
+    public sealed class AudioBookMediaBrowserService : MediaBrowserServiceCompat
     {
         private readonly ICoverService coverService;
         private readonly ComponentName componentName;
@@ -68,13 +67,14 @@ namespace AudioBookPlayer.App.Android.Services
 
             mediaSession.SetPlaybackState(playbackState.Build());
             mediaSession.SetCallback(mediaSessionCallback);
+            mediaSession.SetMediaButtonReceiver(pendingIntent);
 
             SessionToken = mediaSession.SessionToken;
 
             mediaController = new MediaControllerCompat(Application.Context, mediaSession);
             mediaControllerCallback = new MediaControllerCallback();
             mediaController.RegisterCallback(mediaControllerCallback);
-
+            
             var dbContext = new LiteDbContext(new DatabasePathProvider());
 
             booksService = new BooksService(dbContext, coverService);
@@ -90,7 +90,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null == rootHints || rootHints.IsEmpty)
                 {
-                    return new BrowserRoot(IAudioBooksMediaBrowserService.LibraryRoot, null);
+                    return new BrowserRoot(MediaPath.Root, null);
                 }
 
                 if (rootHints.GetBoolean(BrowserRoot.ExtraRecent))
@@ -117,26 +117,42 @@ namespace AudioBookPlayer.App.Android.Services
         public override void OnLoadChildren(string parentId, Result result)
         {
             //System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnLoadChildren] parent id: \"{parentId}\"");
+            var builder = new PublicMediaItemBuilder();
 
-            if (String.Equals(parentId, IAudioBooksMediaBrowserService.LibraryRoot))
+            if (MediaPath.TryParse(parentId, out var mediaPath))
             {
-                var books = booksService.QueryBooks();
-                var builder = new PublicMediaItemBuilder();
-                var list = new JavaList<MediaBrowserCompat.MediaItem>();
-                var flags = MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable;
-
-                for (var index = 0; index < books.Count; index++)
+                if (mediaPath.IsRoot)
                 {
-                    var item = builder.BuildBookPreviewMediaItem(books[index], flags);
-                    list.Add(item);
+                    const int flags = MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable;
+                    
+                    var books = booksService.QueryBooks();
+                    var list = new JavaList<MediaBrowserCompat.MediaItem>();
+
+                    for (var index = 0; index < books.Count; index++)
+                    {
+                        var item = builder.BuildBookPreview(books[index], flags);
+                        list.Add(item);
+                    }
+
+                    result.SendResult(list);
+
+                    return;
                 }
 
-                result.SendResult(list);
+                if (MediaBookId.TryParse(mediaPath[0], out var mediaBookId))
+                {
+                    const int flags = MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable;
 
-                return;
+                    var book = booksService.GetBook(mediaBookId.Id);
+                    var item = builder.BuildBookPreview(book, flags);
+
+                    result.SendResult(item);
+
+                    return;
+                }
             }
 
-            if (parentId.StartsWith(IAudioBooksMediaBrowserService.LibraryRoot))
+            /*if (parentId.StartsWith(IAudioBooksMediaBrowserService.LibraryRoot))
             {
                 var path = parentId.Substring(IAudioBooksMediaBrowserService.LibraryRoot.Length);
 
@@ -156,7 +172,7 @@ namespace AudioBookPlayer.App.Android.Services
                     }
                 }
 
-            }
+            }*/
 
             result.SendResult(null);
         }
@@ -169,26 +185,45 @@ namespace AudioBookPlayer.App.Android.Services
             mediaSession.Dispose();
         }
 
+
+
         // MediaSessionCallback
         private sealed class MediaSessionCallback : MediaSessionCompat.Callback
         {
-            private readonly AudioBookMediaBrowserService mediaBrowserService;
-            private readonly MediaSessionCompat mediaSession;
+            private readonly AudioBookMediaBrowserService service;
+            private readonly MediaSessionCompat session;
 
-            public MediaSessionCallback(AudioBookMediaBrowserService mediaBrowserService, MediaSessionCompat mediaSession)
+            public MediaSessionCallback(AudioBookMediaBrowserService service, MediaSessionCompat session)
             {
-                this.mediaBrowserService = mediaBrowserService;
-                this.mediaSession = mediaSession;
+                this.service = service;
+                this.session = session;
             }
 
             public override void OnCommand(string command, Bundle extras, ResultReceiver cb)
             {
                 base.OnCommand(command, extras, cb);
+
+                System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [OnCommand] Execute");
+                
+                if (String.Equals("MEDIA_TEST_1", command))
+                {
+                    var test = extras.GetString("Test");
+                    System.Diagnostics.Debug.WriteLine($"[MediaSessionCallback] [OnCommand] MEDIA_TEST received, param \"test\": \"{test}\"");
+
+                    cb.Send(global::Android.App.Result.Ok, Bundle.Empty);
+
+                    return;
+                }
+
+                //var result = new Bundle();
+                //result.PutBoolean("Result", true);
+                cb.Send(global::Android.App.Result.Canceled, null);
             }
 
             public override void OnCustomAction(string action, Bundle extras)
             {
-                base.OnCustomAction(action, extras);
+                System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [OnCustomAction] Execute");
+                //base.OnCustomAction(action, extras);
             }
 
             public override void OnPrepare()
@@ -203,11 +238,11 @@ namespace AudioBookPlayer.App.Android.Services
                 metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
                 metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
 
-                mediaSession.SetMetadata(metadata.Build());
+                session.SetMetadata(metadata.Build());
 
-                if (false == mediaSession.Active)
+                if (false == session.Active)
                 {
-                    mediaSession.Active = true;
+                    session.Active = true;
                 }
             }
         }
@@ -224,6 +259,13 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] Playback state: \"{state.State}\"");
             }
+
+            public override void OnSessionEvent(string e, Bundle extras)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnSessionEvent] Event: \"{e}\"");
+            }
+
+
         }
     }
 }

@@ -502,7 +502,7 @@ namespace AudioBookPlayer.App.Android.Services
                     //ContinuePlaying();
                 }
                 else
-                if (position >= audioBook.Duration)
+                if (position >= audioBook.GetDuration())
                 {
                     StopPlaying();
                     return;

@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
@@ -20,6 +21,13 @@ namespace AudioBookPlayer.App.Android
     [Activity(Label = "@string/app_name", Icon = "@mipmap/icon", Theme = "@style/MainTheme", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize )]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
+        private readonly TaskExecutionMonitor serviceConnect;
+
+        public MainActivity()
+        {
+            serviceConnect = new TaskExecutionMonitor(DoServiceConnectAsync);
+        }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -43,7 +51,7 @@ namespace AudioBookPlayer.App.Android
         protected override void OnStart()
         {
             base.OnStart();
-            DependencyService.Get<IMediaBrowserServiceConnector>().Connect();
+            serviceConnect.Start();
         }
 
         protected override void OnResume()
@@ -56,6 +64,12 @@ namespace AudioBookPlayer.App.Android
         {
             base.OnNewIntent(intent);
             Xamarin.Essentials.Platform.OnNewIntent(intent);
+        }
+
+        private static Task DoServiceConnectAsync()
+        {
+            var connector = DependencyService.Get<IMediaBrowserServiceConnector>();
+            return connector.ConnectAsync();
         }
 
         /// <summary>

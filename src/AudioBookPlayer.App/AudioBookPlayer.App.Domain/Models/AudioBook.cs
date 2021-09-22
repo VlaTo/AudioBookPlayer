@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AudioBookPlayer.App.Domain.Data;
 
 namespace AudioBookPlayer.App.Domain.Models
 {
-    public sealed class AudioBook : IEntity
+    public sealed class AudioBook
     {
         public BookId Id
         {

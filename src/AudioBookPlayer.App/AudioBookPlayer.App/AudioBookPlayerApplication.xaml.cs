@@ -30,8 +30,8 @@ namespace AudioBookPlayer.App
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
             DependencyContainer.Register<LiteDbContext>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
-            DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
+            //DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
+            //DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);
 
             // var audioBooksHub = new AudioBooksHub();

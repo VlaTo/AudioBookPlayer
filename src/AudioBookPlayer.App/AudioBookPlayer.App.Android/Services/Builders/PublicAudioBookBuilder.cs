@@ -4,7 +4,7 @@ using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Android.Services.Builders
 {
-    internal sealed class PublicAudioBookBuilder : AudioBookBuilder
+    internal sealed class PublicBookBuilder : BookBuilder
     {
 
         [return: NotNull]
