@@ -12,6 +12,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Models;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -19,14 +20,17 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        private readonly IBooksService booksService;
+        //private readonly IBooksService booksService;
         private readonly IMediaBrowserServiceConnector connector;
-        private readonly IPlaybackService playbackService;
-        private readonly IActivityTrackerService activityTrackerService;
+
+        private readonly ICoverService coverService;
+
+        //private readonly IPlaybackService playbackService;
+        //private readonly IActivityTrackerService activityTrackerService;
         // private readonly INotificationService notificationService;
         private readonly TaskExecutionMonitor serviceConnectMonitor;
         private readonly TaskExecutionMonitor loadBookMonitor;
-        private readonly TaskExecutionMonitor trackBookActivity;
+        //private readonly TaskExecutionMonitor trackBookActivity;
 
         private string bookId;
         private string bookTitle;
@@ -209,17 +213,17 @@ namespace AudioBookPlayer.App.ViewModels
         [PrefferedConstructor]
         // ReSharper disable once UnusedMember.Global
         public PlayerControlViewModel(
-            IBooksService booksService,
             IMediaBrowserServiceConnector connector,
-            IActivityTrackerService activityTrackerService)
+            ICoverService coverService)
         {
-            this.booksService = booksService;
-            this.activityTrackerService = activityTrackerService;
+            //this.booksService = booksService;
+            //this.activityTrackerService = activityTrackerService;
             this.connector = connector;
+            this.coverService = coverService;
 
-            serviceConnectMonitor = new TaskExecutionMonitor(DoServiceConnectAsync);
+            //serviceConnectMonitor = new TaskExecutionMonitor(DoServiceConnectAsync);
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
-            trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
+            //trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
 
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -254,7 +258,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         public void OnInitialize()
         {
-            serviceConnectMonitor.Start();
+            //serviceConnectMonitor.Start();
         }
 
         private void DoPickChapter()
@@ -277,14 +281,14 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
-            if (IsPlaying)
+            /*if (IsPlaying)
             {
                 playbackService.Pause();
             }
             else
             {
                 playbackService.Play();
-            }
+            }*/
         }
 
         private void DoSmallFastForwardCommand()
@@ -320,38 +324,50 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPreviousChapter()
         {
-            var index = chapterIndex - 1;
+            /*var index = chapterIndex - 1;
 
             if (0 > index)
             {
                 return;
             }
 
-            playbackService.ChapterIndex = index;
+            playbackService.ChapterIndex = index;*/
         }
 
         private void DoNextChapter()
         {
-            var index = chapterIndex + 1;
+            /*var index = chapterIndex + 1;
 
             if (playbackService.AudioBook.Chapters.Count <= index)
             {
                 return;
             }
 
-            playbackService.ChapterIndex = index;
+            playbackService.ChapterIndex = index;*/
         }
 
-        private Task DoServiceConnectAsync()
+        private async Task DoLoadBookAsync()
         {
-            //mediaBrowserServiceConnector.Connect();
-            return Task.CompletedTask;
-        }
-
-        private Task DoLoadBookAsync()
-        {
-            if (Domain.Models.BookId.TryParse(BookId, out var id))
+            if (EntityId.TryParse(BookId, out var id))
             {
+                var bookItems = await connector.GetLibraryAsync();
+
+                for (var index = 0; index < bookItems.Count; index++)
+                {
+                    var bookItem = bookItems[index];
+
+                    if (id != bookItem.Id)
+                    {
+                        continue;
+                    }
+
+                    UpdateProperties(bookItem);
+
+                    var sectionItems = await connector.GetSectionsAsync(bookItem.Id);
+
+                    break;
+                }
+
                 /*var book = booksService.GetBook(id);
 
                 if (null != book)
@@ -375,46 +391,9 @@ namespace AudioBookPlayer.App.ViewModels
 
                 }*/
             }
-
-            return Task.CompletedTask;
         }
 
-        private string GetBookAuthors()
-        {
-            var builder = new StringBuilder();
-            var separator = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-            var authors = playbackService.AudioBook.Authors;
-
-            foreach (var author in authors)
-            {
-                if (0 < builder.Length)
-                {
-                    builder.Append(separator);
-                }
-
-                builder.Append(author.Name);
-            }
-
-            return builder.ToString();
-        }
-
-        private Task DoTrackBookActivityAsync()
-        {
-            /*var position = new AudioBookPosition(
-                playbackService.AudioBook.Id.Value,
-                ChapterIndex,
-                TimeSpan.FromMilliseconds(ChapterPosition)
-            );
-
-            return activityTrackerService.TrackActivityAsync(
-                IsPlaying ? ActivityType.Play : ActivityType.Pause,
-                position
-            );*/
-
-            return Task.CompletedTask;
-        }
-
-        private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
+        /*private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
         {
             IsPlaying = playbackService.IsPlaying;
             
@@ -428,20 +407,20 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             trackBookActivity.Start();
-        }
+        }*/
 
-        private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
+        /*private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
         {
             UpdateAudioBookProperties();
-        }
+        }*/
 
-        private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
+        /*private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
         {
             ChapterIndex = playbackService.ChapterIndex;
             UpdateChapterProperties();
-        }
+        }*/
 
-        private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
+        /*private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
         {
             var position = playbackService.CurrentPosition;
 
@@ -451,9 +430,9 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             ChapterPosition = position.TotalMilliseconds;
-        }
+        }*/
 
-        private void UpdateChapterProperties()
+        /*private void UpdateChapterProperties()
         {
             if (-1 < ChapterIndex)
             {
@@ -478,20 +457,38 @@ namespace AudioBookPlayer.App.ViewModels
 
             Elapsed = TimeSpan.Zero;
             ChapterPosition = 0.0d;
-        }
+        }*/
 
-        private void UpdateAudioBookProperties()
+        private void UpdateProperties(BookItem bookItem)
         {
-            CanPlay = 0 < playbackService.AudioBook.Chapters.Count;
-            BookTitle = playbackService.AudioBook.Title;
-            BookSubtitle = GetBookAuthors();
+            CanPlay = false; // 0 < playbackService.AudioBook.Chapters.Count;
+            BookTitle = bookItem.Title;
+            BookSubtitle = GetBookAuthors(bookItem.Authors);
 
             //BookDuration = playbackService.AudioBook.Duration;
-            BookPosition = TimeSpan.Zero;
+            BookPosition = bookItem.Position;
 
-            ImageSource = 0 < playbackService.AudioBook.Images.Count
-                ? (Func<CancellationToken, Task<Stream>>)playbackService.AudioBook.Images[0].GetStreamAsync
-                : null;
+            ImageSource = 0 < bookItem.Covers.Length
+                ? cancellationToken => coverService.GetImageAsync(bookItem.Covers[0], cancellationToken)
+                : (Func<CancellationToken, Task<Stream>>)null;
+        }
+
+        private static string GetBookAuthors(string[] authors)
+        {
+            var builder = new StringBuilder();
+            var separator = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
+
+            foreach (var author in authors)
+            {
+                if (0 < builder.Length)
+                {
+                    builder.Append(separator);
+                }
+
+                builder.Append(author);
+            }
+
+            return builder.ToString();
         }
     }
 }

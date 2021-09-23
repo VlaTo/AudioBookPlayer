@@ -6,7 +6,7 @@ using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public sealed class BookPreviewViewModel : ViewModelBase
+    public sealed class BookItemViewModel : ViewModelBase
     {
         private string authors;
         private string title;
@@ -15,7 +15,7 @@ namespace AudioBookPlayer.App.ViewModels
         private bool completed;
         private Func<CancellationToken, Task<Stream>> imageSource;
 
-        public BookId Id
+        public EntityId Id
         {
             get;
         }
@@ -56,7 +56,7 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref imageSource, value);
         }
 
-        public BookPreviewViewModel(BookId id)
+        public BookItemViewModel(EntityId id)
         {
             Id = id;
         }

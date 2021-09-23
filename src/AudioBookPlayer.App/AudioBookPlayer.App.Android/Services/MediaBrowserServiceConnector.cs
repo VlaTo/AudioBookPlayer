@@ -5,17 +5,11 @@ using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Android.Services;
 using AudioBookPlayer.App.Android.Services.Builders;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
-using AudioBookPlayer.App.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Android.Core;
 using LibraProgramming.Xamarin.Core;
 using Xamarin.Forms;
 using Application = Android.App.Application;
@@ -27,27 +21,15 @@ namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class MediaBrowserServiceConnector : Java.Lang.Object, IMediaBrowserServiceConnector
     {
-        //private readonly ICoverService coverService;
         private readonly MediaControllerCallback mediaControllerCallback;
         private readonly MediaBrowserCompat mediaBrowser;
         private MediaControllerCompat mediaController;
         private TaskCompletionSource connect;
-        private TaskCompletionSource<IReadOnlyList<BookPreviewViewModel>> library;
-        private TaskCompletionSource<CurrentBookViewModel> getBook;
+        private TaskCompletionSource<IReadOnlyList<BookItem>> library;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
 
         public MediaSessionCompat.Token SessionToken => mediaBrowser.SessionToken;
-
-        public IObservable<Unit> Connected
-        {
-            get;
-        }
-
-        public IObservable<BookPreviewViewModel[]> Library
-        {
-            get;
-        }
 
         public MediaControllerCompat MediaController
         {
@@ -73,49 +55,14 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        /*public MediaBrowserServiceConnector()
-            : this(AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<ICoverService>())
-        {
-        }*/
-
         public MediaBrowserServiceConnector()
         {
-            /*var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
-            var componentName = new ComponentName(Application.Context, serviceName);
-
-            var connected = new Subject<Unit>();
-            var library = new Subject<BookPreviewViewModel[]>();
-            var publishConnected = connected.Take(1).Publish();
-            var libraryConnected = library.Publish();
-
-            publishConnected.Connect();
-            libraryConnected.Connect();*/
-            
-            //this.coverService = coverService;
-
             var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
             var componentName = new ComponentName(Application.Context, serviceName);
             var connectionCallback = new ServiceConnectionCallback(this, OnConnected);
 
             mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
             mediaControllerCallback = new MediaControllerCallback(this);
-
-            //Connected = publishConnected.AsObservable();
-            //Library = libraryConnected.AsObservable();
-
-            //connect = new TaskCompletionSource();
-            //connectionCallback = new ServiceConnectionCallback(this, connect);
-            //mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
-        }
-
-        public void Connect()
-        {
-            if (mediaBrowser.IsConnected)
-            {
-                return;
-            }
-
-            mediaBrowser.Connect();
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
@@ -133,51 +80,42 @@ namespace AudioBookPlayer.App.Android.Services
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.GetLibraryAsync" />
-        public Task<IReadOnlyList<BookPreviewViewModel>> GetLibraryAsync(ICoverService coverService)
+        public Task<IReadOnlyList<BookItem>> GetLibraryAsync()
         {
-            var temp = new TaskCompletionSource<IReadOnlyList<BookPreviewViewModel>>();
+            var tcs = new TaskCompletionSource<IReadOnlyList<BookItem>>();
 
-            if (Interlocked.CompareExchange(ref library, temp, null) == null)
+            if (null == Interlocked.CompareExchange(ref library, tcs, null))
             {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetLibraryAsync] Started");
-
                 var mediaId = mediaBrowser.Root;
                 var options = new Bundle();
-                var callback = new MediaBrowserSubscriptionCallback(this);
+                var callback = new SubscriptionCallback(this);
 
                 void Unsubscribe()
                 {
                     mediaBrowser.Unsubscribe(mediaId, callback);
-                    Interlocked.CompareExchange(ref library, null, temp);
-
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetLibraryAsync] Done");
+                    Interlocked.CompareExchange(ref library, null, tcs);
                 }
 
                 callback.ChildrenLoadedImpl = (parentId, children) =>
                 {
-                    var builder = new PreviewBookBuilder(coverService);
-                    var models = new BookPreviewViewModel[children.Count];
+                    var builder = new PreviewBookBuilder();
+                    var bookItems = new BookItem[children.Count];
 
                     for (var index = 0; index < children.Count; index++)
                     {
                         var mediaItem = children[index];
-                        models[index] = builder.BuildBookFrom(mediaItem);
+                        bookItems[index] = builder.BuildBookFrom(mediaItem);
                     }
 
-                    library.SetResult(models);
+                    library.SetResult(bookItems);
 
                     Unsubscribe();
-                    //mediaBrowser.Unsubscribe(mediaId, callback);
-                    //Interlocked.CompareExchange(ref library, null, temp);
                 };
 
                 callback.ErrorImpl = parentId =>
                 {
                     library.TrySetException(new Exception());
-
                     Unsubscribe();
-                    //mediaBrowser.Unsubscribe(mediaId, callback);
-                    //Interlocked.CompareExchange(ref library, null, temp);
                 };
 
                 mediaBrowser.Subscribe(mediaId, options, callback);
@@ -203,7 +141,15 @@ namespace AudioBookPlayer.App.Android.Services
             mediaController.SendCommand("MEDIA_TEST_1", bundle, cb);
         }
 
-        public Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService)
+        public void Temp(string mediaId)
+        {
+            var controls = MediaController.GetTransportControls();
+            var options = new Bundle();
+
+            controls.PrepareFromMediaId(mediaId, options);
+        }
+
+        /*public Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService)
         {
             var temp = new TaskCompletionSource<CurrentBookViewModel>();
 
@@ -226,8 +172,8 @@ namespace AudioBookPlayer.App.Android.Services
 
                 callback.ChildrenLoadedImpl = (parentId, children) =>
                 {
-                    var builder = new PreviewBookBuilder(coverService);
-                    var models = new BookPreviewViewModel[children.Count];
+                    var builder = new PreviewBookBuilder();
+                    var models = new BookItemViewModel[children.Count];
 
                     for (var index = 0; index < children.Count; index++)
                     {
@@ -252,7 +198,7 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             return getBook.Task;
-        }
+        }*/
 
         private void OnConnected(ConnectStatus status)
         {
@@ -338,13 +284,13 @@ namespace AudioBookPlayer.App.Android.Services
         }
 
         // SubscriptionCallback class
-        private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
+        /*private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
-            private readonly IObserver<BookPreviewViewModel[]> observer;
+            private readonly IObserver<BookItemViewModel[]> observer;
             private readonly PreviewBookBuilder builder;
 
-            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<BookPreviewViewModel[]> observer, ICoverService coverService)
+            public SubscriptionCallback(MediaBrowserServiceConnector connector, IObserver<BookItemViewModel[]> observer, ICoverService coverService)
             {
                 this.connector = connector;
                 this.observer = observer;
@@ -354,7 +300,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
             {
-                var books = new BookPreviewViewModel[children.Count];
+                var books = new BookItemViewModel[children.Count];
 
                 for (var index = 0; index < children.Count; index++)
                 {
@@ -369,9 +315,9 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 observer.OnError(new Exception());
             }
-        }
+        }*/
 
-        private sealed class MediaBrowserSubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
+        private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
             private readonly MediaBrowserServiceConnector connector;
 
@@ -393,7 +339,7 @@ namespace AudioBookPlayer.App.Android.Services
                 set;
             }
 
-            public MediaBrowserSubscriptionCallback(MediaBrowserServiceConnector connector)
+            public SubscriptionCallback(MediaBrowserServiceConnector connector)
             {
                 this.connector = connector;
 
@@ -492,6 +438,5 @@ namespace AudioBookPlayer.App.Android.Services
                 System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Execute");
             }
         }
-
     }
 }

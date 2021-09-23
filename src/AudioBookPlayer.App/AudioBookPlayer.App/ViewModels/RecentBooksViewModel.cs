@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
+using System.Collections.Generic;
 
 namespace AudioBookPlayer.App.ViewModels
 {
@@ -15,15 +16,15 @@ namespace AudioBookPlayer.App.ViewModels
         {
         }
 
-        protected override bool FilterSourceBook(BookPreviewViewModel source) => true;
+        protected override bool FilterSourceBook(BookItem bookItem) => true;
 
-        protected override void BindSourceBooks(IReadOnlyList<BookPreviewViewModel> models)
+        protected override void BindSourceBooks(IReadOnlyList<BookItem> bookItems)
         {
             try
             {
                 IsBusy = true;
 
-                base.BindSourceBooks(models);
+                base.BindSourceBooks(bookItems);
             }
             finally
             {

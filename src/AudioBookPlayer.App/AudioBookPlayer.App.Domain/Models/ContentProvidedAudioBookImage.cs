@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Core;
 
 namespace AudioBookPlayer.App.Domain.Models
 {

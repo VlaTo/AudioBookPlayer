@@ -18,14 +18,14 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     public sealed class StartPlayInteractionRequestContext : InteractionRequestContext
     {
-        public BookId BookId
+        public EntityId EntityId
         {
             get;
         }
 
-        public StartPlayInteractionRequestContext(BookId bookId)
+        public StartPlayInteractionRequestContext(EntityId entityId)
         {
-            BookId = bookId;
+            EntityId = entityId;
         }
     }
 
@@ -38,7 +38,7 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly TaskExecutionMonitor loadBooksExecution;
         private bool isBusy;
 
-        public ObservableCollection<BookPreviewViewModel> Books
+        public ObservableCollection<BookItemViewModel> Books
         {
             get;
         }
@@ -54,7 +54,7 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public Command<BookPreviewViewModel> StartPlay
+        public Command<BookItemViewModel> StartPlay
         {
             get;
         }
@@ -75,14 +75,11 @@ namespace AudioBookPlayer.App.ViewModels
         {
             BrowserServiceConnector = browserServiceConnector;
             CoverService = coverService;
-            Books = new ObservableCollection<BookPreviewViewModel>();
-            StartPlay = new Command<BookPreviewViewModel>(DoStartPlay);
+            Books = new ObservableCollection<BookItemViewModel>();
+            StartPlay = new Command<BookItemViewModel>(DoStartPlay);
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
 
             loadBooksExecution = new TaskExecutionMonitor(DoLoadBooksAsync);
-
-            //subscription = browserServiceConnector.Connected.Subscribe(OnMediaBrowserConnected);
-            //var token = browserServiceConnector.Library.Subscribe(BindSourceBooks);
         }
 
         public virtual void OnInitialize()
@@ -90,7 +87,7 @@ namespace AudioBookPlayer.App.ViewModels
             loadBooksExecution.Start();
         }
 
-        protected virtual void DoStartPlay(BookPreviewViewModel book)
+        protected virtual void DoStartPlay(BookItemViewModel book)
         {
             var context = new StartPlayInteractionRequestContext(book.Id);
 
@@ -100,50 +97,45 @@ namespace AudioBookPlayer.App.ViewModels
             });
         }
 
-        protected abstract bool FilterSourceBook(BookPreviewViewModel model);
+        protected abstract bool FilterSourceBook(BookItem bookItem);
 
         protected virtual void OnConnected()
         {
             //var token = BrowserServiceConnector.Library.Subscribe(BindSourceBooks);
         }
 
-        /*protected AudioBookViewModel BuildAudioBookModel(AudioBook book)
+        protected virtual BookItemViewModel BuildBookItemModel(BookItem bookItem)
         {
-            if (false == book.Id.HasValue)
+            var model = new BookItemViewModel(bookItem.Id)
             {
-                return null;
-            }
-            
-            var model = new AudioBookViewModel
-            {
-                Id = book.Id.Value,
-                Title = book.Title,
-                Authors = GetAuthorsForBook(book.Authors),
-                Synopsis = book.Synopsis,
-                Duration = book.Duration
+                Title = bookItem.Title,
+                //Authors = GetAuthorsForBook(book.Authors),
+                //Synopsis = book.Synopsis,
+                Duration = bookItem.Duration
             };
 
-            if (0 < book.Images.Count)
+            if (0 < bookItem.Covers.Length)
             {
-                model.ImageSource = book.Images[0].GetStreamAsync;
+                model.ImageSource = (cancellationToken) => CoverService.GetImageAsync(bookItem.Covers[0], cancellationToken);
             }
 
             return model;
-        }*/
+        }
 
-
-        protected virtual void BindSourceBooks(IReadOnlyList<BookPreviewViewModel> models)
+        protected virtual void BindSourceBooks(IReadOnlyList<BookItem> bookItems)
         {
             Books.Clear();
 
-            for (var index = 0; index < models.Count; index++)
+            for (var index = 0; index < bookItems.Count; index++)
             {
-                var model = models[index];
+                var bookItem = bookItems[index];
 
-                if (false == FilterSourceBook(model))
+                if (false == FilterSourceBook(bookItem))
                 {
                     continue;
                 }
+
+                var model = BuildBookItemModel(bookItem);
 
                 Books.Add(model);
             }
@@ -153,7 +145,7 @@ namespace AudioBookPlayer.App.ViewModels
         {
             await BrowserServiceConnector.ConnectAsync();
 
-            var library = await BrowserServiceConnector.GetLibraryAsync(CoverService);
+            var library = await BrowserServiceConnector.GetLibraryAsync();
 
             BindSourceBooks(library);
         }

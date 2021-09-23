@@ -7,22 +7,22 @@ namespace AudioBookPlayer.App.Domain.Models
     /// <summary>
     /// 
     /// </summary>
-    public readonly struct BookId : IEquatable<BookId>
+    public readonly struct EntityId : IEquatable<EntityId>
     {
         private const string EmptyString = "@empty";
 
         private readonly long? id;
 
-        public static readonly BookId Empty;
+        public static readonly EntityId Empty;
 
-        private BookId(long? id)
+        private EntityId(long? id)
         {
             this.id = id;
         }
 
-        static BookId()
+        static EntityId()
         {
-            Empty = new BookId(null);
+            Empty = new EntityId(null);
         }
 
         public override string ToString()
@@ -30,9 +30,9 @@ namespace AudioBookPlayer.App.Domain.Models
             return id.HasValue ? id.Value.ToString("D", CultureInfo.CurrentUICulture) : EmptyString;
         }
 
-        public static BookId From(long id) => new BookId(id);
+        public static EntityId From(long id) => new EntityId(id);
 
-        public static bool TryParse([MaybeNull] string s, out BookId value)
+        public static bool TryParse([MaybeNull] string s, out EntityId value)
         {
             if (String.IsNullOrEmpty(s) || String.Equals(EmptyString, s) || false == long.TryParse(s, out var id))
             {
@@ -45,13 +45,13 @@ namespace AudioBookPlayer.App.Domain.Models
             return true;
         }
 
-        public static bool Equals(BookId x, BookId y) => x.Equals(y);
+        public static bool Equals(EntityId x, EntityId y) => x.Equals(y);
 
-        public bool Equals(BookId other) => id == other.id;
+        public bool Equals(EntityId other) => id == other.id;
 
         public override bool Equals(object obj)
         {
-            if (obj is BookId other)
+            if (obj is EntityId other)
             {
                 return Equals(other);
             }
@@ -66,12 +66,12 @@ namespace AudioBookPlayer.App.Domain.Models
 
         public override int GetHashCode() => id.GetHashCode();
 
-        public static bool operator ==(BookId left, BookId right) => Equals(left, right);
+        public static bool operator ==(EntityId left, EntityId right) => Equals(left, right);
 
-        public static bool operator !=(BookId left, BookId right) => !(left == right);
+        public static bool operator !=(EntityId left, EntityId right) => !(left == right);
 
-        public static explicit operator long(BookId source) => source.id.GetValueOrDefault();
+        public static explicit operator long(EntityId source) => source.id.GetValueOrDefault();
 
-        public static implicit operator BookId(long value) => From(value);
+        public static implicit operator EntityId(long value) => From(value);
     }
 }

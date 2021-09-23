@@ -6,7 +6,7 @@ using Android.OS;
 using Android.Runtime;
 using AudioBookPlayer.App.Android.Services;
 using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Data;
+using AudioBookPlayer.App.Domain.Providers;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;

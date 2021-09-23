@@ -1,7 +1,7 @@
-﻿using System.IO;
+﻿using AudioBookPlayer.App.Domain.Providers;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
 
 namespace AudioBookPlayer.App.Domain.Services
 {

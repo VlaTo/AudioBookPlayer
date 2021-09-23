@@ -1,4 +1,4 @@
-﻿namespace AudioBookPlayer.App.Domain.Data
+﻿namespace AudioBookPlayer.App.Domain.Core
 {
     public interface IHasContentUri
     {

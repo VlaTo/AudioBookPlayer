@@ -71,7 +71,7 @@
         </CollectionView.EmptyView>
         <CollectionView.ItemTemplate>
             <DataTemplate
-                x:DataType="viewmodels:BookPreviewViewModel">
+                x:DataType="viewmodels:BookItemViewModel">
                 <Grid
                     RowDefinitions="Auto,Auto,Auto,*"
                     ColumnDefinitions="Auto,*"

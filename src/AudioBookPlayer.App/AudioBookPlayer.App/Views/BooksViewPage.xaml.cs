@@ -16,7 +16,7 @@ namespace AudioBookPlayer.App.Views
 
         protected virtual async void OnPlayBookRequest(object sender, StartPlayInteractionRequestContext context, Action callback)
         {
-            var uri = $"{Routes.PlayerPageRoute}?{nameof(PlayerControlViewModel.BookId)}={context.BookId}";
+            var uri = $"{Routes.PlayerPageRoute}?{nameof(PlayerControlViewModel.BookId)}={context.EntityId}";
             
             await Shell.Current.GoToAsync(new ShellNavigationState(uri), true);
             

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Providers;
 
 namespace AudioBookPlayer.App.Domain.Services
 {
@@ -11,6 +11,6 @@ namespace AudioBookPlayer.App.Domain.Services
 
         Task SaveBookAsync(AudioBook audioBook, CancellationToken cancellationToken = default);
 
-        AudioBook GetBook(BookId bookId);
+        AudioBook GetBook(EntityId entityId);
     }
 }

@@ -8,11 +8,11 @@ namespace AudioBookPlayer.App.Android.Services.Builders
     {
         private const string Prefix = "audiobook:";
 
-        public BookId Id { get; }
+        public EntityId EntityId { get; }
 
-        public MediaBookId(BookId bookId)
+        public MediaBookId(EntityId entityId)
         {
-            Id = bookId;
+            EntityId = entityId;
         }
 
         [return: NotNull]
@@ -28,28 +28,23 @@ namespace AudioBookPlayer.App.Android.Services.Builders
 
         public static bool TryParse([NotNull] string s, out MediaBookId mediaBookId)
         {
-            if (false == String.IsNullOrEmpty(s))
+            if (false == String.IsNullOrEmpty(s) && s.StartsWith(Prefix))
             {
-                var position = s.IndexOf(Prefix[^1]);
+                var value = s.Substring(Prefix.Length);
 
-                if (Prefix.Length == position)
+                if (EntityId.TryParse(value, out var audioBookId))
                 {
-                    var value = s.Substring(position);
+                    mediaBookId = new MediaBookId(audioBookId);
 
-                    if (BookId.TryParse(value, out var audioBookId))
-                    {
-                        mediaBookId = new MediaBookId(audioBookId);
-
-                        return true;
-                    }
+                    return true;
                 }
             }
 
-            mediaBookId = new MediaBookId(BookId.Empty);
+            mediaBookId = new MediaBookId(EntityId.Empty);
             
             return false;
         }
 
-        public override string ToString() => Prefix + Id;
+        public override string ToString() => Prefix + EntityId;
     }
 }

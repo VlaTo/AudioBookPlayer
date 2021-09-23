@@ -90,7 +90,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null == rootHints || rootHints.IsEmpty)
                 {
-                    return new BrowserRoot(MediaPath.Root, null);
+                    return new BrowserRoot(MediaPath.Root.ToString(), null);
                 }
 
                 if (rootHints.GetBoolean(BrowserRoot.ExtraRecent))
@@ -116,9 +116,6 @@ namespace AudioBookPlayer.App.Android.Services
         // Concrete chapter: "/audiobook:1/chapter:0" (preview)
         public override void OnLoadChildren(string parentId, Result result)
         {
-            //System.Diagnostics.Debug.WriteLine($"[{nameof(AudioBookPlaybackService)}.OnLoadChildren] parent id: \"{parentId}\"");
-            var builder = new PublicMediaItemBuilder();
-
             if (MediaPath.TryParse(parentId, out var mediaPath))
             {
                 if (mediaPath.IsRoot)
@@ -127,11 +124,14 @@ namespace AudioBookPlayer.App.Android.Services
                     
                     var books = booksService.QueryBooks();
                     var list = new JavaList<MediaBrowserCompat.MediaItem>();
+                    var builder = new MediaBookItemBuilder();
 
                     for (var index = 0; index < books.Count; index++)
                     {
-                        var item = builder.BuildBookPreview(books[index], flags);
-                        list.Add(item);
+                        var book = books[index];
+                        var mediaItem = builder.Build(book, flags);
+
+                        list.Add(mediaItem);
                     }
 
                     result.SendResult(list);
@@ -143,10 +143,19 @@ namespace AudioBookPlayer.App.Android.Services
                 {
                     const int flags = MediaBrowserCompat.MediaItem.FlagBrowsable | MediaBrowserCompat.MediaItem.FlagPlayable;
 
-                    var book = booksService.GetBook(mediaBookId.Id);
-                    var item = builder.BuildBookPreview(book, flags);
+                    var book = booksService.GetBook(mediaBookId.EntityId);
+                    var list = new JavaList<MediaBrowserCompat.MediaItem>();
+                    var builder = new MediaSectionItemBuilder();
 
-                    result.SendResult(item);
+                    for (var index = 0; index < book.Sections.Length; index++)
+                    {
+                        var section = book.Sections[index];
+                        var mediaItem = builder.Build(section, flags);
+
+                        list.Add(mediaItem);
+                    }
+
+                    result.SendResult(list);
 
                     return;
                 }

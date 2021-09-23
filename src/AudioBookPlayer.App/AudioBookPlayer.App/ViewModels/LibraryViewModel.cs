@@ -1,10 +1,10 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Providers;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 

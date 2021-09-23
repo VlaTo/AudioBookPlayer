@@ -30,9 +30,9 @@ namespace AudioBookPlayer.App.Android.Services
             return collection.AsReadOnly();
         }
 
-        public Book GetBook(BookId bookId)
+        public Book GetBook(EntityId entityId)
         {
-            var book = GetBookInternal((long)bookId);
+            var book = GetBookInternal((long)entityId);
             return book;
         }
 

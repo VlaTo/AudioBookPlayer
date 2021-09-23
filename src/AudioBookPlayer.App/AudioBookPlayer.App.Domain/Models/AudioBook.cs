@@ -6,7 +6,7 @@ namespace AudioBookPlayer.App.Domain.Models
 {
     public sealed class AudioBook
     {
-        public BookId Id
+        public EntityId Id
         {
             get;
             set;
@@ -54,7 +54,7 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public AudioBook(BookId id, string title)
+        public AudioBook(EntityId id, string title)
         {
             Id = id;
             Title = title;

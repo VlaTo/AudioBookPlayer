@@ -80,8 +80,9 @@
     <Compile Include="Services\Builders\BookBuilder.cs" />
     <Compile Include="Services\Builders\MediaBookId.cs" />
     <Compile Include="Services\Builders\MediaItemBuilder.cs" />
+    <Compile Include="Services\Builders\MediaSectionItemBuilder.cs" />
     <Compile Include="Services\Builders\PreviewBookBuilder.cs" />
-    <Compile Include="Services\Builders\PublicMediaItemBuilder.cs" />
+    <Compile Include="Services\Builders\MediaBookItemBuilder.cs" />
     <Compile Include="Services\MediaBrowserServiceConnector.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\Builders\NotificationBuilder.cs" />

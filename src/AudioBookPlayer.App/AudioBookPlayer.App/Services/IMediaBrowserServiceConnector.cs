@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reactive;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.ViewModels;
 
 namespace AudioBookPlayer.App.Services
 {
@@ -13,28 +9,6 @@ namespace AudioBookPlayer.App.Services
     /// </summary>
     public interface IMediaBrowserServiceConnector
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        IObservable<Unit> Connected
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        IObservable<BookPreviewViewModel[]> Library
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void Connect();
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -50,14 +24,13 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         /// <returns></returns>
-        Task<IReadOnlyList<BookPreviewViewModel>> GetLibraryAsync(ICoverService coverService);
+        Task<IReadOnlyList<BookItem>> GetLibraryAsync();
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="coverService"></param>
+        /// <param name="bookId"></param>
         /// <returns></returns>
-        Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService);
+        Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId);
     }
 }

@@ -6,12 +6,12 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public interface IBooksViewModel
     {
-        ObservableCollection<BookPreviewViewModel> Books
+        ObservableCollection<BookItemViewModel> Books
         {
             get;
         }
 
-        Command<BookPreviewViewModel> StartPlay
+        Command<BookItemViewModel> StartPlay
         {
             get;
         }

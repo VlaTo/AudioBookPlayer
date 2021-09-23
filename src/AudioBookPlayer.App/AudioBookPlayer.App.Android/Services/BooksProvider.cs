@@ -3,7 +3,6 @@ using Android.Content;
 using Android.OS;
 using Android.Provider;
 using AudioBookPlayer.App.Android.Core;
-using AudioBookPlayer.App.Domain.Data;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Media.Common;
@@ -14,6 +13,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Domain.Extensions;
+using AudioBookPlayer.App.Domain.Providers;
 using AudioBookPlayer.App.Models;
 using Path = System.IO.Path;
 using Uri = Android.Net.Uri;
@@ -226,7 +226,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (0 > audioBookIndex)
             {
-                audioBook = new AudioBook(BookId.Empty, audioFile.Album);
+                audioBook = new AudioBook(EntityId.Empty, audioFile.Album);
                 audioBook.Authors.Add(new AudioBookAuthor(audioFile.Artist));
                 audioBooks.Add(audioBook);
             }
@@ -235,7 +235,7 @@ namespace AudioBookPlayer.App.Android.Services
                 audioBook = audioBooks[audioBookIndex];
             }
 
-            if (BookId.Empty == audioBook.Id)
+            if (EntityId.Empty == audioBook.Id)
             {
                 if (String.IsNullOrEmpty(audioBook.Synopsis))
                 {

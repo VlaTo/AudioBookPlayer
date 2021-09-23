@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using AudioBookPlayer.App.Domain.Models;
+using Java.Lang;
+using Exception = System.Exception;
+using String = System.String;
 
 namespace AudioBookPlayer.App.Android.Core
 {
@@ -48,7 +51,21 @@ namespace AudioBookPlayer.App.Android.Core
 
         public override string ToString()
         {
-            return base.ToString();
+            var sb = new global::System.Text.StringBuilder();
+
+            for (var index = 0; index < segments.Length; index++)
+            {
+                var segment = segments[index];
+
+                if (0 < sb.Length)
+                {
+                    sb.Append(PathDelimiter);
+                }
+
+                sb.Append(segment.ToString());
+            }
+
+            return sb.ToString();
         }
 
         public static bool TryParse(string s, out MediaPath mediaPath)
@@ -84,7 +101,7 @@ namespace AudioBookPlayer.App.Android.Core
             return instance;
         }
 
-        public static MediaPath Combine(MediaPath basePath, BookId id)
+        public static MediaPath Combine(MediaPath basePath, EntityId id)
         {
             return basePath;
         }

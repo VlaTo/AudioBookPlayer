@@ -4,9 +4,9 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class CurrentBookViewModel : ViewModelBase
     {
-        public BookId Id { get; }
+        public EntityId Id { get; }
 
-        public CurrentBookViewModel(BookId id)
+        public CurrentBookViewModel(EntityId id)
         {
             Id = id;
         }

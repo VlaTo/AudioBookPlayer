@@ -2,19 +2,20 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class AudioBookViewModel : ViewModelBase
     {
-        private long id;
+        private EntityId id;
         private string authors;
         private string title;
         private string synopsis;
         private TimeSpan duration;
         private Func<CancellationToken, Task<Stream>> imageSource;
 
-        public long Id
+        public EntityId Id
         {
             get => id;
             set => SetProperty(ref id, value);
