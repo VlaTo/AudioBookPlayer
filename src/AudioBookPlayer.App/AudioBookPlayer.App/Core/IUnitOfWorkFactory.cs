@@ -1,10 +1,17 @@
 ﻿using AudioBookPlayer.App.Persistence.LiteDb;
-using AudioBookPlayer.App.Persistence.LiteDb.Core;
 
 namespace AudioBookPlayer.App.Core
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public interface IUnitOfWorkFactory
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="useTransaction"></param>
+        /// <returns></returns>
         IUnitOfWork CreateUnitOfWork(bool useTransaction);
     }
 }

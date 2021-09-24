@@ -3,7 +3,7 @@ using LiteDB;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Models
 {
-    [Serializable]
+    /*[Serializable]
     public sealed class Fragment
     {
         [BsonField("start")]
@@ -29,5 +29,5 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Models
             get;
             set;
         }
-    }
+    }*/
 }

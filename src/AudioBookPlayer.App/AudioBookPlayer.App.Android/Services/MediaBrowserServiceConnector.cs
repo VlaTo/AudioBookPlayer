@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Android.Extensions;
 using LibraProgramming.Xamarin.Core;
 using Xamarin.Forms;
 using Application = Android.App.Application;
@@ -26,6 +28,8 @@ namespace AudioBookPlayer.App.Android.Services
         private MediaControllerCompat mediaController;
         private TaskCompletionSource connect;
         private TaskCompletionSource<IReadOnlyList<BookItem>> library;
+        private readonly Dictionary<EntityId, TaskCompletionSource<IReadOnlyList<SectionItem>>> sectionTasks;
+        private readonly object gate;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
 
@@ -63,6 +67,8 @@ namespace AudioBookPlayer.App.Android.Services
 
             mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
             mediaControllerCallback = new MediaControllerCallback(this);
+            sectionTasks = new Dictionary<EntityId, TaskCompletionSource<IReadOnlyList<SectionItem>>>();
+            gate = new object();
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
@@ -87,8 +93,7 @@ namespace AudioBookPlayer.App.Android.Services
             if (null == Interlocked.CompareExchange(ref library, tcs, null))
             {
                 var mediaId = mediaBrowser.Root;
-                var options = new Bundle();
-                var callback = new SubscriptionCallback(this);
+                var callback = new SubscriptionCallback();
 
                 void Unsubscribe()
                 {
@@ -98,13 +103,12 @@ namespace AudioBookPlayer.App.Android.Services
 
                 callback.ChildrenLoadedImpl = (parentId, children) =>
                 {
-                    var builder = new PreviewBookBuilder();
                     var bookItems = new BookItem[children.Count];
 
                     for (var index = 0; index < children.Count; index++)
                     {
                         var mediaItem = children[index];
-                        bookItems[index] = builder.BuildBookFrom(mediaItem);
+                        bookItems[index] = mediaItem.ToBookItem();
                     }
 
                     library.SetResult(bookItems);
@@ -118,27 +122,79 @@ namespace AudioBookPlayer.App.Android.Services
                     Unsubscribe();
                 };
 
+                var options = new Bundle();
+
                 mediaBrowser.Subscribe(mediaId, options, callback);
             }
 
             return library.Task;
         }
 
-        public void Refresh()
+        public Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId)
         {
-            // --- Sending command 'MEDIA_TEST_1' ---
-            System.Diagnostics.Debug.WriteLine("[ConnectionCallback] [OnConnected] Sending command");
+            var tcs = new TaskCompletionSource<IReadOnlyList<SectionItem>>();
 
-            var bundle = new Bundle();
-            bundle.PutString("Test", "Value1");
-
-            var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
+            if (AcquireTask(bookId, tcs, out var current))
             {
-                System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
-            }));
-            var cb = new ResultReceiver(handler);
+                var mediaId = new MediaBookId(bookId).ToString();
+                var callback = new SubscriptionCallback();
 
-            mediaController.SendCommand("MEDIA_TEST_1", bundle, cb);
+                void Unsubscribe()
+                {
+                    mediaBrowser.Unsubscribe(mediaId, callback);
+                    ReleaseTask(bookId, current);
+                }
+
+                callback.ChildrenLoadedImpl = (parentId, children) =>
+                {
+                    var sectionItems = new SectionItem[children.Count];
+
+                    for (var index = 0; index < children.Count; index++)
+                    {
+                        var mediaItem = children[index];
+                        sectionItems[index] = mediaItem.ToSectionItem();
+                    }
+
+                    current.SetResult(sectionItems);
+
+                    Unsubscribe();
+                };
+
+                callback.ErrorImpl = parentId =>
+                {
+                    library.TrySetException(new Exception());
+                    Unsubscribe();
+                };
+
+                var options = new Bundle();
+
+                mediaBrowser.Subscribe(mediaId, options, callback);
+            }
+
+            return current.Task;
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.UpdateLibraryAsync" />
+        public Task UpdateLibraryAsync()
+        {
+            var tcs = new TaskCompletionSource();
+
+            {
+                var options = Bundle.Empty;
+                var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
+                {
+                    System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
+                    tcs.Complete();
+                }));
+
+                MediaController.SendCommand(
+                    AudioBookMediaBrowserService.IAudioBookMediaBrowserService.UpdateLibrary,
+                    options,
+                    new ResultReceiver(handler)
+                );
+            }
+
+            return tcs.Task;
         }
 
         public void Temp(string mediaId)
@@ -147,6 +203,38 @@ namespace AudioBookPlayer.App.Android.Services
             var options = new Bundle();
 
             controls.PrepareFromMediaId(mediaId, options);
+        }
+
+        private bool AcquireTask(
+            EntityId bookId,
+            TaskCompletionSource<IReadOnlyList<SectionItem>> tcs,
+            out TaskCompletionSource<IReadOnlyList<SectionItem>> current)
+        {
+            lock (gate)
+            {
+                if (false == sectionTasks.TryGetValue(bookId, out var value))
+                {
+                    sectionTasks.Add(bookId, tcs);
+                    current = tcs;
+
+                    return true;
+                }
+
+                current = value;
+
+                return false;
+            }
+        }
+
+        private void ReleaseTask(EntityId bookId, TaskCompletionSource<IReadOnlyList<SectionItem>> tcs)
+        {
+            lock (gate)
+            {
+                if (sectionTasks.TryGetValue(bookId, out var value) && tcs == value)
+                {
+                    sectionTasks.Remove(bookId);
+                }
+            }
         }
 
         /*public Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService)
@@ -319,8 +407,6 @@ namespace AudioBookPlayer.App.Android.Services
 
         private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
-            private readonly MediaBrowserServiceConnector connector;
-
             public Bundle Options
             {
                 get;
@@ -339,10 +425,8 @@ namespace AudioBookPlayer.App.Android.Services
                 set;
             }
 
-            public SubscriptionCallback(MediaBrowserServiceConnector connector)
+            public SubscriptionCallback()
             {
-                this.connector = connector;
-
                 ChildrenLoadedImpl = Stub.Empty<string, IList<MediaBrowserCompat.MediaItem>>();
                 ErrorImpl = Stub.Empty<string>();
             }

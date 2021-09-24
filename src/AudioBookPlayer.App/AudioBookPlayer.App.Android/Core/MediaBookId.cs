@@ -1,8 +1,8 @@
-﻿using AudioBookPlayer.App.Domain.Models;
-using System;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using AudioBookPlayer.App.Domain.Models;
 
-namespace AudioBookPlayer.App.Android.Services.Builders
+namespace AudioBookPlayer.App.Android.Core
 {
     internal readonly struct MediaBookId
     {

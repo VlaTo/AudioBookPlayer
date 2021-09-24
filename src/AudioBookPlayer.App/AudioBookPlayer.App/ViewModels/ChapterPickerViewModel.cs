@@ -110,7 +110,7 @@ namespace AudioBookPlayer.App.ViewModels
                     var part = playbackService.AudioBook.Sections[partIndex];
                     var groupEntry = new ChapterGroupViewModel
                     {
-                        Title = part.Title
+                        Title = part.Name
                     };
 
                     ChapterGroups.Add(groupEntry);

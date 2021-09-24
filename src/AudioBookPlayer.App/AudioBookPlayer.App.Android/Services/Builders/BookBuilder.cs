@@ -35,15 +35,4 @@ namespace AudioBookPlayer.App.Android.Services.Builders
             }
         }
     }
-
-    internal abstract class BookBuilder<TModel> : BookBuilder
-    {
-        /// <summary>
-        /// Constructs new instance of the <see cref="AudioBook" /> from <see cref="MediaBrowserCompat.MediaItem" />.
-        /// </summary>
-        /// <param name="mediaItem">Source media item.</param>
-        /// <returns>The instance of <see cref="AudioBook" /> constructed.</returns>
-        [return: NotNull]
-        public abstract TModel BuildBookFrom([NotNull] MediaBrowserCompat.MediaItem mediaItem);
-    }
 }

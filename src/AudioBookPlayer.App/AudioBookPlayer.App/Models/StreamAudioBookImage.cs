@@ -22,5 +22,11 @@ namespace AudioBookPlayer.App.Models
             var stream = memory.AsStream();
             return Task.FromResult(stream);
         }
+
+        public override Stream GetStream()
+        {
+            var stream = memory.AsStream();
+            return stream;
+        }
     }
 }

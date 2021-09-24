@@ -1,20 +1,18 @@
 ﻿using AudioBookPlayer.App.Persistence.LiteDb.Models;
-using LibraProgramming.Xamarin.Core;
 using LiteDB;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb
 {
     public class LiteDbContext
     {
-        private const string databaseFilename = "library.ldb";
 
         private readonly LiteDatabase database;
 
-        public LiteDbContext(IDatabasePathProvider pathProvider)
+        public LiteDbContext(string databasePath)
         {
             var connectionString = new ConnectionString
             {
-                Filename = pathProvider.GetDatabasePath(databaseFilename)
+                Filename = databasePath
             };
 
             database = new LiteDatabase(connectionString);

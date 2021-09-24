@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using AudioBookPlayer.App.Domain.Core;
 using LiteDB;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Models
 {
     [Serializable]
-    public sealed class Chapter
+    public sealed class Chapter : IEntity
     {
-        [BsonIgnore]
-        private TimeSpan? duration;
-
-        [BsonIgnore]
-        private IEnumerable<Fragment> fragments;
-
         [BsonField("title")]
         public string Title
         {
@@ -28,34 +21,14 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Models
             set;
         }
 
-        [BsonField("fragments")]
-        public IEnumerable<Fragment> Fragments
+        [BsonField("duration")]
+        public TimeSpan Duration
         {
-            get => fragments;
-            set
-            {
-                if (ReferenceEquals(fragments, value))
-                {
-                    return;
-                }
-
-                fragments = value;
-                duration = null;
-            }
+            get;
+            set;
         }
 
         [BsonIgnore]
-        public TimeSpan Duration
-        {
-            get
-            {
-                if (false == duration.HasValue)
-                {
-                    duration = Fragments.Aggregate(TimeSpan.Zero, (span, fragment) => span + fragment.Duration);
-                }
-
-                return duration.Value;
-            }
-        }
+        public TimeSpan End => Start + Duration;
     }
 }

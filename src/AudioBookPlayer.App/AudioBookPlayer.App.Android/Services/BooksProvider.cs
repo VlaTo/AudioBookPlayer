@@ -34,7 +34,7 @@ namespace AudioBookPlayer.App.Android.Services
             resolver = Application.Context.ContentResolver;
         }
 
-        public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
+        /*public IReadOnlyList<AudioBook> QueryBooks()
         {
             var scanner = new AudioBookFileScanner(resolver, collectionUri);
             var audioFiles = scanner.QueryFiles();
@@ -90,19 +90,6 @@ namespace AudioBookPlayer.App.Android.Services
                                 sourceFiles[contentUri] = duration + track.Duration;
                             }
 
-                            /*foreach (var chapter in audioBook.Chapters)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync] Chapter: \"{chapter.Title}\" from: {chapter.Start:g} end: {chapter.End:g} (duration: {chapter.Duration:g})");
-                                for (var index = 0; index < chapter.Fragments.Count; index++)
-                                {
-                                    var fragment = chapter.Fragments[index];
-                                    System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync]   [{index}]: \"{fragment.SourceFile.ContentUri}\" from: {fragment.Start:g} end: {fragment.End:g} (duration: {fragment.Duration:g})");
-                                }
-                            }
-
-                            System.Diagnostics.Debug.WriteLine($"[QueryBooksAsync] AudioBook duration: {audioBook.Duration:g}");
-                            System.Diagnostics.Debug.WriteLine(null);*/
-
                             foreach (var kvp in mediaInfo.Meta)
                             {
                                 if (String.Equals(WellKnownMediaTags.Cover, kvp.Key))
@@ -127,7 +114,7 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             return Task.FromResult<IReadOnlyList<AudioBook>>(audioBooks);
-        }
+        }*/
 
         public IReadOnlyList<AudioBook> QueryBooks()
         {
@@ -162,25 +149,29 @@ namespace AudioBookPlayer.App.Android.Services
                             foreach (var track in mediaInfo.Tracks)
                             {
                                 var contentUri = audioFile.ContentUri.ToString();
-                                var part = audioBook.GetOrCreatePart(audioFile.Title);
-                                var chapter = new AudioBookChapter(audioBook, track.Title, audioBook.GetDuration(), part);
-                                var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
-
-                                if (null != part)
-                                {
-                                    part.Chapters.Add(chapter);
-                                }
+                                var section = audioBook.GetOrCreatePart(audioFile.Title, contentUri);
 
                                 if (false == sourceFiles.TryGetValue(contentUri, out var duration))
                                 {
                                     duration = TimeSpan.Zero;
                                 }
 
-                                var fragment = new AudioBookChapterFragment(duration, track.Duration, sourceFile);
+                                var chapter = new AudioBookChapter(audioBook, track.Title, section)
+                                {
+                                    Start = duration,
+                                    //Duration = audioBook.Duration
+                                    Duration = track.Duration
+                                };
 
-                                chapter.Fragments.Add(fragment);
-                                audioBook.Chapters.Add(chapter);
-                                audioBook.SourceFiles.Add(sourceFile);
+                                //var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
+
+                                section.Chapters.Add(chapter);
+
+                                //var fragment = new AudioBookChapterFragment(duration, track.Duration, sourceFile);
+
+                                //chapter.Fragments.Add(fragment);
+                                //audioBook.Chapters.Add(chapter);
+                                //audioBook.SourceFiles.Add(sourceFile);
 
                                 sourceFiles[contentUri] = duration + track.Duration;
                             }

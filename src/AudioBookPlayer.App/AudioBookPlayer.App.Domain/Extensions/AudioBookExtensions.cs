@@ -1,40 +1,44 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Domain.Extensions
 {
     public static class AudioBookExtensions
     {
-        public static AudioBookSection GetOrCreatePart(this AudioBook audioBook, string title)
+        [return: NotNull]
+        public static AudioBookSection GetOrCreatePart(this AudioBook audioBook, [NotNull] string name, [NotNull] string contentUri)
         {
-            if (null == title)
+            if (null == name)
             {
                 return null;
             }
 
             for (var index = 0; index < audioBook.Sections.Count; index++)
             {
-                var part = audioBook.Sections[index];
+                var section = audioBook.Sections[index];
 
-                if (String.Equals(part.Title, title, StringComparison.InvariantCulture))
+                if (String.Equals(section.Name, name, StringComparison.InvariantCulture))
                 {
-                    return part;
+                    return section;
                 }
             }
 
-            var target = new AudioBookSection(audioBook, title);
+            var target = new AudioBookSection(audioBook)
+            {
+                Name = name,
+                ContentUri = contentUri
+            };
 
             audioBook.Sections.Add(target);
 
             return target;
         }
 
-        [return: NotNull]
+        /*[return: NotNull]
         public static string GetAuthors([NotNull]this AudioBook audioBook)
         {
             return String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, audioBook.Authors);
-        }
+        }*/
     }
 }

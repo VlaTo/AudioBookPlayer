@@ -12,11 +12,6 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        void Refresh();
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <returns></returns>
         Task ConnectAsync();
 
@@ -32,5 +27,10 @@ namespace AudioBookPlayer.App.Services
         /// <param name="bookId"></param>
         /// <returns></returns>
         Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        Task UpdateLibraryAsync();
     }
 }

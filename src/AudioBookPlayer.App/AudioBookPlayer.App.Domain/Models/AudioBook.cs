@@ -23,36 +23,42 @@ namespace AudioBookPlayer.App.Domain.Models
             set;
         }
 
-        public DateTime? Created
+        public DateTime Created
         {
             get;
             set;
         }
 
-        public IList<AudioBookAuthor> Authors
+        public TimeSpan Duration
+        {
+            get;
+            set;
+        }
+
+        public List<AudioBookAuthor> Authors
         {
             get;
         }
 
-        public IList<AudioBookSection> Sections
+        public List<AudioBookSection> Sections
         {
             get;
         }
 
-        public IList<AudioBookChapter> Chapters
+        /*public IList<AudioBookChapter> Chapters
+        {
+            get;
+        }*/
+
+        public List<AudioBookImage> Images
         {
             get;
         }
 
-        public IList<AudioBookImage> Images
+        /*public IList<AudioBookSourceFile> SourceFiles
         {
             get;
-        }
-
-        public IList<AudioBookSourceFile> SourceFiles
-        {
-            get;
-        }
+        }*/
 
         public AudioBook(EntityId id, string title)
         {
@@ -61,13 +67,13 @@ namespace AudioBookPlayer.App.Domain.Models
             Authors = new List<AudioBookAuthor>();
             Sections = new List<AudioBookSection>();
             Images = new List<AudioBookImage>();
-            Chapters = new List<AudioBookChapter>();
-            SourceFiles = new List<AudioBookSourceFile>();
+            // Chapters = new List<AudioBookChapter>();
+            // SourceFiles = new List<AudioBookSourceFile>();
         }
 
-        public TimeSpan GetDuration()
+        /*public TimeSpan GetDuration()
         {
             return Chapters.Aggregate(TimeSpan.Zero, (current, chapter) => current + chapter.Duration);
-        }
+        }*/
     }
 }

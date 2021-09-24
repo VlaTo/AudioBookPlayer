@@ -1,19 +1,13 @@
-﻿using AudioBookPlayer.App.Persistence.LiteDb.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
+﻿namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
 {
-    /*public partial class BooksRepository
+    public partial class BooksRepository
     {
         /// <summary>
         /// Maps business-object <see cref="AudioBook" /> to DTO-object <see cref="Book" />.
         /// </summary>
         private sealed class BookBuilder
         {
-            private readonly ICoverService coverService;
+            /*private readonly ICoverService coverService;
 
             private BookBuilder(ICoverService coverService)
             {
@@ -145,7 +139,7 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
                 }
 
                 chapter.Fragments = fragments;
-            }
+            }*/
         }
-    }*/
+    }
 }

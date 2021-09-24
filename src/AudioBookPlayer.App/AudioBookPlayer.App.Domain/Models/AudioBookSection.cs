@@ -9,9 +9,37 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public string Title
+        public string ContentUri
         {
             get;
+            set;
+        }
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public int Index
+        {
+            get
+            {
+                if (null != AudioBook)
+                {
+                    for (var index = 0; index < AudioBook.Sections.Count; index++)
+                    {
+                        var section = AudioBook.Sections[index];
+
+                        if (ReferenceEquals(section, this))
+                        {
+                            return index;
+                        }
+                    }
+                }
+
+                return -1;
+            }
         }
         
         public IList<AudioBookChapter> Chapters
@@ -19,11 +47,10 @@ namespace AudioBookPlayer.App.Domain.Models
             get;
         }
 
-        public AudioBookSection(AudioBook audioBook, string title)
+        public AudioBookSection(AudioBook audioBook)
         {
             Chapters = new List<AudioBookChapter>();
             AudioBook = audioBook;
-            Title = title;
         }
     }
 }

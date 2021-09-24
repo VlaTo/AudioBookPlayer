@@ -50,9 +50,9 @@ namespace AudioBookPlayer.App.ViewModels
             Refresh = new Command(DoLibraryRefreshAsync);
         }
 
-        private async Task ExecuteLibraryRefreshAsync()
+        private Task ExecuteLibraryRefreshAsync()
         {
-            connector.Refresh();
+            return connector.UpdateLibraryAsync();
 
             /*IsBusy = true;
 

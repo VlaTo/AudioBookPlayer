@@ -1,7 +1,6 @@
-﻿using AudioBookPlayer.App.Persistence.LiteDb.Core;
+﻿using AudioBookPlayer.App.Domain.Core;
 using LiteDB;
 using System;
-using System.Linq;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Models
 {
@@ -24,6 +23,13 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Models
 
         [BsonField("synopsis")]
         public string Synopsis
+        {
+            get;
+            set;
+        }
+
+        [BsonField("duration")]
+        public TimeSpan Duration
         {
             get;
             set;
@@ -63,13 +69,6 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Models
             Authors = Array.Empty<string>();
             Images = Array.Empty<string>();
             Sections = Array.Empty<Section>();
-        }
-
-        public TimeSpan GetDuration()
-        {
-            return Sections
-                .SelectMany(section => section.Chapters)
-                .Aggregate(TimeSpan.Zero, (duration, chapter) => duration + chapter.Duration);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
 {
-    public sealed class BooksRepository : IBooksRepository
+    public sealed partial class BooksRepository : IBooksRepository
     {
         private readonly LiteDbContext context;
         //private readonly ICoverService coverService;
@@ -53,7 +53,8 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
 
         public IEnumerable<Book> Find(Expression<Func<Book, bool>> predicate)
         {
-            throw new NotImplementedException();
+            var books = context.Books().Find(predicate);
+            return books;
         }
 
         /*public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
