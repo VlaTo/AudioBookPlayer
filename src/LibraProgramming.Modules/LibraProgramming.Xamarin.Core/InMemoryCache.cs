@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace LibraProgramming.Xamarin.Core
 {
-    public sealed class InMemoryCache<TKey, TValue> : ICache<TKey, TValue>
+    public class InMemoryCache<TKey, TValue> : ICache<TKey, TValue>
     {
         private readonly Dictionary<TKey, TValue> cache;
 

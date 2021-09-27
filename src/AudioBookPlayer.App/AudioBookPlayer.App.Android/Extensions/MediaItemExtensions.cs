@@ -41,11 +41,12 @@ namespace AudioBookPlayer.App.Android.Extensions
             }
 
             var id = MediaSectionId.TryParse(mediaItem.MediaId, out var result) ? result : MediaSectionId.Empty;
+            var contentUri = mediaItem.Description.MediaUri.ToString();
             var sectionItem = new SectionItem.Builder()
                 .SetBookId(id.EntityId)
                 .SetIndex(id.Index)
                 .SetTitle(mediaItem.Description.Title)
-                .SetContentUri(GetString("ContentUri"))
+                .SetContentUri(contentUri)
                 //.SetDuration(GetDuration())
                 //.SetPosition(GetPosition())
                 //.SetIsCompleted(GetIsCompleted())

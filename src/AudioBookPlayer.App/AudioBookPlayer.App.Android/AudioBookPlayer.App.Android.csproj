@@ -81,10 +81,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AudioBookMediaBrowserService.cs" />
     <Compile Include="Services\AudioBookMediaBrowserService.IAudioBookMediaBrowserService.cs" />
+    <Compile Include="Services\EntityTaskLock.cs" />
+    <Compile Include="Services\InterlockedTaskLock.cs" />
+    <Compile Include="Services\ITaskLock.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.BookItemsTask.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.BooksLibraryTask.cs" />
     <Compile Include="Services\BooksService.cs" />
     <Compile Include="Services\Builders\BookBuilder.cs" />
     <Compile Include="Core\MediaBookId.cs" />
     <Compile Include="Services\Builders\MediaItemBuilder.cs" />
+    <Compile Include="Services\IBookItemsCache.cs" />
+    <Compile Include="Services\InMemoryBookItemsCache.cs" />
     <Compile Include="Services\MediaBrowserServiceConnector.cs" />
     <Compile Include="Services\AudioFocusRequestor.cs" />
     <Compile Include="Services\Builders\NotificationBuilder.cs" />
@@ -92,8 +99,15 @@
     <Compile Include="Services\CoverService.cs" />
     <Compile Include="Services\DatabasePathProvider.cs" />
     <Compile Include="Services\BooksProvider.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.SubscriptionCallback.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.BookSectionsTask.cs" />
+    <Compile Include="Services\MediaBrowserServiceConnector.ServiceConnectTask.cs" />
+    <Compile Include="Services\MediaControllerCallback.cs" />
+    <Compile Include="Services\MediaSessionCallback.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
+    <Compile Include="Services\TaskExecutor.cs" />
+    <Compile Include="Services\TaskExecutorAsync.cs" />
     <Compile Include="Services\ToastService.cs" />
     <Compile Include="SplashActivity.cs" />
   </ItemGroup>

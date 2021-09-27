@@ -38,7 +38,7 @@ namespace AudioBookPlayer.App
 
             //DependencyContainer.Register<IAudioBooksPublisher>(() => audioBooksHub, InstanceLifetime.Singleton);
             //DependencyContainer.Register<IAudioBooksConsumer>(() => audioBooksHub, InstanceLifetime.Singleton);
-            DependencyContainer.Register(() => DependencyService.Get<IMediaBrowserServiceConnector>(), InstanceLifetime.CreateNew);
+            //DependencyContainer.Register(() => DependencyService.Get<IMediaBrowserServiceConnector>(), InstanceLifetime.CreateNew);
 
             MainPage = new AppShell();
         }

@@ -81,7 +81,10 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 OnCommandImpl = DoMediaSessionCommand,
                 OnCustomActionImpl = DoMediaSessionCustomAction,
-                OnPrepareImpl = DoMediaSessionPrepare
+                OnPrepareImpl = DoMediaSessionPrepare,
+                OnPrepareFromMediaIdImpl = DoPrepareFromMediaId,
+                OnPlayImpl = DoPlay,
+                OnPlayFromMediaIdImpl = DoPlayFromMediaId
             };
             mediaSession.SetPlaybackState(playbackState.Build());
             mediaSession.SetCallback(mediaSessionCallback);
@@ -90,7 +93,17 @@ namespace AudioBookPlayer.App.Android.Services
             SessionToken = mediaSession.SessionToken;
 
             mediaController = new MediaControllerCompat(Application.Context, mediaSession);
-            mediaControllerCallback = new MediaControllerCallback();
+            mediaControllerCallback = new MediaControllerCallback
+            {
+                OnSessionReadyImpl = () =>
+                {
+                    System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService.MediaControllerCallback] [OnSessionReady] Execute");
+                },
+                OnPlaybackStateChangedImpl = state =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] State: {state}");
+                }
+            };
             mediaController.RegisterCallback(mediaControllerCallback);
 
             var databasePath = GetDatabasePath(DatabaseFilename).AbsolutePath;
@@ -263,53 +276,43 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        // MediaSessionCallback
-        private sealed class MediaSessionCallback : MediaSessionCompat.Callback
+        private void DoPrepareFromMediaId(string mediaId, Bundle options)
         {
-            public Action<string, Bundle, ResultReceiver> OnCommandImpl
+            System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [DoPrepareFromMediaId] Execute");
+
+            var metadata = new MediaMetadataCompat.Builder();
+
+            metadata.PutString(MediaMetadataCompat.MetadataKeyMediaId, "media_1");
+            metadata.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
+            metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
+            metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
+            metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
+            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
+
+            mediaSession.SetMetadata(metadata.Build());
+
+            if (false == mediaSession.Active)
             {
-                get;
-                set;
+                mediaSession.Active = true;
             }
-
-            public Action<string, Bundle> OnCustomActionImpl
-            {
-                get;
-                set;
-            }
-
-            public Action OnPrepareImpl
-            {
-                get;
-                set;
-            }
-
-            public override void OnCommand(string command, Bundle options, ResultReceiver cb) => OnCommandImpl.Invoke(command, options, cb);
-
-            public override void OnCustomAction(string action, Bundle extras) => OnCustomActionImpl.Invoke(action, extras);
-
-            public override void OnPrepare() => OnPrepareImpl.Invoke();
         }
 
-        // MediaControllerCallback class
-        private sealed class MediaControllerCallback : MediaControllerCompat.Callback
+        private void DoPlay()
         {
-            public override void OnSessionReady()
-            {
-                System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService.MediaControllerCallback] [OnSessionReady] Execute");
-            }
+            System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [DoPlay] Execute");
 
-            public override void OnPlaybackStateChanged(PlaybackStateCompat state)
-            {
-                System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] Playback state: \"{state.State}\"");
-            }
+            playbackState.SetState(PlaybackStateCompat.StatePlaying, 0L, 1.0f);
+            mediaSession.SetPlaybackState(playbackState.Build());
+        }
 
-            public override void OnSessionEvent(string e, Bundle extras)
-            {
-                System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnSessionEvent] Event: \"{e}\"");
-            }
+        private void DoPlayFromMediaId(string mediaId, Bundle options)
+        {
+            // playbackState.SetState(PlaybackStateCompat.StatePlaying, 0L, 1.0f);
 
+            var controls = mediaController.GetTransportControls();
 
+            controls.PrepareFromMediaId(mediaId, options);
+            controls.Play();
         }
     }
 }

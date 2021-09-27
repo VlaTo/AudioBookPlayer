@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Core.Extensions;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
 using LibraProgramming.Xamarin.Interaction.Contracts;
@@ -109,8 +110,7 @@ namespace AudioBookPlayer.App.ViewModels
             var model = new BookItemViewModel(bookItem.Id)
             {
                 Title = bookItem.Title,
-                //Authors = GetAuthorsForBook(book.Authors),
-                //Synopsis = book.Synopsis,
+                Authors = bookItem.Authors.ToCommaString(),
                 Duration = bookItem.Duration
             };
 

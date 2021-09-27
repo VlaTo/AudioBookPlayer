@@ -24,6 +24,12 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
+        /// <returns></returns>
+        Task<BookItem> GetBookItemAsync(EntityId bookId);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="bookId"></param>
         /// <returns></returns>
         Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId);
@@ -32,5 +38,10 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         Task UpdateLibraryAsync();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Play(EntityId bookId);
     }
 }

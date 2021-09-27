@@ -68,7 +68,8 @@ namespace AudioBookPlayer.App.Android
 
         private static Task DoServiceConnectAsync()
         {
-            var connector = DependencyService.Get<IMediaBrowserServiceConnector>();
+            var dependencyContainer = AudioBookPlayerApplication.Instance.DependencyContainer;
+            var connector = dependencyContainer.GetInstance<IMediaBrowserServiceConnector>();
             return connector.ConnectAsync();
         }
 
@@ -80,11 +81,14 @@ namespace AudioBookPlayer.App.Android
             public void RegisterTypes(DependencyContainer container)
             {
                 // Xamarin.Forms.Internals.Registrar.Registered.Register();
+
+                container.Register<IMediaBrowserServiceConnector, MediaBrowserServiceConnector>(InstanceLifetime.Singleton);
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
                 container.Register<IDatabasePathProvider, DatabasePathProvider>();
+                container.Register<IBookItemsCache, InMemoryBookItemsCache>(InstanceLifetime.Singleton);
             }
         }
     }

@@ -6,6 +6,7 @@ using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -20,15 +21,15 @@ namespace AudioBookPlayer.App.ViewModels
     [QueryProperty(nameof(BookId), nameof(BookId))]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
-        //private readonly IBooksService booksService;
         private readonly IMediaBrowserServiceConnector connector;
-
         private readonly ICoverService coverService;
 
+        private BookItem currentBookItem;
+        private IReadOnlyList<SectionItem> currentSectionItems;
         //private readonly IPlaybackService playbackService;
         //private readonly IActivityTrackerService activityTrackerService;
         // private readonly INotificationService notificationService;
-        private readonly TaskExecutionMonitor serviceConnectMonitor;
+        //private readonly TaskExecutionMonitor serviceConnectMonitor;
         private readonly TaskExecutionMonitor loadBookMonitor;
         //private readonly TaskExecutionMonitor trackBookActivity;
 
@@ -281,6 +282,8 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
+            connector.Play(currentBookItem.Id);
+
             /*if (IsPlaying)
             {
                 playbackService.Pause();
@@ -350,23 +353,11 @@ namespace AudioBookPlayer.App.ViewModels
         {
             if (EntityId.TryParse(BookId, out var id))
             {
-                var bookItems = await connector.GetLibraryAsync();
+                var bookItem = await connector.GetBookItemAsync(id);
 
-                for (var index = 0; index < bookItems.Count; index++)
-                {
-                    var bookItem = bookItems[index];
+                currentBookItem = bookItem;
 
-                    if (id != bookItem.Id)
-                    {
-                        continue;
-                    }
-
-                    UpdateProperties(bookItem);
-
-                    var sectionItems = await connector.GetSectionsAsync(bookItem.Id);
-
-                    break;
-                }
+                UpdateProperties();
 
                 /*var book = booksService.GetBook(id);
 
@@ -459,17 +450,16 @@ namespace AudioBookPlayer.App.ViewModels
             ChapterPosition = 0.0d;
         }*/
 
-        private void UpdateProperties(BookItem bookItem)
+        private void UpdateProperties()
         {
             CanPlay = false; // 0 < playbackService.AudioBook.Chapters.Count;
-            BookTitle = bookItem.Title;
-            BookSubtitle = GetBookAuthors(bookItem.Authors);
+            BookTitle = currentBookItem.Title;
+            BookSubtitle = GetBookAuthors(currentBookItem.Authors);
 
-            //BookDuration = playbackService.AudioBook.Duration;
-            BookPosition = bookItem.Position;
+            BookPosition = currentBookItem.Position;
 
-            ImageSource = 0 < bookItem.Covers.Length
-                ? cancellationToken => coverService.GetImageAsync(bookItem.Covers[0], cancellationToken)
+            ImageSource = 0 < currentBookItem.Covers.Length
+                ? cancellationToken => coverService.GetImageAsync(currentBookItem.Covers[0], cancellationToken)
                 : (Func<CancellationToken, Task<Stream>>)null;
         }
 
