@@ -13,6 +13,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Domain.Extensions;
 using AudioBookPlayer.App.Domain.Models;
 using Xamarin.Forms;
 
@@ -454,16 +455,14 @@ namespace AudioBookPlayer.App.ViewModels
         {
             CanPlay = false; // 0 < playbackService.AudioBook.Chapters.Count;
             BookTitle = currentBookItem.Title;
-            BookSubtitle = GetBookAuthors(currentBookItem.Authors);
-
+            BookSubtitle = currentBookItem.Authors.AsString();
             BookPosition = currentBookItem.Position;
-
             ImageSource = 0 < currentBookItem.Covers.Length
                 ? cancellationToken => coverService.GetImageAsync(currentBookItem.Covers[0], cancellationToken)
                 : (Func<CancellationToken, Task<Stream>>)null;
         }
 
-        private static string GetBookAuthors(string[] authors)
+        /*private static string GetBookAuthors(string[] authors)
         {
             var builder = new StringBuilder();
             var separator = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
@@ -479,6 +478,6 @@ namespace AudioBookPlayer.App.ViewModels
             }
 
             return builder.ToString();
-        }
+        }*/
     }
 }

@@ -7,18 +7,19 @@ using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AndroidX.Media;
 using AudioBookPlayer.App.Android.Core;
-using AudioBookPlayer.App.Android.Services.Builders;
+using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Android.Services.Helpers;
+using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Extensions;
+using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Domain.Providers;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Persistence.LiteDb;
+using AudioBookPlayer.App.Services;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Android.Provider;
-using AudioBookPlayer.App.Android.Extensions;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Providers;
-using AudioBookPlayer.App.Persistence.LiteDb.Extensions;
-using AudioBookPlayer.App.Services;
+using AudioBookPlayer.App.Domain.Core;
 using Application = Android.App.Application;
 
 // https://developer.android.com/guide/topics/media/media-controls
@@ -31,7 +32,7 @@ namespace AudioBookPlayer.App.Android.Services
     /// Provides audiobooks library and handles playing them.
     /// </summary>
     [Service(Enabled = true, Exported = true)]
-    [IntentFilter(new []{ ServiceInterface })]
+    [IntentFilter(new[] { ServiceInterface })]
     public sealed partial class AudioBookMediaBrowserService : MediaBrowserServiceCompat
     {
         private const string DatabaseFilename = "library.ldb";
@@ -40,12 +41,17 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly ICoverService coverService;
         private readonly PackageValidator packageValidator;
         private readonly TaskExecutionMonitor<ResultReceiver> updateLibrary;
+
         private MediaSessionCompat mediaSession;
-        private MediaControllerCompat mediaController;
-        private PlaybackStateCompat.Builder playbackState;
+
+        // private MediaControllerCompat mediaController;
+        //private PlaybackStateCompat.Builder playbackState;
         private MediaSessionCallback mediaSessionCallback;
-        private MediaControllerCallback mediaControllerCallback;
+
+        // private MediaControllerCallback mediaControllerCallback;
         private BooksService booksService;
+        private PlaybackQueue playbackQueue;
+        private Playback playback;
 
         // ReSharper disable once UnusedMember.Global
         public AudioBookMediaBrowserService()
@@ -71,12 +77,13 @@ namespace AudioBookPlayer.App.Android.Services
 
             var componentName = new ComponentName(Application.Context, Class);
             var intent = PackageManager.GetLaunchIntentForPackage(componentName.PackageName);
-            var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
+            var pendingIntent =
+                PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
+            playbackQueue = new PlaybackQueue();
             mediaSession = new MediaSessionCompat(Application.Context, nameof(AudioBookMediaBrowserService), componentName, pendingIntent);
             mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
 
-            playbackState = new PlaybackStateCompat.Builder().SetActions(PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionPlayPause);
             mediaSessionCallback = new MediaSessionCallback
             {
                 OnCommandImpl = DoMediaSessionCommand,
@@ -86,30 +93,18 @@ namespace AudioBookPlayer.App.Android.Services
                 OnPlayImpl = DoPlay,
                 OnPlayFromMediaIdImpl = DoPlayFromMediaId
             };
-            mediaSession.SetPlaybackState(playbackState.Build());
             mediaSession.SetCallback(mediaSessionCallback);
             mediaSession.SetMediaButtonReceiver(pendingIntent);
 
             SessionToken = mediaSession.SessionToken;
 
-            mediaController = new MediaControllerCompat(Application.Context, mediaSession);
-            mediaControllerCallback = new MediaControllerCallback
-            {
-                OnSessionReadyImpl = () =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService.MediaControllerCallback] [OnSessionReady] Execute");
-                },
-                OnPlaybackStateChangedImpl = state =>
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] State: {state}");
-                }
-            };
-            mediaController.RegisterCallback(mediaControllerCallback);
-
             var databasePath = GetDatabasePath(DatabaseFilename).AbsolutePath;
             var dbContext = new LiteDbContext(databasePath);
 
             booksService = new BooksService(dbContext, coverService);
+            playback = new Playback(mediaSession, booksService);
+
+            UpdatePlaybackState(-1, null);
         }
 
         public override BrowserRoot OnGetRoot(string clientPackageName, int clientUid, Bundle rootHints)
@@ -266,7 +261,8 @@ namespace AudioBookPlayer.App.Android.Services
             metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
             metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
             metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
-            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
+            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration,
+                (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
 
             mediaSession.SetMetadata(metadata.Build());
 
@@ -287,7 +283,8 @@ namespace AudioBookPlayer.App.Android.Services
             metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
             metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
             metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
-            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
+            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration,
+                (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
 
             mediaSession.SetMetadata(metadata.Build());
 
@@ -301,18 +298,165 @@ namespace AudioBookPlayer.App.Android.Services
         {
             System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [DoPlay] Execute");
 
-            playbackState.SetState(PlaybackStateCompat.StatePlaying, 0L, 1.0f);
-            mediaSession.SetPlaybackState(playbackState.Build());
+            if (null == playbackQueue || playbackQueue.IsEmpty)
+            {
+                playbackQueue.SetQueue(QueueHelper.GetLastPlaying());
+
+                mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
+                mediaSession.SetQueueTitle("Last Playing");
+            }
+
+            if (playbackQueue is { IsEmpty: false })
+            {
+                HandlePlayRequest();
+            }
         }
 
         private void DoPlayFromMediaId(string mediaId, Bundle options)
         {
-            // playbackState.SetState(PlaybackStateCompat.StatePlaying, 0L, 1.0f);
+            System.Diagnostics.Debug.WriteLine($"[MediaSessionCallback] [DoPlayFromMediaId] MediaId: {mediaId}");
 
-            var controls = mediaController.GetTransportControls();
+            if (playbackQueue.IsEmpty)
+            {
+                var bookId = MediaBookId.Parse(mediaId);
 
-            controls.PrepareFromMediaId(mediaId, options);
-            controls.Play();
+                playbackQueue.SetQueue(QueueHelper.GetQueue(booksService, bookId.EntityId));
+                mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
+                mediaSession.SetQueueTitle("Last Playing");
+
+                HandlePlayRequest();
+            }
+        }
+
+        private void HandlePlayRequest()
+        {
+            if (false == playbackQueue.CanPlayCurrent)
+            {
+                return;
+            }
+
+            UpdateSessionMetadata();
+
+            playback.Play(playbackQueue.Current);
+        }
+
+        private long GetAvailableActions()
+        {
+            var actions = PlaybackState.ActionPlay | PlaybackState.ActionPlayFromMediaId;
+
+            if (playbackQueue.IsEmpty)
+            {
+                return actions;
+            }
+
+            if (playback.IsPlaying)
+            {
+                actions |= PlaybackState.ActionPause;
+            }
+
+            if (0 < playbackQueue.CurrentIndex)
+            {
+                actions |= PlaybackState.ActionSkipToPrevious;
+            }
+
+            if ((playbackQueue.Count - 1) > playbackQueue.CurrentIndex)
+            {
+                actions |= PlaybackState.ActionSkipToNext;
+            }
+
+            return actions;
+        }
+
+        private void UpdateSessionMetadata()
+        {
+            if (false == playbackQueue.CanPlayCurrent)
+            {
+                return;
+            }
+
+            var queueItem = playbackQueue.Current;
+            var mediaId = MediaBookId.Parse(queueItem.Description.MediaId);
+            var audioBook = booksService.GetBook(mediaId.EntityId);
+            var metadata = BuildMetadata(audioBook);
+
+            mediaSession.SetMetadata(metadata);
+
+            if (null == metadata.Description.IconBitmap && null != metadata.Description.IconUri)
+            {
+                var artUri = metadata.Description.IconUri.ToString();
+
+                AlbumArtCache.Instance.Fetch(coverService, artUri, new FetchListener
+                {
+                    OnFetched = (uri, bitmap, icon) =>
+                    {
+                        var metadataBuilder = new MediaMetadataCompat.Builder(metadata);
+
+                        metadataBuilder.PutBitmap(MediaMetadataCompat.MetadataKeyAlbumArt, bitmap);
+                        metadataBuilder.PutBitmap(MediaMetadataCompat.MetadataKeyDisplayIcon, icon);
+
+                        mediaSession.SetMetadata(metadataBuilder.Build());
+                    }
+                });
+            }
+        }
+
+        private void UpdatePlaybackState(int errorCode, string errorMessage)
+        {
+            var position = PlaybackStateCompat.PlaybackPositionUnknown;
+
+            if (playback is { IsConnected: true })
+            {
+                position = playback.CurrentMediaPosition;
+            }
+
+            var playbackState = new PlaybackStateCompat.Builder().SetActions(GetAvailableActions());
+            var state = playback.State;
+
+            if (null != errorMessage)
+            {
+                playbackState.SetErrorMessage(errorCode, errorMessage);
+                state = PlaybackStateCode.Error;
+            }
+
+            playbackState.SetState((int)state, position, 1.0f, SystemClock.ElapsedRealtime());
+
+            if (playbackQueue.CanPlayCurrent)
+            {
+                playbackState.SetActiveQueueItemId(playbackQueue.Current.QueueId);
+            }
+
+            mediaSession.SetPlaybackState(playbackState.Build());
+
+            if (PlaybackStateCode.Playing == playback.State || PlaybackStateCode.Paused == playback.State)
+            {
+                ; // update notification
+            }
+        }
+
+        private static MediaMetadataCompat BuildMetadata(AudioBook audioBook)
+        {
+            var metadataBuilder = new MediaMetadataCompat.Builder();
+            var mediaId = new MediaBookId(audioBook.Id);
+
+            metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyMediaId, mediaId.ToString());
+            // metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
+            metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyArtist, audioBook.Authors.AsString());
+            // metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
+            metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyTitle, audioBook.Title);
+            metadataBuilder.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)audioBook.Duration.TotalMilliseconds);
+
+            for (var index = 0; index < audioBook.Images.Count; index++)
+            {
+                var audioBookImage = audioBook.Images[index];
+
+                if (audioBookImage is IHasContentUri hcu)
+                {
+                    metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyDisplayIconUri, hcu.ContentUri);
+                    break;
+                }
+            }
+
+            return metadataBuilder.Build();
         }
     }
 }
