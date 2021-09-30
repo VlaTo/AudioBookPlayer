@@ -208,7 +208,7 @@
             />
         </StackLayout>
         <controls:PlaybackControl
-            CanPlay="{Binding Path=CanPlay, Mode=OneWay}"
+            IsEnabled="{Binding Path=CanPlay, Mode=OneWay}"
             IsPlaying="{Binding Path=IsPlaying, Mode=OneWay}"
             Rewind="{Binding Path=SmallRewind, Mode=OneTime}"
             Play="{Binding Path=Play, Mode=OneTime}"

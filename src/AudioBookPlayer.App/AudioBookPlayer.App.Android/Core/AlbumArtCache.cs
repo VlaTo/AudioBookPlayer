@@ -12,7 +12,11 @@ namespace AudioBookPlayer.App.Android.Core
 {
     public class FetchListener
     {
-        public Action<string, Bitmap, Bitmap> OnFetched;
+        public Action<string, Bitmap, Bitmap> OnFetched
+        {
+            get;
+            set;
+        }
 
         public void OnError(string artUrl, Exception e)
         {

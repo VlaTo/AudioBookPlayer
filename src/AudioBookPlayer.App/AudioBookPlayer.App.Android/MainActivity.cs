@@ -82,7 +82,7 @@ namespace AudioBookPlayer.App.Android
             {
                 // Xamarin.Forms.Internals.Registrar.Registered.Register();
 
-                container.Register<IMediaBrowserServiceConnector, MediaBrowserServiceConnector>(InstanceLifetime.Singleton);
+                container.Register<IMediaBrowserServiceConnector, AudioBooksPlaybackServiceConnector>(InstanceLifetime.Singleton);
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);

@@ -16,18 +16,18 @@ namespace AudioBookPlayer.App.Controls
         public static readonly BindableProperty PlayProperty;
         public static readonly BindableProperty RewindProperty;
         public static readonly BindableProperty FastForwardProperty;
-        public static readonly BindableProperty CanPlayProperty;
+        // public static readonly BindableProperty CanPlayProperty;
         public static readonly BindableProperty IsPlayingProperty;
 
         private ImageButton playButton;
         private ImageButton fastForwardButton;
         private ImageButton rewindButton;
 
-        public bool CanPlay
+        /*public bool CanPlay
         {
             get => (bool) GetValue(CanPlayProperty);
             set => SetValue(CanPlayProperty, value);
-        }
+        }*/
 
         public bool IsPlaying
         {
@@ -63,14 +63,14 @@ namespace AudioBookPlayer.App.Controls
                 propertyChanged: OnIsPlayingPropertyChanged,
                 defaultValue: false
             );
-            CanPlayProperty = BindableProperty.Create(
+            /*CanPlayProperty = BindableProperty.Create(
                 nameof(CanPlay),
                 typeof(bool),
                 typeof(PlaybackControl),
                 defaultBindingMode: BindingMode.OneWay,
                 propertyChanged: OnCanPlayPropertyChanged,
                 defaultValue: true
-            );
+            );*/
             FastForwardProperty = BindableProperty.Create(
                 nameof(FastForward),
                 typeof(ICommand),
@@ -104,7 +104,6 @@ namespace AudioBookPlayer.App.Controls
 
             base.OnApplyTemplate();
 
-
             UpdatePlayButtonState();
         }
 
@@ -119,10 +118,10 @@ namespace AudioBookPlayer.App.Controls
             ;
         }
 
-        private void OnCanPlayPropertyChanged(bool oldValue, bool newValue)
+        /*private void OnCanPlayPropertyChanged(bool oldValue, bool newValue)
         {
             //VisualStateManager.GoToState(this,);
-        }
+        }*/
 
         private void OnIsPlayingPropertyChanged(bool oldValue, bool newValue)
         {
@@ -150,11 +149,11 @@ namespace AudioBookPlayer.App.Controls
             instance.OnIsPlayingPropertyChanged((bool) oldValue, (bool) newValue);
         }
 
-        private static void OnCanPlayPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        /*private static void OnCanPlayPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             var instance = (PlaybackControl) bindable;
             instance.OnCanPlayPropertyChanged((bool) oldValue, (bool) newValue);
-        }
+        }*/
 
         private static void OnFastForwardPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {

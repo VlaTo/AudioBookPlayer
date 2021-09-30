@@ -9,12 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Core;
+using Xamarin.Forms;
 using Application = Android.App.Application;
 using ResultReceiver = Android.OS.ResultReceiver;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed partial class MediaBrowserServiceConnector : Java.Lang.Object, IMediaBrowserServiceConnector
+    internal sealed partial class AudioBooksPlaybackServiceConnector : Java.Lang.Object, IMediaBrowserServiceConnector
     {
         private readonly IBookItemsCache bookItemsCache;
         private readonly MediaControllerCallback mediaControllerCallback;
@@ -23,6 +26,7 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly BooksLibraryTask booksLibraryTask;
         private readonly BookItemsTask bookItemsTask;
         private readonly BookSectionsTask bookSectionsTask;
+        private readonly WeakEventManager eventManager;
         private MediaControllerCompat mediaController;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
@@ -53,11 +57,17 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        public MediaBrowserServiceConnector(IBookItemsCache bookItemsCache)
+        public event EventHandler<PlaybackStateEventArgs> PlaybackStateChanged
+        {
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
+        }
+
+        public AudioBooksPlaybackServiceConnector(IBookItemsCache bookItemsCache)
         {
             this.bookItemsCache = bookItemsCache;
 
-            var serviceName = Java.Lang.Class.FromType(typeof(AudioBookMediaBrowserService)).Name;
+            var serviceName = Java.Lang.Class.FromType(typeof(AudioBooksPlaybackService)).Name;
             var componentName = new ComponentName(Application.Context, serviceName);
             TaskCompletionSource connect = null;
             var connectionCallback = new ServiceConnectionCallback
@@ -76,11 +86,24 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 OnSessionReadyImpl = () =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Executed");
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Executed");
                 },
-                OnPlaybackStateChangedImpl = (state) =>
+                OnPlaybackStateChangedImpl = OnPlaybackStateChanged,
+                OnMetadataChangedImpl = (metadata) =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"[MediaBrowserServiceConnector.MediaControllerCallback] [OnPlaybackStateChanged] State: {state}");
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnMetadataChanged] Execute");
+                },
+                OnQueueTitleChangedImpl = (title) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueTitleChanged] Execute");
+                },
+                OnAudioInfoChangedImpl = (playbackInfo) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Execute");
+                },
+                OnSessionEventImpl = (eventName, options) =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionEvent] Event: '{eventName}' received");
                 }
             };
 
@@ -93,6 +116,7 @@ namespace AudioBookPlayer.App.Android.Services
                 }
             };
 
+            eventManager = new WeakEventManager();
             booksLibraryTask = new BooksLibraryTask(mediaBrowser, bookItemsCache);
             bookItemsTask = new BookItemsTask(booksLibraryTask, bookItemsCache);
             bookSectionsTask = new BookSectionsTask(mediaBrowser);
@@ -167,7 +191,7 @@ namespace AudioBookPlayer.App.Android.Services
                 }));
 
                 MediaController.SendCommand(
-                    AudioBookMediaBrowserService.IAudioBookMediaBrowserService.UpdateLibrary,
+                    AudioBooksPlaybackService.IAudioBookMediaBrowserService.UpdateLibrary,
                     options,
                     new ResultReceiver(handler)
                 );
@@ -178,19 +202,24 @@ namespace AudioBookPlayer.App.Android.Services
 
         public void Play(EntityId bookId)
         {
-            var mediaId = new MediaBookId(bookId).ToString();
-            var controls = MediaController.GetTransportControls();
-            var options = new Bundle();
+            var controls = MediaController?.GetTransportControls();
 
-            controls.PlayFromMediaId(mediaId, options);
+            if (null != controls)
+            {
+                var mediaId = new MediaBookId(bookId).ToString();
+                var options = new Bundle();
+                controls.PlayFromMediaId(mediaId, options);
+            }
         }
 
-        public void Temp(string mediaId)
+        public void Pause()
         {
-            var controls = MediaController.GetTransportControls();
-            var options = new Bundle();
+            var controls = MediaController?.GetTransportControls();
 
-            controls.PrepareFromMediaId(mediaId, options);
+            if (null != controls)
+            {
+                controls.Pause();
+            }
         }
 
         /*private bool AcquireSectionTask(
@@ -300,6 +329,14 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }*/
 
+        private void OnPlaybackStateChanged(PlaybackStateCompat playback)
+        {
+            var state = playback.State.ToPlaybackState();
+            var eventArgs = new PlaybackStateEventArgs(state);
+
+            eventManager.HandleEvent(this, eventArgs, nameof(PlaybackStateChanged));
+        }
+
         // ConnectionCallback class
         private sealed class ServiceConnectionCallback : MediaBrowserCompat.ConnectionCallback
         {
@@ -359,9 +396,9 @@ namespace AudioBookPlayer.App.Android.Services
         // ItemCallback class
         private sealed class ItemCallback : MediaBrowserCompat.ItemCallback
         {
-            private readonly MediaBrowserServiceConnector connector;
+            private readonly AudioBooksPlaybackServiceConnector connector;
 
-            public ItemCallback(MediaBrowserServiceConnector connector)
+            public ItemCallback(AudioBooksPlaybackServiceConnector connector)
             {
                 this.connector = connector;
             }

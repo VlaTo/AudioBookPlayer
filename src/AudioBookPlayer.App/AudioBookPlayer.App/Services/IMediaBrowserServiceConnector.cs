@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Services
@@ -9,6 +11,8 @@ namespace AudioBookPlayer.App.Services
     /// </summary>
     public interface IMediaBrowserServiceConnector
     {
+        event EventHandler<PlaybackStateEventArgs> PlaybackStateChanged;
+
         /// <summary>
         /// 
         /// </summary>
@@ -43,5 +47,10 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         void Play(EntityId bookId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Pause();
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Android.OS;
+using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
+using Java.Lang;
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -18,19 +20,40 @@ namespace AudioBookPlayer.App.Android.Services
             set;
         }
 
+        public Action<MediaControllerCompat.PlaybackInfo> OnAudioInfoChangedImpl
+        {
+            get;
+            set;
+        }
+
+        public Action<MediaMetadataCompat> OnMetadataChangedImpl
+        {
+            get;
+            set;
+        }
+
+        public Action<string> OnQueueTitleChangedImpl
+        {
+            get;
+            set;
+        }
+
+        public Action<string, Bundle> OnSessionEventImpl
+        {
+            get;
+            set;
+        }
+
         public override void OnSessionReady() => OnSessionReadyImpl.Invoke();
-        /*{
-            System.Diagnostics.Debug.WriteLine("[AudioBookPlaybackService.MediaControllerCallback] [OnSessionReady] Execute");
-        }*/
 
         public override void OnPlaybackStateChanged(PlaybackStateCompat state) => OnPlaybackStateChangedImpl.Invoke(state);
-        /*{
-            System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnPlaybackStateChanged] Playback state: \"{state.State}\"");
-        }*/
 
-        public override void OnSessionEvent(string e, Bundle extras)
-        {
-            System.Diagnostics.Debug.WriteLine($"[AudioBookPlaybackService.MediaControllerCallback] [OnSessionEvent] Event: \"{e}\"");
-        }
+        public override void OnAudioInfoChanged(MediaControllerCompat.PlaybackInfo info) => OnAudioInfoChangedImpl.Invoke(info);
+
+        public override void OnMetadataChanged(MediaMetadataCompat metadata) => OnMetadataChangedImpl.Invoke(metadata);
+
+        public override void OnQueueTitleChanged(ICharSequence title) => OnQueueTitleChangedImpl.Invoke(title.ToString());
+
+        public override void OnSessionEvent(string e, Bundle extras) => OnSessionEventImpl.Invoke(e, extras);
     }
 }

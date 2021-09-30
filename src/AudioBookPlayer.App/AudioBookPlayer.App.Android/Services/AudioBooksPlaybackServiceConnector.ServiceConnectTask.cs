@@ -3,7 +3,7 @@ using LibraProgramming.Xamarin.Core;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal partial class MediaBrowserServiceConnector
+    internal partial class AudioBooksPlaybackServiceConnector
     {
         private sealed class ServiceConnectTask : TaskExecutor
         {

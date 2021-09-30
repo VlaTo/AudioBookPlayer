@@ -51,6 +51,8 @@ namespace AudioBookPlayer.App.ViewModels
         private bool canPlay;
         private bool isPlaying;
 
+        #region Properties
+
         public string BookId
         {
             get => bookId;
@@ -212,21 +214,18 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        #endregion
+
         [PrefferedConstructor]
         // ReSharper disable once UnusedMember.Global
         public PlayerControlViewModel(
             IMediaBrowserServiceConnector connector,
             ICoverService coverService)
         {
-            //this.booksService = booksService;
-            //this.activityTrackerService = activityTrackerService;
             this.connector = connector;
             this.coverService = coverService;
 
-            //serviceConnectMonitor = new TaskExecutionMonitor(DoServiceConnectAsync);
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
-            //trackBookActivity = new TaskExecutionMonitor(DoTrackBookActivityAsync);
-
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
             Play = new Command(DoPlayCommand);
@@ -251,6 +250,9 @@ namespace AudioBookPlayer.App.ViewModels
             BookPosition = TimeSpan.Zero;
             Elapsed = TimeSpan.Zero;
             Left = TimeSpan.Zero;
+            CanPlay = true;
+
+            connector.PlaybackStateChanged += MediaBrowserConnectorPlaybackStateChanged;
 
             // playbackService.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
             // playbackService.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
@@ -283,16 +285,17 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
-            connector.Play(currentBookItem.Id);
-
-            /*if (IsPlaying)
+            if (CanPlay)
             {
-                playbackService.Pause();
+                if (IsPlaying)
+                {
+                    connector.Pause();
+                }
+                else
+                {
+                    connector.Play(currentBookItem.Id);
+                }
             }
-            else
-            {
-                playbackService.Play();
-            }*/
         }
 
         private void DoSmallFastForwardCommand()
@@ -453,7 +456,6 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateProperties()
         {
-            CanPlay = false; // 0 < playbackService.AudioBook.Chapters.Count;
             BookTitle = currentBookItem.Title;
             BookSubtitle = currentBookItem.Authors.AsString();
             BookPosition = currentBookItem.Position;
@@ -479,5 +481,10 @@ namespace AudioBookPlayer.App.ViewModels
 
             return builder.ToString();
         }*/
+
+        private void MediaBrowserConnectorPlaybackStateChanged(object sender, PlaybackStateEventArgs e)
+        {
+            IsPlaying = PlaybackState.Playing == e.State;
+        }
     }
 }

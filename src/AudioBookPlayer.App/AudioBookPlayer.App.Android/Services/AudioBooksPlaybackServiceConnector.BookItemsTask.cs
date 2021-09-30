@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal partial class MediaBrowserServiceConnector
+    internal partial class AudioBooksPlaybackServiceConnector
     {
         /// <summary>
         /// The Book Items task class.

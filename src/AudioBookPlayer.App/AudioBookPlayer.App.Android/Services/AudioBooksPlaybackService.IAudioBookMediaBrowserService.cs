@@ -1,6 +1,6 @@
 ﻿namespace AudioBookPlayer.App.Android.Services
 {
-    public partial class AudioBookMediaBrowserService
+    public partial class AudioBooksPlaybackService
     {
         public interface IAudioBookMediaBrowserService
         {
