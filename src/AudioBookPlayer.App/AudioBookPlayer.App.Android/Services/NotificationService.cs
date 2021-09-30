@@ -1,9 +1,12 @@
-﻿using Android.App;
-using Android.Content;
+﻿#nullable enable
+
+using Android.App;
 using Android.OS;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Domain.Models;
 using System;
+using Android.Content;
+using Android.Media.Session;
 using AndroidX.Core.App;
 using AndroidX.Media.Session;
 using Xamarin.Forms;
@@ -11,24 +14,69 @@ using Application = Android.App.Application;
 
 namespace AudioBookPlayer.App.Android.Services
 {
-    internal sealed class NotificationService : Java.Lang.Object
+    internal sealed class NotificationService : Java.Lang.Object, NotificationService.IIntents
     {
+        private readonly AudioBooksPlaybackService service;
         private const string DefaultChannelId = "AUDIOBOOKPLAYER_1";
+        public const string IntentActionPlay = "com.libraprogramming.audioplayer.actions.play";
+        public const string IntentActionPause = "com.libraprogramming.audioplayer.actions.pause";
+
         private const int DefaultNotificationId = 0x9000;
         private const int ActionStop = -1;
         private const int ActionPrev = 1;
         private const int ActionPlay = 2;
         private const int ActionNext = 3;
 
+        private MediaSessionCompat.Token? sessionToken;
+
         private readonly WeakEventManager eventManager;
-        private readonly NotificationManager notificationManager;
-        private readonly MediaSessionCompat.Token mediaSessionToken;
-        private readonly MediaControllerCompat mediaController;
+        // private readonly MediaSessionCompat.Token mediaSessionToken;
         private readonly PendingIntent closePendingIntent;
-        private NotificationChannel notificationChannel;
-        private NotificationCompat.Action previousChapterAction;
-        private NotificationCompat.Action playCurrentAction;
-        private NotificationCompat.Action nextChapterAction;
+        private readonly MediaControllerCallback controllerCallback;
+        private readonly NotificationManager? notificationManager;
+        private MediaControllerCompat mediaController;
+        private MediaControllerCompat.TransportControls controls;
+        private NotificationChannel? notificationChannel;
+        private readonly PendingIntent? playIntent;
+        private readonly PendingIntent? pauseIntent;
+        private Notification? notification;
+
+        // private NotificationCompat.Action previousChapterAction;
+        // private NotificationCompat.Action playCurrentAction;
+        // private NotificationCompat.Action nextChapterAction;
+
+        public MediaSessionCompat.Token? SessionToken
+        {
+            get => sessionToken;
+            set
+            {
+                if (sessionToken == value)
+                {
+                    return;
+                }
+
+                if (null != sessionToken)
+                {
+                    if (null != mediaController)
+                    {
+                        mediaController.UnregisterCallback(controllerCallback);
+                    }
+                }
+
+                sessionToken = value;
+
+                if (null != sessionToken)
+                {
+                    mediaController = new MediaControllerCompat(Application.Context, sessionToken);
+                    controls = mediaController.GetTransportControls();
+
+                    if (true)
+                    {
+                        mediaController.RegisterCallback(controllerCallback);
+                    }
+                }
+            }
+        }
 
         public event EventHandler Play
         {
@@ -42,18 +90,40 @@ namespace AudioBookPlayer.App.Android.Services
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        public NotificationService(MediaSessionCompat.Token mediaSessionToken)
+        public NotificationService(AudioBooksPlaybackService service)
         {
-            this.mediaSessionToken = mediaSessionToken;
+            this.service = service;
             
             eventManager = new WeakEventManager();
-            notificationManager = (NotificationManager)Application.Context.GetSystemService(Context.NotificationService);
-            mediaController = new MediaControllerCompat(Application.Context, mediaSessionToken);
+            notificationManager = (NotificationManager?)Application.Context.GetSystemService(Context.NotificationService);
             closePendingIntent = MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionStop);
+
+            var packageName = service.PackageName;
+
+            notification = null;
+            playIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.Play).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
+            pauseIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.Pause).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
+            controllerCallback = new MediaControllerCallback
+            {
+                OnPlaybackStateChangedImpl = playbackState =>
+                {
+                    ;
+                }
+            };
         }
 
         public void ShowInformation(AudioBook audioBook)
         {
+            if (null != notification)
+            {
+                return;
+            }
+
+            SessionToken = service.SessionToken;
+
+
+
+
             // 1. create media session
             //var componentName = new ComponentName(Application.Context, Class);
             //var mediaSessionCompat = new MediaSessionCompat(Application.Context, "AudioTag1", componentName, pendingIntent);
@@ -99,6 +169,7 @@ namespace AudioBookPlayer.App.Android.Services
                     notificationManager.CreateNotificationChannel(notificationChannel);
                 }
             }*/
+
             var nc = GetOrCreateNotificationChannel();
 
             if (null == nc)
@@ -184,7 +255,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 previousChapterAction = new NotificationCompat.Action(
                     Resource.Drawable.icon_feed,
-                    Application.Context.Resources.GetString(Resource.String.notification_action_prev),
+                    Application.Context.Resources?.GetString(Resource.String.notification_action_prev),
                     MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPrev)
                 );
             }
@@ -198,7 +269,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 playCurrentAction = new NotificationCompat.Action(
                     Resource.Drawable.icon_feed,
-                    Application.Context.Resources.GetString(Resource.String.notification_action_play),
+                    Application.Context.Resources?.GetString(Resource.String.notification_action_play),
                     MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPlay)
                 );
             }
@@ -212,7 +283,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 nextChapterAction = new NotificationCompat.Action(
                     Resource.Drawable.icon_feed,
-                    Application.Context.Resources.GetString(Resource.String.notification_action_play),
+                    Application.Context.Resources?.GetString(Resource.String.notification_action_play),
                     MediaButtonReceiver.BuildMediaButtonPendingIntent(Application.Context, ActionPlay)
                 );
             }
@@ -230,7 +301,7 @@ namespace AudioBookPlayer.App.Android.Services
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(Pause));
         }
 
-        private sealed class MediaCallback : MediaSessionCompat.Callback
+        /*private sealed class MediaCallback : MediaSessionCompat.Callback
         {
             private readonly Action onPlay;
             private readonly Action onPause;
@@ -250,6 +321,15 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 base.OnPlay();
             }
+        }*/
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public interface IIntents
+        {
+            public const string Play = IntentActionPlay;
+            public const string Pause = IntentActionPause;
         }
     }
 }

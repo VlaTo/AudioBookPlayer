@@ -79,7 +79,7 @@
     <Compile Include="Core\MediaPath.cs" />
     <Compile Include="Core\MediaSectionId.cs" />
     <Compile Include="Core\PackageValidator.cs" />
-    <Compile Include="Core\Playback.cs" />
+    <Compile Include="Services\Playback.cs" />
     <Compile Include="Core\PlaybackQueue.cs" />
     <Compile Include="Extensions\AudioBookExtensions.cs" />
     <Compile Include="Extensions\AudioBookSectionExtensions.cs" />
@@ -93,7 +93,7 @@
     <Compile Include="Services\Helpers\QueueHelper.cs" />
     <Compile Include="Services\InterlockedTaskLock.cs" />
     <Compile Include="Services\ITaskLock.cs" />
-    <Compile Include="Core\Playback.BroadcastReceiver.cs" />
+    <Compile Include="Services\Playback.BroadcastReceiver.cs" />
     <Compile Include="Services\AudioBooksPlaybackServiceConnector.BookItemsTask.cs" />
     <Compile Include="Services\AudioBooksPlaybackServiceConnector.BooksLibraryTask.cs" />
     <Compile Include="Services\BooksService.cs" />

@@ -50,16 +50,12 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly PackageValidator packageValidator;
         private readonly TaskExecutionMonitor<ResultReceiver> updateLibrary;
 
-        private MediaSessionCompat mediaSession;
-
-        // private MediaControllerCompat mediaController;
-        //private PlaybackStateCompat.Builder playbackState;
-        private MediaSessionCallback mediaSessionCallback;
-
-        // private MediaControllerCallback mediaControllerCallback;
-        private BooksService booksService;
-        private PlaybackQueue playbackQueue;
-        private Playback playback;
+        private MediaSessionCompat? mediaSession;
+        private MediaSessionCallback? mediaSessionCallback;
+        private BooksService? booksService;
+        private NotificationService? notificationService;
+        private PlaybackQueue? playbackQueue;
+        private Playback? playback;
 
         // ReSharper disable once UnusedMember.Global
         public AudioBooksPlaybackService()
@@ -68,6 +64,7 @@ namespace AudioBookPlayer.App.Android.Services
                 AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<ICoverService>()
             )
         {
+            ;
         }
 
         private AudioBooksPlaybackService(IBooksProvider booksProvider, ICoverService coverService)
@@ -77,6 +74,11 @@ namespace AudioBookPlayer.App.Android.Services
 
             packageValidator = new PackageValidator(Application.Context);
             updateLibrary = new TaskExecutionMonitor<ResultReceiver>(DoUpdateLibrary);
+            mediaSession = null;
+            mediaSessionCallback = null;
+            booksService = null;
+            playbackQueue = null;
+            playback = null;
         }
 
         public override void OnCreate()
@@ -84,7 +86,7 @@ namespace AudioBookPlayer.App.Android.Services
             base.OnCreate();
 
             var componentName = new ComponentName(Application.Context, Class);
-            var intent = PackageManager.GetLaunchIntentForPackage(componentName.PackageName);
+            var intent = PackageManager?.GetLaunchIntentForPackage(componentName.PackageName);
             var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
             playbackQueue = new PlaybackQueue();
@@ -114,10 +116,11 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 StateChanged = () =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"[AudioBookMediaBrowserService.Playback] [StateChanged] State: {playback.State}");
+                    System.Diagnostics.Debug.WriteLine($"[AudioBookMediaBrowserService.Playback] [StateChanged] State: {playback?.State}");
                     UpdatePlaybackState(-1, null);
                 }
             };
+            notificationService = new NotificationService(mediaSession.SessionToken);
 
             UpdatePlaybackState(-1, null);
         }
@@ -145,7 +148,7 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (packageValidator.IsCallerAllowed(clientPackageName, clientUid))
             {
-                if (null == rootHints || rootHints.IsEmpty)
+                if (rootHints.IsEmpty)
                 {
                     return new BrowserRoot(MediaPath.Root.ToString(), null);
                 }
@@ -178,15 +181,18 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (String.Equals(parentId, MediaPath.Root.ToString()))
             {
-                var audioBooks = booksService.QueryBooks();
+                var audioBooks = booksService?.QueryBooks();
                 var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
-                for (var index = 0; index < audioBooks.Count; index++)
+                if (null != audioBooks)
                 {
-                    var audioBook = audioBooks[index];
-                    var mediaItem = audioBook.ToMediaItem();
+                    for (var index = 0; index < audioBooks.Count; index++)
+                    {
+                        var audioBook = audioBooks[index];
+                        var mediaItem = audioBook.ToMediaItem();
 
-                    list.Add(mediaItem);
+                        list.Add(mediaItem);
+                    }
                 }
 
                 result.SendResult(list);
@@ -197,15 +203,18 @@ namespace AudioBookPlayer.App.Android.Services
             //if (MediaBookId.TryParse(mediaPath[0], out var mediaBookId))
             if (MediaBookId.TryParse(parentId, out var bookId))
             {
-                var audioBook = booksService.GetBook(bookId.EntityId);
+                var audioBook = booksService?.GetBook(bookId.EntityId);
                 var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
-                for (var index = 0; index < audioBook.Sections.Count; index++)
+                if (null != audioBook)
                 {
-                    var section = audioBook.Sections[index];
-                    var mediaItem = section.ToMediaItem();
+                    for (var index = 0; index < audioBook.Sections.Count; index++)
+                    {
+                        var section = audioBook.Sections[index];
+                        var mediaItem = section.ToMediaItem();
 
-                    list.Add(mediaItem);
+                        list.Add(mediaItem);
+                    }
                 }
 
                 result.SendResult(list);
@@ -254,8 +263,6 @@ namespace AudioBookPlayer.App.Android.Services
                 return;
             }
 
-            //var result = new Bundle();
-            //result.PutBoolean("Result", true);
             result.Send(global::Android.App.Result.Canceled, null);
         }
 
@@ -301,14 +308,16 @@ namespace AudioBookPlayer.App.Android.Services
             metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
             metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
             metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
-            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration,
-                (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
+            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
 
-            mediaSession.SetMetadata(metadata.Build());
-
-            if (false == mediaSession.Active)
+            if (null != mediaSession)
             {
-                mediaSession.Active = true;
+                mediaSession.SetMetadata(metadata.Build());
+
+                if (false == mediaSession.Active)
+                {
+                    mediaSession.Active = true;
+                }
             }
         }
 
@@ -326,11 +335,14 @@ namespace AudioBookPlayer.App.Android.Services
             metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration,
                 (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
 
-            mediaSession.SetMetadata(metadata.Build());
-
-            if (false == mediaSession.Active)
+            if (null != mediaSession)
             {
-                mediaSession.Active = true;
+                mediaSession.SetMetadata(metadata.Build());
+
+                if (false == mediaSession.Active)
+                {
+                    mediaSession.Active = true;
+                }
             }
         }
 
@@ -338,12 +350,15 @@ namespace AudioBookPlayer.App.Android.Services
         {
             System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [DoPlay] Execute");
 
-            if (playbackQueue.IsEmpty)
+            if (playbackQueue is { IsEmpty: true })
             {
                 playbackQueue.SetQueue(QueueHelper.GetLastPlaying());
 
-                mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
-                mediaSession.SetQueueTitle("Last Playing");
+                if (null != mediaSession)
+                {
+                    mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
+                    mediaSession.SetQueueTitle("Last Playing");
+                }
 
                 HandlePlayRequest();
             }
@@ -483,7 +498,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (PlaybackStateCompat.StatePlaying == playback.State || PlaybackStateCompat.StatePaused == playback.State)
             {
-                ; // update notification
+                notificationService?.ShowInformation(null);
             }
         }
 

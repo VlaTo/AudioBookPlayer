@@ -3,7 +3,7 @@
 using System;
 using Android.Content;
 
-namespace AudioBookPlayer.App.Android.Core
+namespace AudioBookPlayer.App.Android.Services
 {
     internal partial class Playback
     {
@@ -16,11 +16,6 @@ namespace AudioBookPlayer.App.Android.Core
             {
                 get;
                 set;
-            }
-
-            public BroadcastReceiver()
-            {
-                ;
             }
 
             public override void OnReceive(Context? context, Intent? intent) => OnReceiveImpl.Invoke(context, intent);

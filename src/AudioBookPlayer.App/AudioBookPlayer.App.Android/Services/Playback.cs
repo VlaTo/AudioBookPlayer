@@ -1,18 +1,18 @@
 ﻿#nullable enable
 
+using System;
+using Android.App;
+using Android.Content;
 using Android.Content.Res;
 using Android.Media;
 using Android.OS;
 using Android.Support.V4.Media.Session;
+using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Domain.Services;
-using System;
-using Android.App;
-using Android.Content;
-using AudioBookPlayer.App.Android.Services;
 using Application = Android.App.Application;
 using Uri = Android.Net.Uri;
 
-namespace AudioBookPlayer.App.Android.Core
+namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed partial class Playback : Java.Lang.Object, MediaPlayer.IOnPreparedListener,
         MediaPlayer.IOnCompletionListener, MediaPlayer.IOnErrorListener, MediaPlayer.IOnSeekCompleteListener
@@ -22,8 +22,8 @@ namespace AudioBookPlayer.App.Android.Core
         private const string ModeRead = "r";
 
         private readonly Service service;
-        private readonly MediaSessionCompat mediaSession;
         private readonly IBooksService booksService;
+        private readonly MediaSessionCompat mediaSession;
         private readonly AudioFocusRequestor audioFocusRequestor;
         private readonly BroadcastReceiver noisyReceiver;
         private readonly IntentFilter audioNoisyIntentFilter;
@@ -75,7 +75,7 @@ namespace AudioBookPlayer.App.Android.Core
             var audioManager = (AudioManager?)Application.Context.GetSystemService(Context.AudioService);
 
             audioNoisyIntentFilter = new IntentFilter(AudioManager.ActionAudioBecomingNoisy);
-            noisyReceiver = new BroadcastReceiver
+            noisyReceiver = new Playback.BroadcastReceiver
             {
                 OnReceiveImpl = (context, intent) =>
                 {
