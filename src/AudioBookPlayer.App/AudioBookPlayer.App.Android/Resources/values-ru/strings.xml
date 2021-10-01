@@ -5,5 +5,6 @@
   <string name="notification_channel_description">Воспроизведение Audio Book Player</string>
   <string name="notification_action_prev">Предыдущая глава</string>
   <string name="notification_action_play">Воспроизвести</string>
+  <string name="notification_action_pause">Пауза</string>
   <string name="notification_action_next">Следующая глава</string>
 </resources>

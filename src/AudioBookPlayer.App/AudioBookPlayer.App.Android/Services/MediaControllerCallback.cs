@@ -44,16 +44,24 @@ namespace AudioBookPlayer.App.Android.Services
             set;
         }
 
-        public override void OnSessionReady() => OnSessionReadyImpl.Invoke();
+        public Action OnSessionDestroyedImpl
+        {
+            get;
+            set;
+        }
 
-        public override void OnPlaybackStateChanged(PlaybackStateCompat state) => OnPlaybackStateChangedImpl.Invoke(state);
+        public override void OnSessionReady() => OnSessionReadyImpl?.Invoke();
 
-        public override void OnAudioInfoChanged(MediaControllerCompat.PlaybackInfo info) => OnAudioInfoChangedImpl.Invoke(info);
+        public override void OnPlaybackStateChanged(PlaybackStateCompat state) => OnPlaybackStateChangedImpl?.Invoke(state);
 
-        public override void OnMetadataChanged(MediaMetadataCompat metadata) => OnMetadataChangedImpl.Invoke(metadata);
+        public override void OnAudioInfoChanged(MediaControllerCompat.PlaybackInfo info) => OnAudioInfoChangedImpl?.Invoke(info);
 
-        public override void OnQueueTitleChanged(ICharSequence title) => OnQueueTitleChangedImpl.Invoke(title.ToString());
+        public override void OnMetadataChanged(MediaMetadataCompat metadata) => OnMetadataChangedImpl?.Invoke(metadata);
 
-        public override void OnSessionEvent(string e, Bundle extras) => OnSessionEventImpl.Invoke(e, extras);
+        public override void OnQueueTitleChanged(ICharSequence title) => OnQueueTitleChangedImpl?.Invoke(title.ToString());
+
+        public override void OnSessionEvent(string e, Bundle extras) => OnSessionEventImpl?.Invoke(e, extras);
+
+        public override void OnSessionDestroyed() => OnSessionDestroyedImpl?.Invoke();
     }
 }

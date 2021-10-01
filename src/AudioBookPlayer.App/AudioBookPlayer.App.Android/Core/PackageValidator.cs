@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -33,28 +35,32 @@ namespace AudioBookPlayer.App.Android.Core
 			{
 				while (parser.Read())
 				{
-					if (parser.IsStartElement() && parser.Name == "signing_certificate")
-					{
-						var name = parser["name"];
-                        var isRelease = Convert.ToBoolean(parser["release"]);
-						var packageName = parser["package"];
+					if (parser.IsStartElement() && parser.Name == "signing_certificate" && parser.HasAttributes)
+                    {
+                        var name = parser[0];
+                        var packageName = parser[1];
+                        var isRelease = Convert.ToBoolean(parser[2]);
 						var certificate = parser.ReadString();
 
-						if (certificate != null)
-							certificate = certificate.Replace("\\s|\\n", "");
+                        if (null != certificate)
+                        {
+                            var certData = Base64.Decode(certificate, Base64Flags.Crlf);
+                            certificate = Base64.EncodeToString(certData, Base64Flags.NoWrap);
+                        }
 
-						var info = new CallerInfo(name, packageName, isRelease, certificate);
+                        if (null == certificate || null == packageName || null == name)
+                        {
+                            continue;
+                        }
 
-						List<CallerInfo> infos;
-						validCertificates.TryGetValue(certificate, out infos);
-						if (infos == null)
-						{
-							infos = new List<CallerInfo>();
-							validCertificates.Add(certificate, infos);
-						}
-						/*LogHelper.Verbose(Tag, "Adding allowed caller: ", info.Name,
-							" package=", info.PackageName, " release=", info.Release,
-							" certificate=", certificate);*/
+                        var info = new CallerInfo(name, packageName, isRelease, certificate);
+
+                        if (false == validCertificates.TryGetValue(certificate, out var infos))
+                        {
+                            infos = new List<CallerInfo>();
+                            validCertificates.Add(certificate, infos);
+                        }
+
 						infos.Add(info);
 					}
 				}
@@ -79,11 +85,22 @@ namespace AudioBookPlayer.App.Android.Core
             }
 
             var packageManager = context.PackageManager;
-            PackageInfo packageInfo;
+
+            if (null == packageManager)
+            {
+                return false;
+            }
+
+            PackageInfo? packageInfo;
 
             try
             {
-                packageInfo = packageManager?.GetPackageInfo(callingPackageName, PackageInfoFlags.Signatures);
+                packageInfo = packageManager.GetPackageInfo(callingPackageName, PackageInfoFlags.SigningCertificates);
+
+                if (null == packageInfo)
+                {
+                    return false;
+                }
             }
             catch (PackageManager.NameNotFoundException e)
             {
@@ -91,40 +108,46 @@ namespace AudioBookPlayer.App.Android.Core
                 return false;
             }
 
-            if (packageInfo.Signatures.Count != 1)
-            {
-                //LogHelper.Warn(Tag, "Caller has more than one signature certificate!");
-                return false;
-            }
+            var signatures = packageInfo.SigningInfo.GetSigningCertificateHistory();
 
-            var signature = Base64.EncodeToString(packageInfo.Signatures[0].ToByteArray(), Base64Flags.NoWrap);
-
-            List<CallerInfo> validCallers = certificates[signature];
-            if (validCallers == null)
+            for (int index = 0; index < signatures.Length; index++)
             {
-                //LogHelper.Verbose(Tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
-                if (certificates.Count == 0)
+                var packageSignature = Base64.EncodeToString(signatures[index].ToByteArray(), Base64Flags.NoWrap);
+                // var signature = Base64.EncodeToString(packageInfo.SigningInfo.ToByteArray(), Base64Flags.NoWrap);
+
+                if (false == certificates.TryGetValue(packageSignature, out var validCallers))
                 {
-                    /*LogHelper.Warn(Tag, "The list of valid certificates is empty. Either your file ",
-                        "res/xml/allowed_media_browser_callers.xml is empty or there was an error ",
-                        "while reading it. Check previous log messages.");*/
+                    return false;
                 }
 
-                return false;
-            }
+                // List<CallerInfo> validCallers = certificates[packageSignature];
 
-            // Check if the package name is valid for the certificate:
-            var expectedPackages = new StringBuilder();
-
-            foreach (var info in validCallers)
-            {
-                if (callingPackageName == info.PackageName)
+                if (validCallers == null)
                 {
-                    //LogHelper.Verbose(Tag, "Valid caller: ", info.Name, " package=", info.PackageName, " release=", info.Release);
-                    return true;
+                    //LogHelper.Verbose(Tag, "Signature for caller ", callingPackage, " is not valid: \n", signature);
+                    if (certificates.Count == 0)
+                    {
+                        /*LogHelper.Warn(Tag, "The list of valid certificates is empty. Either your file ",
+                            "res/xml/allowed_media_browser_callers.xml is empty or there was an error ",
+                            "while reading it. Check previous log messages.");*/
+                    }
+
+                    return false;
                 }
 
-                expectedPackages.Append(info.PackageName).Append(' ');
+                // Check if the package name is valid for the certificate:
+                var expectedPackages = new StringBuilder();
+
+                foreach (var info in validCallers)
+                {
+                    if (callingPackageName == info.PackageName)
+                    {
+                        //LogHelper.Verbose(Tag, "Valid caller: ", info.Name, " package=", info.PackageName, " release=", info.Release);
+                        return true;
+                    }
+
+                    expectedPackages.Append(info.PackageName).Append(' ');
+                }
             }
 
             /*LogHelper.Info(Tag, "Caller has a valid certificate, but its package doesn't match any ",
@@ -135,14 +158,14 @@ namespace AudioBookPlayer.App.Android.Core
             return false;
         }
 
-        private class CallerInfo
+        private sealed class CallerInfo
 		{
 			public string Name { get; set; }
 			public string PackageName { get; set; }
 			public bool Release { get; set; }
-			public string SigningCertificate { get; set; }
+			public string? SigningCertificate { get; set; }
 
-			public CallerInfo(string name, string packageName, bool release, string signingCertificate)
+			public CallerInfo(string name, string packageName, bool release, string? signingCertificate)
 			{
 				Name = name;
 				PackageName = packageName;
