@@ -355,9 +355,9 @@ namespace AudioBookPlayer.App.ViewModels
 
         private async Task DoLoadBookAsync()
         {
-            if (EntityId.TryParse(BookId, out var id))
+            if (MediaId.TryParse(BookId, out var id))
             {
-                var bookItem = await connector.GetBookItemAsync(id);
+                var bookItem = await connector.GetBookItemAsync(id.BookId);
 
                 currentBookItem = bookItem;
 

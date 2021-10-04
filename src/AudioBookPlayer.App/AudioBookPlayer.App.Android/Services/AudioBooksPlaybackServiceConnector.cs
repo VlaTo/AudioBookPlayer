@@ -2,15 +2,14 @@
 using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
+using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Android.Core;
-using AudioBookPlayer.App.Android.Extensions;
-using AudioBookPlayer.App.Core;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 using ResultReceiver = Android.OS.ResultReceiver;
@@ -96,6 +95,10 @@ namespace AudioBookPlayer.App.Android.Services
                 OnQueueTitleChangedImpl = (title) =>
                 {
                     System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueTitleChanged] Execute");
+                },
+                OnQueueChangedImpl = (queue) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueChanged] Execute");
                 },
                 OnAudioInfoChangedImpl = (playbackInfo) =>
                 {
@@ -206,7 +209,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (null != controls)
             {
-                var mediaId = new MediaBookId(bookId).ToString();
+                var mediaId = new MediaId(bookId).ToString();
                 var options = new Bundle();
                 controls.PlayFromMediaId(mediaId, options);
             }
@@ -222,113 +225,6 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        /*private bool AcquireSectionTask(
-            EntityId bookId,
-            TaskCompletionSource<IReadOnlyList<SectionItem>> tcs,
-            out TaskCompletionSource<IReadOnlyList<SectionItem>> current)
-        {
-            lock (gate)
-            {
-                if (false == sectionTasks.TryGetValue(bookId, out var value))
-                {
-                    sectionTasks.Add(bookId, tcs);
-                    current = tcs;
-
-                    return true;
-                }
-
-                current = value;
-
-                return false;
-            }
-        }*/
-
-        /*private void ReleaseSectionTask(EntityId bookId, TaskCompletionSource<IReadOnlyList<SectionItem>> tcs)
-        {
-            lock (gate)
-            {
-                if (sectionTasks.TryGetValue(bookId, out var value) && tcs == value)
-                {
-                    sectionTasks.Remove(bookId);
-                }
-            }
-        }*/
-
-        /*public Task<CurrentBookViewModel> GetBookAsync(BookId id, ICoverService coverService)
-        {
-            var temp = new TaskCompletionSource<CurrentBookViewModel>();
-
-            if (Interlocked.CompareExchange(ref getBook, temp, null) == null)
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetBookAsync] Started");
-
-                var mediaId = MediaPath.Combine(MediaPath.Root, id).ToAbsolute();
-                var path = mediaId.ToString();
-                var options = new Bundle();
-                var callback = new MediaBrowserSubscriptionCallback(this);
-
-                void Unsubscribe()
-                {
-                    mediaBrowser.Unsubscribe(path, callback);
-                    Interlocked.CompareExchange(ref getBook, null, temp);
-
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector] [GetBookAsync] Done");
-                }
-
-                callback.ChildrenLoadedImpl = (parentId, children) =>
-                {
-                    var builder = new PreviewBookBuilder();
-                    var models = new BookItemViewModel[children.Count];
-
-                    for (var index = 0; index < children.Count; index++)
-                    {
-                        var mediaItem = children[index];
-                        models[index] = builder.BuildBookFrom(mediaItem);
-                    }
-
-                    Unsubscribe();
-
-                    library.SetResult(models);
-                };
-
-                callback.ErrorImpl = parentId =>
-                {
-                    Unsubscribe();
-
-                    library.TrySetException(new Exception());
-
-                };
-
-                mediaBrowser.Subscribe(path, options, callback);
-            }
-
-            return getBook.Task;
-        }*/
-
-        /*private void OnConnected(ConnectStatus status)
-        {
-            switch (status)
-            {
-                case ConnectStatus.Success:
-                {
-                    connect.Complete();
-                    break;
-                }
-
-                case ConnectStatus.Cancelled:
-                {
-                    connect.Cancel();
-                    break;
-                }
-
-                case ConnectStatus.Failed:
-                {
-                    connect.Fail(new Exception());
-                    break;
-                }
-            }
-        }*/
-
         private void OnPlaybackStateChanged(PlaybackStateCompat playback)
         {
             var state = playback.State.ToPlaybackState();
@@ -340,9 +236,6 @@ namespace AudioBookPlayer.App.Android.Services
         // ConnectionCallback class
         private sealed class ServiceConnectionCallback : MediaBrowserCompat.ConnectionCallback
         {
-            // private readonly MediaBrowserServiceConnector connector;
-            // private readonly Action<ConnectStatus> connectCallback;
-
             public Action OnConnectImpl
             {
                 get;
@@ -361,29 +254,11 @@ namespace AudioBookPlayer.App.Android.Services
                 set;
             }
 
-            /*public ServiceConnectionCallback(MediaBrowserServiceConnector connector, Action<ConnectStatus> connectCallback)
-            {
-                this.connector = connector;
-                this.connectCallback = connectCallback;
-            }*/
-
             public override void OnConnected() => OnConnectImpl.Invoke();
-            /*{
-                var mediaController = new MediaControllerCompat(Application.Context, connector.SessionToken);
-
-                connector.MediaController = mediaController;
-                connectCallback.Invoke(ConnectStatus.Success);
-            }*/
 
             public override void OnConnectionSuspended() => OnConnectionSuspendedImpl.Invoke();
-            /*{
-                connectCallback.Invoke(ConnectStatus.Cancelled);
-            }*/
 
             public override void OnConnectionFailed() => OnConnectionFailedImpl.Invoke();
-            /*{
-                connectCallback.Invoke(ConnectStatus.Failed);
-            }*/
         }
 
         private enum ConnectStatus

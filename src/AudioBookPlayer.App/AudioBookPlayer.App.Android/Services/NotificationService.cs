@@ -6,14 +6,15 @@ using Android.OS;
 using Android.Support.V4.Media.Session;
 using AndroidX.Core.App;
 using System;
+using AudioBookPlayer.App.Android.Core;
 using Application = Android.App.Application;
 
 namespace AudioBookPlayer.App.Android.Services
 {
     internal sealed class NotificationService : BroadcastReceiver, NotificationService.IIntents, NotificationService.IChannels
     {
-        private const string DefaultChannelID = "AUDIOBOOKPLAYER_1";
-        private const int DefaultNotificationID = 0x9000;
+        private const string DefaultChannelId = "AUDIOBOOKPLAYER_1";
+        private const int DefaultNotificationId = 0x9000;
         
         public const string IntentActionPlay = "com.libraprogramming.audioplayer.actions.play";
         public const string IntentActionPause = "com.libraprogramming.audioplayer.actions.pause";
@@ -224,10 +225,9 @@ namespace AudioBookPlayer.App.Android.Services
             var playActionIndex = 0;
 
             TryAddSkipToPrevAction(notificationBuilder, ref playActionIndex);
-            TryAddSkipToNextAction(notificationBuilder);
             TryAddPlayPauseAction(notificationBuilder);
+            TryAddSkipToNextAction(notificationBuilder);
 
-            // 3. create notification
             var mediaStyle = new AndroidX.Media.App.NotificationCompat.MediaStyle()
                 .SetMediaSession(SessionToken)
                 .SetShowActionsInCompactView(playActionIndex)
@@ -238,7 +238,6 @@ namespace AudioBookPlayer.App.Android.Services
                 .SetStyle(mediaStyle)
                 .SetSmallIcon(Resource.Drawable.ic_audiobookplayer)
                 .SetContentTitle(mediaController.Metadata.Description.Title)
-                .SetContentText("Sample Content Text")
                 .SetContentIntent(mediaController.SessionActivity)
                 .SetOnlyAlertOnce(true)
                 .SetVisibility(NotificationCompat.VisibilityPublic)
@@ -246,7 +245,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (null != notification && null != notificationManager)
             {
-                notificationManager.Notify(DefaultNotificationID, notification);
+                notificationManager.Notify(DefaultNotificationId, notification);
             }
 
             return notification;
@@ -339,8 +338,8 @@ namespace AudioBookPlayer.App.Android.Services
         /// </summary>
         public interface IChannels
         {
-            public const string ChannelID = DefaultChannelID;
-            public const int NotificationID = DefaultNotificationID;
+            public const string ChannelID = DefaultChannelId;
+            public const int NotificationID = DefaultNotificationId;
         }
     }
 }

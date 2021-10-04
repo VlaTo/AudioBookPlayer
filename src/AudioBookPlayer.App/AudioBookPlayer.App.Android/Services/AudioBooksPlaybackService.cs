@@ -114,12 +114,9 @@ namespace AudioBookPlayer.App.Android.Services
             booksService = new BooksService(dbContext, coverService);
             playback = new Playback(this, mediaSession, booksService)
             {
-                StateChanged = () =>
-                {
-                    System.Diagnostics.Debug.WriteLine($"[AudioBookMediaBrowserService.Playback] [StateChanged] State: {playback?.State}");
-                    UpdatePlaybackState(-1, null);
-                }
+                StateChanged = () => UpdatePlaybackState(-1, null)
             };
+
             notificationService = new NotificationService(this);
 
             UpdatePlaybackState(-1, null);
@@ -201,9 +198,9 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             //if (MediaBookId.TryParse(mediaPath[0], out var mediaBookId))
-            if (MediaBookId.TryParse(parentId, out var bookId))
+            if (MediaId.TryParse(parentId, out var mediaId))
             {
-                var audioBook = booksService?.GetBook(bookId.EntityId);
+                var audioBook = booksService?.GetBook(mediaId.BookId);
                 var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
                 if (null != audioBook)
@@ -381,9 +378,9 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (playbackQueue is { IsEmpty: true })
             {
-                var bookId = MediaBookId.Parse(mediaId);
+                var id = MediaId.Parse(mediaId);
 
-                playbackQueue.SetQueue(QueueHelper.GetQueue(booksService, bookId.EntityId));
+                playbackQueue.SetQueue(QueueHelper.GetQueue(booksService, id.BookId));
 
                 if (null != mediaSession)
                 {
@@ -459,8 +456,8 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             var queueItem = playbackQueue.Current;
-            var mediaId = MediaBookId.Parse(queueItem.Description.MediaId);
-            var audioBook = booksService.GetBook(mediaId.EntityId);
+            var mediaId = MediaId.Parse(queueItem.Description.MediaId);
+            var audioBook = booksService.GetBook(mediaId.BookId);
             var metadata = BuildMetadata(audioBook);
 
             mediaSession.SetMetadata(metadata);
@@ -525,7 +522,7 @@ namespace AudioBookPlayer.App.Android.Services
         private static MediaMetadataCompat BuildMetadata(AudioBook audioBook)
         {
             var metadataBuilder = new MediaMetadataCompat.Builder();
-            var mediaId = new MediaBookId(audioBook.Id);
+            var mediaId = new MediaId(audioBook.Id);
 
             metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyMediaId, mediaId.ToString());
             // metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");

@@ -1,6 +1,5 @@
-﻿using Android.OS;
-using Android.Support.V4.Media;
-using AudioBookPlayer.App.Android.Core;
+﻿using Android.Support.V4.Media;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Android.Extensions
@@ -24,7 +23,7 @@ namespace AudioBookPlayer.App.Android.Extensions
             }*/
 
             var audioBook = audioBookSection.AudioBook;
-            var mediaItemId = new MediaSectionId(audioBook.Id, audioBookSection.Index);
+            var mediaItemId = new MediaId(audioBook.Id, audioBookSection.Index);
             var mediaUri = global::Android.Net.Uri.Parse(audioBookSection.ContentUri);
             var description = new MediaDescriptionCompat.Builder()
                 .SetMediaId(mediaItemId.ToString())

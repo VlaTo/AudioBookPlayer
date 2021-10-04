@@ -3,8 +3,7 @@ using System.Globalization;
 using System.Linq;
 using Android.OS;
 using Android.Support.V4.Media;
-using AudioBookPlayer.App.Android.Core;
-using AudioBookPlayer.App.Android.Services.Builders;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Core;
 using AudioBookPlayer.App.Domain.Models;
 
@@ -45,7 +44,7 @@ namespace AudioBookPlayer.App.Android.Extensions
                 return null;
             }
 
-            var mediaItemId = new MediaBookId(audioBook.Id);
+            var mediaItemId = new MediaId(audioBook.Id);
             var iconUri = GetBookImageUri(0);
             var description = new MediaDescriptionCompat.Builder()
                 .SetMediaId(mediaItemId.ToString())

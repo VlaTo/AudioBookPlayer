@@ -96,9 +96,13 @@ namespace AudioBookPlayer.App.Domain.Models
             }
 
             [return: NotNull]
-            public Builder AddCover([NotNull] string value)
+            public Builder AddCover([MaybeNull] string value)
             {
-                covers.Add(value);
+                if (null != value)
+                {
+                    covers.Add(value);
+                }
+
                 return this;
             }
 

@@ -1,7 +1,7 @@
 ﻿using Android.OS;
 using Android.Support.V4.Media;
-using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -26,51 +26,10 @@ namespace AudioBookPlayer.App.Android.Services
 
             protected override void DoExecute(EntityId key, TaskCompletionSource<IReadOnlyList<SectionItem>> tcs, Action callback)
             {
-                var mediaId = new MediaBookId(key).ToString();
-                var subscriptionCallback = new SubscriptionCallback();
-
-                subscriptionCallback.ChildrenLoadedImpl = (parentId, children) =>
+                var mediaId = new MediaId(key).ToString();
+                var subscriptionCallback = new SubscriptionCallback
                 {
-                    var sectionItems = new SectionItem[children.Count];
-
-                    for (var index = 0; index < children.Count; index++)
-                    {
-                        var mediaItem = children[index];
-                        sectionItems[index] = mediaItem.ToSectionItem();
-                    }
-
-                    tcs.SetResult(sectionItems);
-
-                    callback.Invoke();
-                };
-
-                subscriptionCallback.ErrorImpl = parentId =>
-                {
-                    tcs.TrySetException(new Exception());
-                    callback.Invoke();
-                };
-
-                var options = new Bundle();
-
-                mediaBrowser.Subscribe(mediaId, options, subscriptionCallback);
-            }
-
-            /*public Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId)
-            {
-                var tcs = new TaskCompletionSource<IReadOnlyList<SectionItem>>();
-
-                if (AcquireTask(bookId, tcs, out var current))
-                {
-                    var mediaId = new MediaBookId(bookId).ToString();
-                    var callback = new SubscriptionCallback();
-
-                    void Unsubscribe()
-                    {
-                        mediaBrowser.Unsubscribe(mediaId, callback);
-                        ReleaseTask(bookId, current);
-                    }
-
-                    callback.ChildrenLoadedImpl = (parentId, children) =>
+                    ChildrenLoadedImpl = (parentId, children) =>
                     {
                         var sectionItems = new SectionItem[children.Count];
 
@@ -80,56 +39,21 @@ namespace AudioBookPlayer.App.Android.Services
                             sectionItems[index] = mediaItem.ToSectionItem();
                         }
 
-                        current.SetResult(sectionItems);
+                        tcs.SetResult(sectionItems);
 
-                        Unsubscribe();
-                    };
-
-                    callback.ErrorImpl = parentId =>
+                        callback.Invoke();
+                    },
+                    ErrorImpl = parentId =>
                     {
-                        current.TrySetException(new Exception());
-                        Unsubscribe();
-                    };
-
-                    var options = new Bundle();
-
-                    mediaBrowser.Subscribe(mediaId, options, callback);
-                }
-
-                return current.Task;
-            }*/
-
-            /*private bool AcquireTask(
-                EntityId bookId,
-                TaskCompletionSource<IReadOnlyList<SectionItem>> tcs,
-                out TaskCompletionSource<IReadOnlyList<SectionItem>> current)
-            {
-                lock (gate)
-                {
-                    if (false == sectionsTasks.TryGetValue(bookId, out var value))
-                    {
-                        sectionsTasks.Add(bookId, tcs);
-                        current = tcs;
-
-                        return true;
+                        tcs.TrySetException(new Exception());
+                        callback.Invoke();
                     }
+                };
 
-                    current = value;
+                var options = new Bundle();
 
-                    return false;
-                }
-            }*/
-
-            /*private void ReleaseTask(EntityId bookId, TaskCompletionSource<IReadOnlyList<SectionItem>> tcs)
-            {
-                lock (gate)
-                {
-                    if (sectionsTasks.TryGetValue(bookId, out var value) && tcs == value)
-                    {
-                        sectionsTasks.Remove(bookId);
-                    }
-                }
-            }*/
+                mediaBrowser.Subscribe(mediaId, options, subscriptionCallback);
+            }
         }
     }
 }

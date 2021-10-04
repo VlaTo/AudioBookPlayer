@@ -1,14 +1,15 @@
 ﻿#nullable enable
 
-using System;
 using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Media;
 using Android.OS;
 using Android.Support.V4.Media.Session;
-using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Services;
+using System;
+using AudioBookPlayer.App.Domain.Models;
 using Application = Android.App.Application;
 using Uri = Android.Net.Uri;
 
@@ -28,11 +29,17 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly BroadcastReceiver noisyReceiver;
         private readonly IntentFilter audioNoisyIntentFilter;
         private Intent noisyIntent;
-        private MediaPlayer mediaPlayer;
-        private string currentMediaId;
+        private MediaPlayer? mediaPlayer;
+        // private string currentMediaId;
         private int state;
         private long currentPosition;
         private bool playOnFocusGain;
+
+        public AudioBook? AudioBook
+        {
+            get;
+            private set;
+        }
 
         public int State
         {
@@ -68,6 +75,7 @@ namespace AudioBookPlayer.App.Android.Services
             this.mediaSession = mediaSession;
             this.booksService = booksService;
 
+            AudioBook = null;
             state = PlaybackStateCompat.StateNone;
             currentPosition = -1L;
 
@@ -75,7 +83,7 @@ namespace AudioBookPlayer.App.Android.Services
             var audioManager = (AudioManager?)Application.Context.GetSystemService(Context.AudioService);
 
             audioNoisyIntentFilter = new IntentFilter(AudioManager.ActionAudioBecomingNoisy);
-            noisyReceiver = new Playback.BroadcastReceiver
+            noisyReceiver = new BroadcastReceiver
             {
                 OnReceiveImpl = (context, intent) =>
                 {
@@ -105,18 +113,20 @@ namespace AudioBookPlayer.App.Android.Services
 
             RegisterNoisyReceiver();
 
-            var mediaId = item.Description.MediaId;
-
             if (false == mediaSession.Active)
             {
                 mediaSession.Active = true;
             }
 
-            var mediaHasChanged = false == String.Equals(currentMediaId, mediaId);
+            var mediaId = MediaId.Parse(item.Description.MediaId);
+            var mediaHasChanged = null == AudioBook || mediaId.BookId != AudioBook.Id;
 
             if (mediaHasChanged)
             {
-                currentMediaId = mediaId;
+                //currentMediaId = mediaId;
+                var book = booksService.GetBook(mediaId.BookId);
+
+                AudioBook = book;
                 currentPosition = 0L;
             }
 
@@ -138,14 +148,20 @@ namespace AudioBookPlayer.App.Android.Services
                     {
                         EnsureMediaPlayerCreated();
 
-                        State = PlaybackStateCompat.StateBuffering;
+                        if (null != mediaPlayer)
+                        {
+                            State = PlaybackStateCompat.StateBuffering;
 
-                        var attributes = CreateAudioAttributes();
+                            var attributes = CreateAudioAttributes();
 
-                        mediaPlayer.SetAudioAttributes(attributes);
-                        mediaPlayer.SetDataSource(source);
-                        mediaPlayer.PrepareAsync();
-
+                            mediaPlayer.SetAudioAttributes(attributes);
+                            mediaPlayer.SetDataSource(source);
+                            mediaPlayer.PrepareAsync();
+                        }
+                        else
+                        {
+                            State = PlaybackStateCompat.StateError;
+                        }
                     }
                     else
                     {
@@ -271,12 +287,12 @@ namespace AudioBookPlayer.App.Android.Services
 
         private AssetFileDescriptor? GetDataSource()
         {
-            var mediaId = MediaBookId.Parse(currentMediaId);
-            var book = booksService.GetBook(mediaId.EntityId);
+            // var mediaId = MediaId.Parse(currentMediaId);
+            // var book = booksService.GetBook(mediaId.BookId);
 
-            if (null != book)
+            if (null != AudioBook)
             {
-                var section = 0 < book.Sections.Count ? book.Sections[0] : null;
+                var section = 0 < AudioBook.Sections.Count ? AudioBook.Sections[0] : null;
 
                 if (null != section)
                 {

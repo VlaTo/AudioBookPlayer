@@ -1,10 +1,13 @@
-﻿using Android.Support.V4.Media;
+﻿using Android.OS;
+using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
-using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace AudioBookPlayer.App.Android.Services.Helpers
 {
@@ -24,16 +27,38 @@ namespace AudioBookPlayer.App.Android.Services.Helpers
                 return Array.Empty<MediaSessionCompat.QueueItem>();
             }
 
-            var description = new MediaDescriptionCompat.Builder();
-            var mediaId = new MediaBookId(bookId);
-            
-            description.SetMediaId(mediaId.ToString());
-            description.SetTitle(audioBook.Title);
-            description.SetDescription(audioBook.Synopsis);
+            var queue = new Collection<MediaSessionCompat.QueueItem>();
 
-            var queueItem = new MediaSessionCompat.QueueItem(description.Build(), (long)bookId);
+            for (var sectionIndex = 0; sectionIndex < audioBook.Sections.Count; sectionIndex++)
+            {
+                var section = audioBook.Sections[sectionIndex];
+                var sectionId = new MediaId(audioBook.Id, sectionIndex).ToString();
 
-            return new[] { queueItem };
+                for (var chapterIndex = 0; chapterIndex < section.Chapters.Count; chapterIndex++)
+                {
+                    var chapter = section.Chapters[chapterIndex];
+                    var description = new MediaDescriptionCompat.Builder();
+                    var mediaId = new MediaId(audioBook.Id, sectionIndex, chapterIndex);
+
+                    description.SetMediaId(mediaId.ToString());
+                    description.SetTitle(chapter.Title);
+                    description.SetSubtitle(section.Name);
+
+                    var extra = new Bundle();
+
+                    extra.PutString("SectionId", sectionId);
+                    extra.PutDouble("Start", chapter.Start.TotalMilliseconds);
+                    extra.PutDouble("Duration", chapter.Duration.TotalMilliseconds);
+
+                    description.SetExtras(extra);
+
+                    var queueItem = new MediaSessionCompat.QueueItem(description.Build(), queue.Count);
+
+                    queue.Add(queueItem);
+                }
+            }
+
+            return queue.AsEnumerable();
         }
     }
 }

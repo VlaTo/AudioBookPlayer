@@ -19,14 +19,14 @@ namespace AudioBookPlayer.App.ViewModels
     /// </summary>
     public sealed class StartPlayInteractionRequestContext : InteractionRequestContext
     {
-        public EntityId EntityId
+        public MediaId MediaId
         {
             get;
         }
 
-        public StartPlayInteractionRequestContext(EntityId entityId)
+        public StartPlayInteractionRequestContext(MediaId mediaId)
         {
-            EntityId = entityId;
+            MediaId = mediaId;
         }
     }
 
@@ -90,7 +90,8 @@ namespace AudioBookPlayer.App.ViewModels
 
         protected virtual void DoStartPlay(BookItemViewModel book)
         {
-            var context = new StartPlayInteractionRequestContext(book.Id);
+            var mediaId = new MediaId(book.Id);
+            var context = new StartPlayInteractionRequestContext(mediaId);
 
             StartPlayRequest.Raise(context, () =>
             {

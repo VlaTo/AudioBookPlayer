@@ -1,6 +1,6 @@
 ﻿using System;
 using Android.Support.V4.Media;
-using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Android.Extensions
@@ -19,7 +19,8 @@ namespace AudioBookPlayer.App.Android.Extensions
             var position = GetTimeSpan("Position");
             var isCompleted = mediaItem.Description.Extras.GetBoolean("IsCompleted");
             var authors = mediaItem.Description.Extras.GetStringArray("Authors");
-            var id = MediaBookId.TryParse(mediaItem.MediaId, out var mediaId) ? mediaId.EntityId : EntityId.Empty;
+            var id = MediaId.TryParse(mediaItem.MediaId, out var mediaId) ? mediaId.BookId : EntityId.Empty;
+            var iconUri = mediaItem.Description.IconUri?.ToString();
             var bookItem = new BookItem.Builder()
                 .SetId(id)
                 .SetTitle(mediaItem.Description.Title)
@@ -27,7 +28,7 @@ namespace AudioBookPlayer.App.Android.Extensions
                 .SetDuration(duration)
                 .SetPosition(position)
                 .SetIsCompleted(isCompleted)
-                .AddCover(mediaItem.Description.IconUri.ToString())
+                .AddCover(iconUri)
                 .Build();
 
             return bookItem;
@@ -35,25 +36,29 @@ namespace AudioBookPlayer.App.Android.Extensions
 
         public static SectionItem ToSectionItem(this MediaBrowserCompat.MediaItem mediaItem)
         {
-            string GetString(string key)
+            /*string GetString(string key)
             {
                 return mediaItem.Description.Extras.GetString(key);
-            }
+            }*/
 
-            var id = MediaSectionId.TryParse(mediaItem.MediaId, out var result) ? result : MediaSectionId.Empty;
+            var id = MediaId.TryParse(mediaItem.MediaId, out var result) ? result : MediaId.Empty;
             var contentUri = mediaItem.Description.MediaUri.ToString();
             var sectionItem = new SectionItem.Builder()
-                .SetBookId(id.EntityId)
-                .SetIndex(id.Index)
+                .SetBookId(id.BookId)
                 .SetTitle(mediaItem.Description.Title)
-                .SetContentUri(contentUri)
-                //.SetDuration(GetDuration())
-                //.SetPosition(GetPosition())
-                //.SetIsCompleted(GetIsCompleted())
-                //.AddCover(mediaItem.Description.IconUri.ToString())
-                .Build();
+                .SetContentUri(contentUri);
 
-            return sectionItem;
+            if (id.SectionIndex.HasValue)
+            {
+                sectionItem.SetIndex(id.SectionIndex.Value);
+            }
+
+            //.SetDuration(GetDuration())
+            //.SetPosition(GetPosition())
+            //.SetIsCompleted(GetIsCompleted())
+            //.AddCover(mediaItem.Description.IconUri.ToString())
+
+            return sectionItem.Build();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
@@ -38,6 +39,12 @@ namespace AudioBookPlayer.App.Android.Services
             set;
         }
 
+        public Action<IList<MediaSessionCompat.QueueItem>> OnQueueChangedImpl
+        {
+            get;
+            set;
+        }
+
         public Action<string, Bundle> OnSessionEventImpl
         {
             get;
@@ -63,5 +70,7 @@ namespace AudioBookPlayer.App.Android.Services
         public override void OnSessionEvent(string e, Bundle extras) => OnSessionEventImpl?.Invoke(e, extras);
 
         public override void OnSessionDestroyed() => OnSessionDestroyedImpl?.Invoke();
+
+        public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue) => OnQueueChangedImpl?.Invoke(queue);
     }
 }

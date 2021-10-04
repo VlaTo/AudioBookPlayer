@@ -77,7 +77,6 @@
     <Compile Include="Core\Extensions\FileDateTime.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
     <Compile Include="Core\MediaPath.cs" />
-    <Compile Include="Core\MediaSectionId.cs" />
     <Compile Include="Core\PackageValidator.cs" />
     <Compile Include="Services\Playback.cs" />
     <Compile Include="Core\PlaybackQueue.cs" />
@@ -98,7 +97,6 @@
     <Compile Include="Services\AudioBooksPlaybackServiceConnector.BooksLibraryTask.cs" />
     <Compile Include="Services\BooksService.cs" />
     <Compile Include="Services\Builders\BookBuilder.cs" />
-    <Compile Include="Core\MediaBookId.cs" />
     <Compile Include="Services\Builders\MediaItemBuilder.cs" />
     <Compile Include="Services\IBookItemsCache.cs" />
     <Compile Include="Services\InMemoryBookItemsCache.cs" />
