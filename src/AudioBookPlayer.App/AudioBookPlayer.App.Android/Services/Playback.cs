@@ -123,7 +123,6 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (mediaHasChanged)
             {
-                //currentMediaId = mediaId;
                 var book = booksService.GetBook(mediaId.BookId);
 
                 AudioBook = book;
@@ -176,6 +175,25 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
+        public bool Prepare(MediaId mediaId)
+        {
+            var mediaHasChanged = null == AudioBook || mediaId.BookId != AudioBook.Id;
+
+            // State = PlaybackStateCompat.StateConnecting;
+
+            if (mediaHasChanged)
+            {
+                Stop();
+
+                var book = booksService.GetBook(mediaId.BookId);
+
+                AudioBook = book;
+                currentPosition = GetPositionFromMediaId(mediaId);
+            }
+
+            return mediaHasChanged;
+        }
+
         public void Pause()
         {
             if (PlaybackStateCompat.StatePlaying == State)
@@ -193,6 +211,47 @@ namespace AudioBookPlayer.App.Android.Services
             State = PlaybackStateCompat.StatePaused;
 
             UnregisterNoisyReceiver();
+        }
+
+        public void Stop()
+        {
+            if (PlaybackStateCompat.StatePlaying == State)
+            {
+                if (mediaPlayer is { IsPlaying: true })
+                {
+                    mediaPlayer.Stop();
+                    currentPosition = mediaPlayer.CurrentPosition;
+                }
+
+                // RelaxResources(false);
+                audioFocusRequestor.Release();
+            }
+
+            State = PlaybackStateCompat.StateStopped;
+
+            UnregisterNoisyReceiver();
+        }
+
+        private long GetPositionFromMediaId(MediaId mediaId)
+        {
+            if (null != AudioBook)
+            {
+                var sectionIndex = mediaId.SectionIndex.GetValueOrDefault(0);
+                var chapterIndex = mediaId.ChapterIndex.GetValueOrDefault(0);
+
+                if (AudioBook.Sections.Count > sectionIndex)
+                {
+                    var section = AudioBook.Sections[sectionIndex];
+
+                    if (section.Chapters.Count > chapterIndex)
+                    {
+                        var chapter = section.Chapters[chapterIndex];
+                        return (long)chapter.Start.TotalMilliseconds;
+                    }
+                }
+            }
+
+            return 0L;
         }
 
         private void DoAudioFocusChange(bool canDuck)

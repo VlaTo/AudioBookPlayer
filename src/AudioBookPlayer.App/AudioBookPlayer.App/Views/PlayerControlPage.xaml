@@ -108,7 +108,7 @@
             VerticalOptions="Start">
             <Label
                 Style="{StaticResource BookTitleLabelStyle}"
-                Text="{Binding Path=BookTitle, Mode=OneWay}"
+                Text="{Binding Path=Title, Mode=OneWay}"
                 HorizontalTextAlignment="Center"
                 VerticalTextAlignment="Center"
                 HorizontalOptions="Fill"
@@ -117,7 +117,7 @@
             />
             <Label
                 Style="{StaticResource BookSubtitleLabelStyle}"
-                Text="{Binding Path=BookSubtitle, Mode=OneWay}"
+                Text="{Binding Path=Subtitle, Mode=OneWay}"
                 HorizontalTextAlignment="Center"
                 VerticalTextAlignment="Center"
                 HorizontalOptions="Fill"
@@ -208,7 +208,7 @@
             />
         </StackLayout>
         <controls:PlaybackControl
-            IsEnabled="{Binding Path=CanPlay, Mode=OneWay}"
+            IsPlaybackEnabled="{Binding Path=IsPlaybackEnabled, Mode=OneWay}"
             IsPlaying="{Binding Path=IsPlaying, Mode=OneWay}"
             Rewind="{Binding Path=SmallRewind, Mode=OneTime}"
             Play="{Binding Path=Play, Mode=OneTime}"

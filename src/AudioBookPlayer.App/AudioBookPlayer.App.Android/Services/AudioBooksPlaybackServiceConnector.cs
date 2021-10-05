@@ -10,8 +10,10 @@ using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Android.Core;
 using Xamarin.Forms;
 using Application = Android.App.Application;
+using PlaybackState = AudioBookPlayer.App.Core.PlaybackState;
 using ResultReceiver = Android.OS.ResultReceiver;
 
 namespace AudioBookPlayer.App.Android.Services
@@ -56,7 +58,27 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        public event EventHandler<PlaybackStateEventArgs> PlaybackStateChanged
+        public PlaybackState PlaybackState
+        {
+            get;
+            private set;
+        }
+
+        public IMediaMetadataDescription MediaMetadataDescription
+        {
+            get;
+            private set;
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.PlaybackStateChanged" />
+        public event EventHandler PlaybackStateChanged
+        {
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.MediaMetadataChanged" />
+        public event EventHandler MediaMetadataChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
@@ -88,18 +110,8 @@ namespace AudioBookPlayer.App.Android.Services
                     System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Executed");
                 },
                 OnPlaybackStateChangedImpl = OnPlaybackStateChanged,
-                OnMetadataChangedImpl = (metadata) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnMetadataChanged] Execute");
-                },
-                OnQueueTitleChangedImpl = (title) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueTitleChanged] Execute");
-                },
-                OnQueueChangedImpl = (queue) =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueChanged] Execute");
-                },
+                OnMetadataChangedImpl = OnMetadataChanged,
+                OnQueueChangedImpl = OnQueueChanged,
                 OnAudioInfoChangedImpl = (playbackInfo) =>
                 {
                     System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Execute");
@@ -225,12 +237,53 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
+        public void PrepareFromMediaId(MediaId mediaId)
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                var options = Bundle.Empty;
+                controls.PrepareFromMediaId(mediaId.ToString(), options);
+            }
+        }
+
         private void OnPlaybackStateChanged(PlaybackStateCompat playback)
         {
-            var state = playback.State.ToPlaybackState();
-            var eventArgs = new PlaybackStateEventArgs(state);
+            PlaybackState = playback.State.ToPlaybackState();
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(PlaybackStateChanged));
+        }
 
-            eventManager.HandleEvent(this, eventArgs, nameof(PlaybackStateChanged));
+        private void OnMetadataChanged(MediaMetadataCompat metadata)
+        {
+            // metadata.Description.MediaId;
+            // metadata.Description.Title;
+            // metadata.Description.Subtitle;
+            // metadata.Description.Description;
+            // metadata.Description.IconUri;
+            // metadata.Description.Extras.GetLong("Duration");
+
+            MediaMetadataDescription = new AudioBookMediaMetadataDescription(metadata);
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(MediaMetadataChanged));
+        }
+
+        private void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
+        {
+            for (var index = 0; index < queue.Count; index++)
+            {
+                var item = queue[index];
+
+                {
+                    var id = item.QueueId;
+                    var mediaId = item.Description.MediaId;
+                    var title = item.Description.Title;
+                    var start = TimeSpan.FromMilliseconds(item.Description.Extras.GetDouble("Start"));
+                    var duration = TimeSpan.FromMilliseconds(item.Description.Extras.GetDouble("Duration"));
+                    var sectionIndex = item.Description.Extras.GetInt("Index");
+                    var sectionName = item.Description.Extras.GetString("Name");
+                    var sectionContentUri = item.Description.Extras.GetString("ContentUri");
+                }
+            }
         }
 
         // ConnectionCallback class
@@ -259,13 +312,6 @@ namespace AudioBookPlayer.App.Android.Services
             public override void OnConnectionSuspended() => OnConnectionSuspendedImpl.Invoke();
 
             public override void OnConnectionFailed() => OnConnectionFailedImpl.Invoke();
-        }
-
-        private enum ConnectStatus
-        {
-            Failed = -1,
-            Success,
-            Cancelled
         }
 
         // ItemCallback class
@@ -305,48 +351,5 @@ namespace AudioBookPlayer.App.Android.Services
                 return true;
             }
         }
-
-        // MediaControllerCallback class
-        /*private sealed class MediaControllerCallback : MediaControllerCompat.Callback
-        {
-            private readonly MediaBrowserServiceConnector connector;
-
-
-            public MediaControllerCallback(MediaBrowserServiceConnector connector)
-            {
-                this.connector = connector;
-            }
-
-            public override void OnPlaybackStateChanged(PlaybackStateCompat state)
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnPlaybackStateChanged] Execute");
-                base.OnPlaybackStateChanged(state);
-            }
-
-            public override void OnMetadataChanged(MediaMetadataCompat metadata)
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnMetadataChanged] Execute");
-            }
-
-            public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnQueueChanged] Execute");
-            }
-
-            public override void OnSessionDestroyed()
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionDestroyed] Execute");
-            }
-
-            public override void OnSessionEvent(string e, Bundle extras)
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionEvent] Execute");
-            }
-
-            public override void OnSessionReady()
-            {
-                System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Execute");
-            }
-        }*/
     }
 }

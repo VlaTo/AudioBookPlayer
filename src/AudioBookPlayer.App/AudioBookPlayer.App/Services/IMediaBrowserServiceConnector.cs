@@ -11,7 +11,33 @@ namespace AudioBookPlayer.App.Services
     /// </summary>
     public interface IMediaBrowserServiceConnector
     {
-        event EventHandler<PlaybackStateEventArgs> PlaybackStateChanged;
+        /// <summary>
+        /// 
+        /// </summary>
+        PlaybackState PlaybackState
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        IMediaMetadataDescription MediaMetadataDescription
+        {
+            get;
+        }
+
+        IReadOnlyCollection<>
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler PlaybackStateChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler MediaMetadataChanged;
 
         /// <summary>
         /// 
@@ -52,5 +78,11 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         void Pause();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mediaId"></param>
+        void PrepareFromMediaId(MediaId mediaId);
     }
 }

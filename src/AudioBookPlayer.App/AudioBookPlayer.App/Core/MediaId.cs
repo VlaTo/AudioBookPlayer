@@ -1,16 +1,22 @@
 ﻿using System;
 using System.Text;
 using AudioBookPlayer.App.Domain.Models;
+using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Core
 {
     public sealed class MediaId
     {
-        private const string AudioBookPrefix = "audiobook:";
-        private const string SectionPrefix = "section:";
-        private const string ChapterPrefix = "chapter:";
-        private const string RootStr = @"/";
+        private const string AudioBookPrefix = "abid:";
+        private const string SectionPrefix = "s";
+        private const string ChapterPrefix = "ch";
+        private const string RootStr = @"@root";
+        private const string EmptyStr = @"@empty";
         private const char Delimiter = '/';
+        private const char IndexOpenBracket = '[';
+        private const char IndexCloseBracket = ']';
+        private const string OpenTag = "{";
+        private const string CloseTag = "}";
 
         public static readonly MediaId Empty;
 
@@ -62,11 +68,12 @@ namespace AudioBookPlayer.App.Core
         {
             if (ReferenceEquals(Empty, this) || EntityId.Empty == BookId)
             {
-                return "@empty";
+                return EmptyStr;
             }
 
             var builder = new StringBuilder();
             
+            builder.Append(OpenTag);
             builder.Append(AudioBookPrefix);
             builder.AppendFormat("{0:D}", (long)BookId);
 
@@ -74,7 +81,9 @@ namespace AudioBookPlayer.App.Core
             {
                 builder.Append(Delimiter);
                 builder.Append(SectionPrefix);
+                builder.Append(IndexOpenBracket);
                 builder.AppendFormat("{0:D}", SectionIndex.Value);
+                builder.Append(IndexCloseBracket);
             }
 
             if (null != ChapterIndex)
@@ -86,8 +95,12 @@ namespace AudioBookPlayer.App.Core
 
                 builder.Append(Delimiter);
                 builder.Append(ChapterPrefix);
+                builder.Append(IndexOpenBracket);
                 builder.AppendFormat("{0:D}", ChapterIndex.Value);
+                builder.Append(IndexCloseBracket);
             }
+
+            builder.Append(CloseTag);
 
             return builder.ToString();
         }
@@ -104,15 +117,20 @@ namespace AudioBookPlayer.App.Core
 
         public static bool TryParse(string s, out MediaId value)
         {
-            if (false != String.IsNullOrEmpty(s))
+            if (String.IsNullOrEmpty(s))
             {
-                value = MediaId.Empty;
-
+                value = Empty;
                 return false;
             }
 
-            // var str = s.Substring(RootStr.Length);
-            var parts = s.Split(Delimiter, StringSplitOptions.RemoveEmptyEntries);
+            if (false == s.StartsWith(OpenTag) || false == s.EndsWith(CloseTag))
+            {
+                value = Empty;
+                return false;
+            }
+
+            var innerStr = s.Substring(OpenTag.Length, s.Length - (OpenTag.Length + CloseTag.Length));
+            var parts = innerStr.Split(Delimiter, StringSplitOptions.RemoveEmptyEntries);
             var builder = new MediaIdBuilder();
 
             for (var partIndex = 0; partIndex < parts.Length; partIndex++)
@@ -133,7 +151,7 @@ namespace AudioBookPlayer.App.Core
 
                     case 1:
                     {
-                        if (TryParseInt(part, SectionPrefix, out var index))
+                        if (TryParseIndex(part, SectionPrefix, out var index))
                         {
                             builder.SetSectionIndex(index);
                         }
@@ -143,7 +161,7 @@ namespace AudioBookPlayer.App.Core
 
                     case 2:
                     {
-                        if (TryParseInt(part, ChapterPrefix, out var index))
+                        if (TryParseIndex(part, ChapterPrefix, out var index))
                         {
                             builder.SetChapterIndex(index);
                         }
@@ -180,15 +198,20 @@ namespace AudioBookPlayer.App.Core
             return false;
         }
 
-        private static bool TryParseInt(string s, string prefix, out int value)
+        private static bool TryParseIndex(string s, string prefix, out int value)
         {
             if (false == String.IsNullOrEmpty(s) && s.StartsWith(prefix))
             {
                 var str = s.Substring(prefix.Length);
 
-                if (int.TryParse(str, out value))
+                if (str.StartsWith(IndexOpenBracket) && s.EndsWith(IndexCloseBracket))
                 {
-                    return true;
+                    str = str.Substring(1, str.Length - 2);
+
+                    if (int.TryParse(str, out value))
+                    {
+                        return true;
+                    }
                 }
             }
 

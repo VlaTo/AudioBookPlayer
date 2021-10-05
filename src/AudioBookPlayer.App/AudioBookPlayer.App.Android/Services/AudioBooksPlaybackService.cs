@@ -114,7 +114,15 @@ namespace AudioBookPlayer.App.Android.Services
             booksService = new BooksService(dbContext, coverService);
             playback = new Playback(this, mediaSession, booksService)
             {
-                StateChanged = () => UpdatePlaybackState(-1, null)
+                StateChanged = () =>
+                {
+                    if (playback is { State: PlaybackStateCompat.StateConnecting })
+                    {
+                        ;
+                    }
+
+                    UpdatePlaybackState(-1, null);
+                }
             };
 
             notificationService = new NotificationService(this);
@@ -297,53 +305,39 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void DoMediaSessionCustomAction(string action, Bundle options)
         {
+            throw new NotImplementedException();
         }
 
         private void DoMediaSessionPrepare()
         {
-            System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [OnPrepare] Execute");
-
-            var metadata = new MediaMetadataCompat.Builder();
-            metadata.PutString(MediaMetadataCompat.MetadataKeyMediaId, "media_1");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
-            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
-
-            if (null != mediaSession)
-            {
-                mediaSession.SetMetadata(metadata.Build());
-
-                if (false == mediaSession.Active)
-                {
-                    mediaSession.Active = true;
-                }
-            }
+            throw new NotImplementedException();
         }
 
         private void DoPrepareFromMediaId(string mediaId, Bundle options)
         {
             System.Diagnostics.Debug.WriteLine("[MediaSessionCallback] [DoPrepareFromMediaId] Execute");
 
-            var metadata = new MediaMetadataCompat.Builder();
+            var mid = MediaId.Parse(mediaId);
 
-            metadata.PutString(MediaMetadataCompat.MetadataKeyMediaId, "media_1");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, "Sample AudioBook Author");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
-            metadata.PutString(MediaMetadataCompat.MetadataKeyTitle, "Sample AudioBook Title");
-            metadata.PutLong(MediaMetadataCompat.MetadataKeyDuration,
-                (long)TimeSpan.FromHours(4.23d).TotalMilliseconds);
-
-            if (null != mediaSession)
+            if (null == playback)
             {
-                mediaSession.SetMetadata(metadata.Build());
+                return;
+            }
 
-                if (false == mediaSession.Active)
+            if (playback.Prepare(mid))
+            {
+                if (null != playbackQueue)
                 {
-                    mediaSession.Active = true;
+                    playbackQueue.SetQueue(QueueHelper.GetQueue(playback.AudioBook));
+
+                    if (null != mediaSession)
+                    {
+                        mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
+                        mediaSession.SetQueueTitle(playback.AudioBook?.Title);
+                    }
                 }
+
+                UpdateSessionMetadata();
             }
         }
 
@@ -380,7 +374,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 var id = MediaId.Parse(mediaId);
 
-                playbackQueue.SetQueue(QueueHelper.GetQueue(booksService, id.BookId));
+                //playbackQueue.SetQueue(QueueHelper.GetQueue(booksService, id.BookId));
 
                 if (null != mediaSession)
                 {

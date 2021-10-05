@@ -19,14 +19,14 @@ using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    [QueryProperty(nameof(BookId), nameof(BookId))]
+    [QueryProperty(nameof(MediaId), "mid")]
     public class PlayerControlViewModel : ViewModelBase, IInitialize
     {
         private readonly IMediaBrowserServiceConnector connector;
         private readonly ICoverService coverService;
 
-        private BookItem currentBookItem;
-        private IReadOnlyList<SectionItem> currentSectionItems;
+        // private BookItem currentBookItem;
+        // private IReadOnlyList<SectionItem> currentSectionItems;
         //private readonly IPlaybackService playbackService;
         //private readonly IActivityTrackerService activityTrackerService;
         // private readonly INotificationService notificationService;
@@ -34,9 +34,10 @@ namespace AudioBookPlayer.App.ViewModels
         private readonly TaskExecutionMonitor loadBookMonitor;
         //private readonly TaskExecutionMonitor trackBookActivity;
 
-        private string bookId;
-        private string bookTitle;
-        private string bookSubtitle;
+        private string mediaId;
+        private string title;
+        private string subtitle;
+        private string description;
         private string currentChapterTitle;
         private int chapterIndex;
         private double chapterStart;
@@ -44,37 +45,43 @@ namespace AudioBookPlayer.App.ViewModels
         private double chapterPosition;
         private TimeSpan elapsed;
         private TimeSpan left;
-        private TimeSpan bookDuration;
+        private TimeSpan duration;
         private TimeSpan bookProgress;
         private TimeSpan chapterDuration;
         private Func<CancellationToken, Task<Stream>> imageSource;
-        private bool canPlay;
         private bool isPlaying;
+        private bool isPlaybackEnabled;
 
         #region Properties
 
-        public string BookId
+        public string MediaId
         {
-            get => bookId;
+            get => mediaId;
             set
             {
-                if (SetProperty(ref bookId, value))
+                if (SetProperty(ref mediaId, value))
                 {
                     loadBookMonitor.Start();
                 }
             }
         }
 
-        public string BookTitle
+        public string Title
         {
-            get => bookTitle;
-            set => SetProperty(ref bookTitle, value);
+            get => title;
+            set => SetProperty(ref title, value);
         }
 
-        public string BookSubtitle
+        public string Subtitle
         {
-            get => bookSubtitle;
-            set => SetProperty(ref bookSubtitle, value);
+            get => subtitle;
+            set => SetProperty(ref subtitle, value);
+        }
+
+        public string Description
+        {
+            get => description;
+            set => SetProperty(ref description, value);
         }
 
         public Func<CancellationToken, Task<Stream>> ImageSource
@@ -111,10 +118,10 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
-        public TimeSpan BookDuration
+        public TimeSpan Duration
         {
-            get => bookDuration;
-            set => SetProperty(ref bookDuration, value);
+            get => duration;
+            set => SetProperty(ref duration, value);
         }
 
         public TimeSpan BookPosition
@@ -147,10 +154,10 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref left, value);
         }
 
-        public bool CanPlay
+        public bool IsPlaybackEnabled
         {
-            get => canPlay;
-            set => SetProperty(ref canPlay, value);
+            get => isPlaybackEnabled;
+            set => SetProperty(ref isPlaybackEnabled, value);
         }
 
         public bool IsPlaying
@@ -246,23 +253,22 @@ namespace AudioBookPlayer.App.ViewModels
             ChapterIndex = -1;
             CurrentChapterTitle = String.Empty;
 
-            BookDuration = TimeSpan.Zero;
+            Title = String.Empty;
+            Subtitle = String.Empty;
+            ImageSource = null;
+            Duration = TimeSpan.Zero;
             BookPosition = TimeSpan.Zero;
             Elapsed = TimeSpan.Zero;
             Left = TimeSpan.Zero;
-            CanPlay = true;
+            IsPlaybackEnabled = true;
 
             connector.PlaybackStateChanged += MediaBrowserConnectorPlaybackStateChanged;
-
-            // playbackService.IsPlayingChanged += OnPlaybackControllerIsPlayingChanged;
-            // playbackService.AudioBookChanged += OnPlaybackControllerAudioBookChanged;
-            // playbackService.ChapterIndexChanged += OnPlaybackControllerChapterIndexChanged;
-            // playbackService.CurrentPositionChanged += OnPlaybackControllerPositionChanged;
+            connector.MediaMetadataChanged += MediaBrowserConnectorMediaMetadataChanged;
         }
 
         public void OnInitialize()
         {
-            //serviceConnectMonitor.Start();
+            UpdateProperties();
         }
 
         private void DoPickChapter()
@@ -285,7 +291,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
-            if (CanPlay)
+            /*if (CanPlay)
             {
                 if (IsPlaying)
                 {
@@ -295,7 +301,7 @@ namespace AudioBookPlayer.App.ViewModels
                 {
                     connector.Play(currentBookItem.Id);
                 }
-            }
+            }*/
         }
 
         private void DoSmallFastForwardCommand()
@@ -353,39 +359,14 @@ namespace AudioBookPlayer.App.ViewModels
             playbackService.ChapterIndex = index;*/
         }
 
-        private async Task DoLoadBookAsync()
+        private Task DoLoadBookAsync()
         {
-            if (MediaId.TryParse(BookId, out var id))
+            if (Core.MediaId.TryParse(MediaId, out var mid) && null != connector)
             {
-                var bookItem = await connector.GetBookItemAsync(id.BookId);
-
-                currentBookItem = bookItem;
-
-                UpdateProperties();
-
-                /*var book = booksService.GetBook(id);
-
-                if (null != book)
-                {
-
-                    using (playbackService.BatchUpdate())
-                    {
-                        if (AudioBook.AreSame(playbackService.AudioBook, book))
-                        {
-                            UpdateAudioBookProperties();
-                        }
-                        else
-                        {
-                            playbackService.AudioBook = book;
-                        }
-                    }
-                }
-                else
-                {
-                    // should we clear book properties?
-
-                }*/
+                connector.PrepareFromMediaId(mid);
             }
+
+            return Task.CompletedTask;
         }
 
         /*private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
@@ -456,35 +437,36 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateProperties()
         {
-            BookTitle = currentBookItem.Title;
-            BookSubtitle = currentBookItem.Authors.AsString();
-            BookPosition = currentBookItem.Position;
-            ImageSource = 0 < currentBookItem.Covers.Length
-                ? cancellationToken => coverService.GetImageAsync(currentBookItem.Covers[0], cancellationToken)
-                : (Func<CancellationToken, Task<Stream>>)null;
-        }
-
-        /*private static string GetBookAuthors(string[] authors)
-        {
-            var builder = new StringBuilder();
-            var separator = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
-
-            foreach (var author in authors)
+            if (null == connector.MediaMetadataDescription)
             {
-                if (0 < builder.Length)
-                {
-                    builder.Append(separator);
-                }
-
-                builder.Append(author);
+                return;
             }
 
-            return builder.ToString();
-        }*/
+            Title = connector.MediaMetadataDescription.Title;
+            Subtitle = connector.MediaMetadataDescription.Subtitle;
+            Description = connector.MediaMetadataDescription.Description;
+            Duration = connector.MediaMetadataDescription.Duration;
 
-        private void MediaBrowserConnectorPlaybackStateChanged(object sender, PlaybackStateEventArgs e)
+            var imageUri = connector.MediaMetadataDescription.AlbumArtUri;
+
+            if (null == imageUri)
+            {
+                // ImageSource = cancellationToken => coverService.GetImageAsync(connector.MediaMetadataDescription.AlbumAtrUri, cancellationToken);
+            }
+
+            ImageSource = cancellationToken => coverService.GetImageAsync(imageUri, cancellationToken);
+
+            /*BookPosition = currentBookItem.Position;*/
+        }
+
+        private void MediaBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
         {
-            IsPlaying = PlaybackState.Playing == e.State;
+            IsPlaying = PlaybackState.Playing == connector.PlaybackState;
+        }
+
+        private void MediaBrowserConnectorMediaMetadataChanged(object sender, EventArgs _)
+        {
+            UpdateProperties();
         }
     }
 }

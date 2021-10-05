@@ -69,6 +69,7 @@
     <Compile Include="Core\AlbumArtCache.cs" />
     <Compile Include="Core\Attributes\ColumnAttribute.cs" />
     <Compile Include="Core\AudioBookFileScanner.cs" />
+    <Compile Include="Core\AudioBookMediaMetadataDescription.cs" />
     <Compile Include="Core\ICacheable.cs" />
     <Compile Include="Core\ISizable.cs" />
     <Compile Include="Core\LRUCache.cs" />
