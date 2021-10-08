@@ -48,6 +48,30 @@ namespace AudioBookPlayer.App.Android.Services
             set;
         }
 
+        public Action OnSkipToNextImpl
+        {
+            get;
+            set;
+        }
+
+        public Action OnSkipToPreviousImpl
+        {
+            get;
+            set;
+        }
+
+        public Action<long> OnSkipToQueueItemImpl
+        {
+            get;
+            set;
+        }
+
+        public Action OnStopImpl
+        {
+            get;
+            set;
+        }
+
         public override void OnCommand(string command, Bundle options, ResultReceiver cb) => OnCommandImpl.Invoke(command, options, cb);
 
         public override void OnCustomAction(string action, Bundle extras) => OnCustomActionImpl.Invoke(action, extras);
@@ -58,8 +82,16 @@ namespace AudioBookPlayer.App.Android.Services
 
         public override void OnPlay() => OnPlayImpl.Invoke();
 
-        public override void OnPlayFromMediaId(string mediaId, Bundle extras) => OnPlayFromMediaIdImpl.Invoke(mediaId, extras);
+        public override void OnPlayFromMediaId(string mediaId, Bundle extras) => OnPlayFromMediaIdImpl?.Invoke(mediaId, extras);
 
-        public override void OnPause() => OnPauseImpl.Invoke();
+        public override void OnPause() => OnPauseImpl?.Invoke();
+
+        public override void OnSkipToNext() => OnSkipToNextImpl?.Invoke();
+
+        public override void OnSkipToPrevious() => OnSkipToPreviousImpl?.Invoke();
+
+        public override void OnSkipToQueueItem(long id) => OnSkipToQueueItemImpl?.Invoke(id);
+
+        public override void OnStop() => OnStopImpl?.Invoke();
     }
 }

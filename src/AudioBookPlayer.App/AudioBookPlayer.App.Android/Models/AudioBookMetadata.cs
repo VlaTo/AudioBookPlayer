@@ -1,10 +1,13 @@
 ﻿using System;
 using Android.Support.V4.Media;
-using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Models;
 
-namespace AudioBookPlayer.App.Android.Core
+namespace AudioBookPlayer.App.Android.Models
 {
-    internal sealed class AudioBookMediaMetadataDescription : IMediaMetadataDescription
+    /// <summary>
+    /// 
+    /// </summary>
+    internal sealed class AudioBookMetadata : IAudioBookMetadata
     {
         private readonly MediaMetadataCompat metadata;
 
@@ -18,7 +21,7 @@ namespace AudioBookPlayer.App.Android.Core
 
         public string AlbumArtUri => metadata.Description.IconUri.ToString();
 
-        public AudioBookMediaMetadataDescription(MediaMetadataCompat metadata)
+        public AudioBookMetadata(MediaMetadataCompat metadata)
         {
             this.metadata = metadata;
         }

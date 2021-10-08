@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace AudioBookPlayer.App.Core
+namespace AudioBookPlayer.App.Models
 {
-    public interface IMediaMetadataDescription
+    public interface IAudioBookMetadata
     {
         string Title
         {

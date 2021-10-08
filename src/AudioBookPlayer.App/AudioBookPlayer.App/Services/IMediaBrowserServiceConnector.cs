@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {
@@ -14,6 +15,22 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
+        bool IsConnected
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        int QueueIndex
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         PlaybackState PlaybackState
         {
             get;
@@ -22,12 +39,18 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        IMediaMetadataDescription MediaMetadataDescription
+        IAudioBookMetadata AudioBookMetadata
         {
             get;
         }
 
-        IReadOnlyCollection<>
+        /// <summary>
+        /// 
+        /// </summary>
+        IReadOnlyList<IChapterMetadata> Chapters
+        {
+            get;
+        }
 
         /// <summary>
         /// 
@@ -37,7 +60,17 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler MediaMetadataChanged;
+        event EventHandler AudioBookMetadataChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler ChaptersChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler QueueIndexChanged;
 
         /// <summary>
         /// 
@@ -72,7 +105,7 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        void Play(EntityId bookId);
+        void Play();
 
         /// <summary>
         /// 
@@ -84,5 +117,11 @@ namespace AudioBookPlayer.App.Services
         /// </summary>
         /// <param name="mediaId"></param>
         void PrepareFromMediaId(MediaId mediaId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="queueId"></param>
+        void SetQueueItemIndex(long queueId);
     }
 }

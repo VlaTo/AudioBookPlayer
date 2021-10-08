@@ -69,11 +69,14 @@
     <Compile Include="Core\AlbumArtCache.cs" />
     <Compile Include="Core\Attributes\ColumnAttribute.cs" />
     <Compile Include="Core\AudioBookFileScanner.cs" />
-    <Compile Include="Core\AudioBookMediaMetadataDescription.cs" />
+    <Compile Include="Models\AudioBookMetadata.cs" />
     <Compile Include="Core\ICacheable.cs" />
     <Compile Include="Core\ISizable.cs" />
     <Compile Include="Core\LRUCache.cs" />
     <Compile Include="Extensions\PlaybackStateExtensions.cs" />
+    <Compile Include="Models\ChapterMetadata.cs" />
+    <Compile Include="Models\MediaFragment.cs" />
+    <Compile Include="Models\SectionMetadata.cs" />
     <Compile Include="Services\Helpers\BitmapHelper.cs" />
     <Compile Include="Core\Extensions\FileDateTime.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
@@ -115,6 +118,7 @@
     <Compile Include="Services\MediaSessionCallback.cs" />
     <Compile Include="Services\NotificationService.cs" />
     <Compile Include="Services\PermissionRequestor.cs" />
+    <Compile Include="Services\RefreshService.cs" />
     <Compile Include="Services\TaskExecutor.cs" />
     <Compile Include="Services\TaskExecutorAsync.cs" />
     <Compile Include="Services\ToastService.cs" />
@@ -273,6 +277,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxhdpi\ic_pause.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

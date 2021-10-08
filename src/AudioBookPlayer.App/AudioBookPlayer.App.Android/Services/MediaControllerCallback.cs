@@ -57,6 +57,12 @@ namespace AudioBookPlayer.App.Android.Services
             set;
         }
 
+        public Action<Bundle> OnExtrasChangedImpl
+        {
+            get;
+            set;
+        }
+
         public override void OnSessionReady() => OnSessionReadyImpl?.Invoke();
 
         public override void OnPlaybackStateChanged(PlaybackStateCompat state) => OnPlaybackStateChangedImpl?.Invoke(state);
@@ -72,5 +78,7 @@ namespace AudioBookPlayer.App.Android.Services
         public override void OnSessionDestroyed() => OnSessionDestroyedImpl?.Invoke();
 
         public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue) => OnQueueChangedImpl?.Invoke(queue);
+
+        public override void OnExtrasChanged(Bundle extras) => OnExtrasChangedImpl?.Invoke(extras);
     }
 }

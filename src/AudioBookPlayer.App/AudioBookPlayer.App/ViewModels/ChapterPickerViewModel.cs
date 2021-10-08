@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
 using LibraProgramming.Xamarin.Interaction;
@@ -12,22 +13,22 @@ namespace AudioBookPlayer.App.ViewModels
 {
     public sealed class ChapterPickerViewModel : ViewModelBase, IInitialize
     {
-        private readonly IPlaybackService playbackService;
+        private readonly IMediaBrowserServiceConnector connector;
         private readonly TaskExecutionMonitor chaptersLoader;
-        private int chapterIndex;
+        // private int chapterIndex;
         private ChapterViewModel selectedChapter;
         private bool isInitializing;
 
-        public ObservableCollection<IChapterViewModel> ChapterGroups
+        public ObservableCollection<IChapterViewModel> Sections
         {
             get;
         }
 
-        public int ChapterIndex
+        /*public int ChapterIndex
         {
             get => chapterIndex;
             set => SetProperty(ref chapterIndex, value);
-        }
+        }*/
 
         public ChapterViewModel SelectedChapter
         {
@@ -43,7 +44,7 @@ namespace AudioBookPlayer.App.ViewModels
 
                     if (null != selectedChapter)
                     {
-                        playbackService.ChapterIndex = selectedChapter.Index;
+                        connector.SetQueueItemIndex(selectedChapter.QueueId);
                     }
 
                     DoClose(false);
@@ -61,16 +62,17 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public ChapterPickerViewModel(IPlaybackService playbackService)
+        public ChapterPickerViewModel(IMediaBrowserServiceConnector connector)
         {
-            this.playbackService = playbackService;
+            this.connector = connector;
+
             chaptersLoader = new TaskExecutionMonitor(LoadChaptersAsync);
 
             Close = new Command(DoCancel);
             CloseRequest = new InteractionRequest<ClosePopupRequestContext>();
-            ChapterGroups = new ObservableCollection<IChapterViewModel>();
+            Sections = new ObservableCollection<IChapterViewModel>();
             
-            chapterIndex = -1;
+            // chapterIndex = -1;
             selectedChapter = null;
         }
 
@@ -82,9 +84,9 @@ namespace AudioBookPlayer.App.ViewModels
         private int FindChapterIndex(ChapterViewModel model)
         {
 
-            for (var index = 0; index < ChapterGroups.Count; index++)
+            for (var index = 0; index < Sections.Count; index++)
             {
-                var current = ChapterGroups[index];
+                var current = Sections[index];
 
                 if (ReferenceEquals(current, model))
                 {
@@ -101,65 +103,51 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 isInitializing = true;
 
-                ChapterViewModel selection = null;
-
-                var localIndex = 0;
-
-                for (var partIndex = 0; partIndex < playbackService.AudioBook.Sections.Count; partIndex++)
+                SectionViewModel GetOrCreateSection(ISectionMetadata sectionMetadata)
                 {
-                    var part = playbackService.AudioBook.Sections[partIndex];
-                    var groupEntry = new ChapterGroupViewModel
+                    for (int index = 0; index < Sections.Count; index++)
                     {
-                        Title = part.Name
+                        if (Sections[index] is SectionViewModel svm)
+                        {
+                            if (svm.Index == sectionMetadata.Index)
+                            {
+                                return svm;
+                            }
+                        }
+                    }
+
+                    var section = new SectionViewModel
+                    {
+                        Title = sectionMetadata.Name,
+                        Index = sectionMetadata.Index
                     };
 
-                    ChapterGroups.Add(groupEntry);
+                    Sections.Add(section);
 
-                    for (var index = 0; index < part.Chapters.Count; index++)
+                    return section;
+                }
+
+                for (var chapterIndex = 0; chapterIndex < connector.Chapters.Count; chapterIndex++)
+                {
+                    var chapterMetadata = connector.Chapters[chapterIndex];
+                    var sectionViewModel = GetOrCreateSection(chapterMetadata.Section);
+                    var chapterViewModel = new ChapterViewModel(chapterIndex, chapterMetadata.QueueId)
                     {
-                        var chapter = part.Chapters[index];
-                        var chapterViewModel = new ChapterViewModel(localIndex)
-                        {
-                            Title = chapter.Title
-                        };
+                        Title = chapterMetadata.Title
+                    };
 
-                        groupEntry.Entries.Add(chapterViewModel);
+                    sectionViewModel.Entries.Add(chapterViewModel);
 
-                        if (localIndex++ == playbackService.ChapterIndex)
-                        {
-                            selection = chapterViewModel;
-                        }
+                    if (connector.QueueIndex == chapterIndex)
+                    {
+                        selectedChapter = chapterViewModel;
                     }
                 }
 
-
-                /*else
-                {
-                    HasGroups = false;
-
-                    var chapters = playbackService.AudioBook.Chapters;
-
-                    for (var index = 0; index < chapters.Count; index++)
-                    {
-                        var chapter = chapters[index];
-                        var model = new ChapterViewModel
-                        {
-                            Title = chapter.Title
-                        };
-
-                        ViewModels.Add(model);
-
-                        if (index == playbackService.ChapterIndex)
-                        {
-                            selection = model;
-                        }
-                    }
-                }*/
-
-                if (null != selection)
+                /*if (null != selection)
                 {
                     SelectedChapter = selection;
-                }
+                }*/
             }
             finally
             {

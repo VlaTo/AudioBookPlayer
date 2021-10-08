@@ -19,20 +19,18 @@ namespace AudioBookPlayer.App.Android.Services.Helpers
             return Array.Empty<MediaSessionCompat.QueueItem>();
         }
         
-        public static IEnumerable<MediaSessionCompat.QueueItem> GetQueue(AudioBook audioBook)
+        public static IEnumerable<MediaSessionCompat.QueueItem> BuildQueue(AudioBook audioBook)
         {
             var queue = new Collection<MediaSessionCompat.QueueItem>();
 
             for (var sectionIndex = 0; sectionIndex < audioBook.Sections.Count; sectionIndex++)
             {
                 var section = audioBook.Sections[sectionIndex];
-                // var sectionId = new MediaId(audioBook.Id, sectionIndex).ToString();
-                // var sectionUri = Uri.Parse(section.ContentUri);
+                var mediaUri = Uri.Parse(section.ContentUri);
                 var sectionExtra = new Bundle();
 
-                sectionExtra.PutInt("Index", sectionIndex);
-                sectionExtra.PutString("Name", section.Name);
-                sectionExtra.PutString("ContentUri", section.ContentUri);
+                sectionExtra.PutInt("Section.Index", sectionIndex);
+                sectionExtra.PutString("Section.Name", section.Name);
 
                 for (var chapterIndex = 0; chapterIndex < section.Chapters.Count; chapterIndex++)
                 {
@@ -41,10 +39,8 @@ namespace AudioBookPlayer.App.Android.Services.Helpers
                     var mediaId = new MediaId(audioBook.Id, sectionIndex, chapterIndex);
 
                     description.SetMediaId(mediaId.ToString());
+                    description.SetMediaUri(mediaUri);
                     description.SetTitle(chapter.Title);
-                    // description.SetSubtitle(section.Name);
-                    // description.SetDescription(section.Name);
-                    // description.SetMediaUri(sectionUri);
 
                     var extra = new Bundle(sectionExtra);
 

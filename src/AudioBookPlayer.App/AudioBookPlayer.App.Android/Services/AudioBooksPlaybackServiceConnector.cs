@@ -10,7 +10,8 @@ using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Android.Core;
+using AudioBookPlayer.App.Android.Models;
+using AudioBookPlayer.App.Models;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 using PlaybackState = AudioBookPlayer.App.Core.PlaybackState;
@@ -31,6 +32,12 @@ namespace AudioBookPlayer.App.Android.Services
         private MediaControllerCompat mediaController;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
+
+        public int QueueIndex
+        {
+            get;
+            private set;
+        }
 
         public MediaSessionCompat.Token SessionToken => mediaBrowser.SessionToken;
 
@@ -64,7 +71,13 @@ namespace AudioBookPlayer.App.Android.Services
             private set;
         }
 
-        public IMediaMetadataDescription MediaMetadataDescription
+        public IAudioBookMetadata AudioBookMetadata
+        {
+            get;
+            private set;
+        }
+
+        public IReadOnlyList<IChapterMetadata> Chapters
         {
             get;
             private set;
@@ -77,8 +90,22 @@ namespace AudioBookPlayer.App.Android.Services
             remove => eventManager.RemoveEventHandler(value);
         }
 
-        /// <inheritdoc cref="IMediaBrowserServiceConnector.MediaMetadataChanged" />
-        public event EventHandler MediaMetadataChanged
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.AudioBookMetadataChanged" />
+        public event EventHandler AudioBookMetadataChanged
+        {
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.ChaptersChanged" />
+        public event EventHandler ChaptersChanged
+        {
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
+        }
+
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.QueueIndexChanged" />
+        public event EventHandler QueueIndexChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
@@ -112,6 +139,7 @@ namespace AudioBookPlayer.App.Android.Services
                 OnPlaybackStateChangedImpl = OnPlaybackStateChanged,
                 OnMetadataChangedImpl = OnMetadataChanged,
                 OnQueueChangedImpl = OnQueueChanged,
+                OnExtrasChangedImpl = OnExtrasChanged,
                 OnAudioInfoChangedImpl = (playbackInfo) =>
                 {
                     System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Execute");
@@ -135,6 +163,10 @@ namespace AudioBookPlayer.App.Android.Services
             booksLibraryTask = new BooksLibraryTask(mediaBrowser, bookItemsCache);
             bookItemsTask = new BookItemsTask(booksLibraryTask, bookItemsCache);
             bookSectionsTask = new BookSectionsTask(mediaBrowser);
+
+            AudioBookMetadata = null;
+            QueueIndex = -1;
+            Chapters = Array.Empty<IChapterMetadata>();
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
@@ -215,7 +247,7 @@ namespace AudioBookPlayer.App.Android.Services
             return tcs.Task;
         }
 
-        public void Play(EntityId bookId)
+        /*public void Play(EntityId bookId)
         {
             var controls = MediaController?.GetTransportControls();
 
@@ -224,6 +256,16 @@ namespace AudioBookPlayer.App.Android.Services
                 var mediaId = new MediaId(bookId).ToString();
                 var options = new Bundle();
                 controls.PlayFromMediaId(mediaId, options);
+            }
+        }*/
+
+        public void Play()
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.Play();
             }
         }
 
@@ -248,6 +290,16 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
+        public void SetQueueItemIndex(long queueId)
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.SkipToQueueItem(queueId);
+            }
+        }
+
         private void OnPlaybackStateChanged(PlaybackStateCompat playback)
         {
             PlaybackState = playback.State.ToPlaybackState();
@@ -263,17 +315,21 @@ namespace AudioBookPlayer.App.Android.Services
             // metadata.Description.IconUri;
             // metadata.Description.Extras.GetLong("Duration");
 
-            MediaMetadataDescription = new AudioBookMediaMetadataDescription(metadata);
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(MediaMetadataChanged));
+            AudioBookMetadata = new AudioBookMetadata(metadata);
+
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(AudioBookMetadataChanged));
         }
 
         private void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
         {
+            var chapters = new List<IChapterMetadata>();
+
             for (var index = 0; index < queue.Count; index++)
             {
                 var item = queue[index];
+                chapters.Add(new ChapterMetadata(item));
 
-                {
+                /*{
                     var id = item.QueueId;
                     var mediaId = item.Description.MediaId;
                     var title = item.Description.Title;
@@ -282,8 +338,19 @@ namespace AudioBookPlayer.App.Android.Services
                     var sectionIndex = item.Description.Extras.GetInt("Index");
                     var sectionName = item.Description.Extras.GetString("Name");
                     var sectionContentUri = item.Description.Extras.GetString("ContentUri");
-                }
+                }*/
             }
+
+            Chapters = chapters.AsReadOnly();
+
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
+        }
+
+        private void OnExtrasChanged(Bundle extras)
+        {
+            QueueIndex = extras.GetInt("QueueIndex");
+
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(QueueIndexChanged));
         }
 
         // ConnectionCallback class

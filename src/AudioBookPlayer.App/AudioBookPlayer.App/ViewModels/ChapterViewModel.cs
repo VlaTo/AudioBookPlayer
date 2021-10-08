@@ -2,10 +2,17 @@
 {
     public class ChapterViewModel : ViewModelBase, IChapterViewModel
     {
-        private readonly int index;
         private string title;
 
-        public int Index => index;
+        public int Index
+        {
+            get;
+        }
+
+        public long QueueId
+        {
+            get;
+        }
 
         public string Title
         {
@@ -13,9 +20,10 @@
             set => SetProperty(ref title, value);
         }
 
-        public ChapterViewModel(int index)
+        public ChapterViewModel(int index, long queueId)
         {
-            this.index = index;
+            Index = index;
+            QueueId = queueId;
         }
     }
 }

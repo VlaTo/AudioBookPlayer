@@ -6,15 +6,10 @@ using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Extensions;
-using AudioBookPlayer.App.Domain.Models;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -24,15 +19,7 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly IMediaBrowserServiceConnector connector;
         private readonly ICoverService coverService;
-
-        // private BookItem currentBookItem;
-        // private IReadOnlyList<SectionItem> currentSectionItems;
-        //private readonly IPlaybackService playbackService;
-        //private readonly IActivityTrackerService activityTrackerService;
-        // private readonly INotificationService notificationService;
-        //private readonly TaskExecutionMonitor serviceConnectMonitor;
         private readonly TaskExecutionMonitor loadBookMonitor;
-        //private readonly TaskExecutionMonitor trackBookActivity;
 
         private string mediaId;
         private string title;
@@ -262,8 +249,10 @@ namespace AudioBookPlayer.App.ViewModels
             Left = TimeSpan.Zero;
             IsPlaybackEnabled = true;
 
-            connector.PlaybackStateChanged += MediaBrowserConnectorPlaybackStateChanged;
-            connector.MediaMetadataChanged += MediaBrowserConnectorMediaMetadataChanged;
+            connector.PlaybackStateChanged += AudioBookBrowserConnectorPlaybackStateChanged;
+            connector.AudioBookMetadataChanged += AudioBookBrowserConnectorAudioBookMetadataChanged;
+            connector.ChaptersChanged += AudioBookBrowserConnectorChaptersChanged;
+            connector.QueueIndexChanged += AudioBookBrowserConnectorQueueIndexChanged;
         }
 
         public void OnInitialize()
@@ -273,15 +262,14 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPickChapter()
         {
-            /*if (null != playbackService.AudioBook && playbackService.AudioBook.Id.HasValue)
-            {
-                var context = new PickChapterRequestContext(playbackService.AudioBook.Id.Value);
+            var context = new PickChapterRequestContext(-1);
 
-                PickChapterRequest.Raise(context, () =>
+            PickChapterRequest.Raise(context,
+                () =>
                 {
                     Debug.WriteLine($"[PlayerControlViewModel] [DoPickChapter] Callback");
-                });
-            }*/
+                }
+            );
         }
 
         private void DoSmallRewindCommand()
@@ -291,17 +279,14 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPlayCommand()
         {
-            /*if (CanPlay)
+            if (IsPlaying)
             {
-                if (IsPlaying)
-                {
-                    connector.Pause();
-                }
-                else
-                {
-                    connector.Play(currentBookItem.Id);
-                }
-            }*/
+                connector.Pause();
+            }
+            else
+            {
+                connector.Play();
+            }
         }
 
         private void DoSmallFastForwardCommand()
@@ -437,17 +422,17 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateProperties()
         {
-            if (null == connector.MediaMetadataDescription)
+            if (null == connector.AudioBookMetadata)
             {
                 return;
             }
 
-            Title = connector.MediaMetadataDescription.Title;
-            Subtitle = connector.MediaMetadataDescription.Subtitle;
-            Description = connector.MediaMetadataDescription.Description;
-            Duration = connector.MediaMetadataDescription.Duration;
+            Title = connector.AudioBookMetadata.Title;
+            Subtitle = connector.AudioBookMetadata.Subtitle;
+            Description = connector.AudioBookMetadata.Description;
+            Duration = connector.AudioBookMetadata.Duration;
 
-            var imageUri = connector.MediaMetadataDescription.AlbumArtUri;
+            var imageUri = connector.AudioBookMetadata.AlbumArtUri;
 
             if (null == imageUri)
             {
@@ -459,14 +444,30 @@ namespace AudioBookPlayer.App.ViewModels
             /*BookPosition = currentBookItem.Position;*/
         }
 
-        private void MediaBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
+        private void UpdateChaptersList()
         {
+
+        }
+
+        private void AudioBookBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
+        {
+            IsPlaybackEnabled = connector.IsConnected;
             IsPlaying = PlaybackState.Playing == connector.PlaybackState;
         }
 
-        private void MediaBrowserConnectorMediaMetadataChanged(object sender, EventArgs _)
+        private void AudioBookBrowserConnectorAudioBookMetadataChanged(object sender, EventArgs _)
         {
             UpdateProperties();
+        }
+
+        private void AudioBookBrowserConnectorChaptersChanged(object sender, EventArgs _)
+        {
+            UpdateChaptersList();
+        }
+
+        private void AudioBookBrowserConnectorQueueIndexChanged(object sender, EventArgs _)
+        {
+            ;
         }
     }
 }
