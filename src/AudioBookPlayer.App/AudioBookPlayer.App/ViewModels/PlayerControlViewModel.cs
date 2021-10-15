@@ -253,11 +253,14 @@ namespace AudioBookPlayer.App.ViewModels
             connector.AudioBookMetadataChanged += AudioBookBrowserConnectorAudioBookMetadataChanged;
             connector.ChaptersChanged += AudioBookBrowserConnectorChaptersChanged;
             connector.QueueIndexChanged += AudioBookBrowserConnectorQueueIndexChanged;
+            connector.CurrentMediaPositionChanged += AudioBookBrowserConnectorCurrentMediaPositionChanged;
         }
 
         public void OnInitialize()
         {
             UpdateProperties();
+            UpdateCurrentChapterTitle();
+            UpdateCurrentMediaPosition();
         }
 
         private void DoPickChapter()
@@ -334,14 +337,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoNextChapter()
         {
-            /*var index = chapterIndex + 1;
-
-            if (playbackService.AudioBook.Chapters.Count <= index)
-            {
-                return;
-            }
-
-            playbackService.ChapterIndex = index;*/
+            connector.SkipToNext();
         }
 
         private Task DoLoadBookAsync()
@@ -446,7 +442,27 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateChaptersList()
         {
+            ;
+        }
 
+        private void UpdateCurrentChapterTitle()
+        {
+            var queueIndex = connector.QueueIndex;
+
+            if (-1 < queueIndex)
+            {
+                var chapter = connector.Chapters[queueIndex];
+                CurrentChapterTitle = chapter.Title;
+            }
+            else
+            {
+                CurrentChapterTitle = String.Empty;
+            }
+        }
+
+        private void UpdateCurrentMediaPosition()
+        {
+            ChapterPosition = connector.CurrentMediaPosition;
         }
 
         private void AudioBookBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
@@ -467,7 +483,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void AudioBookBrowserConnectorQueueIndexChanged(object sender, EventArgs _)
         {
-            ;
+            UpdateCurrentChapterTitle();
+        }
+
+        private void AudioBookBrowserConnectorCurrentMediaPositionChanged(object sender, EventArgs _)
+        {
+            UpdateCurrentMediaPosition();
         }
     }
 }

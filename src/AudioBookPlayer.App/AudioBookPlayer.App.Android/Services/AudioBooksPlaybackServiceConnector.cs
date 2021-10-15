@@ -10,6 +10,7 @@ using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Android.Support.V4.OS;
 using AudioBookPlayer.App.Android.Models;
 using AudioBookPlayer.App.Models;
 using Xamarin.Forms;
@@ -30,13 +31,39 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly BookSectionsTask bookSectionsTask;
         private readonly WeakEventManager eventManager;
         private MediaControllerCompat mediaController;
+        private int queueIndex;
+        private long currentMediaPosition;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
 
         public int QueueIndex
         {
-            get;
-            private set;
+            get => queueIndex;
+            private set
+            {
+                if (queueIndex == value)
+                {
+                    return;
+                }
+
+                queueIndex = value;
+                eventManager.HandleEvent(this, EventArgs.Empty, nameof(QueueIndexChanged));
+            }
+        }
+
+        public long CurrentMediaPosition
+        {
+            get => currentMediaPosition;
+            private set
+            {
+                if (currentMediaPosition == value)
+                {
+                    return;
+                }
+
+                currentMediaPosition = value;
+                eventManager.HandleEvent(this, EventArgs.Empty, nameof(CurrentMediaPositionChanged));
+            }
         }
 
         public MediaSessionCompat.Token SessionToken => mediaBrowser.SessionToken;
@@ -111,6 +138,13 @@ namespace AudioBookPlayer.App.Android.Services
             remove => eventManager.RemoveEventHandler(value);
         }
 
+        /// <inheritdoc cref="IMediaBrowserServiceConnector.CurrentMediaPositionChanged" />
+        public event EventHandler CurrentMediaPositionChanged
+        {
+            add => eventManager.AddEventHandler(value);
+            remove => eventManager.RemoveEventHandler(value);
+        }
+
         public AudioBooksPlaybackServiceConnector(IBookItemsCache bookItemsCache)
         {
             this.bookItemsCache = bookItemsCache;
@@ -132,10 +166,7 @@ namespace AudioBookPlayer.App.Android.Services
             mediaBrowser = new MediaBrowserCompat(Application.Context, componentName, connectionCallback, null);
             mediaControllerCallback = new MediaControllerCallback
             {
-                OnSessionReadyImpl = () =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnSessionReady] Executed");
-                },
+                OnSessionReadyImpl = OnSessionReady,
                 OnPlaybackStateChangedImpl = OnPlaybackStateChanged,
                 OnMetadataChangedImpl = OnMetadataChanged,
                 OnQueueChangedImpl = OnQueueChanged,
@@ -228,21 +259,22 @@ namespace AudioBookPlayer.App.Android.Services
         public Task UpdateLibraryAsync()
         {
             var tcs = new TaskCompletionSource();
-
+            var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
             {
-                var options = Bundle.Empty;
-                var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
-                {
-                    System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
-                    tcs.Complete();
-                }));
+                /*var temp1 = Handler.CreateAsync(Looper.MyLooper());
+                var temp2 = temp1.ObtainMessage(1);
 
-                MediaController.SendCommand(
-                    AudioBooksPlaybackService.IAudioBookMediaBrowserService.UpdateLibrary,
-                    options,
-                    new ResultReceiver(handler)
-                );
-            }
+                temp1.DispatchMessage(temp2);*/
+
+                System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
+                tcs.Complete();
+            }));
+
+            MediaController.SendCommand(
+                AudioBooksPlaybackService.IAudioBookMediaBrowserService.UpdateLibrary,
+                Bundle.Empty,
+                new ResultReceiver(handler)
+            );
 
             return tcs.Task;
         }
@@ -300,6 +332,16 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
+        public void SkipToNext()
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.SkipToNext();
+            }
+        }
+
         private void OnPlaybackStateChanged(PlaybackStateCompat playback)
         {
             PlaybackState = playback.State.ToPlaybackState();
@@ -346,63 +388,46 @@ namespace AudioBookPlayer.App.Android.Services
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
         }
 
+        private void OnSessionReady()
+        {
+            var messenger = new Messenger(new CallbackHandler
+            {
+                Handle = msg =>
+                {
+                    switch (msg.What)
+                    {
+                        case 1:
+                        {
+                            var position = msg.Data.GetLong("POSITION");
+
+                            System.Diagnostics.Debug.WriteLine($"[MediaControllerCallback.OnSessionReadyImpl] [Handle] Position: {position}");
+
+                            break;
+                        }
+
+                        default:
+                        {
+                            System.Diagnostics.Debug.WriteLine("[MediaControllerCallback.OnSessionReadyImpl] [Handle] Callback executed");
+                            break;
+                        }
+                    }
+                }
+            });
+
+            var options = new Bundle();
+
+            options.PutParcelable("MESSENGER", messenger);
+
+            MediaController.SendCommand("TEST", options, null);
+        }
+
         private void OnExtrasChanged(Bundle extras)
         {
             QueueIndex = extras.GetInt("QueueIndex");
-
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(QueueIndexChanged));
+            CurrentMediaPosition = extras.GetLong("CurrentMediaPosition");
+            //eventManager.HandleEvent(this, EventArgs.Empty, nameof(QueueIndexChanged));
         }
 
-        // ConnectionCallback class
-        private sealed class ServiceConnectionCallback : MediaBrowserCompat.ConnectionCallback
-        {
-            public Action OnConnectImpl
-            {
-                get;
-                set;
-            }
-
-            public Action OnConnectionSuspendedImpl
-            {
-                get;
-                set;
-            }
-
-            public Action OnConnectionFailedImpl
-            {
-                get;
-                set;
-            }
-
-            public override void OnConnected() => OnConnectImpl.Invoke();
-
-            public override void OnConnectionSuspended() => OnConnectionSuspendedImpl.Invoke();
-
-            public override void OnConnectionFailed() => OnConnectionFailedImpl.Invoke();
-        }
-
-        // ItemCallback class
-        private sealed class ItemCallback : MediaBrowserCompat.ItemCallback
-        {
-            private readonly AudioBooksPlaybackServiceConnector connector;
-
-            public ItemCallback(AudioBooksPlaybackServiceConnector connector)
-            {
-                this.connector = connector;
-            }
-
-            public override void OnError(string itemId)
-            {
-                System.Diagnostics.Debug.WriteLine($"[ItemCallback] [OnError] Item: \"{itemId}\"");
-            }
-
-            public override void OnItemLoaded(MediaBrowserCompat.MediaItem item)
-            {
-                System.Diagnostics.Debug.WriteLine($"[ItemCallback] [OnItemLoaded] Loaded: \"{item.MediaId}\"");
-            }
-        }
-
-        // ActionHandlerCallback class
         private sealed class ActionHandlerCallback : Java.Lang.Object, Handler.ICallback
         {
             private readonly Action<Message> handler;
@@ -417,6 +442,27 @@ namespace AudioBookPlayer.App.Android.Services
                 handler.Invoke(msg);
                 return true;
             }
+        }
+
+        private sealed class CallbackHandler : Handler
+        {
+            public Action<Message> Handle
+            {
+                get; 
+                set;
+            }
+
+            public CallbackHandler()
+            {
+                ;
+            }
+
+            public override void HandleMessage(Message msg) => Handle?.Invoke(msg);
+        }
+
+        public interface IPlaybackCallback
+        {
+            void 
         }
     }
 }

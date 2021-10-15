@@ -2,14 +2,11 @@
 
 using Android.App;
 using Android.Content;
-using Android.Content.Res;
 using Android.Media;
 using Android.OS;
 using Android.Support.V4.Media.Session;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
 using System;
-using AudioBookPlayer.App.Domain.Models;
+using System.Threading;
 using Application = Android.App.Application;
 using Uri = Android.Net.Uri;
 
@@ -18,6 +15,8 @@ namespace AudioBookPlayer.App.Android.Services
     internal interface IPlaybackCallback
     {
         void StateChanged();
+
+        void PositionChanged();
     }
 
     internal sealed partial class Playback : Java.Lang.Object, MediaPlayer.IOnPreparedListener,
@@ -36,9 +35,10 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly AudioAttributes? audioAttributes;
         private Intent? noisyIntent;
         private MediaPlayer? mediaPlayer;
+        private Timer? playingTimer;
         private int state;
-        // private long currentPosition;
         private bool playOnFocusGain;
+        private long currentMediaPosition;
 
         public Uri? MediaUri
         {
@@ -58,11 +58,20 @@ namespace AudioBookPlayer.App.Android.Services
             private set;
         }
 
-        public long FragmentPosition
+        /*public long FragmentPosition
         {
-            get;
-            private set;
-        }
+            get => fragmentPosition;
+            private set
+            {
+                if (value == fragmentPosition)
+                {
+                    return;
+                }
+
+                fragmentPosition = value;
+                callback.PositionChanged();
+            }
+        }*/
 
         public int State
         {
@@ -83,7 +92,20 @@ namespace AudioBookPlayer.App.Android.Services
 
         public bool IsPlaying => playOnFocusGain || mediaPlayer is { IsPlaying: true };
 
-        public long CurrentMediaPosition => null != mediaPlayer ? mediaPlayer.CurrentPosition : FragmentPosition;
+        public long CurrentMediaPosition
+        {
+            get => currentMediaPosition;
+            set
+            {
+                if (value == currentMediaPosition)
+                {
+                    return;
+                }
+
+                currentMediaPosition = value;
+                callback.PositionChanged();
+            }
+        }
 
         public Playback(Service service, MediaSessionCompat mediaSession, IPlaybackCallback callback)
         {
@@ -121,7 +143,7 @@ namespace AudioBookPlayer.App.Android.Services
             MediaUri = null;
             FragmentStart = -1L;
             FragmentDuration = 0L;
-            FragmentPosition = FragmentStart;
+            CurrentMediaPosition = FragmentStart;
         }
 
         public void PlayFragment(Uri mediaUri, double start, double duration)
@@ -156,7 +178,7 @@ namespace AudioBookPlayer.App.Android.Services
             MediaUri = mediaUri;
             FragmentStart = (long)start;
             FragmentDuration = (long)duration;
-            FragmentPosition = FragmentStart;
+            CurrentMediaPosition = FragmentStart;
 
             try
             {
@@ -203,7 +225,9 @@ namespace AudioBookPlayer.App.Android.Services
                     RegisterNoisyReceiver();
 
                     mediaPlayer.Start();
-                    FragmentPosition = mediaPlayer.CurrentPosition;
+                    CurrentMediaPosition = mediaPlayer.CurrentPosition;
+
+                    CreatePlayTimer();
                 }
 
                 State = PlaybackStateCompat.StatePlaying;
@@ -218,8 +242,10 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (mediaPlayer is { IsPlaying: true })
                 {
+                    DeletePlayTimer();
+
                     mediaPlayer.Pause();
-                    FragmentPosition = mediaPlayer.CurrentPosition;
+                    CurrentMediaPosition = mediaPlayer.CurrentPosition;
                 }
 
                 // RelaxResources(false);
@@ -237,8 +263,12 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (mediaPlayer is { IsPlaying: true })
                 {
+                    DeletePlayTimer();
+
                     mediaPlayer.Stop();
-                    FragmentPosition = mediaPlayer.CurrentPosition;
+                    CurrentMediaPosition = mediaPlayer.CurrentPosition;
+                    mediaPlayer.Dispose();
+                    mediaPlayer = null;
                 }
 
                 // RelaxResources(false);
@@ -249,20 +279,6 @@ namespace AudioBookPlayer.App.Android.Services
 
             UnregisterNoisyReceiver();
         }
-
-        /*private MediaFragmentInfo? GetPositionFromQueueItem()
-        {
-            if (null == QueueItem)
-            {
-                return null;
-            }
-
-            var start = (long)QueueItem.Description.Extras.GetDouble("Start");
-            var duration = (long)QueueItem.Description.Extras.GetDouble("Duration");
-            var mediaUri = QueueItem.Description.MediaUri;
-
-            return new MediaFragmentInfo(start, duration, mediaUri);
-        }*/
 
         private void DoAudioFocusChange(bool canDuck)
         {
@@ -288,7 +304,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         void MediaPlayer.IOnSeekCompleteListener.OnSeekComplete(MediaPlayer? _)
         {
-            if (playOnFocusGain && null != mediaPlayer && mediaPlayer.CurrentPosition == FragmentPosition)
+            if (playOnFocusGain && null != mediaPlayer /*&& mediaPlayer.CurrentPosition == FragmentPosition*/)
             {
                 mediaPlayer.Start();
                 State = PlaybackStateCompat.StatePlaying;
@@ -320,24 +336,27 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (playOnFocusGain)
                 {
-                    var newState = State;
-
                     if (mediaPlayer is { IsPlaying: false })
                     {
-                        if (mediaPlayer.CurrentPosition == FragmentPosition)
+                        if (mediaPlayer.CurrentPosition == CurrentMediaPosition)
                         {
                             mediaPlayer.Start();
-                            newState = PlaybackStateCompat.StatePlaying;
                             playOnFocusGain = false;
+                            State = PlaybackStateCompat.StatePlaying;
                         }
                         else
                         {
-                            mediaPlayer.SeekTo(FragmentPosition, MediaPlayerSeekMode.Closest);
-                            newState = PlaybackStateCompat.StateBuffering;
+                            // FragmentStart ?
+                            mediaPlayer.SeekTo(CurrentMediaPosition, MediaPlayerSeekMode.Closest);
+                            State = PlaybackStateCompat.StateBuffering;
                         }
                     }
+                    else
+                    {
+                        ;
+                    }
 
-                    State = newState;
+                    return ;
                 }
             }
         }
@@ -353,11 +372,7 @@ namespace AudioBookPlayer.App.Android.Services
             return builder.Build();
         }
 
-        private static AudioManager? GetAudioManager()
-        {
-            return AudioManager.FromContext(Application.Context);
-            // return (AudioManager?)Application.Context.GetSystemService(Context.AudioService);
-        }
+        private static AudioManager? GetAudioManager() => AudioManager.FromContext(Application.Context);
 
         private void EnsureMediaPlayerCreated()
         {
@@ -371,6 +386,8 @@ namespace AudioBookPlayer.App.Android.Services
             mediaPlayer.SetWakeMode(Application.Context, WakeLockFlags.Partial);
             mediaPlayer.SetOnPreparedListener(this);
             mediaPlayer.SetOnSeekCompleteListener(this);
+
+            CreatePlayTimer();
         }
 
         private void RegisterNoisyReceiver()
@@ -387,6 +404,40 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 service.UnregisterReceiver(noisyReceiver);
                 noisyIntent = null;
+            }
+        }
+
+        private void CreatePlayTimer()
+        {
+            if (null != playingTimer)
+            {
+                return;
+            }
+
+            playingTimer = new Timer(OnPlayingTimer, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(100.0d));
+        }
+
+        private void DeletePlayTimer()
+        {
+            if (null != playingTimer)
+            {
+                playingTimer.Dispose();
+                playingTimer = null;
+            }
+        }
+
+        private void OnPlayingTimer(object _)
+        {
+            if (null != mediaPlayer)
+            {
+                var elapsed = mediaPlayer.CurrentPosition - FragmentStart;
+
+                if (FragmentDuration <= elapsed)
+                {
+                    Pause();
+                }
+
+                CurrentMediaPosition = elapsed;
             }
         }
     }

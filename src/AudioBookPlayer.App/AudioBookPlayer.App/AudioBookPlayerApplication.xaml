@@ -167,6 +167,7 @@
                         VerticalOptions="Center">
                         <ImageButton
                             x:Name="PART_RewindButton"
+                            Command="{TemplateBinding Path=Rewind, Mode=OneWay}"
                             Style="{StaticResource SecondaryPlaybackButtonStyle}"
                             Source="{FontImage FontFamily=FASolid, Size=12, Glyph='&#xF04A;'}"
                             Padding="{OnPlatform Android='8,12,12,12', iOS='4'}"
@@ -202,6 +203,7 @@
                         </ImageButton>
                         <ImageButton
                             x:Name="PART_FastForwardButton"
+                            Command="{TemplateBinding Path=FastForward, Mode=OneWay}"
                             Style="{StaticResource SecondaryPlaybackButtonStyle}"
                             Source="{FontImage FontFamily=FASolid, Size=12, Glyph='&#xF04E;'}"
                             Padding="{OnPlatform Android='12,12,8,12', iOS='4'}"

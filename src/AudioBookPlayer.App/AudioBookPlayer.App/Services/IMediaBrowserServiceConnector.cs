@@ -31,6 +31,14 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
+        long CurrentMediaPosition
+        {
+            get;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         PlaybackState PlaybackState
         {
             get;
@@ -71,6 +79,11 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         event EventHandler QueueIndexChanged;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler CurrentMediaPositionChanged;
 
         /// <summary>
         /// 
@@ -123,5 +136,10 @@ namespace AudioBookPlayer.App.Services
         /// </summary>
         /// <param name="queueId"></param>
         void SetQueueItemIndex(long queueId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void SkipToNext();
     }
 }
