@@ -17,9 +17,14 @@ namespace AudioBookPlayer.App.Core
         {
             if (typeof(String) == targetType)
             {
-                if (null != value && value is TimeSpan timespan)
+                if (value is TimeSpan timespan)
                 {
                     return ConvertTimeSpanToString(timespan, parameter, culture);
+                }
+
+                if (value is long duration)
+                {
+                    return ConvertTimeSpanToString(duration, parameter, culture);
                 }
             }
 
@@ -31,10 +36,16 @@ namespace AudioBookPlayer.App.Core
             throw new NotImplementedException();
         }
 
-        private static object ConvertTimeSpanToString(TimeSpan value, object parameter, CultureInfo culture)
+        private static object ConvertTimeSpanToString(TimeSpan value, object _, CultureInfo culture)
         {
             var format = 0 < value.Days ? LongTimeSpanFormat : ShortTimeSpanFormat;
             return value.ToString(format, culture);
+        }
+
+        private static object ConvertTimeSpanToString(double value, object parameter, CultureInfo culture)
+        {
+            var timespan = TimeSpan.FromMilliseconds(value);
+            return ConvertTimeSpanToString(timespan, parameter, culture);
         }
     }
 }

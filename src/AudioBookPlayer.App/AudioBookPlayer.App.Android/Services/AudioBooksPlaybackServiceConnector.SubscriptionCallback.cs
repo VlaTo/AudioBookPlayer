@@ -33,8 +33,8 @@ namespace AudioBookPlayer.App.Android.Services
 
             public SubscriptionCallback()
             {
-                ChildrenLoadedImpl = Stub.Empty<string, IList<MediaBrowserCompat.MediaItem>>();
-                ErrorImpl = Stub.Empty<string>();
+                ChildrenLoadedImpl = Stub.Nop<string, IList<MediaBrowserCompat.MediaItem>>();
+                ErrorImpl = Stub.Nop<string>();
             }
 
             public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)

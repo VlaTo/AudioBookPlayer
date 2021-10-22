@@ -241,6 +241,7 @@ namespace AudioBookPlayer.App.Android.Services
                 .SetContentIntent(mediaController.SessionActivity)
                 .SetOnlyAlertOnce(true)
                 .SetVisibility(NotificationCompat.VisibilityPublic)
+                .SetUsesChronometer(true)
                 .Build();
 
             if (null != notification && null != notificationManager)

@@ -2,23 +2,23 @@
 {
     internal readonly struct MediaFragment
     {
-        public double Start
+        public long Start
         {
             get;
         }
 
-        public double Duration
+        public long Duration
         {
             get;
         }
 
-        public MediaFragment(double start, double duration)
+        public MediaFragment(long start, long duration)
         {
             Start = start;
             Duration = duration;
         }
 
-        public void Deconstruct(out double start, out double duration)
+        public void Deconstruct(out long start, out long duration)
         {
             start = Start;
             duration = Duration;

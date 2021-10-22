@@ -77,6 +77,7 @@
     <Compile Include="Models\ChapterMetadata.cs" />
     <Compile Include="Models\MediaFragment.cs" />
     <Compile Include="Models\SectionMetadata.cs" />
+    <Compile Include="Services\AudioBooksPlaybackService.ICustomPlayback.cs" />
     <Compile Include="Services\AudioBooksPlaybackServiceConnector.ItemCallback.cs" />
     <Compile Include="Services\AudioBooksPlaybackServiceConnector.ServiceConnectionCallback.cs" />
     <Compile Include="Services\Helpers\BitmapHelper.cs" />

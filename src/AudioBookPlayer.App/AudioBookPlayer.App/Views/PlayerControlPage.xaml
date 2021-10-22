@@ -167,7 +167,7 @@
                 VerticalOptions="Fill"
                 Padding="{OnPlatform Android='8', iOS='16'}"
                 TextTransform="None"
-                Text="{Binding Path=CurrentChapterTitle, Mode=OneWay}"
+                Text="{Binding Path=QueueItemTitle, Mode=OneWay}"
             />
             <ImageButton
                 Command="{Binding Path=NextChapter, Mode=OneTime}"
@@ -181,7 +181,7 @@
             HeightRequest="{OnPlatform Android='32', iOS='32'}">
             <Label
                 Style="{StaticResource SeekBarTimeLabelStyle}"
-                Text="{Binding Path=Elapsed, Converter={StaticResource SpanConverter}, Mode=OneWay}"
+                Text="{Binding Path=Position, Converter={StaticResource SpanConverter}, Mode=OneWay}"
                 HorizontalOptions="Start"
                 VerticalOptions="Fill"
                 HorizontalTextAlignment="Center"
@@ -191,8 +191,8 @@
             />
             <Slider
                 Minimum="0"
-                Maximum="{Binding Path=ChapterEnd, Mode=OneWay}"
-                Value="{Binding Path=ChapterPosition, Mode=TwoWay}"
+                Maximum="{Binding Path=Duration, Mode=OneWay}"
+                Value="{Binding Path=Position, Mode=TwoWay}"
                 HorizontalOptions="FillAndExpand"
                 Margin="{OnPlatform Android='0', iOS='48,4'}"
             />

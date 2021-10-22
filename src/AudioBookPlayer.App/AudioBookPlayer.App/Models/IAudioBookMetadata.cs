@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AudioBookPlayer.App.Models
+﻿namespace AudioBookPlayer.App.Models
 {
     public interface IAudioBookMetadata
     {
@@ -15,11 +13,6 @@ namespace AudioBookPlayer.App.Models
         }
 
         string Description
-        {
-            get;
-        }
-
-        TimeSpan Duration
         {
             get;
         }

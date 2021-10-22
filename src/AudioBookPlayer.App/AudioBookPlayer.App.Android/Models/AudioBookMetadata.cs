@@ -1,5 +1,4 @@
-﻿using System;
-using Android.Support.V4.Media;
+﻿using Android.Support.V4.Media;
 using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Android.Models
@@ -17,8 +16,6 @@ namespace AudioBookPlayer.App.Android.Models
         
         public string Description => metadata.Description.Description;
         
-        public TimeSpan Duration => TimeSpan.FromMilliseconds(metadata.Bundle.GetLong("Duration"));
-
         public string AlbumArtUri => metadata.Description.IconUri.ToString();
 
         public AudioBookMetadata(MediaMetadataCompat metadata)

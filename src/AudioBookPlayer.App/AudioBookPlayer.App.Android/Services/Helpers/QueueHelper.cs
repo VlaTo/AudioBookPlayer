@@ -44,9 +44,8 @@ namespace AudioBookPlayer.App.Android.Services.Helpers
 
                     var extra = new Bundle(sectionExtra);
 
-                    // extra.PutString("SectionId", sectionId);
-                    extra.PutDouble("Start", chapter.Start.TotalMilliseconds);
-                    extra.PutDouble("Duration", chapter.Duration.TotalMilliseconds);
+                    extra.PutLong("Chapter.Start", (long)chapter.Start.TotalMilliseconds);
+                    extra.PutLong("Chapter.Duration", (long)chapter.Duration.TotalMilliseconds);
 
                     description.SetExtras(extra);
 

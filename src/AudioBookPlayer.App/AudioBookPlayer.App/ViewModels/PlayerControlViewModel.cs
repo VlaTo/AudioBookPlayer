@@ -25,19 +25,16 @@ namespace AudioBookPlayer.App.ViewModels
         private string title;
         private string subtitle;
         private string description;
-        private string currentChapterTitle;
-        private int chapterIndex;
-        private double chapterStart;
-        private double chapterEnd;
-        private double chapterPosition;
-        private TimeSpan elapsed;
-        private TimeSpan left;
-        private TimeSpan duration;
+        private string queueItemTitle;
+        private int queueItemIndex;
+        private long position;
+        private long duration;
+        private long left;
         private TimeSpan bookProgress;
-        private TimeSpan chapterDuration;
         private Func<CancellationToken, Task<Stream>> imageSource;
         private bool isPlaying;
         private bool isPlaybackEnabled;
+        private long activeQueueItemId;
 
         #region Properties
 
@@ -77,65 +74,85 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref imageSource, value);
         }
 
-        public double ChapterEnd
+        public long ActiveQueueItemId
         {
-            get => chapterEnd;
+            get => activeQueueItemId;
             set
             {
-                if (SetProperty(ref chapterEnd, value))
+                if (SetProperty(ref activeQueueItemId, value))
                 {
-                    ;
+                    for (var index = 0; index < connector.Chapters.Count; index++)
+                    {
+                        var chapter = connector.Chapters[index];
+
+                        if (chapter.QueueId == value)
+                        {
+                            QueueItemIndex = index;
+                            QueueItemTitle = chapter.Title;
+
+                            return;
+                        }
+                    }
+
+                    QueueItemIndex = -1;
+                    QueueItemTitle = String.Empty;
                 }
             }
         }
 
-        public double ChapterPosition
+        public long Position
         {
-            get => chapterPosition;
+            get => position;
             set
             {
-                if (SetProperty(ref chapterPosition, value))
+                if (SetProperty(ref position, value))
                 {
-                    elapsed = TimeSpan.FromMilliseconds(value);
-                    left = elapsed - chapterDuration;
-
-                    OnPropertyChanged(nameof(Elapsed));
-                    OnPropertyChanged(nameof(Left));
+                    Left = duration - position;
                 }
             }
         }
 
-        public TimeSpan Duration
+        public long Duration
         {
             get => duration;
-            set => SetProperty(ref duration, value);
+            set
+            {
+                if (SetProperty(ref duration, value))
+                {
+                    Left = duration - position;
+                }
+            }
         }
 
-        public TimeSpan BookPosition
+        public int QueueItemIndex
         {
-            get => bookProgress;
-            set => SetProperty(ref bookProgress, value);
+            get => queueItemIndex;
+            set
+            {
+                if (SetProperty(ref queueItemIndex, value))
+                {
+                    if (-1 < value && value < connector.Chapters.Count)
+                    {
+                        var chapter = connector.Chapters[value];
+                        ActiveQueueItemId = chapter.QueueId;
+                    }
+                }
+            }
         }
 
-        public int ChapterIndex
+        public string QueueItemTitle
         {
-            get => chapterIndex;
-            set => SetProperty(ref chapterIndex, value);
+            get => queueItemTitle;
+            set => SetProperty(ref queueItemTitle, value);
         }
 
-        public string CurrentChapterTitle
-        {
-            get => currentChapterTitle;
-            set => SetProperty(ref currentChapterTitle, value);
-        }
-
-        public TimeSpan Elapsed
+        /*public TimeSpan Elapsed
         {
             get => elapsed;
             set => SetProperty(ref elapsed, value);
-        }
+        }*/
 
-        public TimeSpan Left
+        public long Left
         {
             get => left;
             set => SetProperty(ref left, value);
@@ -232,35 +249,35 @@ namespace AudioBookPlayer.App.ViewModels
             PickChapterRequest = new InteractionRequest<PickChapterRequestContext>();
             BookmarkRequest = new InteractionRequest<BookmarkRequestContext>();
 
-            chapterStart = 0.0d;
-            chapterDuration = TimeSpan.Zero;
-
-            ChapterEnd = 0.1d;
-            ChapterPosition = 0.0d;
-            ChapterIndex = -1;
-            CurrentChapterTitle = String.Empty;
-
+            ActiveQueueItemId = -1;
+            QueueItemIndex = -1;
             Title = String.Empty;
             Subtitle = String.Empty;
+            Description=String.Empty;
+            QueueItemTitle = String.Empty;
             ImageSource = null;
-            Duration = TimeSpan.Zero;
-            BookPosition = TimeSpan.Zero;
-            Elapsed = TimeSpan.Zero;
-            Left = TimeSpan.Zero;
+            Duration = 1L;
+            Position = 0L;
+            Left = 0L;
             IsPlaybackEnabled = true;
 
             connector.PlaybackStateChanged += AudioBookBrowserConnectorPlaybackStateChanged;
             connector.AudioBookMetadataChanged += AudioBookBrowserConnectorAudioBookMetadataChanged;
             connector.ChaptersChanged += AudioBookBrowserConnectorChaptersChanged;
             connector.QueueIndexChanged += AudioBookBrowserConnectorQueueIndexChanged;
-            connector.CurrentMediaPositionChanged += AudioBookBrowserConnectorCurrentMediaPositionChanged;
+            connector.CurrentMediaInfoChanged += AudioBookBrowserConnectorCurrentMediaPositionChanged;
         }
 
         public void OnInitialize()
         {
             UpdateProperties();
             UpdateCurrentChapterTitle();
-            UpdateCurrentMediaPosition();
+            //UpdateCurrentMediaPosition();
+            IsPlaybackEnabled = connector.IsConnected;
+            IsPlaying = PlaybackState.Playing == connector.PlaybackState;
+            ActiveQueueItemId = connector.ActiveQueueItemId;
+            Position = connector.PlaybackPosition;
+            Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
         }
 
         private void DoPickChapter()
@@ -319,7 +336,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoSnoozeCommand()
         {
-            var position = TimeSpan.FromMilliseconds(ChapterPosition);
+            var position = TimeSpan.FromMilliseconds(Position);
             Debug.WriteLine($"[PlayerControlViewModel] [DoSnoozeCommand] Current: {position:g}");
         }
 
@@ -418,31 +435,30 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateProperties()
         {
-            if (null == connector.AudioBookMetadata)
+            var metadata = connector.AudioBookMetadata;
+
+            if (null == metadata)
             {
                 return;
             }
 
-            Title = connector.AudioBookMetadata.Title;
-            Subtitle = connector.AudioBookMetadata.Subtitle;
-            Description = connector.AudioBookMetadata.Description;
-            Duration = connector.AudioBookMetadata.Duration;
+            Title = metadata.Title;
+            Subtitle = metadata.Subtitle;
+            Description = metadata.Description;
+            Duration = metadata.Duration;
+            Position = 0L;
+            //Duration = metadata.Duration;
 
-            var imageUri = connector.AudioBookMetadata.AlbumArtUri;
+            var imageUri = metadata.AlbumArtUri;
 
-            if (null == imageUri)
+            if (null != imageUri)
             {
-                // ImageSource = cancellationToken => coverService.GetImageAsync(connector.MediaMetadataDescription.AlbumAtrUri, cancellationToken);
+                ImageSource = cancellationToken => coverService.GetImageAsync(imageUri, cancellationToken);
             }
-
-            ImageSource = cancellationToken => coverService.GetImageAsync(imageUri, cancellationToken);
-
-            /*BookPosition = currentBookItem.Position;*/
         }
 
         private void UpdateChaptersList()
         {
-            ;
         }
 
         private void UpdateCurrentChapterTitle()
@@ -452,23 +468,28 @@ namespace AudioBookPlayer.App.ViewModels
             if (-1 < queueIndex)
             {
                 var chapter = connector.Chapters[queueIndex];
-                CurrentChapterTitle = chapter.Title;
+                QueueItemTitle = chapter.Title;
             }
             else
             {
-                CurrentChapterTitle = String.Empty;
+                QueueItemTitle = String.Empty;
             }
         }
 
         private void UpdateCurrentMediaPosition()
         {
-            ChapterPosition = connector.CurrentMediaPosition;
+            Position = connector.PlaybackPosition;
+            Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
         }
 
         private void AudioBookBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
         {
-            IsPlaybackEnabled = connector.IsConnected;
+            //IsPlaybackEnabled = connector.IsConnected;
             IsPlaying = PlaybackState.Playing == connector.PlaybackState;
+            ActiveQueueItemId = connector.ActiveQueueItemId;
+            Position = connector.PlaybackPosition;
+            // Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
+            //UpdateCurrentMediaPosition();
         }
 
         private void AudioBookBrowserConnectorAudioBookMetadataChanged(object sender, EventArgs _)
@@ -483,12 +504,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void AudioBookBrowserConnectorQueueIndexChanged(object sender, EventArgs _)
         {
-            UpdateCurrentChapterTitle();
+            //UpdateCurrentChapterTitle();
         }
 
         private void AudioBookBrowserConnectorCurrentMediaPositionChanged(object sender, EventArgs _)
         {
-            UpdateCurrentMediaPosition();
+           // UpdateCurrentMediaPosition();
         }
     }
 }

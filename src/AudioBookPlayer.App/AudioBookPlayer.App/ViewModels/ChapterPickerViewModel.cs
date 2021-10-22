@@ -44,7 +44,8 @@ namespace AudioBookPlayer.App.ViewModels
 
                     if (null != selectedChapter)
                     {
-                        connector.SetQueueItemIndex(selectedChapter.QueueId);
+                        // connector.SetQueueItemIndex(selectedChapter.QueueId);
+                        connector.SetQueueItemIndex(selectedChapter.Index);
                     }
 
                     DoClose(false);
