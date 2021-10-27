@@ -159,19 +159,10 @@ namespace AudioBookPlayer.App.Android.Services
                                 var chapter = new AudioBookChapter(audioBook, track.Title, section)
                                 {
                                     Start = duration,
-                                    //Duration = audioBook.Duration
                                     Duration = track.Duration
                                 };
 
-                                //var sourceFile = new AudioBookSourceFile(audioBook, contentUri);
-
                                 section.Chapters.Add(chapter);
-
-                                //var fragment = new AudioBookChapterFragment(duration, track.Duration, sourceFile);
-
-                                //chapter.Fragments.Add(fragment);
-                                //audioBook.Chapters.Add(chapter);
-                                //audioBook.SourceFiles.Add(sourceFile);
 
                                 sourceFiles[contentUri] = duration + track.Duration;
                             }
@@ -190,6 +181,8 @@ namespace AudioBookPlayer.App.Android.Services
                                     }
                                 }
                             }
+
+                            audioBook.Duration = CalculateBookDuration(audioBook);
                         }
                     }
                 }
@@ -276,6 +269,24 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 audioBook.Synopsis = String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, synopsis);
             }
+        }
+
+        private static TimeSpan CalculateBookDuration(AudioBook audioBook)
+        {
+            var duration = TimeSpan.Zero;
+
+            for (var sectionIndex = 0; sectionIndex < audioBook.Sections.Count; sectionIndex++)
+            {
+                var section = audioBook.Sections[sectionIndex];
+
+                for (var chapterIndex = 0; chapterIndex < section.Chapters.Count; chapterIndex++)
+                {
+                    var chapter = section.Chapters[chapterIndex];
+                    duration += chapter.Duration;
+                }
+            }
+
+            return duration;
         }
     }
 }

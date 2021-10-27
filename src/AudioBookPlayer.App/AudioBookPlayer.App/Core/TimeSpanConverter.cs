@@ -36,13 +36,13 @@ namespace AudioBookPlayer.App.Core
             throw new NotImplementedException();
         }
 
-        private static object ConvertTimeSpanToString(TimeSpan value, object _, CultureInfo culture)
+        private static object ConvertTimeSpanToString(TimeSpan value, object _, IFormatProvider culture)
         {
             var format = 0 < value.Days ? LongTimeSpanFormat : ShortTimeSpanFormat;
             return value.ToString(format, culture);
         }
 
-        private static object ConvertTimeSpanToString(double value, object parameter, CultureInfo culture)
+        private static object ConvertTimeSpanToString(long value, object parameter, IFormatProvider culture)
         {
             var timespan = TimeSpan.FromMilliseconds(value);
             return ConvertTimeSpanToString(timespan, parameter, culture);

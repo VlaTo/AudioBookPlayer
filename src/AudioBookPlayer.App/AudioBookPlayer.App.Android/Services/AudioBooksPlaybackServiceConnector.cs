@@ -30,14 +30,24 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly BookSectionsTask bookSectionsTask;
         private readonly WeakEventManager eventManager;
         private MediaControllerCompat mediaController;
+        private long activeQueueItemId;
+        private int queueIndex;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
 
-        public int QueueIndex
+        /*public int QueueIndex
         {
-            get;
-            private set;
-        }
+            get => queueIndex;
+            private set
+            {
+                if (queueIndex != value)
+                {
+                    ;
+                }
+
+                queueIndex = value;
+            }
+        }*/
 
         public long PlaybackPosition
         {
@@ -53,8 +63,32 @@ namespace AudioBookPlayer.App.Android.Services
 
         public long ActiveQueueItemId
         {
-            get;
-            private set;
+            get => activeQueueItemId;
+            private set
+            {
+                if (activeQueueItemId == value)
+                {
+                    return;
+                }
+
+                activeQueueItemId = value;
+
+                var chapters = Chapters;
+
+                for (var index = 0; index < chapters.Count; index++)
+                {
+                    if (chapters[index].QueueId != value)
+                    {
+                        continue;
+                    }
+
+                    queueIndex = index;
+
+                    return;
+                }
+
+                queueIndex = -1;
+            }
         }
 
         public MediaSessionCompat.Token SessionToken => mediaBrowser.SessionToken;
@@ -161,10 +195,11 @@ namespace AudioBookPlayer.App.Android.Services
                 OnPlaybackStateChangedImpl = OnPlaybackStateChanged,
                 OnMetadataChangedImpl = OnMetadataChanged,
                 OnQueueChangedImpl = OnQueueChanged,
+                OnQueueTitleChangedImpl = OnQueueTitleChanged,
                 // OnExtrasChangedImpl = OnExtrasChanged,
-                OnAudioInfoChangedImpl = (playbackInfo) =>
+                OnAudioInfoChangedImpl = pi =>
                 {
-                    System.Diagnostics.Debug.WriteLine("[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Execute");
+                    System.Diagnostics.Debug.WriteLine($"[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Playback type: {pi.PlaybackType}");
                 },
                 OnSessionEventImpl = (eventName, options) =>
                 {
@@ -186,9 +221,9 @@ namespace AudioBookPlayer.App.Android.Services
             bookItemsTask = new BookItemsTask(booksLibraryTask, bookItemsCache);
             bookSectionsTask = new BookSectionsTask(mediaBrowser);
 
-            AudioBookMetadata = null;
-            QueueIndex = -1;
             Chapters = Array.Empty<IChapterMetadata>();
+            AudioBookMetadata = null;
+            ActiveQueueItemId = -1;
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
@@ -313,13 +348,23 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        public void SetQueueItemIndex(long queueId)
+        public void SetActiveQueueItemId(long queueItemId)
         {
             var controls = MediaController?.GetTransportControls();
 
             if (null != controls)
             {
-                controls.SkipToQueueItem(queueId);
+                controls.SkipToQueueItem(queueItemId);
+            }
+        }
+
+        public void SkipToPrevious()
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.SkipToPrevious();
             }
         }
 
@@ -336,10 +381,30 @@ namespace AudioBookPlayer.App.Android.Services
         private void OnPlaybackStateChanged(PlaybackStateCompat playback)
         {
             PlaybackState = playback.State.ToPlaybackState();
-            PlaybackPosition = playback.Position;
             ActiveQueueItemId = playback.ActiveQueueItemId;
-            // playback.LastPositionUpdateTime
+
+            var start = GetMediaFragmentStart(playback.Extras);
+            var duration = GetMediaFragmentDuration(playback.Extras);
+            var queueId = GetMediaFragmentLong(playback.Extras, "Queue.ID");
+
+            PlaybackPosition = playback.Position;
+            PlaybackDuration = duration;
+            
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(PlaybackStateChanged));
+        }
+
+        private static long GetMediaFragmentStart(Bundle bundle) => GetMediaFragmentLong(bundle, "Chapter.Start");
+
+        private static long GetMediaFragmentDuration(Bundle bundle) => GetMediaFragmentLong(bundle, "Chapter.Duration");
+
+        private static long GetMediaFragmentLong(Bundle bundle, string key)
+        {
+            if (null == bundle || false == bundle.ContainsKey(key))
+            {
+                return 0L;
+            }
+
+            return bundle.GetLong(key);
         }
 
         private void OnMetadataChanged(MediaMetadataCompat metadata)
@@ -380,6 +445,12 @@ namespace AudioBookPlayer.App.Android.Services
             Chapters = chapters.AsReadOnly();
 
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
+        }
+
+        private void OnQueueTitleChanged(string queueTitle)
+        {
+
+            // eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
         }
 
         private void OnSessionReady()

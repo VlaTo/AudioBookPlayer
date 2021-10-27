@@ -15,7 +15,6 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly IMediaBrowserServiceConnector connector;
         private readonly TaskExecutionMonitor chaptersLoader;
-        // private int chapterIndex;
         private ChapterViewModel selectedChapter;
         private bool isInitializing;
 
@@ -23,12 +22,6 @@ namespace AudioBookPlayer.App.ViewModels
         {
             get;
         }
-
-        /*public int ChapterIndex
-        {
-            get => chapterIndex;
-            set => SetProperty(ref chapterIndex, value);
-        }*/
 
         public ChapterViewModel SelectedChapter
         {
@@ -44,8 +37,7 @@ namespace AudioBookPlayer.App.ViewModels
 
                     if (null != selectedChapter)
                     {
-                        // connector.SetQueueItemIndex(selectedChapter.QueueId);
-                        connector.SetQueueItemIndex(selectedChapter.Index);
+                        connector.SetActiveQueueItemId(value.QueueId);
                     }
 
                     DoClose(false);
@@ -130,25 +122,20 @@ namespace AudioBookPlayer.App.ViewModels
 
                 for (var chapterIndex = 0; chapterIndex < connector.Chapters.Count; chapterIndex++)
                 {
-                    var chapterMetadata = connector.Chapters[chapterIndex];
-                    var sectionViewModel = GetOrCreateSection(chapterMetadata.Section);
-                    var chapterViewModel = new ChapterViewModel(chapterIndex, chapterMetadata.QueueId)
+                    var chapter = connector.Chapters[chapterIndex];
+                    var sectionViewModel = GetOrCreateSection(chapter.Section);
+                    var chapterViewModel = new ChapterViewModel(chapterIndex, chapter.QueueId)
                     {
-                        Title = chapterMetadata.Title
+                        Title = chapter.Title
                     };
-
+                    
                     sectionViewModel.Entries.Add(chapterViewModel);
 
-                    if (connector.QueueIndex == chapterIndex)
+                    if (connector.ActiveQueueItemId == chapter.QueueId)
                     {
                         selectedChapter = chapterViewModel;
                     }
                 }
-
-                /*if (null != selection)
-                {
-                    SelectedChapter = selection;
-                }*/
             }
             finally
             {

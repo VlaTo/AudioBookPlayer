@@ -258,7 +258,6 @@ namespace AudioBookPlayer.App.ViewModels
             ImageSource = null;
             Duration = 1L;
             Position = 0L;
-            Left = 0L;
             IsPlaybackEnabled = true;
 
             connector.PlaybackStateChanged += AudioBookBrowserConnectorPlaybackStateChanged;
@@ -272,12 +271,9 @@ namespace AudioBookPlayer.App.ViewModels
         {
             UpdateProperties();
             UpdateCurrentChapterTitle();
-            //UpdateCurrentMediaPosition();
+
             IsPlaybackEnabled = connector.IsConnected;
             IsPlaying = PlaybackState.Playing == connector.PlaybackState;
-            ActiveQueueItemId = connector.ActiveQueueItemId;
-            Position = connector.PlaybackPosition;
-            Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
         }
 
         private void DoPickChapter()
@@ -342,14 +338,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void DoPreviousChapter()
         {
-            /*var index = chapterIndex - 1;
-
-            if (0 > index)
-            {
-                return;
-            }
-
-            playbackService.ChapterIndex = index;*/
+            connector.SkipToPrevious();
         }
 
         private void DoNextChapter()
@@ -445,9 +434,8 @@ namespace AudioBookPlayer.App.ViewModels
             Title = metadata.Title;
             Subtitle = metadata.Subtitle;
             Description = metadata.Description;
-            Duration = metadata.Duration;
-            Position = 0L;
-            //Duration = metadata.Duration;
+            //Position = 0L;
+            //Duration = 1L;
 
             var imageUri = metadata.AlbumArtUri;
 
@@ -459,11 +447,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateChaptersList()
         {
+            // connector.Chapters;
         }
 
         private void UpdateCurrentChapterTitle()
         {
-            var queueIndex = connector.QueueIndex;
+            /*var queueIndex = connector.QueueIndex;
 
             if (-1 < queueIndex)
             {
@@ -473,7 +462,7 @@ namespace AudioBookPlayer.App.ViewModels
             else
             {
                 QueueItemTitle = String.Empty;
-            }
+            }*/
         }
 
         private void UpdateCurrentMediaPosition()
@@ -484,11 +473,11 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void AudioBookBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
         {
-            //IsPlaybackEnabled = connector.IsConnected;
+            IsPlaybackEnabled = connector.IsConnected;
             IsPlaying = PlaybackState.Playing == connector.PlaybackState;
             ActiveQueueItemId = connector.ActiveQueueItemId;
             Position = connector.PlaybackPosition;
-            // Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
+            Duration = Math.Max(1L, connector.PlaybackDuration);
             //UpdateCurrentMediaPosition();
         }
 

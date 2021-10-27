@@ -24,7 +24,8 @@ namespace AudioBookPlayer.App.Android.Services
     {
         private const float VolumeNormal = 1.0f;
         private const float VolumeDuck = 0.6f;
-        private const string ModeRead = "r";
+
+        public const float DefaultSpeed = 1.0f;
 
         private readonly Service service;
         private readonly MediaSessionCompat mediaSession;

@@ -31,10 +31,10 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        int QueueIndex
+        /*int QueueIndex
         {
             get;
-        }
+        }*/
 
         /// <summary>
         /// 
@@ -150,8 +150,13 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="queueId"></param>
-        void SetQueueItemIndex(long queueId);
+        /// <param name="queueItemId"></param>
+        void SetActiveQueueItemId(long queueItemId);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void SkipToPrevious();
 
         /// <summary>
         /// 

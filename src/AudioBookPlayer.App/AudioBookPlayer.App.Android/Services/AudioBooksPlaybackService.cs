@@ -28,9 +28,11 @@ using LibraProgramming.Xamarin.Core;
 using Application = Android.App.Application;
 using PlaybackState = Android.Media.Session.PlaybackState;
 
+// https://github.com/android/uamp/blob/main/docs/FullGuide.md
 // https://developer.android.com/guide/topics/media/media-controls
 // https://github.com/android/uamp/blob/f60b902643407ba234a316abe91410da7c08a4af/common/src/main/java/com/example/android/uamp/media/MusicService.kt
 // https://github.com/xamarin/monodroid-samples/tree/master/android5.0/MediaBrowserService
+// https://android-developers.googleblog.com/2020/08/playing-nicely-with-media-controls.html
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -110,10 +112,11 @@ namespace AudioBookPlayer.App.Android.Services
                 OnCommandImpl = DoMediaSessionCommand,
                 // OnCustomActionImpl = DoMediaSessionCustomAction,
                 OnPrepareFromMediaIdImpl = DoPrepareFromMediaId,
-                OnPlayImpl = DoPlay,
+                OnPlayImpl = DoPlay,        // android 10+ playback resumption
                 OnPauseImpl = DoPause,
                 OnSkipToQueueItemImpl = DoSkipToQueueItem,
-                OnSkipToNextImpl = DoSkipToNext
+                OnSkipToNextImpl = DoSkipToNext,
+                OnSkipToPreviousImpl = DoSkipToPrevious
             };
             mediaSession.SetCallback(mediaSessionCallback);
             mediaSession.SetMediaButtonReceiver(pendingIntent);
@@ -167,7 +170,7 @@ namespace AudioBookPlayer.App.Android.Services
                     var bundle = new Bundle();
 
                     bundle.PutBoolean(BrowserRoot.ExtraRecent, true);
-                    bundle.PutBoolean("android.media.browse.SEARCH_SUPPORTED", true);
+                    bundle.PutBoolean("android.media.browse.SEARCH_SUPPORTED", false);
 
                     return new BrowserRoot(IAudioBookMediaBrowserService.Recent, bundle);
                 }
@@ -451,21 +454,24 @@ namespace AudioBookPlayer.App.Android.Services
 
                     if (null != playback)
                     {
-                        HandlePlayRequest();
-
-                        /*var mediaUri = playbackQueue.Current.Description.MediaUri;
-                        var (start, duration) = BuildMediaFragment(playbackQueue.Current);
-
-                        mediaSession.SetExtras(BuildQueueIndexExtras(playbackQueue.CurrentIndex));
-                        playback.PlayFragment(mediaUri, start, duration);*/
+                        UpdatePlaybackPosition(playback.State, playback.MediaPosition);
                     }
+
+                    HandlePlayRequest();
+                }
+            }
+        }
+
+        private void DoSkipToPrevious()
+        {
+            if (playbackQueue is { IsEmpty: false } && playbackQueue.MovePrevious())
+            {
+                if (null != playback)
+                {
+                    UpdatePlaybackPosition(playback.State, playback.MediaPosition);
                 }
 
-                /*if (null != mediaSession)
-                {
-                    mediaSession.SetQueue(playbackQueue.AsReadOnlyList());
-                    mediaSession.SetQueueTitle("Last Playing");
-                }*/
+                HandlePlayRequest();
             }
         }
 
@@ -509,8 +515,13 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (null != playback && null != mediaSession)
                 {
-                    //mediaSession.SetExtras(BuildQueueIndexExtras(playbackQueue.CurrentIndex, playback.CurrentMediaPosition));
                     playback.PlayFragment(mediaUri, start, duration);
+
+                    if (null != playbackStateBuilder)
+                    {
+                        var extra = BuildMediaFragmentBundle(playbackQueue.Current);
+                        playbackStateBuilder.SetExtras(extra);
+                    }
                 }
             }
         }
@@ -522,26 +533,29 @@ namespace AudioBookPlayer.App.Android.Services
 
         private long GetAvailableActions()
         {
-            var actions = PlaybackState.ActionPlay | PlaybackState.ActionPlayFromMediaId;
+            var actions = PlaybackState.ActionPlay | PlaybackState.ActionSeekTo /*| PlaybackState.ActionPlayFromMediaId*/;
 
-            if (playbackQueue.IsEmpty)
+            if (playbackQueue is { IsEmpty: true })
             {
                 return actions;
             }
 
-            if (playback.IsPlaying)
+            if (playback is { IsPlaying: true })
             {
                 actions |= PlaybackState.ActionPause;
             }
 
-            if (0 < playbackQueue.CurrentIndex)
+            if (null != playbackQueue)
             {
-                actions |= PlaybackState.ActionSkipToPrevious;
-            }
+                if (0 < playbackQueue.CurrentIndex)
+                {
+                    actions |= PlaybackState.ActionSkipToPrevious;
+                }
 
-            if ((playbackQueue.Count - 1) > playbackQueue.CurrentIndex)
-            {
-                actions |= PlaybackState.ActionSkipToNext;
+                if ((playbackQueue.Count - 1) > playbackQueue.CurrentIndex)
+                {
+                    actions |= PlaybackState.ActionSkipToNext;
+                }
             }
 
             return actions;
@@ -606,7 +620,17 @@ namespace AudioBookPlayer.App.Android.Services
                     state = PlaybackStateCompat.StateError;
                 }
 
-                playbackStateBuilder.SetBufferedPosition(playback.MediaDuration);
+                /*if (null != playbackQueue)
+                {
+                    var queueIndex = playbackQueue.CurrentIndex;
+
+                    if (playbackQueue.IsValidIndex(queueIndex))
+                    {
+                        var extra = BuildMediaFragmentBundle(playbackQueue.Current);
+                        playbackStateBuilder.SetExtras(extra);
+                    }
+                }*/
+
                 UpdatePlaybackPosition(state, position);
 
                 if (PlaybackStateCompat.StatePlaying == playback.State ||
@@ -621,7 +645,7 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (null != playbackStateBuilder)
             {
-                playbackStateBuilder.SetState(playbackState, position, 1.0f, SystemClock.ElapsedRealtime());
+                playbackStateBuilder.SetState(playbackState, position, Playback.DefaultSpeed, SystemClock.ElapsedRealtime());
 
                 if (null != playbackQueue)
                 {
@@ -692,11 +716,9 @@ namespace AudioBookPlayer.App.Android.Services
             var mediaId = new MediaId(audioBook.Id);
 
             metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyMediaId, mediaId.ToString());
-            metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyArtist, audioBook.Authors.AsString());
             metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyTitle, audioBook.Title);
+            metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyArtist, audioBook.Authors.AsString());
             metadataBuilder.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)audioBook.Duration.TotalMilliseconds);
-            // metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyAlbum, "Sample AudioBook");
-            // metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyGenre, "Sample Genre");
 
             for (var index = 0; index < audioBook.Images.Count; index++)
             {
@@ -704,7 +726,8 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (audioBookImage is IHasContentUri hcu)
                 {
-                    metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyDisplayIconUri, hcu.ContentUri);
+                    //metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyDisplayIconUri, hcu.ContentUri);
+                    metadataBuilder.PutString(MediaMetadataCompat.MetadataKeyAlbumArtUri, hcu.ContentUri);
                     break;
                 }
             }
@@ -728,6 +751,21 @@ namespace AudioBookPlayer.App.Android.Services
             var duration = queueItem.Description.Extras.GetLong("Chapter.Duration");
 
             return new MediaFragment(start, duration);
+        }
+
+        private static Bundle BuildMediaFragmentBundle(MediaSessionCompat.QueueItem queueItem)
+        {
+            var source = queueItem.Description.Extras;
+            var start = source.GetLong("Chapter.Start");
+            var duration = source.GetLong("Chapter.Duration");
+
+            var bundle = new Bundle();
+
+            bundle.PutLong("Chapter.Start", start);
+            bundle.PutLong("Chapter.Duration", duration);
+            bundle.PutLong("Queue.ID", queueItem.QueueId);
+
+            return bundle;
         }
 
         public interface IActions
