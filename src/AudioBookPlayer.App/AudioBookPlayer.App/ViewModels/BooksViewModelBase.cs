@@ -81,6 +81,8 @@ namespace AudioBookPlayer.App.ViewModels
             StartPlayRequest = new InteractionRequest<StartPlayInteractionRequestContext>();
 
             loadBooksExecution = new TaskExecutionMonitor(DoLoadBooksAsync);
+
+            browserServiceConnector.ChaptersChanged += DoChaptersChanged;
         }
 
         public virtual void OnInitialize()
@@ -142,6 +144,11 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
+        private void DoChaptersChanged(object sender, EventArgs e)
+        {
+            loadBooksExecution.Start();
+        }
+        
         private async Task DoLoadBooksAsync()
         {
             await BrowserServiceConnector.ConnectAsync();

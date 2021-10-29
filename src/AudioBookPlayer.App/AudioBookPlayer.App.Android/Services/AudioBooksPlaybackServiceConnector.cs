@@ -292,7 +292,10 @@ namespace AudioBookPlayer.App.Android.Services
 
                 temp1.DispatchMessage(temp2);*/
 
-                System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
+                //System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
+
+                eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
+
                 tcs.Complete();
             }));
 

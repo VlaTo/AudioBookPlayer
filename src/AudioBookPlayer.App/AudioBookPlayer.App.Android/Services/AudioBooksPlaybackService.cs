@@ -333,6 +333,8 @@ namespace AudioBookPlayer.App.Android.Services
                 }
             }
 
+
+
             cb.Send(global::Android.App.Result.Ok, result);
         }
 
@@ -551,6 +553,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             }
         }
+
         private void DoRewind()
         {
             if (playbackQueue is { IsEmpty: false })
@@ -796,7 +799,7 @@ namespace AudioBookPlayer.App.Android.Services
             return new BooksService(dbContext, coverService);
         }
 
-        private void SendPlaybackPosition()
+        /*private void SendPlaybackPosition()
         {
             if (null != playbackQueue)
             {
@@ -823,9 +826,9 @@ namespace AudioBookPlayer.App.Android.Services
                     cb.OnPlaybackPositionChanged(mediaPosition, mediaDuration);
                 }
             }
-        }
+        }*/
 
-        private void SendQueueIndex()
+        /*private void SendQueueIndex()
         {
             if (null != playbackQueue)
             {
@@ -835,7 +838,7 @@ namespace AudioBookPlayer.App.Android.Services
                     cb.OnQueueIndexChanged(playbackQueue.CurrentIndex);
                 }
             }
-        }
+        }*/
 
         private static MediaMetadataCompat BuildAudioBookMetadata(AudioBook audioBook)
         {

@@ -60,7 +60,16 @@ namespace AudioBookPlayer.App.Android.Services
 
         public void RemoveBook(AudioBook audioBook)
         {
-            throw new System.NotImplementedException();
+            using (var unitOfWork = new UnitOfWork(context, false))
+            {
+                var book = unitOfWork.Books.Get((long)audioBook.Id);
+
+                if (null != book)
+                {
+                    unitOfWork.Books.Remove(book);
+                    unitOfWork.Commit();
+                }
+            }
         }
 
         private Book CreateBook(AudioBook audioBook)
