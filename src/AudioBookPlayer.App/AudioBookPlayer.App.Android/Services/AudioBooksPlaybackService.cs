@@ -33,6 +33,10 @@ using PlaybackState = Android.Media.Session.PlaybackState;
 // https://github.com/android/uamp/blob/f60b902643407ba234a316abe91410da7c08a4af/common/src/main/java/com/example/android/uamp/media/MusicService.kt
 // https://github.com/xamarin/monodroid-samples/tree/master/android5.0/MediaBrowserService
 // https://android-developers.googleblog.com/2020/08/playing-nicely-with-media-controls.html
+// https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/Handler.java
+// https://androidexperinz.wordpress.com/2012/02/14/communication-between-service-and-activity-part-1/
+// https://androidexperinz.wordpress.com/2012/02/21/communication-between-service-and-activity-part-2/
+// https://androidexperinz.wordpress.com/2012/12/14/communication-between-service-and-activity-part-3/
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -61,6 +65,7 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly PackageValidator packageValidator;
         private readonly TaskExecutionMonitor<ResultReceiver> updateLibrary;
         private readonly List<KeyValuePair<Bundle, ICustomPlayback>> callbacks;
+        private readonly long playbackDelta;
 
         private MediaSessionCompat? mediaSession;
         private MediaSessionCallback? mediaSessionCallback;
@@ -93,6 +98,8 @@ namespace AudioBookPlayer.App.Android.Services
             booksService = null;
             playbackQueue = null;
             playback = null;
+
+            playbackDelta = (long)TimeSpan.FromSeconds(20.0d).TotalMilliseconds;
         }
 
         public override void OnCreate()
@@ -114,9 +121,12 @@ namespace AudioBookPlayer.App.Android.Services
                 OnPrepareFromMediaIdImpl = DoPrepareFromMediaId,
                 OnPlayImpl = DoPlay,        // android 10+ playback resumption
                 OnPauseImpl = DoPause,
+                OnStopImpl = DoStop,
                 OnSkipToQueueItemImpl = DoSkipToQueueItem,
                 OnSkipToNextImpl = DoSkipToNext,
-                OnSkipToPreviousImpl = DoSkipToPrevious
+                OnSkipToPreviousImpl = DoSkipToPrevious,
+                OnFastForwardImpl = DoFastForward,
+                OnRewindImpl = DoRewind
             };
             mediaSession.SetCallback(mediaSessionCallback);
             mediaSession.SetMediaButtonReceiver(pendingIntent);
@@ -127,7 +137,8 @@ namespace AudioBookPlayer.App.Android.Services
             var playbackCallback = new PlaybackCallback
             {
                 StateChangedImpl = DoPlaybackStateChanged,
-                PositionChangedImpl = DoPlaybackPositionChanged
+                PositionChangedImpl = DoPlaybackPositionChanged,
+                FragmentEndedImpl = DoFragmentEnded
             };
 
             playbackStateBuilder = new PlaybackStateCompat.Builder();
@@ -442,6 +453,14 @@ namespace AudioBookPlayer.App.Android.Services
             HandlePauseRequest();
         }
 
+        private void DoStop()
+        {
+            if (playback is { IsPlaying: true })
+            {
+                playback.Stop();
+            }
+        }
+
         private void DoSkipToQueueItem(long queueId)
         {
             if (playbackQueue is { IsEmpty: false })
@@ -454,7 +473,8 @@ namespace AudioBookPlayer.App.Android.Services
 
                     if (null != playback)
                     {
-                        UpdatePlaybackPosition(playback.State, playback.MediaPosition);
+                        var position = playback.MediaStart + playback.MediaPosition;
+                        UpdatePlaybackPosition(playback.State, position);
                     }
 
                     HandlePlayRequest();
@@ -468,7 +488,8 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null != playback)
                 {
-                    UpdatePlaybackPosition(playback.State, playback.MediaPosition);
+                    var position = playback.MediaStart + playback.MediaPosition;
+                    UpdatePlaybackPosition(playback.State, position);
                 }
 
                 HandlePlayRequest();
@@ -481,10 +502,93 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null != playback)
                 {
-                    UpdatePlaybackPosition(playback.State, playback.MediaPosition);
+                    var position = playback.MediaStart + playback.MediaPosition;
+                    UpdatePlaybackPosition(playback.State, position);
                 }
 
                 HandlePlayRequest();
+            }
+        }
+
+        private void DoFastForward()
+        {
+            if (playbackQueue is { IsEmpty: false })
+            {
+                if (null != playback)
+                {
+                    var delta = playbackDelta;
+                    var left = playback.MediaDuration - playback.MediaPosition;
+
+                    if (delta > left)
+                    {
+                        delta -= left;
+
+                        for (var queueIndex = playbackQueue.CurrentIndex + 1; playbackQueue.IsValidIndex(queueIndex); queueIndex++)
+                        {
+                            var (_, duration) = BuildMediaFragment(playbackQueue[queueIndex]);
+
+                            if (delta > duration)
+                            {
+                                delta -= duration;
+                                continue;
+                            }
+
+                            playbackQueue.CurrentIndex = queueIndex;
+
+                            HandlePlayRequest();
+
+                            return;
+                        }
+
+                        DoStop();
+                    }
+
+                    if (null != mediaSession)
+                    {
+                        playback.SeekTo(delta);
+                    }
+                }
+
+            }
+        }
+        private void DoRewind()
+        {
+            if (playbackQueue is { IsEmpty: false })
+            {
+                if (null != playback)
+                {
+                    var delta = playbackDelta;
+                    var elapsed = playback.MediaPosition;
+
+                    if (elapsed < delta)
+                    {
+                        delta -= elapsed;
+
+                        for (var queueIndex = playbackQueue.CurrentIndex - 1; playbackQueue.IsValidIndex(queueIndex); queueIndex--)
+                        {
+                            var (_, duration) = BuildMediaFragment(playbackQueue[queueIndex]);
+
+                            if (delta > duration)
+                            {
+                                delta -= duration;
+                                continue;
+                            }
+
+                            playbackQueue.CurrentIndex = queueIndex;
+
+                            HandlePlayRequest();
+
+                            return;
+                        }
+
+                        MoveToPrev();
+                    }
+
+                    if (null != mediaSession)
+                    {
+                        playback.SeekTo(-delta);
+                    }
+                }
             }
         }
 
@@ -492,21 +596,41 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (null != playback)
             {
-                UpdatePlaybackPosition(playback.State, playback.MediaPosition);
+                var position = playback.MediaStart + playback.MediaPosition;
+                UpdatePlaybackPosition(playback.State, position);
             }
         }
 
         private void DoPlaybackStateChanged()
         {
-            /*if (playback is { State: PlaybackStateCompat.StateConnecting })
-            {
-                SendPlaybackPosition();
-            }*/
-
             UpdatePlaybackState(-1, null);
         }
 
-        private void HandlePlayRequest()
+        private void DoFragmentEnded()
+        {
+            if (playbackQueue is { IsEmpty: false } && playbackQueue.MoveNext())
+            {
+                HandlePlayRequest();
+            }
+            else
+            {
+                DoStop();
+            }
+        }
+
+        private void MoveToPrev()
+        {
+            if (null != playbackQueue)
+            {
+                playbackQueue.CurrentIndex = 0;
+
+                var (_, duration) = BuildMediaFragment(playbackQueue.Current);
+
+                HandlePlayRequest(duration - playbackDelta);
+            }
+        }
+
+        private void HandlePlayRequest(long offset = 0L)
         {
             if (null != playbackQueue)
             {
@@ -515,7 +639,7 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (null != playback && null != mediaSession)
                 {
-                    playback.PlayFragment(mediaUri, start, duration);
+                    playback.PlayFragment(mediaUri, start, duration, offset);
 
                     if (null != playbackStateBuilder)
                     {
@@ -528,7 +652,10 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void HandlePauseRequest()
         {
-            playback.Pause();
+            if (null != playback)
+            {
+                playback.Pause();
+            }
         }
 
         private long GetAvailableActions()
@@ -605,7 +732,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             if (playback.IsConnected)
             {
-                position = playback.MediaPosition;
+                position = playback.MediaStart + playback.MediaPosition;
             }
 
             if (null != playbackStateBuilder)
@@ -799,13 +926,22 @@ namespace AudioBookPlayer.App.Android.Services
                 set;
             }
 
+            public Action FragmentEndedImpl
+            {
+                get;
+                set;
+            }
+
             public PlaybackCallback()
             {
                 StateChangedImpl = Stub.Nop();
                 PositionChangedImpl = Stub.Nop();
+                FragmentEndedImpl = Stub.Nop();
             }
 
             void IPlaybackCallback.PositionChanged() => PositionChangedImpl.Invoke();
+            
+            public void FragmentEnded() => FragmentEndedImpl.Invoke();
 
             void IPlaybackCallback.StateChanged() => StateChangedImpl.Invoke();
         }

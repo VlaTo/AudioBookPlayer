@@ -378,16 +378,37 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        private void OnPlaybackStateChanged(PlaybackStateCompat playback)
+        public void FastForward()
         {
-            PlaybackState = playback.State.ToPlaybackState();
-            ActiveQueueItemId = playback.ActiveQueueItemId;
+            var controls = MediaController?.GetTransportControls();
 
-            var start = GetMediaFragmentStart(playback.Extras);
-            var duration = GetMediaFragmentDuration(playback.Extras);
-            var queueId = GetMediaFragmentLong(playback.Extras, "Queue.ID");
+            if (null != controls)
+            {
+                controls.FastForward();
+            }
+        }
 
-            PlaybackPosition = playback.Position;
+        public void Rewind()
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.Rewind();
+            }
+        }
+
+        private void OnPlaybackStateChanged(PlaybackStateCompat psc)
+        {
+            PlaybackState = psc.State.ToPlaybackState();
+            ActiveQueueItemId = psc.ActiveQueueItemId;
+
+            var start = GetMediaFragmentStart(psc.Extras);
+            var duration = GetMediaFragmentDuration(psc.Extras);
+            var position = psc.Position - start;
+            var queueId = GetMediaFragmentLong(psc.Extras, "Queue.ID");
+
+            PlaybackPosition = position;
             PlaybackDuration = duration;
             
             eventManager.HandleEvent(this, EventArgs.Empty, nameof(PlaybackStateChanged));

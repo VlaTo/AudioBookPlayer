@@ -6,10 +6,8 @@ using Android.OS;
 using Android.Support.V4.Media.Session;
 using AndroidX.Core.App;
 using System;
-using Android.Graphics;
-using Android.Support.V4.Media;
-using AudioBookPlayer.App.Android.Core;
 using Application = Android.App.Application;
+using MediaStyle = AndroidX.Media.App.NotificationCompat.MediaStyle;
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -27,6 +25,7 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly AudioBooksPlaybackService service;
         private readonly MediaControllerCallback controllerCallback;
         private readonly NotificationManager? notificationManager;
+        private readonly PendingIntent? contentIntent;
         private readonly PendingIntent? closePendingIntent;
         private readonly PendingIntent? playIntent;
         private readonly PendingIntent? pauseIntent;
@@ -37,6 +36,7 @@ namespace AudioBookPlayer.App.Android.Services
         private NotificationChannel? notificationChannel;
         private PlaybackStateCompat? playbackState;
         private MediaSessionCompat.Token? sessionToken;
+        private int lastPlaybackState;
         private bool shown;
 
         public MediaSessionCompat.Token? SessionToken
@@ -88,16 +88,16 @@ namespace AudioBookPlayer.App.Android.Services
             this.service = service;
             mediaController = null;
             controls = null;
+            lastPlaybackState = PlaybackStateCompat.StateNone;
             
             notificationManager = (NotificationManager?)Application.Context.GetSystemService(Context.NotificationService);
 
-            var packageName = service.PackageName;
-
-            playIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.Play).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
-            pauseIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.Pause).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
-            skipToPrevIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.SkipToPrev).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
-            skipToNextIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.SkipToNext).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
-            closePendingIntent = PendingIntent.GetBroadcast(service, 0, new Intent(IIntents.Close).SetPackage(packageName), PendingIntentFlags.CancelCurrent);
+            playIntent = CreatePendingIntent(PlaybackStateCompat.ActionPlay, IIntents.Play);
+            pauseIntent = CreatePendingIntent(PlaybackStateCompat.ActionPause, IIntents.Pause);
+            skipToPrevIntent = CreatePendingIntent(PlaybackStateCompat.ActionSkipToPrevious, IIntents.SkipToPrev);
+            skipToNextIntent = CreatePendingIntent(PlaybackStateCompat.ActionSkipToNext, IIntents.SkipToNext);
+            closePendingIntent = CreatePendingIntent(0, IIntents.Close);
+            contentIntent = CreateContentIntent();
 
             controllerCallback = new MediaControllerCallback
             {
@@ -105,18 +105,23 @@ namespace AudioBookPlayer.App.Android.Services
                 {
                     playbackState = pbs;
 
-                    if (null != pbs && (PlaybackStateCompat.StateStopped == pbs.State || PlaybackStateCompat.StateNone == pbs.State))
+                    if (null != pbs)
                     {
-                        HideInformation();
-                    }
-                    else if (null != pbs && (PlaybackStateCompat.StatePlaying == pbs.State || PlaybackStateCompat.StatePaused == pbs.State))
-                    {
-                        /*var notification = CreateNotification();
-
-                        if (null != notification && null != notificationManager)
+                        if (PlaybackStateCompat.StateStopped == pbs.State || PlaybackStateCompat.StateNone == pbs.State)
                         {
-                            notificationManager.Notify(IChannels.NotificationID, notification);
-                        }*/
+                            HideInformation();
+                        }
+                        else if (PlaybackStateCompat.StatePlaying == pbs.State || PlaybackStateCompat.StatePaused == pbs.State)
+                        {
+                            if (shown)
+                            {
+                                UpdateInformation();
+                            }
+                            else
+                            {
+                                ShowInformation();
+                            }
+                        }
                     }
                 },
                 OnSessionDestroyedImpl = () =>
@@ -130,17 +135,14 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (false == shown)
             {
+                System.Diagnostics.Debug.WriteLine("[NotificationService] [ShowInformation] Execute");
+
                 SessionToken = service.SessionToken;
-                PlaybackState = mediaController.PlaybackState;
-
-
-                var position = PlaybackState.Position;
-                var duration = mediaController.Metadata.GetLong(MediaMetadataCompat.MetadataKeyDuration);
-
-                System.Diagnostics.Debug.WriteLine($"[NotificationService] [ShowInformation] Position: {position}; Duration: {duration}");
+                PlaybackState = mediaController?.PlaybackState;
+                lastPlaybackState = PlaybackState?.State ?? PlaybackStateCompat.StateNone;
 
                 var notification = CreateNotification();
-
+                
                 if (null != notification)
                 {
                     var filter = new IntentFilter();
@@ -150,8 +152,13 @@ namespace AudioBookPlayer.App.Android.Services
                     filter.AddAction(IIntents.SkipToPrev);
                     filter.AddAction(IIntents.SkipToNext);
 
-                    mediaController.RegisterCallback(controllerCallback);
+                    if (null != mediaController)
+                    {
+                        mediaController.RegisterCallback(controllerCallback);
+                    }
+
                     service.RegisterReceiver(this, filter);
+                    service.StartForeground(IChannels.NotificationID, notification);
 
                     if (null != notificationManager)
                     {
@@ -167,8 +174,11 @@ namespace AudioBookPlayer.App.Android.Services
         {
             if (shown)
             {
+                System.Diagnostics.Debug.WriteLine("[NotificationService] [HideInformation] Execute");
+
                 shown = false;
-                mediaController.UnregisterCallback(controllerCallback);
+
+                mediaController?.UnregisterCallback(controllerCallback);
 
                 try
                 {
@@ -184,7 +194,24 @@ namespace AudioBookPlayer.App.Android.Services
                     // ignore if the receiver is not registered.
                 }
 
-                // service.StopForeground(true);
+                service.StopForeground(true);
+            }
+        }
+
+        public void UpdateInformation()
+        {
+            var state = PlaybackState?.State ?? PlaybackStateCompat.StateNone;
+
+            if (shown && state != lastPlaybackState)
+            {
+                System.Diagnostics.Debug.WriteLine("[NotificationService] [UpdateInformation] Execute");
+
+                var notification = CreateNotification();
+
+                if (null != notification && null != notificationManager)
+                {
+                    notificationManager.Notify(IChannels.NotificationID, notification);
+                }
             }
         }
 
@@ -224,22 +251,14 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        private void UpdateInformation()
+        private void AddSkipToNextAction(NotificationCompat.Builder? notificationBuilder)
         {
-            if (!shown)
-            {
-                return;
-            }
-
-            ;
-        }
-
-        private bool TryAddSkipToNextAction(NotificationCompat.Builder? notificationBuilder)
-        {
-            var canSkipToNext = 0 != (mediaController.PlaybackState.Actions & PlaybackStateCompat.ActionSkipToNext);
+            var actions = mediaController?.PlaybackState.Actions ?? 0;
+            var canSkipToNext = 0 != (actions & PlaybackStateCompat.ActionSkipToNext);
 
             if (null != notificationBuilder && canSkipToNext)
             {
+
                 var action = new NotificationCompat.Action(
                     Resource.Drawable.ic_skip_to_next,
                     Application.Context.Resources?.GetString(Resource.String.notification_action_next),
@@ -247,16 +266,13 @@ namespace AudioBookPlayer.App.Android.Services
                 );
 
                 notificationBuilder.AddAction(action);
-
-                return true;
             }
-
-            return false;
         }
 
-        private bool TryAddSkipToPrevAction(NotificationCompat.Builder? notificationBuilder, ref int playActionIndex)
+        private void AddSkipToPrevAction(NotificationCompat.Builder? notificationBuilder, ref int playActionIndex)
         {
-            var canSkipToPrev = 0 != (mediaController.PlaybackState.Actions & PlaybackStateCompat.ActionSkipToPrevious);
+            var actions = mediaController?.PlaybackState.Actions ?? 0;
+            var canSkipToPrev = 0 != (actions & PlaybackStateCompat.ActionSkipToPrevious);
 
             if (null != notificationBuilder && canSkipToPrev)
             {
@@ -269,35 +285,36 @@ namespace AudioBookPlayer.App.Android.Services
                 notificationBuilder.AddAction(action);
 
                 playActionIndex++;
-
-                return true;
             }
-
-            return false;
         }
 
-        private bool TryAddPlayPauseAction(NotificationCompat.Builder? notificationBuilder)
+        private void AddPlayPauseAction(NotificationCompat.Builder? notificationBuilder)
         {
-            const long mask = PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionPlayPause | PlaybackStateCompat.ActionPlayFromMediaId;
-            var canPlay = 0 != (mediaController.PlaybackState.Actions & mask);
+            const long mask = PlaybackStateCompat.ActionPlay | PlaybackStateCompat.ActionPlayPause;
 
-            if (null != notificationBuilder && canPlay)
+            if (null != mediaController)
             {
-                var playing = PlaybackStateCompat.StatePlaying == mediaController.PlaybackState.State;
-                var action = new NotificationCompat.Action(
-                    playing ? Resource.Drawable.ic_pause : Resource.Drawable.ic_play,
-                    Application.Context.Resources?.GetString(
-                        playing ? Resource.String.notification_action_pause : Resource.String.notification_action_play
-                    ),
-                    playing ? pauseIntent : playIntent
-                );
+                var actions = mediaController?.PlaybackState.Actions ?? 0;
+                var canPlay = 0 != (actions & mask);
 
-                notificationBuilder.AddAction(action);
+                if (null != notificationBuilder && canPlay)
+                {
+                    var state = mediaController?.PlaybackState.State ?? PlaybackStateCompat.StateNone;
+                    var playing = PlaybackStateCompat.StatePlaying == state;
+                    var title = Application.Context.Resources?.GetString(
+                        playing
+                            ? Resource.String.notification_action_pause
+                            : Resource.String.notification_action_play
+                    );
+                    var action = new NotificationCompat.Action(
+                        playing ? Resource.Drawable.ic_pause : Resource.Drawable.ic_play,
+                        title,
+                        playing ? pauseIntent : playIntent
+                    );
 
-                return true;
+                    notificationBuilder.AddAction(action);
+                }
             }
-
-            return false;
         }
 
         private Notification? CreateNotification()
@@ -305,73 +322,23 @@ namespace AudioBookPlayer.App.Android.Services
             var nc = GetOrCreateNotificationChannel();
             var notificationBuilder = new NotificationCompat.Builder(Application.Context, nc?.Id);
 
-            //var playActionIndex = 0;
+            var playActionIndex = 0;
 
-            //TryAddSkipToPrevAction(notificationBuilder, ref playActionIndex);
-            //TryAddPlayPauseAction(notificationBuilder);
-            //TryAddSkipToNextAction(notificationBuilder);
-
-            var mediaStyle = new AndroidX.Media.App.NotificationCompat.MediaStyle()
-                .SetMediaSession(SessionToken)
-                //.SetShowActionsInCompactView(playActionIndex)
-                //.SetCancelButtonIntent(closePendingIntent)
-                //.SetShowCancelButton(true)
-                ;
-
-            /*Bitmap? largeIcon = null;
-
-            if (null != mediaController.Metadata.Description.IconUri)
-            {
-                var atrUri = mediaController.Metadata.Description.IconUri.ToString();
-
-                largeIcon = AlbumArtCache.Instance.GetBigImage(atrUri);
-
-                if (null == largeIcon)
-                {
-                    largeIcon = BitmapFactory.DecodeResource(service.Resources, Resource.Drawable.ic_skip_to_next);
-                }
-            }*/
+            AddSkipToPrevAction(notificationBuilder, ref playActionIndex);
+            AddPlayPauseAction(notificationBuilder);
+            AddSkipToNextAction(notificationBuilder);
 
             notificationBuilder
-                .SetStyle(mediaStyle)
+                .SetStyle(new MediaStyle()
+                    .SetMediaSession(SessionToken)
+                    .SetShowActionsInCompactView(playActionIndex)
+                    .SetCancelButtonIntent(closePendingIntent)
+                    .SetShowCancelButton(true))
                 .SetSmallIcon(Resource.Drawable.ic_audiobookplayer)
-                //.SetContentTitle(mediaController.Metadata.Description.TitleFormatted)
-                //.SetContentText(mediaController.Metadata.Description.SubtitleFormatted)
-                //.SetContentIntent(mediaController.SessionActivity)
-                //.SetLargeIcon(largeIcon)
-                //.SetOnlyAlertOnce(true)
-                .SetVisibility(NotificationCompat.VisibilityPublic)
-                ;
-
-            UpdatePlaybackState(notificationBuilder);
+                .SetContentIntent(contentIntent)
+                .SetVisibility(NotificationCompat.VisibilityPublic);
 
             return notificationBuilder.Build();
-        }
-
-        private void UpdatePlaybackState(NotificationCompat.Builder notificationBuilder)
-        {
-            if (null == playbackState || false == shown)
-            {
-                return;
-            }
-
-            if (PlaybackStateCompat.StatePlaying == playbackState.State && playbackState.Position >= 0)
-            {
-                var timeout = ((long)(DateTime.UtcNow - DateTime.UnixEpoch).TotalMilliseconds) - playbackState.Position;
-                notificationBuilder
-                    .SetWhen(timeout)
-                    .SetShowWhen(true)
-                    .SetUsesChronometer(true);
-            }
-            else
-            {
-                notificationBuilder
-                    .SetWhen(0L)
-                    .SetShowWhen(false)
-                    .SetUsesChronometer(false);
-            }
-
-            notificationBuilder.SetOngoing(PlaybackStateCompat.StatePlaying == playbackState.State);
         }
 
         private NotificationChannel? GetOrCreateNotificationChannel()
@@ -406,6 +373,24 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             return notificationChannel;
+        }
+
+        private PendingIntent? CreatePendingIntent(long requestCode, string action)
+        {
+            var intent = new Intent(action).SetPackage(service.PackageName);
+            return PendingIntent.GetBroadcast(Application.Context, (int)requestCode, intent, PendingIntentFlags.CancelCurrent);
+        }
+
+        private static PendingIntent? CreateContentIntent()
+        {
+            var context = Application.Context;
+            var className = Java.Lang.Class.FromType(typeof(MainActivity));
+            var notificationIntent = new Intent(context, className);
+            
+            notificationIntent.SetAction(IIntents.Close);
+            notificationIntent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop | ActivityFlags.NewTask);
+
+            return PendingIntent.GetActivity(context, 0, notificationIntent, PendingIntentFlags.UpdateCurrent);
         }
 
         /// <summary>

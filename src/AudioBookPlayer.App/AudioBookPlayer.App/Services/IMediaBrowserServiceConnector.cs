@@ -10,76 +10,23 @@ namespace AudioBookPlayer.App.Services
     /// <summary>
     /// 
     /// </summary>
-    public interface IMediaBrowserServiceConnector
+    public interface IMediaBrowserServiceConnector : IPlaybackController, IPlaybackQueue
     {
         /// <summary>
         /// 
         /// </summary>
-        bool IsConnected
-        {
-            get;
-        }
+        bool IsConnected { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        long ActiveQueueItemId
-        {
-            get;
-        }
+        IAudioBookMetadata AudioBookMetadata { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        /*int QueueIndex
-        {
-            get;
-        }*/
+        IReadOnlyList<IChapterMetadata> Chapters { get; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        long PlaybackPosition
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        long PlaybackDuration
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        PlaybackState PlaybackState
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        IAudioBookMetadata AudioBookMetadata
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        IReadOnlyList<IChapterMetadata> Chapters
-        {
-            get;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        event EventHandler PlaybackStateChanged;
 
         /// <summary>
         /// 
@@ -90,11 +37,6 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         event EventHandler ChaptersChanged;
-
-        /// <summary>
-        /// 
-        /// </summary>
-        event EventHandler QueueIndexChanged;
 
         /// <summary>
         /// 
@@ -131,36 +73,11 @@ namespace AudioBookPlayer.App.Services
         /// </summary>
         Task UpdateLibraryAsync();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        void Play();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void Pause();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="mediaId"></param>
         void PrepareFromMediaId(MediaId mediaId);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="queueItemId"></param>
-        void SetActiveQueueItemId(long queueItemId);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void SkipToPrevious();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        void SkipToNext();
     }
 }

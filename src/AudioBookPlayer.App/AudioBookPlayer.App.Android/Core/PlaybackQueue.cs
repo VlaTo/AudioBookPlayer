@@ -51,6 +51,19 @@ namespace AudioBookPlayer.App.Android.Core
 
         public bool IsEmpty => 0 == queue.Count;
 
+        public MediaSessionCompat.QueueItem this[int index]
+        {
+            get
+            {
+                if (IsValidIndex(index))
+                {
+                    return queue[index];
+                }
+
+                throw new IndexOutOfRangeException();
+            }
+        }
+
         public PlaybackQueue()
         {
             queue = new List<MediaSessionCompat.QueueItem>();

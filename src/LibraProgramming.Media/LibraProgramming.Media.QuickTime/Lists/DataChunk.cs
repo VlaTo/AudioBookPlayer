@@ -92,6 +92,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
                 }
 
                 case 0x0D:
+                //case 0x0E:
                 {
                     return DataType.Binary;
                 }

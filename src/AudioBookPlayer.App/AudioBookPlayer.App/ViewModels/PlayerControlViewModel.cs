@@ -288,11 +288,6 @@ namespace AudioBookPlayer.App.ViewModels
             );
         }
 
-        private void DoSmallRewindCommand()
-        {
-            Debug.WriteLine($"[PlayerControlViewModel] [DoSmallRewindCommand] Execute");
-        }
-
         private void DoPlayCommand()
         {
             if (IsPlaying)
@@ -305,9 +300,14 @@ namespace AudioBookPlayer.App.ViewModels
             }
         }
 
+        private void DoSmallRewindCommand()
+        {
+            connector.Rewind();
+        }
+
         private void DoSmallFastForwardCommand()
         {
-            Debug.WriteLine($"[PlayerControlViewModel] [DoSmallFastForwardCommand] Execute");
+            connector.FastForward();
         }
 
         private void DoChangeCoverCommand()

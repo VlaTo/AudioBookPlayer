@@ -103,6 +103,7 @@ namespace AudioBookPlayer.App.Controls
             fastForwardButton = GetTemplatePart<ImageButton>(FastForwardButtonPartName);
 
             playButton.Clicked += OnPlayButtonClicked;
+            fastForwardButton.Clicked += OnFastForwardButtonClicked;
 
             base.OnApplyTemplate();
 
@@ -116,6 +117,11 @@ namespace AudioBookPlayer.App.Controls
         }
 
         private void OnPlayButtonClicked(object sender, EventArgs e)
+        {
+            ;
+        }
+
+        private void OnFastForwardButtonClicked(object sender, EventArgs e)
         {
             ;
         }

@@ -136,7 +136,7 @@
                 IsClippedToBounds="True"
                 Padding="0">
                 <Image
-                    Aspect="AspectFit"
+                    Aspect="AspectFill"
                     HorizontalOptions="FillAndExpand"
                     VerticalOptions="Fill">
                     <Image.GestureRecognizers>
