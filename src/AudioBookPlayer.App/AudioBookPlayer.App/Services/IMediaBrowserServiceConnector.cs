@@ -41,11 +41,6 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler CurrentMediaInfoChanged;
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <returns></returns>
         Task ConnectAsync();
 

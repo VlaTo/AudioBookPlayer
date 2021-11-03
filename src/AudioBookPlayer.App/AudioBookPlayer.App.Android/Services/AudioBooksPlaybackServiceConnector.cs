@@ -31,31 +31,22 @@ namespace AudioBookPlayer.App.Android.Services
         private readonly WeakEventManager eventManager;
         private MediaControllerCompat mediaController;
         private long activeQueueItemId;
-        private int queueIndex;
 
         public bool IsConnected => mediaBrowser is { IsConnected: true };
 
-        /*public int QueueIndex
-        {
-            get => queueIndex;
-            private set
-            {
-                if (queueIndex != value)
-                {
-                    ;
-                }
-
-                queueIndex = value;
-            }
-        }*/
-
-        public long PlaybackPosition
+        public long Offset
         {
             get;
             private set;
         }
 
-        public long PlaybackDuration
+        public long Position
+        {
+            get;
+            private set;
+        }
+
+        public long Duration
         {
             get;
             private set;
@@ -82,12 +73,8 @@ namespace AudioBookPlayer.App.Android.Services
                         continue;
                     }
 
-                    queueIndex = index;
-
                     return;
                 }
-
-                queueIndex = -1;
             }
         }
 
@@ -117,7 +104,7 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
-        public PlaybackState PlaybackState
+        public PlaybackState State
         {
             get;
             private set;
@@ -135,8 +122,8 @@ namespace AudioBookPlayer.App.Android.Services
             private set;
         }
 
-        /// <inheritdoc cref="IMediaBrowserServiceConnector.PlaybackStateChanged" />
-        public event EventHandler PlaybackStateChanged
+        /// <inheritdoc cref="IPlaybackController.StateChanged" />
+        public event EventHandler StateChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
@@ -151,20 +138,6 @@ namespace AudioBookPlayer.App.Android.Services
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ChaptersChanged" />
         public event EventHandler ChaptersChanged
-        {
-            add => eventManager.AddEventHandler(value);
-            remove => eventManager.RemoveEventHandler(value);
-        }
-
-        /// <inheritdoc cref="IMediaBrowserServiceConnector.QueueIndexChanged" />
-        public event EventHandler QueueIndexChanged
-        {
-            add => eventManager.AddEventHandler(value);
-            remove => eventManager.RemoveEventHandler(value);
-        }
-
-        /// <inheritdoc cref="IMediaBrowserServiceConnector.CurrentMediaInfoChanged" />
-        public event EventHandler CurrentMediaInfoChanged
         {
             add => eventManager.AddEventHandler(value);
             remove => eventManager.RemoveEventHandler(value);
@@ -196,7 +169,6 @@ namespace AudioBookPlayer.App.Android.Services
                 OnMetadataChangedImpl = OnMetadataChanged,
                 OnQueueChangedImpl = OnQueueChanged,
                 OnQueueTitleChangedImpl = OnQueueTitleChanged,
-                // OnExtrasChangedImpl = OnExtrasChanged,
                 OnAudioInfoChangedImpl = pi =>
                 {
                     System.Diagnostics.Debug.WriteLine($"[MediaBrowserServiceConnector.MediaControllerCallback] [OnAudioInfoChanged] Playback type: {pi.PlaybackType}");
@@ -223,7 +195,7 @@ namespace AudioBookPlayer.App.Android.Services
 
             Chapters = Array.Empty<IChapterMetadata>();
             AudioBookMetadata = null;
-            ActiveQueueItemId = -1;
+            ActiveQueueItemId = -1L;
         }
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.ConnectAsync" />
@@ -401,20 +373,31 @@ namespace AudioBookPlayer.App.Android.Services
             }
         }
 
+        public void SeekTo(long position)
+        {
+            var controls = MediaController?.GetTransportControls();
+
+            if (null != controls)
+            {
+                controls.SeekTo(Offset + position);
+            }
+        }
+
         private void OnPlaybackStateChanged(PlaybackStateCompat psc)
         {
-            PlaybackState = psc.State.ToPlaybackState();
+            State = psc.State.ToPlaybackState();
             ActiveQueueItemId = psc.ActiveQueueItemId;
 
-            var start = GetMediaFragmentStart(psc.Extras);
+            var offset = GetMediaFragmentStart(psc.Extras);
             var duration = GetMediaFragmentDuration(psc.Extras);
-            var position = psc.Position - start;
-            var queueId = GetMediaFragmentLong(psc.Extras, "Queue.ID");
+            var position = psc.Position - offset;
+            //var queueId = GetMediaFragmentLong(psc.Extras, "Queue.ID");
 
-            PlaybackPosition = position;
-            PlaybackDuration = duration;
+            Offset = offset;
+            Position = position;
+            Duration = duration;
             
-            eventManager.HandleEvent(this, EventArgs.Empty, nameof(PlaybackStateChanged));
+            eventManager.HandleEvent(this, EventArgs.Empty, nameof(StateChanged));
         }
 
         private static long GetMediaFragmentStart(Bundle bundle) => GetMediaFragmentLong(bundle, "Chapter.Start");
@@ -527,13 +510,6 @@ namespace AudioBookPlayer.App.Android.Services
             MediaController.SendCommand(AudioBooksPlaybackService.IAudioBookMediaBrowserService.SubscribePlayback, options, null);*/
         }
 
-        private void OnExtrasChanged(Bundle extras)
-        {
-            //QueueIndex = extras.GetInt("QueueIndex");
-            //CurrentMediaPosition = extras.GetLong("CurrentMediaPosition");
-            //eventManager.HandleEvent(this, EventArgs.Empty, nameof(QueueIndexChanged));
-        }
-
         private sealed class ActionHandlerCallback : Java.Lang.Object, Handler.ICallback
         {
             private readonly Action<Message> handler;
@@ -549,26 +525,5 @@ namespace AudioBookPlayer.App.Android.Services
                 return true;
             }
         }
-
-        private sealed class CallbackHandler : Handler
-        {
-            public Action<Message> OnMessage
-            {
-                get; 
-                set;
-            }
-
-            public CallbackHandler()
-            {
-                ;
-            }
-
-            public override void HandleMessage(Message msg) => OnMessage?.Invoke(msg);
-        }
-
-        /*public interface IPlaybackCallback
-        {
-            void 
-        }*/
     }
 }

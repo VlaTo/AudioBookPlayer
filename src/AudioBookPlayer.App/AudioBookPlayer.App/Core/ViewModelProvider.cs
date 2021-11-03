@@ -22,13 +22,13 @@ namespace AudioBookPlayer.App.Core
                 {
                     foreach (var behavior in page.Behaviors)
                     {
-                        if (behavior is PageLifecycleBehavior)
+                        if (behavior is PageAppearingBehavior)
                         {
                             return;
                         }
                     }
 
-                    page.Behaviors.Add(new PageLifecycleBehavior());
+                    page.Behaviors.Add(new PageAppearingBehavior());
                 }
             }
         }

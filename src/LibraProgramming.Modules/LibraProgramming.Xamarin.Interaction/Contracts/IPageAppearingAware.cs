@@ -1,6 +1,6 @@
 ﻿namespace LibraProgramming.Xamarin.Interaction.Contracts
 {
-    public interface IPageLifecycleAware
+    public interface IPageAppearingAware
     {
         void OnAppearing();
         

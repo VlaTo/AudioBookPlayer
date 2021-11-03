@@ -15,7 +15,7 @@ using Xamarin.Forms;
 namespace AudioBookPlayer.App.ViewModels
 {
     [QueryProperty(nameof(MediaId), "mid")]
-    public class PlayerControlViewModel : ViewModelBase, IInitialize
+    public class PlayerControlViewModel : ViewModelBase, IInitialize, ICleanup
     {
         private readonly IMediaBrowserServiceConnector connector;
         private readonly ICoverService coverService;
@@ -35,6 +35,9 @@ namespace AudioBookPlayer.App.ViewModels
         private bool isPlaying;
         private bool isPlaybackEnabled;
         private long activeQueueItemId;
+        private bool wasPlaying;
+        private bool seeking;
+        private bool initializing;
 
         #region Properties
 
@@ -107,6 +110,7 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 if (SetProperty(ref position, value))
                 {
+                    Debug.WriteLine($"[PlayerControlViewModel] [SetPosition] Value: {value} (Duration: {duration})");
                     Left = duration - position;
                 }
             }
@@ -215,6 +219,16 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public Command SeekStart
+        {
+            get;
+        }
+
+        public Command SeekComplete
+        {
+            get;
+        }
+
         public InteractionRequest<PickChapterRequestContext> PickChapterRequest
         {
             get;
@@ -236,6 +250,7 @@ namespace AudioBookPlayer.App.ViewModels
             this.connector = connector;
             this.coverService = coverService;
 
+            initializing = true;
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -246,9 +261,13 @@ namespace AudioBookPlayer.App.ViewModels
             Snooze = new Command(DoSnoozeCommand);
             PreviousChapter = new Command(DoPreviousChapter);
             NextChapter = new Command(DoNextChapter);
+            SeekStart = new Command(DoSeekStart);
+            SeekComplete = new Command(DoSeekComplete);
             PickChapterRequest = new InteractionRequest<PickChapterRequestContext>();
             BookmarkRequest = new InteractionRequest<BookmarkRequestContext>();
 
+            wasPlaying = false;
+            seeking = false;
             ActiveQueueItemId = -1;
             QueueItemIndex = -1;
             Title = String.Empty;
@@ -256,24 +275,32 @@ namespace AudioBookPlayer.App.ViewModels
             Description=String.Empty;
             QueueItemTitle = String.Empty;
             ImageSource = null;
-            Duration = 1L;
-            Position = 0L;
+            //Duration = 1L;
+            //Position = 0L;
             IsPlaybackEnabled = true;
 
-            connector.PlaybackStateChanged += AudioBookBrowserConnectorPlaybackStateChanged;
+            connector.StateChanged += AudioBookBrowserConnectorStateChanged;
             connector.AudioBookMetadataChanged += AudioBookBrowserConnectorAudioBookMetadataChanged;
             connector.ChaptersChanged += AudioBookBrowserConnectorChaptersChanged;
-            connector.QueueIndexChanged += AudioBookBrowserConnectorQueueIndexChanged;
-            connector.CurrentMediaInfoChanged += AudioBookBrowserConnectorCurrentMediaPositionChanged;
         }
 
         public void OnInitialize()
         {
-            UpdateProperties();
-            UpdateCurrentChapterTitle();
+            initializing = false;
 
             IsPlaybackEnabled = connector.IsConnected;
-            IsPlaying = PlaybackState.Playing == connector.PlaybackState;
+            
+            UpdateProperties();
+            UpdatePlaybackState();
+            
+            Debug.WriteLine($"[PlayerControlViewModel] [OnInitialize] Position: {Position}");
+        }
+
+        public void OnCleanup()
+        {
+            connector.StateChanged -= AudioBookBrowserConnectorStateChanged;
+            connector.AudioBookMetadataChanged -= AudioBookBrowserConnectorAudioBookMetadataChanged;
+            connector.ChaptersChanged -= AudioBookBrowserConnectorChaptersChanged;
         }
 
         private void DoPickChapter()
@@ -346,12 +373,41 @@ namespace AudioBookPlayer.App.ViewModels
             connector.SkipToNext();
         }
 
+        private void DoSeekStart()
+        {
+            seeking = true;
+
+            if (PlaybackState.Playing == connector.State)
+            {
+                wasPlaying = true;
+                connector.Pause();
+            }
+        }
+
+        private void DoSeekComplete()
+        {
+            if (seeking)
+            {
+                connector.SeekTo(Position);
+
+                if (wasPlaying)
+                {
+                    connector.Play();
+                    wasPlaying = false;
+                }
+
+                seeking = false;
+            }
+        }
+
         private Task DoLoadBookAsync()
         {
             if (Core.MediaId.TryParse(MediaId, out var mid) && null != connector)
             {
                 connector.PrepareFromMediaId(mid);
             }
+
+            UpdatePlaybackState();
 
             return Task.CompletedTask;
         }
@@ -434,8 +490,6 @@ namespace AudioBookPlayer.App.ViewModels
             Title = metadata.Title;
             Subtitle = metadata.Subtitle;
             Description = metadata.Description;
-            //Position = 0L;
-            //Duration = 1L;
 
             var imageUri = metadata.AlbumArtUri;
 
@@ -450,35 +504,19 @@ namespace AudioBookPlayer.App.ViewModels
             // connector.Chapters;
         }
 
-        private void UpdateCurrentChapterTitle()
+        private void UpdatePlaybackState()
         {
-            /*var queueIndex = connector.QueueIndex;
-
-            if (-1 < queueIndex)
-            {
-                var chapter = connector.Chapters[queueIndex];
-                QueueItemTitle = chapter.Title;
-            }
-            else
-            {
-                QueueItemTitle = String.Empty;
-            }*/
+            IsPlaying = PlaybackState.Playing == connector.State;
+            ActiveQueueItemId = connector.ActiveQueueItemId;
+            Duration = Math.Max(1L, connector.Duration);
+            Position = connector.Position;
         }
 
-        private void UpdateCurrentMediaPosition()
-        {
-            Position = connector.PlaybackPosition;
-            Duration = 1L > connector.PlaybackDuration ? 1L : connector.PlaybackDuration;
-        }
-
-        private void AudioBookBrowserConnectorPlaybackStateChanged(object sender, EventArgs _)
+        private void AudioBookBrowserConnectorStateChanged(object sender, EventArgs _)
         {
             IsPlaybackEnabled = connector.IsConnected;
-            IsPlaying = PlaybackState.Playing == connector.PlaybackState;
-            ActiveQueueItemId = connector.ActiveQueueItemId;
-            Position = connector.PlaybackPosition;
-            Duration = Math.Max(1L, connector.PlaybackDuration);
-            //UpdateCurrentMediaPosition();
+            UpdatePlaybackState();
+            Debug.WriteLine($"[PlayerControlViewModel] [AudioBookBrowserConnectorStateChanged] Position: {Position}");
         }
 
         private void AudioBookBrowserConnectorAudioBookMetadataChanged(object sender, EventArgs _)
@@ -490,15 +528,5 @@ namespace AudioBookPlayer.App.ViewModels
         {
             UpdateChaptersList();
         }
-
-        private void AudioBookBrowserConnectorQueueIndexChanged(object sender, EventArgs _)
-        {
-            //UpdateCurrentChapterTitle();
-        }
-
-        private void AudioBookBrowserConnectorCurrentMediaPositionChanged(object sender, EventArgs _)
-        {
-           // UpdateCurrentMediaPosition();
-        }
-    }
+   }
 }

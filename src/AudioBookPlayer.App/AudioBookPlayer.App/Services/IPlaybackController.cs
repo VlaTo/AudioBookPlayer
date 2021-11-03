@@ -8,22 +8,27 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        long PlaybackPosition { get; }
+        long Position { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        long PlaybackDuration { get; }
+        long Offset { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        PlaybackState PlaybackState { get; }
+        long Duration { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        event EventHandler PlaybackStateChanged;
+        PlaybackState State { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        event EventHandler StateChanged;
 
         /// <summary>
         /// 
@@ -54,5 +59,11 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         void Rewind();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        void SeekTo(long position);
     }
 }

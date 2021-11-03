@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
 using AudioBookPlayer.App.Domain.Models;
-using Xamarin.Forms.Xaml;
 
 namespace AudioBookPlayer.App.Core
 {
-    public sealed class MediaId
+    public sealed class MediaId : IEquatable<MediaId>
     {
         private const string AudioBookPrefix = "abid:";
         private const string SectionPrefix = "s";
@@ -218,6 +217,31 @@ namespace AudioBookPlayer.App.Core
             value = default;
 
             return false;
+        }
+
+        public bool Equals(MediaId other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return BookId.Equals(other.BookId) && SectionIndex == other.SectionIndex && ChapterIndex == other.ChapterIndex;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ReferenceEquals(this, obj) || (obj is MediaId other && Equals(other));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(BookId, SectionIndex, ChapterIndex);
         }
     }
 }

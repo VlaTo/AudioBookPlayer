@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AudioBookPlayer.App.Services
+﻿namespace AudioBookPlayer.App.Services
 {
     public interface IPlaybackQueue
     {
@@ -9,11 +7,6 @@ namespace AudioBookPlayer.App.Services
         /// </summary>
         long ActiveQueueItemId { get; }
         
-        /// <summary>
-        /// 
-        /// </summary>
-        event EventHandler QueueIndexChanged;
-
         /// <summary>
         /// 
         /// </summary>

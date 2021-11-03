@@ -13,6 +13,7 @@
             Timeout="0:00:3.0"
             ShowHintMessage="OnMultiTapToExitBehaviorOnShowHintMessage"
         />
+        <interactivity:ShellNavigationPageDisposeBehavior />
     </Shell.Behaviors>
 
     <!--

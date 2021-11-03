@@ -6,6 +6,7 @@
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:controls="clr-namespace:AudioBookPlayer.App.Controls;assembly=AudioBookPlayer.App"
+    xmlns:behaviours="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:requestContexts="clr-namespace:AudioBookPlayer.App.ViewModels.RequestContexts;assembly=AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.Views.PlayerControlPage"
@@ -190,12 +191,21 @@
                 Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
             />
             <Slider
+                DragStartedCommand="{Binding Path=SeekStart, Mode=OneTime}"
+                DragCompletedCommand="{Binding Path=SeekComplete, Mode=OneTime}"
                 Minimum="0"
                 Maximum="{Binding Path=Duration, Mode=OneWay}"
                 Value="{Binding Path=Position, Mode=TwoWay}"
                 HorizontalOptions="FillAndExpand"
-                Margin="{OnPlatform Android='0', iOS='48,4'}"
-            />
+                Margin="{OnPlatform Android='0', iOS='48,4'}">
+                <!--<Slider.Behaviors>
+                    <behaviours:EventToCommandBehavior
+                        EventName="DragCompleted"
+                        Command="{Binding Path=SeekComplete, Mode=OneTime}"
+                        CommandParameter="{Binding Path=Value, Source={RelativeSource FindAncestor}, Mode=OneWay}"
+                    />
+                </Slider.Behaviors>-->
+            </Slider>
             <Label
                 Style="{StaticResource Key=SeekBarTimeLabelStyle}"
                 Text="{Binding Path=Left, Converter={StaticResource SpanConverter}, Mode=OneWay}"

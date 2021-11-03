@@ -14,7 +14,6 @@ namespace AudioBookPlayer.App
             InitializeComponent();
             
             Routing.RegisterRoute(Routes.PlayerPageRoute, typeof(PlayerControlPage));
-
         }
 
         private void OnMenuItemClicked(object sender, EventArgs e)
