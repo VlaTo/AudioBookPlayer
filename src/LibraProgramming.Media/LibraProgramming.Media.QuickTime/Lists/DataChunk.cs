@@ -21,6 +21,11 @@ namespace LibraProgramming.Media.QuickTime.Lists
             get;
         }
 
+        public uint ActualType
+        {
+            get;
+        }
+
         public ReadOnlyMemory<byte> Data => memory;
 
         public string Text
@@ -36,11 +41,12 @@ namespace LibraProgramming.Media.QuickTime.Lists
             }
         }
 
-        public DataChunk(DataType dataType, byte[] data)
+        public DataChunk(DataType dataType, uint actualType, byte[] data)
             : base(AtomTypes.Data)
         {
             memory = new Memory<byte>(data);
             DataType = dataType;
+            ActualType = actualType;
         }
         
         [ChunkCreator]
@@ -63,7 +69,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
                 bytes = StreamHelper.ReadBytes(stream, (uint) stream.Length);
             }
 
-            return new DataChunk(GetDataType(type), bytes.ToArray());
+            return new DataChunk(GetDataType(type), type, bytes.ToArray());
         }
 
         public override void Debug(int level)
@@ -72,7 +78,7 @@ namespace LibraProgramming.Media.QuickTime.Lists
             var bytes = BitConverter.GetBytes(Type);
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
-            Console.WriteLine($"{tabs}{type}");
+            Console.WriteLine($"{tabs}{type}({ActualType:X4})");
         }
 
         private static DataType GetDataType(uint type)
@@ -92,6 +98,10 @@ namespace LibraProgramming.Media.QuickTime.Lists
                 }
 
                 case 0x0D:
+                {
+                    return DataType.Binary;
+                }
+
                 case 0x0E:
                 {
                     return DataType.Binary;

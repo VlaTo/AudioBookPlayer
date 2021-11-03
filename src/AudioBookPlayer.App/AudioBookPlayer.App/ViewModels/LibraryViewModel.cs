@@ -1,24 +1,18 @@
 ﻿using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using System;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Providers;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public sealed class LibraryViewModel : ViewModelBase//, IInitialize
+    public sealed class LibraryViewModel : ViewModelBase
     {
-        private readonly IBooksProvider booksProvider;
-        private readonly IBooksService booksService;
-        //private readonly AudioBooksLibrary booksLibrary;
         private readonly IMediaBrowserServiceConnector connector;
-        private readonly IPermissionRequestor permissions;
-        private readonly ITaskExecutionMonitor refreshExecution;
-        private IDisposable browserServiceSubscription;
+        private readonly IUpdateLibraryService updateLibraryService;
+        //private readonly IPermissionRequestor permissions;
+        //private readonly ITaskExecutionMonitor libraryUpdateMonitor;
         private bool isBusy;
 
         public bool IsBusy
@@ -27,7 +21,7 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref isBusy, value);
         }
 
-        public Command Refresh
+        public Command UpdateLibrary
         {
             get;
         }
@@ -35,26 +29,22 @@ namespace AudioBookPlayer.App.ViewModels
         [PrefferedConstructor]
         public LibraryViewModel(
             IMediaBrowserServiceConnector connector,
-            IPermissionRequestor permissions)
+            IUpdateLibraryService updateLibraryService
+            //IPermissionRequestor permissions
+            )
         {
-            //this.booksProvider = booksProvider;
-            //this.booksService = booksService;
-            //this.booksLibrary = booksLibrary;
-            //this.booksPublisher = booksPublisher;
-
             this.connector = connector;
-            this.permissions = permissions;
+            this.updateLibraryService = updateLibraryService;
+            //this.permissions = permissions;
 
-            refreshExecution = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
+            //libraryUpdateMonitor = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
 
-            Refresh = new Command(DoLibraryRefreshAsync);
+            UpdateLibrary = new Command(DoUpdateLibrary);
         }
 
-        private Task ExecuteLibraryRefreshAsync()
+        /*private Task ExecuteLibraryRefreshAsync()
         {
-            return connector.UpdateLibraryAsync();
-
-            /*IsBusy = true;
+            IsBusy = true;
 
             try
             {
@@ -77,19 +67,21 @@ namespace AudioBookPlayer.App.ViewModels
             finally
             {
                 IsBusy = false;
-            }*/
-        }
+            }
+        }*/
 
-        private async void DoLibraryRefreshAsync()
+        private void DoUpdateLibrary()
         {
-            var status = await permissions.CheckAndRequestMediaPermissionsAsync();
+            updateLibraryService.StartUpdate();
+
+            /*var status = await permissions.CheckAndRequestMediaPermissionsAsync();
 
             if (PermissionStatus.Denied == status)
             {
                 return;
             }
 
-            refreshExecution.Start();
+            refreshExecution.Start();*/
         }
     }
 }

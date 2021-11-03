@@ -10,7 +10,9 @@ using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AndroidX.Work;
 using AudioBookPlayer.App.Android.Models;
+using AudioBookPlayer.App.Android.Services.Workers;
 using AudioBookPlayer.App.Models;
 using Xamarin.Forms;
 using Application = Android.App.Application;
@@ -254,22 +256,16 @@ namespace AudioBookPlayer.App.Android.Services
         }*/
 
         /// <inheritdoc cref="IMediaBrowserServiceConnector.UpdateLibraryAsync" />
-        public Task UpdateLibraryAsync()
+        /*public Task UpdateLibraryAsync()
         {
             var tcs = new TaskCompletionSource();
-            var handler = new Handler(Looper.MainLooper, new ActionHandlerCallback(message =>
+            var handler = new ActionHandler(message =>
             {
-                /*var temp1 = Handler.CreateAsync(Looper.MyLooper());
-                var temp2 = temp1.ObtainMessage(1);
-
-                temp1.DispatchMessage(temp2);*/
-
-                //System.Diagnostics.Debug.WriteLine("[ConnectionCallback.OnConnected] [Handler] Callback executed");
 
                 eventManager.HandleEvent(this, EventArgs.Empty, nameof(ChaptersChanged));
 
                 tcs.Complete();
-            }));
+            });
 
             MediaController.SendCommand(
                 AudioBooksPlaybackService.IAudioBookMediaBrowserService.UpdateLibrary,
@@ -278,18 +274,6 @@ namespace AudioBookPlayer.App.Android.Services
             );
 
             return tcs.Task;
-        }
-
-        /*public void Play(EntityId bookId)
-        {
-            var controls = MediaController?.GetTransportControls();
-
-            if (null != controls)
-            {
-                var mediaId = new MediaId(bookId).ToString();
-                var options = new Bundle();
-                controls.PlayFromMediaId(mediaId, options);
-            }
         }*/
 
         public void Play()
@@ -510,7 +494,23 @@ namespace AudioBookPlayer.App.Android.Services
             MediaController.SendCommand(AudioBooksPlaybackService.IAudioBookMediaBrowserService.SubscribePlayback, options, null);*/
         }
 
-        private sealed class ActionHandlerCallback : Java.Lang.Object, Handler.ICallback
+        private sealed class ActionHandler : Handler
+        {
+            private readonly Action<Message> handler;
+
+            public ActionHandler(Action<Message> handler)
+                : base(handler)
+            {
+                this.handler = handler;
+            }
+
+            public override void HandleMessage(Message msg)
+            {
+                handler.Invoke(msg);
+            }
+        }
+
+        /*private sealed class ActionHandlerCallback : Java.Lang.Object, Handler.ICallback
         {
             private readonly Action<Message> handler;
 
@@ -524,6 +524,6 @@ namespace AudioBookPlayer.App.Android.Services
                 handler.Invoke(msg);
                 return true;
             }
-        }
+        }*/
     }
 }

@@ -8,23 +8,19 @@ using Android.Runtime;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AndroidX.Media;
+using AndroidX.Work;
 using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Android.Models;
 using AudioBookPlayer.App.Android.Services.Helpers;
+using AudioBookPlayer.App.Android.Services.Workers;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Domain.Core;
 using AudioBookPlayer.App.Domain.Extensions;
 using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Domain.Providers;
 using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.LiteDb;
-using AudioBookPlayer.App.Services;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using AudioBookPlayer.App.Android.Models;
-using AudioBookPlayer.App.Domain.Core;
 using LibraProgramming.Xamarin.Core;
+using System;
 using Application = Android.App.Application;
 using PlaybackState = Android.Media.Session.PlaybackState;
 
@@ -48,7 +44,6 @@ namespace AudioBookPlayer.App.Android.Services
     public sealed partial class AudioBooksPlaybackService : MediaBrowserServiceCompat, AudioBooksPlaybackService.IActions, AudioBooksPlaybackService.IKeys,
         AudioBooksPlaybackService.ICommands
     {
-        private const string DatabaseFilename = "library.ldb";
         private const string ActionCommand = "Command";
         private const string ActionHint = "Hint";
         private const string KeyCommandName = "CommandName";
@@ -60,50 +55,49 @@ namespace AudioBookPlayer.App.Android.Services
         private const int PlaybackPositionChangedEvent = 1;
         private const int PlaybackQueueIndexChangedEvent = 2;
 
-        private readonly IBooksProvider booksProvider;
+        //private readonly IBooksProvider booksProvider;
         private readonly ICoverService coverService;
+        private readonly IBooksService booksService;
         private readonly PackageValidator packageValidator;
-        private readonly TaskExecutionMonitor<ResultReceiver> updateLibrary;
-        private readonly List<KeyValuePair<Bundle, ICustomPlayback>> callbacks;
-        private readonly long playbackDelta;
+        //private readonly TaskExecutionMonitor<ResultReceiver> updateLibrary;
+        //private readonly List<KeyValuePair<Bundle, ICustomPlayback>> callbacks;
+        private readonly long seekDelta;
 
         private EntityId bookId;
         private bool resetFragment;
         private MediaSessionCompat? mediaSession;
         private MediaSessionCallback? mediaSessionCallback;
-        private BooksService? booksService;
         private NotificationService? notificationService;
         private PlaybackQueue? playbackQueue;
         private Playback? playback;
         private PlaybackStateCompat.Builder? playbackStateBuilder;
+        private WorkManager? workManager;
 
         // ReSharper disable once UnusedMember.Global
         public AudioBooksPlaybackService()
             : this(
-                AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksProvider>(),
+                //AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksProvider>(),
+                AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<IBooksService>(),
                 AudioBookPlayerApplication.Instance.DependencyContainer.GetInstance<ICoverService>()
             )
         {
-            ;
         }
 
-        private AudioBooksPlaybackService(IBooksProvider booksProvider, ICoverService coverService)
+        private AudioBooksPlaybackService(IBooksService booksService, ICoverService coverService)
         {
-            this.booksProvider = booksProvider;
+            //this.booksProvider = booksProvider;
             this.coverService = coverService;
+            this.booksService = booksService;
 
             packageValidator = new PackageValidator(Application.Context);
-            updateLibrary = new TaskExecutionMonitor<ResultReceiver>(DoUpdateLibrary);
-            callbacks = new List<KeyValuePair<Bundle, ICustomPlayback>>();
             bookId = EntityId.Empty;
             mediaSession = null;
             mediaSessionCallback = null;
-            booksService = null;
             playbackQueue = null;
             playback = null;
             resetFragment = false;
 
-            playbackDelta = (long)TimeSpan.FromSeconds(20.0d).TotalMilliseconds;
+            seekDelta = (long)TimeSpan.FromSeconds(20.0d).TotalMilliseconds;
         }
 
         public override void OnCreate()
@@ -117,6 +111,7 @@ namespace AudioBookPlayer.App.Android.Services
             playbackQueue = new PlaybackQueue();
             mediaSession = new MediaSessionCompat(Application.Context, nameof(AudioBooksPlaybackService), componentName, pendingIntent);
             mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
+            workManager = WorkManager.GetInstance(Application.Context);
 
             mediaSessionCallback = new MediaSessionCallback
             {
@@ -135,7 +130,7 @@ namespace AudioBookPlayer.App.Android.Services
             };
             mediaSession.SetCallback(mediaSessionCallback);
             mediaSession.SetMediaButtonReceiver(pendingIntent);
-            booksService = CreateBookService();
+            //booksService = CreateBookService();
 
             SessionToken = mediaSession.SessionToken;
 
@@ -289,7 +284,7 @@ namespace AudioBookPlayer.App.Android.Services
 
         private void DoMediaSessionCommand(string command, Bundle options, ResultReceiver result)
         {
-            if (String.Equals(IAudioBookMediaBrowserService.UpdateLibrary, command))
+            /*if (String.Equals(IAudioBookMediaBrowserService.UpdateLibrary, command))
             {
                 updateLibrary.Start(result);
                 result.Send(global::Android.App.Result.Ok, null);
@@ -310,12 +305,26 @@ namespace AudioBookPlayer.App.Android.Services
                 return;
             }
 
-            result.Send(global::Android.App.Result.Canceled, null);
+            result.Send(global::Android.App.Result.Canceled, null);*/
         }
 
-        private async Task DoUpdateLibrary(ResultReceiver cb)
+        private void DoUpdateLibrary(ResultReceiver cb)
         {
-            var result = Bundle.Empty;
+            if (null != workManager)
+            {
+                //var input = new Data.Builder().Put("RECEIVER", cb).Build();
+                var req = new OneTimeWorkRequest.Builder(typeof(UpdateLibraryWorker))
+                    .AddTag("UPDATE")
+                    //.SetInputData(input)
+                    .Build();
+
+                var operation = workManager.Enqueue(req);
+
+                var result = new Bundle();
+                cb.Send(global::Android.App.Result.Ok, result);
+            }
+
+            /*var result = Bundle.Empty;
             var booksLibrary = new AudioBooksLibrary();
 
             // 1. Get books from device and library
@@ -332,20 +341,11 @@ namespace AudioBookPlayer.App.Android.Services
                 {
                     result = new Bundle();
 
-                    result.PutInt("Count", 1);
-
-                    return;
+                    result.PutInt("Count", changes.Count);
                 }
             }
 
-
-
-            cb.Send(global::Android.App.Result.Ok, result);
-        }
-
-        private void DoMediaSessionPrepare()
-        {
-            throw new NotImplementedException();
+            cb.Send(global::Android.App.Result.Ok, result);*/
         }
 
         private void DoPrepareFromMediaId(string mediaId, Bundle options)
@@ -562,7 +562,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null != playback)
                 {
-                    var delta = playbackDelta;
+                    var delta = seekDelta;
                     var left = playback.Duration - playback.Position;
 
                     if (delta > left)
@@ -605,7 +605,7 @@ namespace AudioBookPlayer.App.Android.Services
             {
                 if (null != playback)
                 {
-                    var delta = playbackDelta;
+                    var delta = seekDelta;
                     var elapsed = playback.Position;
 
                     if (elapsed < delta)
@@ -858,55 +858,6 @@ namespace AudioBookPlayer.App.Android.Services
                 mediaSession?.SetPlaybackState(playbackStateBuilder.Build());
             }
         }
-
-        private BooksService CreateBookService()
-        {
-            var databasePath = GetDatabasePath(DatabaseFilename)?.AbsolutePath;
-            var dbContext = new LiteDbContext(databasePath);
-
-            return new BooksService(dbContext, coverService);
-        }
-
-        /*private void SendPlaybackPosition()
-        {
-            if (null != playbackQueue)
-            {
-                var mediaPosition = 0L;
-                var mediaDuration = 0L;
-
-                if (playbackQueue.IsValidIndex(playbackQueue.CurrentIndex))
-                {
-                    if (null != playback)
-                    {
-                        mediaPosition = playback.MediaPosition;
-                        mediaDuration = playback.MediaDuration;
-                    }
-                    else
-                    {
-                        var (_, duration) = BuildMediaFragment(playbackQueue.Current);
-                        mediaDuration = (long)duration;
-                    }
-                }
-
-                for (var index = 0; index < callbacks.Count; index++)
-                {
-                    var (_, cb) = callbacks[index];
-                    cb.OnPlaybackPositionChanged(mediaPosition, mediaDuration);
-                }
-            }
-        }*/
-
-        /*private void SendQueueIndex()
-        {
-            if (null != playbackQueue)
-            {
-                for (var index = 0; index < callbacks.Count; index++)
-                {
-                    var (_, cb) = callbacks[index];
-                    cb.OnQueueIndexChanged(playbackQueue.CurrentIndex);
-                }
-            }
-        }*/
 
         private static MediaMetadataCompat BuildAudioBookMetadata(AudioBook audioBook)
         {

@@ -81,6 +81,11 @@ namespace LibraProgramming.Media.QuickTime.Lists
             var type = Encoding.ASCII.GetString(bytes.ToBigEndian());
 
             Console.WriteLine($"{tabs}{type}");
+
+            if (null != DataChunk)
+            {
+                DataChunk.Debug(level + 1);
+            }
         }
     }
 }

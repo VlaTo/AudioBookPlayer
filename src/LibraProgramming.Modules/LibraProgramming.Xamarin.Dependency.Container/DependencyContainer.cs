@@ -48,7 +48,7 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         {
             if (null == serviceType)
             {
-                Throw.ArgumentNull(nameof(serviceType));
+                throw Throw.ArgumentNull(nameof(serviceType));
             }
 
             lock (gate)
@@ -69,14 +69,14 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         {
             if (null == service)
             {
-                Throw.ArgumentNull(nameof(service));
+                throw Throw.ArgumentNull(nameof(service));
             }
 
             var typeInfo = service.GetTypeInfo();
 
             if (typeInfo.IsAbstract || typeInfo.IsInterface)
             {
-                Throw.UnsupportedServiceType(service);
+                throw Throw.UnsupportedServiceType(service);
             }
 
             RegisterService(service, new TypeFactory(this, service), lifetime, key, createImmediate);
@@ -91,26 +91,26 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         {
             if (null == service)
             {
-                Throw.ArgumentNull(nameof(service));
+                throw Throw.ArgumentNull(nameof(service));
             }
 
             var typeInfo = service.GetTypeInfo();
 
             if (!typeInfo.IsAbstract && !typeInfo.IsInterface)
             {
-                Throw.UnsupportedServiceType(service);
+                throw Throw.UnsupportedServiceType(service);
             }
 
             if (null == impl)
             {
-                Throw.ArgumentNull(nameof(impl));
+                throw Throw.ArgumentNull(nameof(impl));
             }
 
             typeInfo = impl.GetTypeInfo();
 
             if (typeInfo.IsAbstract || typeInfo.IsInterface)
             {
-                Throw.UnsupportedServiceType(impl);
+                throw Throw.UnsupportedServiceType(impl);
             }
 
             RegisterService(service, new TypeFactory(this, impl), lifetime, key, createImmediate);
@@ -125,7 +125,7 @@ namespace LibraProgramming.Xamarin.Dependency.Container
 
         public void Register<TService, TConcrete>(
             Func<Factory, InstanceLifetime> lifetime = null,
-            string key = null, 
+            string key = null,
             bool createimmediate = false)
             where TConcrete : class, TService
         {
@@ -142,15 +142,15 @@ namespace LibraProgramming.Xamarin.Dependency.Container
         {
             lock (gate)
             {
-                if (!registration.TryGetValue(serviceType, out var collection))
+                if (registration.TryGetValue(serviceType, out var collection))
                 {
-                    Throw.MissingServiceRegistration(serviceType, nameof(serviceType));
+                    return collection[key].ResolveInstance(queue);
                 }
-
-                return collection[key].ResolveInstance(queue);
             }
+
+            throw Throw.MissingServiceRegistration(serviceType, nameof(serviceType));
         }
-        
+
         private void RegisterService(
             Type service,
             Factory factory,
@@ -167,7 +167,7 @@ namespace LibraProgramming.Xamarin.Dependency.Container
                 }
                 else if (null == key)
                 {
-                    Throw.MissingServiceRegistration(service, nameof(service));
+                    throw Throw.DuplicateServiceRegistration(service, nameof(service));
                 }
 
                 var manager = lifetime ?? InstanceLifetime.Singleton;

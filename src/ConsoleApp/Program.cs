@@ -12,7 +12,6 @@ namespace ConsoleApp
         static void Main(string[] args)
         {
             var source = args[0];
-            var output = args[1];
 
             using (var stream = File.OpenRead(source))
             {

@@ -66,7 +66,7 @@ namespace AudioBookPlayer.App.Services
         /// <summary>
         /// 
         /// </summary>
-        Task UpdateLibraryAsync();
+        //Task UpdateLibraryAsync();
 
 
         /// <summary>

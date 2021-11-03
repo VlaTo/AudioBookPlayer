@@ -18,6 +18,7 @@ namespace AudioBookPlayer.App.ViewModels
     public class PlayerControlViewModel : ViewModelBase, IInitialize, ICleanup
     {
         private readonly IMediaBrowserServiceConnector connector;
+        private readonly IUpdateLibraryService updateLibraryService;
         private readonly ICoverService coverService;
         private readonly TaskExecutionMonitor loadBookMonitor;
 
@@ -37,7 +38,6 @@ namespace AudioBookPlayer.App.ViewModels
         private long activeQueueItemId;
         private bool wasPlaying;
         private bool seeking;
-        private bool initializing;
 
         #region Properties
 
@@ -245,12 +245,13 @@ namespace AudioBookPlayer.App.ViewModels
         // ReSharper disable once UnusedMember.Global
         public PlayerControlViewModel(
             IMediaBrowserServiceConnector connector,
+            IUpdateLibraryService updateLibraryService,
             ICoverService coverService)
         {
             this.connector = connector;
+            this.updateLibraryService = updateLibraryService;
             this.coverService = coverService;
 
-            initializing = true;
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -286,14 +287,10 @@ namespace AudioBookPlayer.App.ViewModels
 
         public void OnInitialize()
         {
-            initializing = false;
-
             IsPlaybackEnabled = connector.IsConnected;
             
             UpdateProperties();
             UpdatePlaybackState();
-            
-            Debug.WriteLine($"[PlayerControlViewModel] [OnInitialize] Position: {Position}");
         }
 
         public void OnCleanup()
@@ -412,72 +409,6 @@ namespace AudioBookPlayer.App.ViewModels
             return Task.CompletedTask;
         }
 
-        /*private void OnPlaybackControllerIsPlayingChanged(object sender, EventArgs e)
-        {
-            IsPlaying = playbackService.IsPlaying;
-            
-            if (IsPlaying)
-            {
-                //notificationService.ShowInformation(playbackService.AudioBook);
-            }
-            else
-            {
-                //notificationService.HideInformation();
-            }
-
-            trackBookActivity.Start();
-        }*/
-
-        /*private void OnPlaybackControllerAudioBookChanged(object sender, EventArgs e)
-        {
-            UpdateAudioBookProperties();
-        }*/
-
-        /*private void OnPlaybackControllerChapterIndexChanged(object sender, EventArgs e)
-        {
-            ChapterIndex = playbackService.ChapterIndex;
-            UpdateChapterProperties();
-        }*/
-
-        /*private void OnPlaybackControllerPositionChanged(object sender, EventArgs e)
-        {
-            var position = playbackService.CurrentPosition;
-
-            if (position > BookPosition)
-            {
-                BookPosition = position;
-            }
-
-            ChapterPosition = position.TotalMilliseconds;
-        }*/
-
-        /*private void UpdateChapterProperties()
-        {
-            if (-1 < ChapterIndex)
-            {
-                var chapter = playbackService.AudioBook.Chapters[ChapterIndex];
-
-                chapterStart = chapter.Start.TotalMilliseconds;
-                chapterDuration = chapter.Duration;
-
-                CurrentChapterTitle = chapter.Title;
-                ChapterEnd = chapterDuration.TotalMilliseconds;
-                Left = -chapter.Duration;
-            }
-            else
-            {
-                chapterStart = 0.0d;
-                chapterDuration = TimeSpan.Zero;
-
-                CurrentChapterTitle = String.Empty;
-                ChapterEnd = 0.1d;
-                Left = Elapsed;
-            }
-
-            Elapsed = TimeSpan.Zero;
-            ChapterPosition = 0.0d;
-        }*/
-
         private void UpdateProperties()
         {
             var metadata = connector.AudioBookMetadata;
@@ -516,7 +447,6 @@ namespace AudioBookPlayer.App.ViewModels
         {
             IsPlaybackEnabled = connector.IsConnected;
             UpdatePlaybackState();
-            Debug.WriteLine($"[PlayerControlViewModel] [AudioBookBrowserConnectorStateChanged] Position: {Position}");
         }
 
         private void AudioBookBrowserConnectorAudioBookMetadataChanged(object sender, EventArgs _)
