@@ -87,6 +87,8 @@ namespace AudioBookPlayer.App.ViewModels
 
         public virtual void OnInitialize()
         {
+            MessagingCenter.Instance.Subscribe<LibraryViewModel, bool>(this, "1", DoRefreshLibrary);
+
             loadBooksExecution.Start();
         }
 
@@ -156,6 +158,11 @@ namespace AudioBookPlayer.App.ViewModels
             var library = await BrowserServiceConnector.GetLibraryAsync();
 
             BindSourceBooks(library);
+        }
+
+        private void DoRefreshLibrary(LibraryViewModel viewModel, bool force)
+        {
+            loadBooksExecution.Start();
         }
 
         private void OnMediaBrowserConnected(Unit _) => OnConnected();

@@ -128,8 +128,6 @@
     <Compile Include="Services\TaskExecutor.cs" />
     <Compile Include="Services\TaskExecutorAsync.cs" />
     <Compile Include="Services\ToastService.cs" />
-    <Compile Include="Services\UpdateLibraryService.cs" />
-    <Compile Include="Services\Workers\UpdateLibraryWorker.cs" />
     <Compile Include="SplashActivity.cs" />
   </ItemGroup>
   <ItemGroup>

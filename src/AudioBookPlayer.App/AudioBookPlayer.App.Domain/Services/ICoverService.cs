@@ -24,5 +24,11 @@ namespace AudioBookPlayer.App.Domain.Services
         /// <param name="stream"></param>
         /// <returns></returns>
         string AddImage(Stream stream);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="contentUri"></param>
+        void RemoveImage(string contentUri);
     }
 }

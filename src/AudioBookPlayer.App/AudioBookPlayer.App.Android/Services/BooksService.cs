@@ -66,6 +66,8 @@ namespace AudioBookPlayer.App.Android.Services
 
                 if (null != book)
                 {
+                    RemoveBookImages(book);
+
                     unitOfWork.Books.Remove(book);
                     unitOfWork.Commit();
                 }
@@ -190,6 +192,15 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             return audioBook;
+        }
+
+        private void RemoveBookImages(Book book)
+        {
+            for (var index = 0; index < book.Images.Length; index++)
+            {
+                var contentUri = book.Images[index];
+                coverService.RemoveImage(contentUri);
+            }
         }
     }
 }

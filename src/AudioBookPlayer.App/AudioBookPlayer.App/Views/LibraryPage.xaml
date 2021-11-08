@@ -6,6 +6,8 @@
     xmlns:views="clr-namespace:AudioBookPlayer.App.Views"
     xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels"
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
+    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:requestContexts="clr-namespace:AudioBookPlayer.App.ViewModels.RequestContexts;assembly=AudioBookPlayer.App"
     x:Class="AudioBookPlayer.App.Views.LibraryPage"
     x:DataType="viewmodels:LibraryViewModel"
     core:ViewModelLocation.AutowireViewModel="True"
@@ -13,6 +15,15 @@
     BarBackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
     IsBusy="{Binding Path=IsBusy, Mode=OneWay}"
     NavigationPage.HasNavigationBar="{OnPlatform Android=false, iOS=true}">
+    <interactivity:Interaction.RequestTriggers>
+        <interactivity:InteractionRequestTrigger
+            Request="{Binding Path=CheckPermissionsRequest, Mode=OneTime}">
+            <interactivity:CallMethodTriggerAction
+                x:TypeArguments="requestContexts:CheckPermissionsRequestContext"
+                MethodName="OnCheckPermissionsRequest"
+            />
+        </interactivity:InteractionRequestTrigger>
+    </interactivity:Interaction.RequestTriggers>
     <TabbedPage.ToolbarItems>
         <ToolbarItem
             Command="{Binding Path=UpdateLibrary, Mode=OneTime}"

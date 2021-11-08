@@ -1,7 +1,11 @@
-﻿using AudioBookPlayer.App.Core;
+﻿using System;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.ViewModels.RequestContexts;
+using LibraProgramming.Xamarin.Interaction;
+using LibraProgramming.Xamarin.Interaction.Contracts;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -11,8 +15,7 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private readonly IMediaBrowserServiceConnector connector;
         private readonly IUpdateLibraryService updateLibraryService;
-        //private readonly IPermissionRequestor permissions;
-        //private readonly ITaskExecutionMonitor libraryUpdateMonitor;
+        private readonly ITaskExecutionMonitor libraryUpdateMonitor;
         private bool isBusy;
 
         public bool IsBusy
@@ -26,62 +29,76 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public InteractionRequest<CheckPermissionsRequestContext> CheckPermissionsRequest
+        {
+            get;
+        }
+
         [PrefferedConstructor]
         public LibraryViewModel(
             IMediaBrowserServiceConnector connector,
             IUpdateLibraryService updateLibraryService
-            //IPermissionRequestor permissions
             )
         {
             this.connector = connector;
             this.updateLibraryService = updateLibraryService;
-            //this.permissions = permissions;
 
-            //libraryUpdateMonitor = new TaskExecutionMonitor(ExecuteLibraryRefreshAsync);
+            libraryUpdateMonitor = new TaskExecutionMonitor(DoUpdateLibraryAsync);
 
             UpdateLibrary = new Command(DoUpdateLibrary);
+            CheckPermissionsRequest = new InteractionRequest<CheckPermissionsRequestContext>();
         }
 
-        /*private Task ExecuteLibraryRefreshAsync()
+        private void DoUpdateLibrary()
+        {
+            libraryUpdateMonitor.Start();
+        }
+
+        private async Task DoUpdateLibraryAsync()
         {
             IsBusy = true;
 
             try
             {
-                // 1. Get books from device and library
-                var actualBooks = await booksProvider.QueryBooksAsync();
-                var libraryBooks = await booksService.QueryBooksAsync();
-                // 2. Compare collections, get differences
-                var changes = booksLibrary.GetChanges(libraryBooks, actualBooks);
-                // 3. Apply differences to library
-                if (0 < changes.Count)
-                {
-                    var success = await booksLibrary.TryApplyChangesAsync(booksService, changes, CancellationToken.None);
+                var context = new CheckPermissionsRequestContext();
+                
+                CheckPermissionsRequest.Raise(context);
 
-                    if (success)
-                    {
-                        //await DoQueryLibraryAsync(CancellationToken.None);
-                    }
+                var status = await context.WaitAsync();
+
+                if (PermissionStatus.Granted == status)
+                {
+                    var progress = new Progress<int>();
+                    progress.ProgressChanged += DoUpdateProgressChanged;
+
+                    updateLibraryService.Update(progress);
+
+                    MessagingCenter.Send(this, "1", true);
                 }
             }
             finally
             {
                 IsBusy = false;
             }
-        }*/
+        }
 
-        private void DoUpdateLibrary()
+        private void DoUpdateProgressChanged(object _, int progress)
+        {
+            ;
+        }
+
+        /*private void DoUpdateLibrary()
         {
             updateLibraryService.StartUpdate();
 
-            /*var status = await permissions.CheckAndRequestMediaPermissionsAsync();
+            var status = await permissions.CheckAndRequestMediaPermissionsAsync();
 
             if (PermissionStatus.Denied == status)
             {
                 return;
             }
 
-            refreshExecution.Start();*/
-        }
+            refreshExecution.Start();
+        }*/
     }
 }

@@ -3,21 +3,18 @@ using Android.OS;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AudioBookPlayer.App.Android.Extensions;
+using AudioBookPlayer.App.Android.Models;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AndroidX.Work;
-using AudioBookPlayer.App.Android.Models;
-using AudioBookPlayer.App.Android.Services.Workers;
-using AudioBookPlayer.App.Models;
 using Xamarin.Forms;
 using Application = Android.App.Application;
 using PlaybackState = AudioBookPlayer.App.Core.PlaybackState;
-using ResultReceiver = Android.OS.ResultReceiver;
 
 namespace AudioBookPlayer.App.Android.Services
 {

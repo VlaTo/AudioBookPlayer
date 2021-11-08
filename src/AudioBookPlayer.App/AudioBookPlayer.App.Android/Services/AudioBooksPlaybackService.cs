@@ -13,7 +13,6 @@ using AudioBookPlayer.App.Android.Core;
 using AudioBookPlayer.App.Android.Extensions;
 using AudioBookPlayer.App.Android.Models;
 using AudioBookPlayer.App.Android.Services.Helpers;
-using AudioBookPlayer.App.Android.Services.Workers;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Core;
 using AudioBookPlayer.App.Domain.Extensions;
@@ -306,46 +305,6 @@ namespace AudioBookPlayer.App.Android.Services
             }
 
             result.Send(global::Android.App.Result.Canceled, null);*/
-        }
-
-        private void DoUpdateLibrary(ResultReceiver cb)
-        {
-            if (null != workManager)
-            {
-                //var input = new Data.Builder().Put("RECEIVER", cb).Build();
-                var req = new OneTimeWorkRequest.Builder(typeof(UpdateLibraryWorker))
-                    .AddTag("UPDATE")
-                    //.SetInputData(input)
-                    .Build();
-
-                var operation = workManager.Enqueue(req);
-
-                var result = new Bundle();
-                cb.Send(global::Android.App.Result.Ok, result);
-            }
-
-            /*var result = Bundle.Empty;
-            var booksLibrary = new AudioBooksLibrary();
-
-            // 1. Get books from device and library
-            var actualBooks = booksProvider.QueryBooks();
-            var libraryBooks = booksService.QueryBooks();
-            // 2. Compare collections, get differences
-            var changes = booksLibrary.GetChanges(libraryBooks, actualBooks);
-            // 3. Apply differences to library
-            if (0 < changes.Count)
-            {
-                var success = await booksLibrary.TryApplyChangesAsync(booksService, changes, CancellationToken.None);
-
-                if (success)
-                {
-                    result = new Bundle();
-
-                    result.PutInt("Count", changes.Count);
-                }
-            }
-
-            cb.Send(global::Android.App.Result.Ok, result);*/
         }
 
         private void DoPrepareFromMediaId(string mediaId, Bundle options)

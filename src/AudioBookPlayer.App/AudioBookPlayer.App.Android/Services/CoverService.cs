@@ -9,7 +9,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Java.Lang;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.Android.Services
@@ -28,7 +27,7 @@ namespace AudioBookPlayer.App.Android.Services
             resolver = Application.Context.ContentResolver;
         }
 
-        public async Task<string> AddImageAsync(Stream stream, CancellationToken cancellationToken = default)
+        public async Task<string> AddImageAsync([NotNull] Stream stream, CancellationToken cancellationToken = default)
         {
             var displayName = Guid.NewGuid().ToString("N");
             var mimeType = await GetMimeTypeAsync(stream);
@@ -103,7 +102,14 @@ namespace AudioBookPlayer.App.Android.Services
             return contentUri.ToString();
         }
 
-        public Task<Stream> GetImageAsync(string contentUri, CancellationToken cancellationToken = default)
+        public void RemoveImage([NotNull] string contentUri)
+        {
+            var uri = Uri.Parse(contentUri);
+            //var descriptor = resolver.OpenAssetFileDescriptor(uri, WriteMode);
+            resolver.Delete(uri, Bundle.Empty);
+        }
+
+        public Task<Stream> GetImageAsync([NotNull] string contentUri, CancellationToken cancellationToken = default)
         {
             var uri = Uri.Parse(contentUri);
             var afd = resolver.OpenAssetFileDescriptor(uri, ReadMode);
