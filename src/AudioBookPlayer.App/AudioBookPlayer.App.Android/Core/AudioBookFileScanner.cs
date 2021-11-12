@@ -104,16 +104,17 @@ namespace AudioBookPlayer.App.Android.Core
             this.collection = collection;
         }
 
-        public IEnumerable<AudioBookFile> QueryFiles()
+        public AudioBookFile[] QueryFiles()
         {
             const string sortOrder = MediaStore.Audio.Media.InterfaceConsts.Id + " ASC";
             var columns = CreateProjectionColumns();
 
             if (null == contentResolver)
             {
-                yield break;
+                return Array.Empty<AudioBookFile>();
             }
 
+            var audioBookFiles = new List<AudioBookFile>();
             var projection = columns
                 .Select(tuple => tuple.Name)
                 .ToArray();
@@ -130,11 +131,12 @@ namespace AudioBookPlayer.App.Android.Core
             while (success)
             {
                 var audioBookFile = CreateAudioBookFile(cursor, columns);
-
-                yield return audioBookFile;
-
+                
+                audioBookFiles.Add(audioBookFile);
                 success = cursor.MoveToNext();
             }
+
+            return audioBookFiles.ToArray();
         }
 
         public AssetFileDescriptor OpenFile(AudioBookFile file)

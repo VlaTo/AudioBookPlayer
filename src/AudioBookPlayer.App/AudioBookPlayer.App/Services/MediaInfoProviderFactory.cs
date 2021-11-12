@@ -1,6 +1,6 @@
 ﻿namespace AudioBookPlayer.App.Services
 {
-    internal sealed class MediaInfoProviderFactory : IMediaInfoProviderFactory
+    public sealed class MediaInfoProviderFactory : IMediaInfoProviderFactory
     {
         public IMediaInfoProvider CreateProviderFor(string extension, string mimeType)
         {

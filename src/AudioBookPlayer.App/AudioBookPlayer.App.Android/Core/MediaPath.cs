@@ -1,7 +1,6 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Domain.Models;
+using System;
 using System.Collections.Generic;
-using AudioBookPlayer.App.Domain.Models;
-using Java.Lang;
 using Exception = System.Exception;
 using String = System.String;
 
@@ -9,8 +8,9 @@ namespace AudioBookPlayer.App.Android.Core
 {
     internal class MediaPath
     {
-        public const char PathDelimiter = '/';
-        private const string root = "/";
+        private const char PathDelimiter = '/';
+        private const string RootPath = "/";
+        private const string EmptyPath = "@empty@";
 
         private readonly PathSegment[] segments;
 
@@ -40,18 +40,13 @@ namespace AudioBookPlayer.App.Android.Core
 
         static MediaPath()
         {
-            Empty = new MediaPath(Array.Empty<PathSegment>(), false);
-            Root = new MediaPath(new[] { new PathSegment(root, 0, root.Length) }, true);
-        }
-
-        public MediaPath ToAbsolute()
-        {
-            return Empty;
+            Empty = new MediaPath(new[] { new PathSegment(EmptyPath, 0, EmptyPath.Length) }, false);
+            Root = new MediaPath(new[] { new PathSegment(RootPath, 0, RootPath.Length) }, true);
         }
 
         public override string ToString()
         {
-            var sb = new global::System.Text.StringBuilder();
+            var sb = new System.Text.StringBuilder();
 
             for (var index = 0; index < segments.Length; index++)
             {
@@ -76,7 +71,7 @@ namespace AudioBookPlayer.App.Android.Core
                 return false;
             }
 
-            if (s.StartsWith(root))
+            if (s.StartsWith(RootPath))
             {
                 var parts = Split(s);
                 mediaPath = 0 == parts.Length
@@ -108,7 +103,7 @@ namespace AudioBookPlayer.App.Android.Core
 
         private static PathSegment[] Split(string s)
         {
-            if (false == s.StartsWith(root))
+            if (false == s.StartsWith(RootPath))
             {
                 return Array.Empty<PathSegment>();
             }

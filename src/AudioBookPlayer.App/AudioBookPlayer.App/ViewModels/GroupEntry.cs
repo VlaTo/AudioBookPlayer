@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public class GroupEntry<TModel> : ViewModelBase, IEnumerable<TModel>
+    public class GroupEntry<TModel> : ViewModelBase, IEnumerable<TModel>, INotifyCollectionChanged
     {
         private string title;
 
@@ -14,14 +15,20 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref title, value);
         }
 
-        public ICollection<TModel> Entries
+        public ObservableCollection<TModel> Entries
         {
             get;
         }
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add => Entries.CollectionChanged += value;
+            remove => Entries.CollectionChanged -= value;
+        }
+
         public GroupEntry()
         {
-            Entries = new Collection<TModel>();
+            Entries = new ObservableCollection<TModel>();
         }
 
         public IEnumerator<TModel> GetEnumerator() => Entries.GetEnumerator();

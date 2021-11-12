@@ -1,16 +1,18 @@
-﻿using System.Threading.Tasks;
-using AudioBookPlayer.App.Domain.Models;
+﻿using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Domain.Services
 {
     public enum ActivityType
     {
         Play,
-        Pause
+        Pause,
+        Stop
     }
 
     public interface IActivityTrackerService
     {
-        Task TrackActivityAsync(ActivityType activityType, AudioBookPosition position);
+        void TrackActivity(ActivityType activityType, AudioBookPosition position);
+
+        AudioBookPosition GetRecent();
     }
 }

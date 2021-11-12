@@ -255,10 +255,6 @@ namespace AudioBookPlayer.App.Android.Services
 
                     CreatePlayTimer();
                 }
-
-                //State = PlaybackStateCompat.StatePlaying;
-
-                //RegisterNoisyReceiver();
             }
         }
 

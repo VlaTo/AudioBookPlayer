@@ -11,6 +11,7 @@ using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Core;
 using LibraProgramming.Xamarin.Dependency.Container;
+using ActivityTrackerService = AudioBookPlayer.App.Android.Services.ActivityTrackerService;
 using Forms = Xamarin.Forms.Forms;
 using LibraControls = LibraProgramming.Xamarin.Controls.Controls;
 using LibraPopups = LibraProgramming.Xamarin.Popups.Popup;
@@ -83,11 +84,12 @@ namespace AudioBookPlayer.App.Android
 
                 container.Register<IMediaBrowserServiceConnector, AudioBooksPlaybackServiceConnector>(InstanceLifetime.Singleton);
                 container.Register<IPermissionRequestor, PermissionRequestor>(InstanceLifetime.Singleton);
+                container.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
                 container.Register<IBooksProvider, BooksProvider>(InstanceLifetime.Singleton);
-                container.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
+                //container.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
                 container.Register<ICoverService, CoverService>(InstanceLifetime.Singleton);
                 container.Register<IPlatformToastService, ToastService>(InstanceLifetime.Singleton);
-                container.Register<IDatabasePathProvider, DatabasePathProvider>();
+                //container.Register<IDatabasePathProvider, DatabasePathProvider>();
                 container.Register<IBookItemsCache, InMemoryBookItemsCache>(InstanceLifetime.Singleton);
             }
         }

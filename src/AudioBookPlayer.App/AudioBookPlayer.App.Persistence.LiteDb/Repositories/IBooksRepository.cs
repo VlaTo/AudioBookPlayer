@@ -13,6 +13,12 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
         /// 
         /// </summary>
         /// <returns></returns>
-        IEnumerable<Book> GetAll();
+        IReadOnlyCollection<Book> GetAll();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        int Count();
     }
 }

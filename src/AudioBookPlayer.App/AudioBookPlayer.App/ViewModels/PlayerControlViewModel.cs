@@ -6,10 +6,12 @@ using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using AudioBookPlayer.App.Models;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
@@ -18,7 +20,6 @@ namespace AudioBookPlayer.App.ViewModels
     public class PlayerControlViewModel : ViewModelBase, IInitialize, ICleanup
     {
         private readonly IMediaBrowserServiceConnector connector;
-        private readonly IUpdateLibraryService updateLibraryService;
         private readonly ICoverService coverService;
         private readonly TaskExecutionMonitor loadBookMonitor;
 
@@ -38,6 +39,12 @@ namespace AudioBookPlayer.App.ViewModels
         private long activeQueueItemId;
         private bool wasPlaying;
         private bool seeking;
+
+        private bool isExpanding;
+        private bool isVisible;
+        private double expandingPercentage;
+        private ChapterViewModel selectedChapter;
+        private bool isInitializing;
 
         #region Properties
 
@@ -99,6 +106,31 @@ namespace AudioBookPlayer.App.ViewModels
 
                     QueueItemIndex = -1;
                     QueueItemTitle = String.Empty;
+
+                    for (var index = 0; index < Sections.Count; index++)
+                    {
+                        var viewModel = Sections[index];
+
+                        if (viewModel is SectionViewModel section)
+                        {
+                            for (var entryIndex = 0; entryIndex < section.Entries.Count; entryIndex++)
+                            {
+                                var entry = section.Entries[entryIndex];
+
+                                if (entry.QueueId == activeQueueItemId)
+                                {
+                                    SelectedChapter = entry;
+                                    break;
+                                }
+                            }
+                        }
+                        else
+                        if (viewModel is ChapterViewModel chapter && chapter.QueueId == activeQueueItemId)
+                        {
+                            SelectedChapter = chapter;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -110,7 +142,6 @@ namespace AudioBookPlayer.App.ViewModels
             {
                 if (SetProperty(ref position, value))
                 {
-                    Debug.WriteLine($"[PlayerControlViewModel] [SetPosition] Value: {value} (Duration: {duration})");
                     Left = duration - position;
                 }
             }
@@ -150,12 +181,6 @@ namespace AudioBookPlayer.App.ViewModels
             set => SetProperty(ref queueItemTitle, value);
         }
 
-        /*public TimeSpan Elapsed
-        {
-            get => elapsed;
-            set => SetProperty(ref elapsed, value);
-        }*/
-
         public long Left
         {
             get => left;
@@ -172,6 +197,33 @@ namespace AudioBookPlayer.App.ViewModels
         {
             get => isPlaying;
             set => SetProperty(ref isPlaying, value);
+        }
+
+        public ObservableCollection<IChapterViewModel> Sections
+        {
+            get;
+        }
+
+        public ChapterViewModel SelectedChapter
+        {
+            get => selectedChapter;
+            set
+            {
+                if (SetProperty(ref selectedChapter, value))
+                {
+                    if (isInitializing)
+                    {
+                        return;
+                    }
+
+                    if (null != selectedChapter)
+                    {
+                        connector.SetActiveQueueItemId(value.QueueId);
+                    }
+
+                    DoCloseDrawer();
+                }
+            }
         }
 
         public Command PickChapter
@@ -229,6 +281,11 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public Command CloseDrawer
+        {
+            get;
+        }
+
         public InteractionRequest<PickChapterRequestContext> PickChapterRequest
         {
             get;
@@ -243,15 +300,12 @@ namespace AudioBookPlayer.App.ViewModels
 
         [PrefferedConstructor]
         // ReSharper disable once UnusedMember.Global
-        public PlayerControlViewModel(
-            IMediaBrowserServiceConnector connector,
-            IUpdateLibraryService updateLibraryService,
-            ICoverService coverService)
+        public PlayerControlViewModel(IMediaBrowserServiceConnector connector, ICoverService coverService)
         {
             this.connector = connector;
-            this.updateLibraryService = updateLibraryService;
             this.coverService = coverService;
 
+            Sections = new ObservableCollection<IChapterViewModel>();
             loadBookMonitor = new TaskExecutionMonitor(DoLoadBookAsync);
             PickChapter = new Command(DoPickChapter);
             SmallRewind = new Command(DoSmallRewindCommand);
@@ -264,6 +318,7 @@ namespace AudioBookPlayer.App.ViewModels
             NextChapter = new Command(DoNextChapter);
             SeekStart = new Command(DoSeekStart);
             SeekComplete = new Command(DoSeekComplete);
+            CloseDrawer = new Command(DoCloseDrawer);
             PickChapterRequest = new InteractionRequest<PickChapterRequestContext>();
             BookmarkRequest = new InteractionRequest<BookmarkRequestContext>();
 
@@ -310,6 +365,11 @@ namespace AudioBookPlayer.App.ViewModels
                     Debug.WriteLine($"[PlayerControlViewModel] [DoPickChapter] Callback");
                 }
             );
+        }
+
+        private void DoCloseDrawer()
+        {
+            // IsVisible = false;
         }
 
         private void DoPlayCommand()
@@ -399,7 +459,7 @@ namespace AudioBookPlayer.App.ViewModels
 
         private Task DoLoadBookAsync()
         {
-            if (Core.MediaId.TryParse(MediaId, out var mid) && null != connector)
+            if (Domain.Models.MediaId.TryParse(MediaId, out var mid) && null != connector)
             {
                 connector.PrepareFromMediaId(mid);
             }
@@ -432,7 +492,57 @@ namespace AudioBookPlayer.App.ViewModels
 
         private void UpdateChaptersList()
         {
-            // connector.Chapters;
+            try
+            {
+                isInitializing = true;
+
+                Sections.Clear();
+
+                SectionViewModel GetOrCreateSection(ISectionMetadata sectionMetadata)
+                {
+                    for (var index = 0; index < Sections.Count; index++)
+                    {
+                        if (Sections[index] is SectionViewModel svm)
+                        {
+                            if (svm.Index == sectionMetadata.Index)
+                            {
+                                return svm;
+                            }
+                        }
+                    }
+
+                    var section = new SectionViewModel
+                    {
+                        Title = sectionMetadata.Name,
+                        Index = sectionMetadata.Index
+                    };
+
+                    Sections.Add(section);
+
+                    return section;
+                }
+
+                for (var chapterIndex = 0; chapterIndex < connector.Chapters.Count; chapterIndex++)
+                {
+                    var chapter = connector.Chapters[chapterIndex];
+                    var sectionViewModel = GetOrCreateSection(chapter.Section);
+                    var chapterViewModel = new ChapterViewModel(chapterIndex, chapter.QueueId)
+                    {
+                        Title = chapter.Title
+                    };
+
+                    sectionViewModel.Entries.Add(chapterViewModel);
+
+                    if (connector.ActiveQueueItemId == chapter.QueueId)
+                    {
+                        selectedChapter = chapterViewModel;
+                    }
+                }
+            }
+            finally
+            {
+                isInitializing = false;
+            }
         }
 
         private void UpdatePlaybackState()

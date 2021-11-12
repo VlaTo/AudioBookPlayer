@@ -1,21 +1,19 @@
-﻿using System;
-using AudioBookPlayer.App.Core;
+﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
-using LibraProgramming.Xamarin.Dependency.Container.Attributes;
-using System.Threading.Tasks;
 using AudioBookPlayer.App.ViewModels.RequestContexts;
+using LibraProgramming.Xamarin.Dependency.Container.Attributes;
 using LibraProgramming.Xamarin.Interaction;
+using System.Threading.Tasks;
 using LibraProgramming.Xamarin.Interaction.Contracts;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace AudioBookPlayer.App.ViewModels
 {
-    public sealed class LibraryViewModel : ViewModelBase
+    public sealed class LibraryViewModel : ViewModelBase, IInitialize
     {
         private readonly IMediaBrowserServiceConnector connector;
-        private readonly IUpdateLibraryService updateLibraryService;
-        private readonly ITaskExecutionMonitor libraryUpdateMonitor;
+        private readonly ITaskExecutionMonitor libraryConnect;
         private bool isBusy;
 
         public bool IsBusy
@@ -35,24 +33,18 @@ namespace AudioBookPlayer.App.ViewModels
         }
 
         [PrefferedConstructor]
-        public LibraryViewModel(
-            IMediaBrowserServiceConnector connector,
-            IUpdateLibraryService updateLibraryService
-            )
+        public LibraryViewModel(IMediaBrowserServiceConnector connector)
         {
             this.connector = connector;
-            this.updateLibraryService = updateLibraryService;
 
-            libraryUpdateMonitor = new TaskExecutionMonitor(DoUpdateLibraryAsync);
-
-            UpdateLibrary = new Command(DoUpdateLibrary);
+            libraryConnect = new TaskExecutionMonitor(this.connector.ConnectAsync);
+            
+            var libraryUpdate = new TaskExecutionMonitor(DoUpdateLibraryAsync);
+            UpdateLibrary = new Command(libraryUpdate.Start);
             CheckPermissionsRequest = new InteractionRequest<CheckPermissionsRequestContext>();
         }
 
-        private void DoUpdateLibrary()
-        {
-            libraryUpdateMonitor.Start();
-        }
+        void IInitialize.OnInitialize() => libraryConnect.Start();
 
         private async Task DoUpdateLibraryAsync()
         {
@@ -60,6 +52,8 @@ namespace AudioBookPlayer.App.ViewModels
 
             try
             {
+                System.Diagnostics.Debug.WriteLine("[LibraryViewModel] [DoUpdateLibraryAsync] Update begin");
+
                 var context = new CheckPermissionsRequestContext();
                 
                 CheckPermissionsRequest.Raise(context);
@@ -68,12 +62,9 @@ namespace AudioBookPlayer.App.ViewModels
 
                 if (PermissionStatus.Granted == status)
                 {
-                    var progress = new Progress<int>();
-                    progress.ProgressChanged += DoUpdateProgressChanged;
+                    await connector.UpdateLibraryAsync();
 
-                    updateLibraryService.Update(progress);
-
-                    MessagingCenter.Send(this, "1", true);
+                    System.Diagnostics.Debug.WriteLine("[LibraryViewModel] [DoUpdateLibraryAsync] Update complete");
                 }
             }
             finally
@@ -81,24 +72,5 @@ namespace AudioBookPlayer.App.ViewModels
                 IsBusy = false;
             }
         }
-
-        private void DoUpdateProgressChanged(object _, int progress)
-        {
-            ;
-        }
-
-        /*private void DoUpdateLibrary()
-        {
-            updateLibraryService.StartUpdate();
-
-            var status = await permissions.CheckAndRequestMediaPermissionsAsync();
-
-            if (PermissionStatus.Denied == status)
-            {
-                return;
-            }
-
-            refreshExecution.Start();
-        }*/
     }
 }

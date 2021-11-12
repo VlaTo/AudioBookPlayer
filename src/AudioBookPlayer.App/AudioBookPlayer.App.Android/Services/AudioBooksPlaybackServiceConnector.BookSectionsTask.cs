@@ -1,7 +1,6 @@
 ﻿using Android.OS;
 using Android.Support.V4.Media;
 using AudioBookPlayer.App.Android.Extensions;
-using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ namespace AudioBookPlayer.App.Android.Services
                 var mediaId = new MediaId(key).ToString();
                 var subscriptionCallback = new SubscriptionCallback
                 {
-                    ChildrenLoadedImpl = (parentId, children) =>
+                    OnChildrenLoadedImpl = (parentId, children, options) =>
                     {
                         var sectionItems = new SectionItem[children.Count];
 
@@ -43,7 +42,7 @@ namespace AudioBookPlayer.App.Android.Services
 
                         callback.Invoke();
                     },
-                    ErrorImpl = parentId =>
+                    OnErrorImpl = (parentId, options) =>
                     {
                         tcs.TrySetException(new Exception());
                         callback.Invoke();

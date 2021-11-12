@@ -116,11 +116,13 @@ namespace AudioBookPlayer.App.Android.Services
             return Task.FromResult<IReadOnlyList<AudioBook>>(audioBooks);
         }*/
 
-        public IReadOnlyList<AudioBook> QueryBooks()
+        public IReadOnlyList<AudioBook> QueryBooks(IProgress<float> progress)
         {
             var scanner = new AudioBookFileScanner(resolver, collectionUri);
             var audioFiles = scanner.QueryFiles();
-            
+            var total = audioFiles.Length;
+            var count = 0.0f;
+
             var audioBooks = new List<AudioBook>();
 
             foreach (var audioFile in audioFiles)
@@ -185,6 +187,8 @@ namespace AudioBookPlayer.App.Android.Services
                             audioBook.Duration = CalculateBookDuration(audioBook);
                         }
                     }
+
+                    progress.Report(count++ / total);
                 }
                 catch (Exception exception)
                 {

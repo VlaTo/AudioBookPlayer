@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using AudioBookPlayer.App.Domain.Models;
 
 namespace AudioBookPlayer.App.Domain.Providers
@@ -12,6 +13,6 @@ namespace AudioBookPlayer.App.Domain.Providers
         /// 
         /// </summary>
         /// <returns></returns>
-        IReadOnlyList<AudioBook> QueryBooks();
+        IReadOnlyList<AudioBook> QueryBooks(IProgress<float> progress);
     }
 }

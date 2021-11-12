@@ -1,4 +1,5 @@
-﻿using AudioBookPlayer.App.Domain.Core;
+﻿using System;
+using AudioBookPlayer.App.Domain.Core;
 using AudioBookPlayer.App.Domain.Models;
 using AudioBookPlayer.App.Domain.Services;
 using AudioBookPlayer.App.Persistence.LiteDb;
@@ -18,18 +19,30 @@ namespace AudioBookPlayer.App.Android.Services
             this.coverService = coverService;
         }
 
-        public IReadOnlyList<AudioBook> QueryBooks()
+        public bool IsEmpty()
+        {
+            using (var unitOfWork = new UnitOfWork(context, false))
+            {
+                return 0 == unitOfWork.Books.Count();
+            }
+        }
+
+        public IReadOnlyList<AudioBook> QueryBooks(IProgress<float> progress)
         {
             var collection = new List<AudioBook>();
 
             using (var unitOfWork = new UnitOfWork(context, false))
             {
                 var books = unitOfWork.Books.GetAll();
+                var total = books.Count;
+                var count = 0.0f;
 
                 foreach (var book in books)
                 {
                     var audioBook = CreateAudioBook(book);
+
                     collection.Add(audioBook);
+                    progress.Report(count++ / total);
                 }
             }
 

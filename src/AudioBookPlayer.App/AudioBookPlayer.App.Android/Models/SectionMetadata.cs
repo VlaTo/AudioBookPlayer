@@ -1,4 +1,5 @@
-﻿using Android.OS;
+﻿using System;
+using Android.OS;
 using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Android.Models
@@ -7,11 +8,27 @@ namespace AudioBookPlayer.App.Android.Models
     {
         private readonly Bundle bundle;
 
-        public string Name => bundle.GetString("Name");
+        public string Name => bundle.GetString("Section.Name");
 
-        public int Index => bundle.GetInt("Index");
+        public int Index => bundle.GetInt("Section.Index");
 
-        public string ContentUri => bundle.GetString("ContentUri");
+        public TimeSpan Start
+        {
+            get
+            {
+                var milliseconds = bundle.GetLong("Chapter.Start");
+                return TimeSpan.FromMilliseconds(milliseconds);
+            }
+        }
+
+        public TimeSpan Duration
+        {
+            get
+            {
+                var milliseconds = bundle.GetLong("Chapter.Duration");
+                return TimeSpan.FromMilliseconds(milliseconds);
+            }
+        }
 
         public SectionMetadata(Bundle bundle)
         {

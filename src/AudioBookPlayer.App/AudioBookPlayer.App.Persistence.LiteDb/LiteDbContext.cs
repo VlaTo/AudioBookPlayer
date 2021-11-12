@@ -27,6 +27,8 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
 
         public ILiteCollection<Book> Books() => database.GetCollection<Book>();
 
+        public ILiteCollection<Activity> Activities() => database.GetCollection<Activity>();
+
         internal bool BeginTransaction() => database.BeginTrans();
 
         internal bool CommitTransaction() => database.Commit();

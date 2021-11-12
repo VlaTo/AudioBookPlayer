@@ -13,11 +13,17 @@ namespace AudioBookPlayer.App.Persistence.LiteDb
             get;
         }
 
+        public IActivityRepository Activities
+        {
+            get;
+        }
+
         public UnitOfWork(LiteDbContext context, bool useTransaction)
         {
             this.context = context;
 
             Books = new BooksRepository(context);
+            Activities = new ActivityRepository(context);
 
             if (useTransaction)
             {

@@ -1,18 +1,25 @@
-﻿namespace AudioBookPlayer.App.Models
+﻿using System;
+
+namespace AudioBookPlayer.App.Models
 {
     public interface ISectionMetadata
     {
-        string Name
-        {
-            get;
-        }
-
         int Index
         {
             get;
         }
 
-        string ContentUri
+        string Name
+        {
+            get;
+        }
+
+        TimeSpan Start
+        {
+            get;
+        }
+
+        TimeSpan Duration
         {
             get;
         }

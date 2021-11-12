@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Services;
-using AudioBookPlayer.App.Persistence.LiteDb;
+﻿using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Services;
 using LibraProgramming.Xamarin.Dependency.Container;
 using LibraProgramming.Xamarin.Popups.Services;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -27,9 +25,9 @@ namespace AudioBookPlayer.App
 
             DependencyContainer.Register<ApplicationSettings>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IMediaInfoProviderFactory, MediaInfoProviderFactory>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<LiteDbContext>(InstanceLifetime.Singleton);
-            DependencyContainer.Register<IUpdateLibraryService, UpdateLibraryService>(InstanceLifetime.CreateNew);
+            //DependencyContainer.Register<IActivityTrackerService, ActivityTrackerService>(InstanceLifetime.Singleton);
+            //DependencyContainer.Register<LiteDbContext>(InstanceLifetime.Singleton);
+            // DependencyContainer.Register<IUpdateLibraryService, UpdateLibraryService>(InstanceLifetime.CreateNew);
             //DependencyContainer.Register<AudioBooksLibrary>(InstanceLifetime.CreateNew);
             //DependencyContainer.Register<IBooksService, BooksService>(InstanceLifetime.Singleton);
             DependencyContainer.Register<IPopupService, PopupService>(InstanceLifetime.Singleton);

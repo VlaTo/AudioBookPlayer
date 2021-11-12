@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Android.OS;
+﻿using Android.OS;
 using Android.Support.V4.Media;
 using LibraProgramming.Xamarin.Core;
+using System;
+using System.Collections.Generic;
 
 namespace AudioBookPlayer.App.Android.Services
 {
@@ -13,19 +13,13 @@ namespace AudioBookPlayer.App.Android.Services
         /// </summary>
         private sealed class SubscriptionCallback : MediaBrowserCompat.SubscriptionCallback
         {
-            public Bundle Options
-            {
-                get;
-                private set;
-            }
-
-            public Action<string, IList<MediaBrowserCompat.MediaItem>> ChildrenLoadedImpl
+            public Action<string, IList<MediaBrowserCompat.MediaItem>, Bundle> OnChildrenLoadedImpl
             {
                 get;
                 set;
             }
 
-            public Action<string> ErrorImpl
+            public Action<string, Bundle> OnErrorImpl
             {
                 get;
                 set;
@@ -33,41 +27,26 @@ namespace AudioBookPlayer.App.Android.Services
 
             public SubscriptionCallback()
             {
-                ChildrenLoadedImpl = Stub.Nop<string, IList<MediaBrowserCompat.MediaItem>>();
-                ErrorImpl = Stub.Nop<string>();
+                OnChildrenLoadedImpl = Stub.Nop<string, IList<MediaBrowserCompat.MediaItem>, Bundle>();
+                OnErrorImpl = Stub.Nop<string, Bundle>();
             }
 
-            public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children)
-            {
-                DoChildrenLoaded(parentId, children, Bundle.Empty);
-            }
+            public override void OnChildrenLoaded(
+                string parentId,
+                IList<MediaBrowserCompat.MediaItem> children
+            ) =>
+                OnChildrenLoadedImpl.Invoke(parentId, children, Bundle.Empty);
 
-            public override void OnError(string parentId)
-            {
-                DoError(parentId, Bundle.Empty);
-            }
+            public override void OnChildrenLoaded(
+                string parentId,
+                IList<MediaBrowserCompat.MediaItem> children,
+                Bundle options
+            ) =>
+                OnChildrenLoadedImpl?.Invoke(parentId, children, options);
 
-            public override void OnChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children, Bundle options)
-            {
-                DoChildrenLoaded(parentId, children, options);
-            }
+            public override void OnError(string parentId) => OnErrorImpl.Invoke(parentId, Bundle.Empty);
 
-            public override void OnError(string parentId, Bundle options)
-            {
-                DoError(parentId, options);
-            }
-
-            private void DoChildrenLoaded(string parentId, IList<MediaBrowserCompat.MediaItem> children, Bundle options)
-            {
-                Options = options;
-                ChildrenLoadedImpl.Invoke(parentId, children);
-            }
-
-            private void DoError(string parentId, Bundle options)
-            {
-                Options = options;
-                ErrorImpl.Invoke(parentId);
-            }
+            public override void OnError(string parentId, Bundle options) => OnErrorImpl.Invoke(parentId, options);
         }
     }
 }

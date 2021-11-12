@@ -1,34 +1,27 @@
-﻿using System;
-
-namespace AudioBookPlayer.App.Domain.Models
+﻿namespace AudioBookPlayer.App.Domain.Models
 {
     public sealed class AudioBookPosition
     {
-        public long BookId
+        public MediaId MediaId
         {
             get;
         }
 
-        public int ChapterIndex
+        public long QueueItemId
         {
             get;
         }
 
-        public TimeSpan ChapterPosition
+        public long MediaPosition
         {
             get;
         }
 
-        public AudioBookPosition(long bookId, int chapterIndex, TimeSpan chapterPosition)
+        public AudioBookPosition(MediaId mediaId, long queueId, long mediaPosition)
         {
-            BookId = bookId;
-            ChapterIndex = chapterIndex;
-            ChapterPosition = chapterPosition;
-        }
-
-        public AudioBookPosition(long bookId, int chapterIndex)
-            : this(bookId, chapterIndex, TimeSpan.Zero)
-        {
+            MediaId = mediaId;
+            QueueItemId = queueId;
+            MediaPosition = mediaPosition;
         }
     }
 }

@@ -10,21 +10,21 @@ namespace AudioBookPlayer.App.ViewModels
     {
         [PrefferedConstructor]
         public RecentBooksViewModel(
-            IMediaBrowserServiceConnector browserServiceConnector,
+            IMediaBrowserServiceConnector serviceConnector,
             ICoverService coverService)
-            : base(browserServiceConnector, coverService)
+            : base(serviceConnector, coverService)
         {
         }
 
         protected override bool FilterSourceBook(BookItem bookItem) => true;
 
-        protected override void BindSourceBooks(IReadOnlyList<BookItem> bookItems)
+        protected override void BindBooks(IReadOnlyList<BookItem> bookItems)
         {
             try
             {
                 IsBusy = true;
 
-                base.BindSourceBooks(bookItems);
+                base.BindBooks(bookItems);
             }
             finally
             {

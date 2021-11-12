@@ -2,6 +2,7 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
@@ -9,22 +10,15 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
     public sealed partial class BooksRepository : IBooksRepository
     {
         private readonly LiteDbContext context;
-        //private readonly ICoverService coverService;
 
-        public BooksRepository(LiteDbContext context/*, ICoverService coverService*/)
+        public BooksRepository(LiteDbContext context)
         {
             this.context = context;
-            // this.coverService = coverService;
         }
 
         public void Add(Book entity)
         {
-            //var builder = BookBuilder.Create(coverService);
-            //var book = await builder.MapFromAsync(entity);
-
             var id = context.Books().Insert(entity);
-
-            //EnsureKeyAssigned(entity, id);
         }
 
         public Book Get(long id)
@@ -40,9 +34,6 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
                 return null;
             }
 
-            //var builder = AudioBookBuilder.Create(coverService);
-            //var entity = builder.MapFrom(book);
-
             return book;
         }
 
@@ -57,42 +48,12 @@ namespace AudioBookPlayer.App.Persistence.LiteDb.Repositories
             return books;
         }
 
-        /*public Task<IReadOnlyList<AudioBook>> QueryBooksAsync(CancellationToken cancellationToken = default)
+        public IReadOnlyCollection<Book> GetAll()
         {
             var books = context.Books().FindAll();
-            var entities = new List<AudioBook>();
-
-            foreach (var book in books)
-            {
-                var builder = AudioBookBuilder.Create(coverService);
-                var entity = builder.MapFrom(book);
-                entities.Add(entity);
-            }
-
-            return Task.FromResult<IReadOnlyList<AudioBook>>(new ReadOnlyCollection<AudioBook>(entities));
-        }*/
-
-        public IEnumerable<Book> GetAll()
-        {
-            var books = context.Books().FindAll();
-            //var entities = new List<AudioBook>();
-
-            /*foreach (var book in books)
-            {
-                var builder = AudioBookBuilder.Create(coverService);
-                var entity = builder.MapFrom(book);
-                entities.Add(entity);
-            }*/
-
-            return books;
+            return books.ToArray();
         }
 
-        /*private static void EnsureKeyAssigned(AudioBook audioBook, BsonValue id)
-        {
-            if (false == audioBook.Id.HasValue)
-            {
-                audioBook.Id = id.AsInt64;
-            }
-        }*/
+        public int Count() => context.Books().Count();
     }
 }

@@ -28,32 +28,32 @@ namespace AudioBookPlayer.App.Android.Services
             protected override void DoExecute(TaskCompletionSource<IReadOnlyList<BookItem>> tcs, Action callback)
             {
                 var mediaId = mediaBrowser.Root;
-                var subscriptionCallback = new SubscriptionCallback();
-
-                subscriptionCallback.ChildrenLoadedImpl = (parentId, children) =>
+                var subscriptionCallback = new SubscriptionCallback
                 {
-                    var bookItems = new BookItem[children.Count];
-
-                    for (var index = 0; index < children.Count; index++)
+                    OnChildrenLoadedImpl = (parentId, children, options) =>
                     {
-                        var mediaItem = children[index];
+                        var bookItems = new BookItem[children.Count];
 
-                        bookItems[index] = mediaItem.ToBookItem();
-                        cache.Put(mediaItem.MediaId, bookItems[index]);
+                        for (var index = 0; index < children.Count; index++)
+                        {
+                            var mediaItem = children[index];
+
+                            bookItems[index] = mediaItem.ToBookItem();
+                            cache.Put(mediaItem.MediaId, bookItems[index]);
+                        }
+
+                        tcs.SetResult(bookItems);
+                        //mediaBrowser.Unsubscribe(mediaId, subscriptionCallback);
+
+                        callback.Invoke();
+                    },
+                    OnErrorImpl = (parentId, options) =>
+                    {
+                        tcs.TrySetException(new Exception());
+                        //mediaBrowser.Unsubscribe(mediaId, subscriptionCallback);
+
+                        callback.Invoke();
                     }
-
-                    tcs.SetResult(bookItems);
-                    mediaBrowser.Unsubscribe(mediaId, subscriptionCallback);
-
-                    callback.Invoke();
-                };
-
-                subscriptionCallback.ErrorImpl = parentId =>
-                {
-                    tcs.TrySetException(new Exception());
-                    mediaBrowser.Unsubscribe(mediaId, subscriptionCallback);
-                    
-                    callback.Invoke();
                 };
 
                 var options = new Bundle();

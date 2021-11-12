@@ -6,7 +6,9 @@
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     Title="AudioBookPlayer.App"
-    x:Class="AudioBookPlayer.App.AppShell">
+    x:Class="AudioBookPlayer.App.AppShell"
+    FlyoutHeaderBehavior="CollapseOnScroll"
+    FlyoutBackgroundColor="{AppThemeBinding Light={StaticResource LightShellBackgroundColor}, Dark={StaticResource DarkShellBackgroundColor}}">
     <Shell.Behaviors>
         <interactivity:MultiTapToExitBehavior
             TapCount="2"
@@ -159,6 +161,9 @@
             <Grid
                 BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}">
                 <Image
+                    Aspect="AspectFit"
+                    Source="flyout_logo.png"
+                    Opacity="0.2"
                     HeightRequest="240"
                 />
                 <Label
@@ -200,7 +205,7 @@
     
     <FlyoutItem
         Title="{Static res:AppResources.ShellMenuLibraryItem}"
-        Icon="icon_feed.png">
+        Icon="outline_library_books_black_18.png">
         <ShellContent
             Route="LibraryPage"
             ContentTemplate="{DataTemplate local:LibraryPage}"
@@ -208,7 +213,7 @@
     </FlyoutItem>
     <FlyoutItem
         Title="{Static res:AppResources.ShellMenuSettingItem}"
-        Icon="icon_feed.png">
+        Icon="outline_settings_black_18.png">
         <ShellContent
             Route="SettingsPage"
             ContentTemplate="{DataTemplate local:SettingsPage}"
@@ -216,7 +221,7 @@
     </FlyoutItem>
     <FlyoutItem
         Title="{Static res:AppResources.ShellMenuAboutItem}"
-        Icon="icon_about.png">
+        Icon="outline_info_black_18.png">
         <ShellContent
             Route="AboutPage"
             ContentTemplate="{DataTemplate local:AboutPage}"

@@ -9,6 +9,8 @@
     xmlns:behaviours="clr-namespace:LibraProgramming.Xamarin.Interactivity.Behaviors;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
     xmlns:requestContexts="clr-namespace:AudioBookPlayer.App.ViewModels.RequestContexts;assembly=AudioBookPlayer.App"
+    xmlns:views="clr-namespace:AudioBookPlayer.App.Views;assembly=AudioBookPlayer.App"
+    xmlns:xamanimation="clr-namespace:Xamanimation;assembly=Xamanimation"
     x:Class="AudioBookPlayer.App.Views.PlayerControlPage"
     x:DataType="viewmodels:PlayerControlViewModel"
     core:ViewModelLocation.AutowireViewModel="True"
@@ -75,6 +77,29 @@
                 />
             </Style>
 
+            <xamanimation:TranslateToAnimation
+                x:Key="OpenDrawer"
+                Target="{x:Reference BottomDrawer}"
+                Duration="250"
+                TranslateY="16"
+                Easing="SinIn"
+            />
+
+            <xamanimation:StoryBoard x:Key="OpenDrawer1">
+                <xamanimation:TranslateToAnimation
+                    Target="{x:Reference BottomDrawer}"
+                    Duration="250"
+                    TranslateY="16"
+                    Easing="SinIn"
+                />
+                <xamanimation:FadeToAnimation
+                    Target="{x:Reference Backdrop}"
+                    Duration="250"
+                    Opacity="1"
+                    Easing="Linear"
+                />
+            </xamanimation:StoryBoard>
+
         </ResourceDictionary>
     </ContentPage.Resources>
     <ContentPage.ToolbarItems>
@@ -99,132 +124,325 @@
             Text="{Static res:AppResources.PlayBookBookmarkCurrentLabel}"
         />
     </ContentPage.ToolbarItems>
-    <StackLayout
-        Orientation="Vertical"
-        HorizontalOptions="Fill"
-        VerticalOptions="Fill">
+    <Grid>
         <StackLayout
             Orientation="Vertical"
             HorizontalOptions="Fill"
-            VerticalOptions="Start">
-            <Label
-                Style="{StaticResource BookTitleLabelStyle}"
-                Text="{Binding Path=Title, Mode=OneWay}"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
+            VerticalOptions="Fill">
+            <StackLayout
+                Orientation="Vertical"
                 HorizontalOptions="Fill"
-                VerticalOptions="Start"
-                Margin="{OnPlatform Android='4,12,4,0', iOS='4,12,4,0'}"
-            />
-            <Label
-                Style="{StaticResource BookSubtitleLabelStyle}"
-                Text="{Binding Path=Subtitle, Mode=OneWay}"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
+                VerticalOptions="Start">
+                <Label
+                    Style="{StaticResource BookTitleLabelStyle}"
+                    Text="{Binding Path=Title, Mode=OneWay}"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Start"
+                    Margin="{OnPlatform Android='4,12,4,0', iOS='4,12,4,0'}"
+                />
+                <Label
+                    Style="{StaticResource BookSubtitleLabelStyle}"
+                    Text="{Binding Path=Subtitle, Mode=OneWay}"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Start"
+                    Margin="{OnPlatform Android='4,0,4,8', iOS='4,0,4,8'}"
+                />
+            </StackLayout>
+            <Grid
                 HorizontalOptions="Fill"
-                VerticalOptions="Start"
-                Margin="{OnPlatform Android='4,0,4,8', iOS='4,0,4,8'}"
-            />
-        </StackLayout>
-        <Grid
-            HorizontalOptions="Fill"
-            VerticalOptions="FillAndExpand"
-            Margin="{OnPlatform Android='48,12', iOS='48,12'}">
-            <Frame
-                CornerRadius="{OnPlatform Android='8', iOS='16'}"
-                BackgroundColor="{AppThemeBinding Light={StaticResource LightPlayBookCoverBackgroundColor}, Dark={StaticResource DarkPlayBookCoverBackgroundColor}}"
-                HasShadow="True"
-                IsClippedToBounds="True"
-                Padding="0">
-                <Image
-                    Aspect="AspectFill"
+                VerticalOptions="FillAndExpand"
+                Margin="{OnPlatform Android='48,12', iOS='48,12'}">
+                <Frame
+                    CornerRadius="{OnPlatform Android='8', iOS='16'}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightPlayBookCoverBackgroundColor}, Dark={StaticResource DarkPlayBookCoverBackgroundColor}}"
+                    HasShadow="True"
+                    IsClippedToBounds="True"
+                    Padding="0">
+                    <Image
+                        Aspect="AspectFill"
+                        HorizontalOptions="FillAndExpand"
+                        VerticalOptions="Fill">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Path=ChangeCover, Mode=OneWay}"
+                            />
+                        </Image.GestureRecognizers>
+                        <Image.Source>
+                            <StreamImageSource
+                                Stream="{Binding Path=ImageSource, Mode=OneWay}"
+                            />
+                        </Image.Source>
+                    </Image>
+                </Frame>
+            </Grid>
+            <StackLayout
+                Orientation="Horizontal"
+                Margin="{OnPlatform Android='12,4,12,8', iOS='12,0'}"
+                HeightRequest="{OnPlatform Android='42', iOS='24'}">
+                <ImageButton
+                    Command="{Binding Path=PreviousChapter, Mode=OneTime}"
+                    Style="{StaticResource PreviousChapterImageButtonStyle}"
+                    HorizontalOptions="Start"
+                />
+                <Button
+                    Command="{Binding Path=PickChapter, Mode=OneTime}"
                     HorizontalOptions="FillAndExpand"
-                    VerticalOptions="Fill">
-                    <Image.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Command="{Binding Path=ChangeCover, Mode=OneWay}"
+                    VerticalOptions="Fill"
+                    Padding="{OnPlatform Android='8', iOS='16'}"
+                    TextTransform="None"
+                    Text="{Binding Path=QueueItemTitle, Mode=OneWay}"
+                />
+                <ImageButton
+                    Command="{Binding Path=NextChapter, Mode=OneTime}"
+                    Style="{StaticResource NextChapterImageButtonStyle}"
+                    HorizontalOptions="End"
+                />
+            </StackLayout>
+            <StackLayout
+                Orientation="Horizontal"
+                Margin="{OnPlatform Android='12,0', iOS='12,0'}"
+                HeightRequest="{OnPlatform Android='32', iOS='32'}">
+                <Label
+                    Style="{StaticResource SeekBarTimeLabelStyle}"
+                    Text="{Binding Path=Position, Converter={StaticResource SpanConverter}, Mode=OneWay}"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Fill"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    WidthRequest="64"
+                    Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
+                />
+                <Slider
+                    DragStartedCommand="{Binding Path=SeekStart, Mode=OneTime}"
+                    DragCompletedCommand="{Binding Path=SeekComplete, Mode=OneTime}"
+                    Minimum="0"
+                    Maximum="{Binding Path=Duration, Mode=OneWay}"
+                    Value="{Binding Path=Position, Mode=TwoWay}"
+                    HorizontalOptions="FillAndExpand"
+                    Margin="{OnPlatform Android='0', iOS='48,4'}">
+                    <!--<Slider.Behaviors>
+                        <behaviours:EventToCommandBehavior
+                            EventName="DragCompleted"
+                            Command="{Binding Path=SeekComplete, Mode=OneTime}"
+                            CommandParameter="{Binding Path=Value, Source={RelativeSource FindAncestor}, Mode=OneWay}"
                         />
-                    </Image.GestureRecognizers>
-                    <Image.Source>
-                        <StreamImageSource
-                            Stream="{Binding Path=ImageSource, Mode=OneWay}"
-                        />
-                    </Image.Source>
-                </Image>
-            </Frame>
-        </Grid>
-        <StackLayout
-            Orientation="Horizontal"
-            Margin="{OnPlatform Android='12,4,12,8', iOS='12,0'}"
-            HeightRequest="{OnPlatform Android='42', iOS='24'}">
-            <ImageButton
-                Command="{Binding Path=PreviousChapter, Mode=OneTime}"
-                Style="{StaticResource PreviousChapterImageButtonStyle}"
-                HorizontalOptions="Start"
-            />
-            <Button
-                Command="{Binding Path=PickChapter, Mode=OneTime}"
+                    </Slider.Behaviors>-->
+                </Slider>
+                <Label
+                    Style="{StaticResource Key=SeekBarTimeLabelStyle}"
+                    Text="{Binding Path=Left, Converter={StaticResource SpanConverter}, Mode=OneWay}"
+                    HorizontalOptions="End"
+                    VerticalOptions="Fill"
+                    HorizontalTextAlignment="Center"
+                    VerticalTextAlignment="Center"
+                    WidthRequest="64"
+                    Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
+                />
+            </StackLayout>
+            <controls:PlaybackControl
+                IsPlaybackEnabled="{Binding Path=IsPlaybackEnabled, Mode=OneWay}"
+                IsPlaying="{Binding Path=IsPlaying, Mode=OneWay}"
+                Rewind="{Binding Path=SmallRewind, Mode=OneTime}"
+                Play="{Binding Path=Play, Mode=OneTime}"
+                FastForward="{Binding Path=SmallFastForward, Mode=OneTime}"
                 HorizontalOptions="FillAndExpand"
-                VerticalOptions="Fill"
-                Padding="{OnPlatform Android='8', iOS='16'}"
-                TextTransform="None"
-                Text="{Binding Path=QueueItemTitle, Mode=OneWay}"
-            />
-            <ImageButton
-                Command="{Binding Path=NextChapter, Mode=OneTime}"
-                Style="{StaticResource NextChapterImageButtonStyle}"
-                HorizontalOptions="End"
+                VerticalOptions="End"
             />
         </StackLayout>
-        <StackLayout
-            Orientation="Horizontal"
-            Margin="{OnPlatform Android='12,0', iOS='12,0'}"
-            HeightRequest="{OnPlatform Android='32', iOS='32'}">
-            <Label
-                Style="{StaticResource SeekBarTimeLabelStyle}"
-                Text="{Binding Path=Position, Converter={StaticResource SpanConverter}, Mode=OneWay}"
-                HorizontalOptions="Start"
-                VerticalOptions="Fill"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
-                WidthRequest="64"
-                Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
-            />
-            <Slider
-                DragStartedCommand="{Binding Path=SeekStart, Mode=OneTime}"
-                DragCompletedCommand="{Binding Path=SeekComplete, Mode=OneTime}"
-                Minimum="0"
-                Maximum="{Binding Path=Duration, Mode=OneWay}"
-                Value="{Binding Path=Position, Mode=TwoWay}"
-                HorizontalOptions="FillAndExpand"
-                Margin="{OnPlatform Android='0', iOS='48,4'}">
-                <!--<Slider.Behaviors>
-                    <behaviours:EventToCommandBehavior
-                        EventName="DragCompleted"
-                        Command="{Binding Path=SeekComplete, Mode=OneTime}"
-                        CommandParameter="{Binding Path=Value, Source={RelativeSource FindAncestor}, Mode=OneWay}"
-                    />
-                </Slider.Behaviors>-->
-            </Slider>
-            <Label
-                Style="{StaticResource Key=SeekBarTimeLabelStyle}"
-                Text="{Binding Path=Left, Converter={StaticResource SpanConverter}, Mode=OneWay}"
-                HorizontalOptions="End"
-                VerticalOptions="Fill"
-                HorizontalTextAlignment="Center"
-                VerticalTextAlignment="Center"
-                WidthRequest="64"
-                Margin="{OnPlatform Android='4', iOS='4,0,4,8'}"
-            />
-        </StackLayout>
-        <controls:PlaybackControl
-            IsPlaybackEnabled="{Binding Path=IsPlaybackEnabled, Mode=OneWay}"
-            IsPlaying="{Binding Path=IsPlaying, Mode=OneWay}"
-            Rewind="{Binding Path=SmallRewind, Mode=OneTime}"
-            Play="{Binding Path=Play, Mode=OneTime}"
-            FastForward="{Binding Path=SmallFastForward, Mode=OneTime}"
-            HorizontalOptions="FillAndExpand"
-            VerticalOptions="End">
-        </controls:PlaybackControl>
-    </StackLayout>
+        <!-- <ContentView
+            RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1, Constant=0}"
+            RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1, Constant=0}"
+            BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkContentPageBackgroundColor}}"
+            Opacity="{Binding Path=DrawerExpandedPercentage, Source={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:PlayerControlPage}}, Mode=OneWay}"
+            IsVisible="{Binding Path=IsDrawerVisible, Source={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:PlayerControlPage}}, Mode=OneWay}">
+            <ContentView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnOffDrawerTapped" />
+            </ContentView.GestureRecognizers>
+        </ContentView>
+        <drawer:BottomDrawer
+            RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1, Constant=0}"
+            RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1, Constant=0}"
+            RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1, Constant=-120}"
+            
+            Padding="0"
+            ExpandedPercentage="{Binding Path=DrawerExpandedPercentage, Source={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:PlayerControlPage}}, Mode=TwoWay}"
+            IsExpanded="{Binding Path=IsDrawerExpanded, Source={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:PlayerControlPage}}, Mode=TwoWay}"
+            IsVisible="{Binding Path=IsDrawerVisible, Source={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:PlayerControlPage}}, Mode=OneWay}">
+            <StackLayout>
+                <BoxView
+                    Margin="20,16,20,6"
+                    BackgroundColor="Gray"
+                    CornerRadius="2"
+                    HeightRequest="3"
+                    HorizontalOptions="Center"
+                    WidthRequest="80"
+                />
+                <ScrollView
+                    Margin="4,0,4,4">
+                    <CollectionView
+                        ItemsSource="{Binding Path=Sections, Mode=OneWay}"
+                        SelectedItem="{Binding Path=SelectedChapter, Mode=TwoWay}"
+                        IsGrouped="True"
+                        SelectionMode="Single"
+                        SelectionChanged="OnSectionsSelectionChanged">
+                        <CollectionView.GroupHeaderTemplate>
+                            <DataTemplate x:DataType="viewmodels:SectionViewModel">
+                                <StackLayout
+                                    Orientation="Horizontal">
+                                    <Label
+                                        TextColor="{AppThemeBinding Light={StaticResource DarkSecondaryTextColor}, Dark={StaticResource LightSecondaryTextColor}}"
+                                        Text="{Binding Path=Title, Mode=OneTime}"
+                                        VerticalOptions="CenterAndExpand" 
+                                        HorizontalOptions="StartAndExpand"
+                                        HorizontalTextAlignment="Start"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.GroupHeaderTemplate>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate
+                                x:DataType="viewmodels:ChapterViewModel">
+                                <StackLayout
+                                    Orientation="Horizontal">
+                                    <BoxView
+                                        WidthRequest="36"
+                                        HeightRequest="36"
+                                    />
+                                    <Label
+                                        TextColor="{AppThemeBinding Light={StaticResource DarkPrimaryTextColor}, Dark={StaticResource LightPrimaryTextColor}}"
+                                        Text="{Binding Path=Title, Mode=OneTime}"
+                                        VerticalOptions="CenterAndExpand" 
+                                        HorizontalOptions="StartAndExpand"
+                                        HorizontalTextAlignment="Start"
+                                        VerticalTextAlignment="Center"
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                </StackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </ScrollView>
+            </StackLayout>
+        </drawer:BottomDrawer> -->
+        <!-- Chapter selection backdrop -->
+        <BoxView
+            x:Name="Backdrop"
+            Color="#4E000000"
+            InputTransparent="False"
+            IsVisible="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Tapped="OnBoxViewTapGestureRecognizerTapped" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+        <!-- Chapter selection view -->
+        <Frame
+            x:Name="BottomDrawer"
+            CornerRadius="16"
+            BackgroundColor="White"
+            HeightRequest="340"
+            VerticalOptions="End"
+            TranslationY="340"
+            Padding="0,0,0,16"
+            IsVisible="False">
+            <Frame.Triggers>
+                <Trigger
+                    TargetType="Frame"
+                    Property="VisualElement.IsVisible"
+                    Value="True">
+                    <Trigger.EnterActions>
+                        <xamanimation:BeginAnimation Animation="{StaticResource OpenDrawer1}" />
+                    </Trigger.EnterActions>
+                </Trigger>
+            </Frame.Triggers>
+            <Frame.GestureRecognizers>
+                <PanGestureRecognizer PanUpdated="OnFramePanGestureRecognizerPanUpdated" />
+            </Frame.GestureRecognizers>
+            <StackLayout>
+                <BoxView
+                    Margin="20,16,20,6"
+                    BackgroundColor="Gray"
+                    CornerRadius="2"
+                    HeightRequest="3"
+                    HorizontalOptions="Center"
+                    WidthRequest="80"
+                />
+                <CollectionView
+                    ItemsSource="{Binding Path=Sections, Mode=OneWay}"
+                    SelectedItem="{Binding Path=SelectedChapter, Mode=TwoWay}"
+                    IsGrouped="True"
+                    SelectionMode="Single"
+                    SelectionChanged="OnSectionsSelectionChanged">
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate x:DataType="viewmodels:SectionViewModel">
+                            <StackLayout
+                                Orientation="Horizontal"
+                                Padding="{OnPlatform Android='18,0,0,0', iOS=4}"
+                                HeightRequest="{OnPlatform Android=36, iOS=48}">
+                                <Label
+                                    TextColor="{AppThemeBinding Light={StaticResource DarkSecondaryTextColor}, Dark={StaticResource LightSecondaryTextColor}}"
+                                    Text="{Binding Path=Title, Mode=OneTime}"
+                                    VerticalOptions="CenterAndExpand" 
+                                    HorizontalOptions="StartAndExpand"
+                                    HorizontalTextAlignment="Start"
+                                    VerticalTextAlignment="Center"
+                                    LineBreakMode="TailTruncation"
+                                />
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate
+                            x:DataType="viewmodels:ChapterViewModel">
+                            <Grid
+                                HeightRequest="{OnPlatform Android=36, iOS=48}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{OnPlatform Android=28, iOS=36}" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <BoxView
+                                    Grid.Column="0"
+                                    x:Name="PlayIcon"
+                                    CornerRadius="18"
+                                    BackgroundColor="Gray"
+                                    WidthRequest="28"
+                                    HeightRequest="28"
+                                    IsVisible="False"
+                                />
+                                <Label
+                                    Grid.Column="1"
+                                    TextColor="{AppThemeBinding Light={StaticResource DarkPrimaryTextColor}, Dark={StaticResource LightPrimaryTextColor}}"
+                                    Text="{Binding Path=Title, Mode=OneTime}"
+                                    VerticalOptions="CenterAndExpand" 
+                                    HorizontalOptions="StartAndExpand"
+                                    HorizontalTextAlignment="Start"
+                                    VerticalTextAlignment="Center"
+                                    LineBreakMode="TailTruncation"
+                                />
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal">
+                                            <VisualState.Setters>
+                                                <Setter TargetName="PlayIcon" Property="VisualElement.IsVisible" Value="False" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter TargetName="PlayIcon" Property="VisualElement.IsVisible" Value="True" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </Frame>
+    </Grid>
 </ContentPage>

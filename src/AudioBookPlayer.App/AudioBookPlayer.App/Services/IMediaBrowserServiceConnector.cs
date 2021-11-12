@@ -1,12 +1,16 @@
-﻿using System;
+﻿using AudioBookPlayer.App.Domain.Models;
+using AudioBookPlayer.App.Models;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Domain.Models;
-using AudioBookPlayer.App.Models;
 
 namespace AudioBookPlayer.App.Services
 {
+    public interface ILibraryCallback
+    {
+        void OnGetBooks(IReadOnlyList<BookItem> books);
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -48,25 +52,12 @@ namespace AudioBookPlayer.App.Services
         /// 
         /// </summary>
         /// <returns></returns>
-        Task<IReadOnlyList<BookItem>> GetLibraryAsync();
+        IDisposable Subscribe(ILibraryCallback callback);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        Task<BookItem> GetBookItemAsync(EntityId bookId);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bookId"></param>
-        /// <returns></returns>
-        Task<IReadOnlyList<SectionItem>> GetSectionsAsync(EntityId bookId);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        //Task UpdateLibraryAsync();
+        Task UpdateLibraryAsync();
 
 
         /// <summary>

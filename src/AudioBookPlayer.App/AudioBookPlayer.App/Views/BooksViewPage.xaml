@@ -6,8 +6,9 @@
     xmlns:res="clr-namespace:AudioBookPlayer.App.Resources"
     x:Class="AudioBookPlayer.App.Views.BooksViewPage"
     core:ViewModelLocation.AutowireViewModel="True"
-    xmlns:interactivity="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
-    xmlns:viewmodels="clr-namespace:AudioBookPlayer.App.ViewModels">
+    xmlns:i="clr-namespace:LibraProgramming.Xamarin.Interactivity;assembly=LibraProgramming.Xamarin.Interactivity"
+    xmlns:vm="clr-namespace:AudioBookPlayer.App.ViewModels"
+    xmlns:rc="clr-namespace:AudioBookPlayer.App.ViewModels.RequestContexts;assembly=AudioBookPlayer.App">
     <ContentPage.Resources>
         <ResourceDictionary>
             
@@ -42,114 +43,126 @@
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
-    <interactivity:Interaction.RequestTriggers>
-        <interactivity:InteractionRequestTrigger
-            x:DataType="viewmodels:IBooksViewModel"
+    <i:Interaction.RequestTriggers>
+        <i:InteractionRequestTrigger
+            x:DataType="vm:IBooksViewModel"
             Request="{Binding Path=StartPlayRequest, Mode=OneTime}">
-            <interactivity:CallMethodTriggerAction
-                x:TypeArguments="viewmodels:StartPlayInteractionRequestContext"
+            <i:CallMethodTriggerAction
+                x:TypeArguments="rc:StartPlayInteractionRequestContext"
                 MethodName="OnPlayBookRequest"
             />
-        </interactivity:InteractionRequestTrigger>
-    </interactivity:Interaction.RequestTriggers>
+        </i:InteractionRequestTrigger>
+    </i:Interaction.RequestTriggers>
     <!--
       x:DataType enables compiled bindings for better performance and compile time validation of binding expressions.
       https://docs.microsoft.com/xamarin/xamarin-forms/app-fundamentals/data-binding/compiled-bindings
     -->
-    <CollectionView
-        x:DataType="viewmodels:IBooksViewModel"
-        ItemsSource="{Binding Path=Books, Mode=OneWay}"
-        SelectionMode="None">
-        <CollectionView.EmptyView>
-            <StackLayout>
-                <Label
-                    HorizontalOptions="CenterAndExpand"
-                    VerticalOptions="CenterAndExpand"
-                    Text="Empty"
-                />
-            </StackLayout>
-        </CollectionView.EmptyView>
-        <CollectionView.ItemTemplate>
-            <DataTemplate
-                x:DataType="viewmodels:BookItemViewModel">
-                <Grid
-                    RowDefinitions="Auto,Auto,Auto,*"
-                    ColumnDefinitions="Auto,*"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
-                    Padding="10">
-                    <Grid.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:IBooksViewModel}}, Path=StartPlay}"
-                            CommandParameter="{Binding .}"
+    <Grid>
+        <CollectionView
+            x:DataType="vm:IBooksViewModel"
+            ItemsSource="{Binding Path=Books, Mode=OneWay}"
+            SelectionMode="None">
+            <CollectionView.EmptyView>
+                <StackLayout>
+                    <Label
+                        HorizontalOptions="CenterAndExpand"
+                        VerticalOptions="CenterAndExpand"
+                        Text="Empty"
+                    />
+                </StackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate
+                    x:DataType="vm:BookItemViewModel">
+                    <Grid
+                        RowDefinitions="Auto,Auto,Auto,*"
+                        ColumnDefinitions="Auto,*"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource LightContentPageBackgroundColor}, Dark={StaticResource DarkListViewBackgroundColor}}"
+                        Padding="10">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:IBooksViewModel}}, Path=StartPlay}"
+                                CommandParameter="{Binding .}"
+                            />
+                        </Grid.GestureRecognizers>
+                        <Frame
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Grid.RowSpan="4"
+                            BorderColor="Gray"
+                            BackgroundColor="DimGray"
+                            Padding="2"
+                            Margin="0"
+                            HorizontalOptions="Center">
+                            <Image
+                                Aspect="Fill"
+                                WidthRequest="{OnPlatform Android='108', iOS='146'}"
+                                HeightRequest="{OnPlatform Android='148', iOS='176'}">
+                                <Image.Source>
+                                    <StreamImageSource
+                                        Stream="{Binding Path=ImageSource, Mode=OneWay}"
+                                    />
+                                </Image.Source>
+                            </Image>
+                        </Frame>
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Text="{Binding Path=Title, Mode=OneTime}"
+                            LineBreakMode="WordWrap"
+                            Style="{DynamicResource ListItemTextStyle}"
+                            FontSize="16"
+                            MaxLines="3"
+                            Margin="8,4,4,0"
+                            Padding="0"
                         />
-                    </Grid.GestureRecognizers>
-                    <Frame
-                        Grid.Column="0"
-                        Grid.Row="0"
-                        Grid.RowSpan="4"
-                        BorderColor="Gray"
-                        BackgroundColor="DimGray"
-                        Padding="2"
-                        Margin="0"
-                        HorizontalOptions="Center">
-                        <Image
-                            Aspect="Fill"
-                            WidthRequest="{OnPlatform Android='108', iOS='146'}"
-                            HeightRequest="{OnPlatform Android='148', iOS='176'}">
-                            <Image.Source>
-                                <StreamImageSource
-                                    Stream="{Binding Path=ImageSource, Mode=OneWay}"
-                                />
-                            </Image.Source>
-                        </Image>
-                    </Frame>
-                    <Label
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Text="{Binding Path=Title, Mode=OneTime}"
-                        LineBreakMode="WordWrap"
-                        Style="{DynamicResource ListItemTextStyle}"
-                        FontSize="16"
-                        MaxLines="3"
-                        Margin="8,4,4,0"
-                        Padding="0"
-                    />
-                    <Label
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        LineBreakMode="NoWrap"
-                        Style="{StaticResource SubtitleLabelStyle}"
-                        FontSize="12"
-                        Margin="8,0,4,0"
-                        Padding="0"
-                        Text="{Binding Path=Authors, Mode=OneTime}"
-                    />
-                    <Label
-                        Grid.Row="2"
-                        Grid.Column="1"
-                        LineBreakMode="NoWrap"
-                        Style="{StaticResource SubtitleLabelStyle}"
-                        FontSize="12"
-                        Text="{Binding
-                                Path=Duration,
-                                Converter={StaticResource SpanConverter},
-                                ConverterParameter='1',
-                                Mode=OneTime}"
-                        Margin="8,0,4,0"
-                        Padding="0"
-                    />
-                    <Label
-                        Grid.Row="3"
-                        Grid.Column="1"
-                        LineBreakMode="NoWrap"
-                        Style="{StaticResource SubtitleLabelStyle}"
-                        FontSize="12"
-                        Text="{Binding Path=Position, StringFormat={Static res:AppResources.LibraryPageListenedTitle}}"
-                        Margin="8,0,4,0"
-                        Padding="0"
-                    />
-                </Grid>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            LineBreakMode="NoWrap"
+                            Style="{StaticResource SubtitleLabelStyle}"
+                            FontSize="12"
+                            Margin="8,0,4,0"
+                            Padding="0"
+                            Text="{Binding Path=Authors, Mode=OneTime}"
+                        />
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            LineBreakMode="NoWrap"
+                            Style="{StaticResource SubtitleLabelStyle}"
+                            FontSize="12"
+                            Text="{Binding
+                                    Path=Duration,
+                                    Converter={StaticResource SpanConverter},
+                                    ConverterParameter='1',
+                                    Mode=OneTime}"
+                            Margin="8,0,4,0"
+                            Padding="0"
+                        />
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            LineBreakMode="NoWrap"
+                            Style="{StaticResource SubtitleLabelStyle}"
+                            FontSize="12"
+                            Text="{Binding Path=Position, StringFormat={Static res:AppResources.LibraryPageListenedTitle}}"
+                            Margin="8,0,4,0"
+                            Padding="0"
+                        />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <!--<Frame
+            x:DataType="vm:IBooksViewModel"
+            IsVisible="{Binding Path=IsBusy, Mode=OneWay}">
+            <ActivityIndicator
+                HeightRequest="64"
+                WidthRequest="64"
+                Color="White"
+                IsRunning="{Binding Path=IsBusy, Mode=OneWay}"
+            />
+        </Frame>-->
+    </Grid>
 </ContentPage>

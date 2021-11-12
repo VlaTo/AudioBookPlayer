@@ -30,6 +30,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72853205-2748-4969-A2CF-2B370CBA4081}"
 	ProjectSection(SolutionItems) = preProject
 		audioformats_2.14_letter.pdf = audioformats_2.14_letter.pdf
+		flyout_logo.png = flyout_logo.png
 		ftyp.txt = ftyp.txt
 		logo-1.pdn = logo-1.pdn
 		logo.pdn = logo.pdn
