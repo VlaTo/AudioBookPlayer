@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">AudioBookPlayer.App</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="action_snooze">Snooze</string>
+    <string name="action_bookmark">Bookmark</string>
+    <string name="action_player_options">Options</string>
+  
+    <string name="nav_header_title">Audio Books Player</string>
+    <string name="nav_header_subtitle">by LibraProgramming</string>
+    <string name="nav_header_desc">Navigation header</string>
+  
+    <string name="menu_library">Library</string>
+    <string name="menu_gallery">Gallery</string>
+    <string name="menu_settings">Settings</string>
+
+	<string name="title_library">Library</string>
+	<string name="title_settings">Settings</string>
+
+	<string name="tab_all_books">All Books</string>
+	<string name="tab_recent_books">Recent</string>
+	
+	<string name="preference_play_group">Player</string>
+	<string name="preference_title_play_on_headset_connected">Continue Playing</string>
+	<string name="preference_description_play_on_headset_connected">Continue playing after headset are connected again</string>
+
+</resources>

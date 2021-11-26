@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<resources>
-  <string name="app_name">Audio Book Player</string>
-  <string name="notification_channel_name">Audio Book Player Playback</string>
-  <string name="notification_channel_description">Audio Book Player Playback</string>
-</resources>

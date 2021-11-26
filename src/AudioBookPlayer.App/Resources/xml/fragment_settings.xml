@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<PreferenceCategory 
+		android:title="@string/preference_play_group">
+
+		<CheckBoxPreference
+			android:key="preference_play_on_headset_connected"
+			android:title="@string/preference_title_play_on_headset_connected"
+			android:summary="@string/preference_description_play_on_headset_connected"
+		/>
+
+	</PreferenceCategory>
+
+</PreferenceScreen>

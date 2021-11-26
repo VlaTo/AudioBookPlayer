@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:padding="@dimen/content_book_item_padding"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+		android:id="@+id/book_item_cover"
+		android:src="@drawable/ic_no_book"
+        android:layout_width="48dp"
+        android:layout_height="64dp"
+        android:layout_alignParentLeft="true"
+		android:layout_alignParentTop="true"
+    />
+
+    <TextView
+	    android:id="@+id/book_item_title"
+	    style="@style/BookItemPrimaryTextView"
+	    android:textSize="14dip"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentRight="true"
+	    android:layout_alignParentTop="true"
+	    android:layout_toRightOf="@id/book_item_cover"
+	    android:layout_marginLeft="8dp"
+    />
+
+    <TextView
+	    android:id="@+id/book_item_subtitle"
+	    android:textSize="14dip"
+	    android:textColor="@android:color/darker_gray"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentRight="true"
+	    android:layout_toRightOf="@id/book_item_cover"
+	    android:layout_below="@id/book_item_title"
+	    android:layout_marginLeft="8dp"
+    />
+
+    <TextView
+	    android:id="@+id/book_item_description"
+	    android:textSize="14dip"
+	    android:textColor="@android:color/darker_gray"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentRight="true"
+	    android:layout_toRightOf="@id/book_item_cover"
+	    android:layout_below="@id/book_item_subtitle"
+	    android:layout_marginLeft="8dp"
+    />
+
+</RelativeLayout>
