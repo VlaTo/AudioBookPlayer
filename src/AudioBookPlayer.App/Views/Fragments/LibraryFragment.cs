@@ -14,6 +14,7 @@ using Google.Android.Material.ProgressIndicator;
 using Google.Android.Material.Tabs;
 using System;
 using System.Collections.Generic;
+using Android.Support.V4.Media;
 using Java.Util;
 using Java.Util.Concurrent;
 
@@ -21,11 +22,13 @@ namespace AudioBookPlayer.App.Views.Fragments
 {
     public class LibraryFragment : Fragment,
         TabLayoutMediator.ITabConfigurationStrategy,
-        MediaBrowserServiceConnector.IAudioBooksResultCallback
+        MediaBrowserServiceConnector.IConnectCallback,
+        MediaBrowserServiceConnector.IAudioBooksCallback
     {
         private static readonly Func<Fragment>[] fragmentCreators;
         private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
 
+        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
         private ViewPager2? viewPager;
         private TabLayout? tabsLayout;
         private CircularProgressIndicator? busyIndicator;
@@ -33,7 +36,9 @@ namespace AudioBookPlayer.App.Views.Fragments
         private TabLayoutMediator? layoutMediator;
         private Timer? preloaderTimer;
 
-        public MainActivity MainActivity => (MainActivity)Activity;
+        internal MainActivity MainActivity => (MainActivity)Activity;
+
+        internal MediaBrowserServiceConnector? ServiceConnector => MainActivity.ServiceConnector;
 
         public static LibraryFragment NewInstance()
         {
@@ -120,7 +125,10 @@ namespace AudioBookPlayer.App.Views.Fragments
             preloaderTimer = new Timer();
             preloaderTimer.Schedule(new PreloaderTimerTask(preloaderTimer, ShowPreloader), PreloaderDelay);
 
-            MainActivity.ServiceConnector?.GetAudioBooks(this);
+            if (null != ServiceConnector)
+            {
+                ServiceConnector.Connect(this);
+            }
         }
 
         public override void OnResume()
@@ -132,9 +140,9 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             var id = item.ItemId;
 
-            if (id == Resource.Id.action_settings)
+            if (id == Resource.Id.action_library_update)
             {
-                System.Diagnostics.Debug.WriteLine("[LibraryFragment] [OnOptionsItemSelected] Action Settings");
+                // ServiceConnector?.UpdateLibrary();
                 return true;
             }
 
@@ -153,7 +161,22 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         #region MediaBrowserServiceConnector.IAudioBooksResultCallback
 
-        void MediaBrowserServiceConnector.IAudioBooksResultCallback.OnAudioBooksResult(IReadOnlyList<AudioBookDescription> list)
+        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
+        {
+            if (null != preloaderTimer)
+            {
+                preloaderTimer.Cancel();
+            }
+
+            for (var index = 0; index < list.Count; index++)
+            {
+                var book = list[index];
+            }
+
+            HidePreloader();
+        }
+
+        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)
         {
             if (null != preloaderTimer)
             {
@@ -163,14 +186,24 @@ namespace AudioBookPlayer.App.Views.Fragments
             HidePreloader();
         }
 
-        void MediaBrowserServiceConnector.IAudioBooksResultCallback.OnAudioBooksError()
-        {
-            if (null != preloaderTimer)
-            {
-                preloaderTimer.Cancel();
-            }
+        #endregion
 
-            HidePreloader();
+        #region MediaBrowserServiceConnector.IConnectCallback
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
+        {
+            browserService = service;
+            browserService.GetAudioBooks(this);
+        }
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
+        {
+            throw new NotImplementedException();
+        }
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnFailed()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

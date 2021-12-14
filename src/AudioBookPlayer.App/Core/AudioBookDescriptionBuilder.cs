@@ -11,7 +11,7 @@ namespace AudioBookPlayer.App.Core
         {
             var title = mediaItem.Description.Title;
             var duration = mediaItem.Description.Extras?.GetDouble(MediaItemMetadata.KeyDuration, 0.0d) ?? 0.0d;
-            var description = new AudioBookDescription(title, TimeSpan.FromMilliseconds(duration));
+            var description = new AudioBookDescription(mediaItem.MediaId, title, TimeSpan.FromMilliseconds(duration));
 
             return description;
         }

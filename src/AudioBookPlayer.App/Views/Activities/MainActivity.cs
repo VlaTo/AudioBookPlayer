@@ -1,30 +1,28 @@
 ﻿#nullable enable
 
-using System;
-using System.Reactive.Linq;
 using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.V4.Media;
 using Android.Views;
 using AndroidX.AppCompat.App;
 using AndroidX.AppCompat.Widget;
 using AndroidX.Core.View;
 using AndroidX.DrawerLayout.Widget;
-using AndroidX.Preference;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Fragments;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.Navigation;
 using Google.Android.Material.Snackbar;
+using System;
+using System.Reactive.Linq;
 using Xamarin.Essentials;
 
 namespace AudioBookPlayer.App.Views.Activities
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     [IntentFilter(new [] { Intent.ActionView, Platform.Intent.ActionAppAction }, Categories = new []{ Intent.CategoryDefault })]
-    public class MainActivity : AppCompatActivity, NavigationView.IOnNavigationItemSelectedListener, View.IOnClickListener, MediaBrowserServiceConnector.IConnectCallback
+    public class MainActivity : AppCompatActivity, NavigationView.IOnNavigationItemSelectedListener, View.IOnClickListener
     {
         private const int SettingsActivityRequest = 100;
 
@@ -141,7 +139,7 @@ namespace AudioBookPlayer.App.Views.Activities
             }
 
             var connector = new MediaBrowserServiceConnector(Application.Context);
-            connector.Connect(this);
+            //connector.Connect(this);
 
             ServiceConnector = connector;
         }
@@ -204,11 +202,6 @@ namespace AudioBookPlayer.App.Views.Activities
         void View.IOnClickListener.OnClick(View? action)
         {
             System.Diagnostics.Debug.WriteLine($"[MainActivity] [OnClick] Action: {action?.Id}");
-        }
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnConnected()
-        {
-            System.Diagnostics.Debug.WriteLine("[MainActivity] [MediaBrowserServiceConnector.IConnectCallback.OnConnected] Executed");
         }
 
         private void OnAppActionsAction(object sender, AppActionEventArgs e)

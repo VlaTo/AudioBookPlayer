@@ -2,6 +2,7 @@
 
 using Android.App;
 using Android.Content;
+using Android.Media.Browse;
 using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
@@ -11,16 +12,15 @@ using AndroidX.Media;
 using AudioBookPlayer.Domain;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
 using System;
-using Android.Media;
-using Android.Media.Browse;
 
 namespace AudioBookPlayer.MediaBrowserService
 {
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    public class MediaBrowserService : MediaBrowserServiceCompat
+    public class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions
     {
         private const string SupportSearch = "android.media.browse.SEARCH_SUPPORTED";
+        private const string LibraryUpdateAction = "com.libraprogramming.audioplayer.library.update";
         private const string NoRoot = "@empty@";
         private const string ExtraRecent = "__RECENT__";
 
@@ -127,6 +127,11 @@ namespace AudioBookPlayer.MediaBrowserService
 
         public override void OnCustomAction(string action, Bundle extras, Result result)
         {
+            if (String.Equals(IMediaLibraryActions.Update, action))
+            {
+                ;
+            }
+
             base.OnCustomAction(action, extras, result);
         }
 
@@ -157,6 +162,11 @@ namespace AudioBookPlayer.MediaBrowserService
             }
 
             result.SendResult(list);
+        }
+
+        public interface IMediaLibraryActions
+        {
+            public const string Update = LibraryUpdateAction;
         }
     }
 }

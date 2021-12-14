@@ -5,16 +5,18 @@ using Android.Support.V4.Media.Session;
 using AudioBookPlayer.Domain;
 using Java.Lang;
 using System.Collections.Generic;
+using Android.App;
 
 namespace AudioBookPlayer.App.Core
 {
-    internal sealed class ConnectExecutor
+    /*
+    internal sealed partial class ConnectExecutor
     {
         private readonly MediaBrowserServiceConnector.IConnectCallback owner;
         private readonly MediaBrowserCompat mediaBrowser;
         private readonly MediaBrowserSubscriptionCallback browserCallback;
         private readonly List<MediaBrowserServiceConnector.IConnectCallback> connectCallbacks;
-        private readonly List<MediaBrowserServiceConnector.IAudioBooksResultCallback> childrenCallback;
+        private readonly List<MediaBrowserServiceConnector.IAudioBooksCallback> childrenCallback;
         private readonly List<AudioBookDescription> descriptions;
         private AbstractConnectState state;
 
@@ -36,7 +38,7 @@ namespace AudioBookPlayer.App.Core
             this.owner = owner;
             mediaBrowser = new MediaBrowserCompat(context, componentName, connectionCallbacks, rootHints);
             connectCallbacks = new List<MediaBrowserServiceConnector.IConnectCallback>();
-            childrenCallback = new List<MediaBrowserServiceConnector.IAudioBooksResultCallback>();
+            childrenCallback = new List<MediaBrowserServiceConnector.IAudioBooksCallback>();
             browserCallback = new MediaBrowserSubscriptionCallback
             {
                 OnChildrenLoadedImpl = DoChildrenLoaded,
@@ -51,7 +53,9 @@ namespace AudioBookPlayer.App.Core
 
         public void Disconnect() => state.DoDisconnect();
 
-        public void GetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback) => state.DoGetAudioBooks(callback);
+        public void GetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback) => state.DoGetAudioBooks(callback);
+
+        public void UpdateLibrary() => state.DoUpdateLibrary();
 
         private void DoConnected() => state.DoConnected();
 
@@ -89,7 +93,7 @@ namespace AudioBookPlayer.App.Core
 
             for (var index = 0; index < handlers.Length; index++)
             {
-                handlers[index].OnAudioBooksResult(descriptions);
+                handlers[index].OnAudioBooksReady(descriptions);
             }
         }
 
@@ -119,7 +123,9 @@ namespace AudioBookPlayer.App.Core
 
             public abstract void DoDisconnect();
 
-            public abstract void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback);
+            public abstract void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback);
+
+            public abstract void DoUpdateLibrary();
         }
 
         //
@@ -147,9 +153,14 @@ namespace AudioBookPlayer.App.Core
 
             public override void DoDisconnect() => executor.state = new DisconnectedState(executor);
             
-            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback)
+            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback)
             {
                 executor.childrenCallback.Add(callback);
+            }
+
+            public override void DoUpdateLibrary()
+            {
+                throw new System.NotImplementedException();
             }
         }
 
@@ -202,9 +213,14 @@ namespace AudioBookPlayer.App.Core
                 throw new System.NotImplementedException();
             }
 
-            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback)
+            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback)
             {
                 executor.childrenCallback.Add(callback);
+            }
+
+            public override void DoUpdateLibrary()
+            {
+                throw new System.NotImplementedException();
             }
         }
 
@@ -235,9 +251,16 @@ namespace AudioBookPlayer.App.Core
 
             public override void DoConnectionFailed() => throw new System.NotImplementedException();
 
-            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback)
+            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback)
             {
-                callback.OnAudioBooksResult(executor.descriptions);
+                callback.OnAudioBooksReady(executor.descriptions);
+            }
+
+            public override void DoUpdateLibrary()
+            {
+                var extras = new Bundle();
+                var callback = new CustomActionCallback();
+                executor.mediaBrowser.SendCustomAction(MediaBrowserService.MediaBrowserService.IMediaLibraryActions.Update, extras, callback);
             }
         }
 
@@ -273,9 +296,14 @@ namespace AudioBookPlayer.App.Core
                 throw new System.NotImplementedException();
             }
 
-            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback)
+            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback)
             {
                 callback.OnAudioBooksError();
+            }
+
+            public override void DoUpdateLibrary()
+            {
+                throw new System.NotImplementedException();
             }
         }
 
@@ -311,10 +339,16 @@ namespace AudioBookPlayer.App.Core
                 throw new System.NotImplementedException();
             }
 
-            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksResultCallback callback)
+            public override void DoGetAudioBooks(MediaBrowserServiceConnector.IAudioBooksCallback callback)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public override void DoUpdateLibrary()
             {
                 throw new System.NotImplementedException();
             }
         }
     }
+*/
 }

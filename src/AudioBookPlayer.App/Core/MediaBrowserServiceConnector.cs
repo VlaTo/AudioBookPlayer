@@ -3,69 +3,96 @@
 using Android.Content;
 using Android.OS;
 using Android.Support.V4.Media;
-using Android.Support.V4.Media.Session;
-using AudioBookPlayer.Domain;
 using Java.Lang;
+using System;
 using System.Collections.Generic;
+using Object = Java.Lang.Object;
 
 namespace AudioBookPlayer.App.Core
 {
-    internal sealed partial class MediaBrowserServiceConnector : Object, MediaBrowserServiceConnector.IConnectCallback
+    internal sealed partial class MediaBrowserServiceConnector : Object
     {
         private readonly Context context;
-        private readonly MediaControllerCallback mediaControllerCallback;
-        private readonly ConnectExecutor connectExecutor;
+        private ConnectionState state;
         private bool disposed;
-        private MediaControllerCompat? mediaController;
-
-        public bool IsConnected => ConnectExecutor.ConnectState.Connected == connectExecutor.State;
-
-        public MediaControllerCompat? MediaController
-        {
-            get => mediaController;
-            private set
-            {
-                if (ReferenceEquals(value, mediaController))
-                {
-                    return;
-                }
-
-                if (null != mediaController)
-                {
-                    mediaController.UnregisterCallback(mediaControllerCallback);
-                }
-
-                mediaController = value;
-
-                if (null != mediaController)
-                {
-                    mediaController.RegisterCallback(mediaControllerCallback);
-                }
-            }
-        }
-
-        public MediaSessionCompat.Token SessionToken => connectExecutor.SessionToken;
+        private MediaBrowserServiceImpl? mediaBrowserService;
+        private readonly MediaBrowserCompat mediaBrowser;
+        private readonly List<IConnectCallback> connectCallbacks;
 
         public MediaBrowserServiceConnector(Context context)
         {
-            this.context = context;
-            connectExecutor = new ConnectExecutor(context, Bundle.Empty, this);
-            mediaControllerCallback = new MediaControllerCallback
+            var serviceName = Class.FromType(typeof(MediaBrowserService.MediaBrowserService));
+            var componentName = new ComponentName(context, serviceName);
+            var callbacks = new MediaBrowserServiceConnectionCallback
             {
-                OnMetadataChangedImpl = DoMetadataChanged,
-                OnPlaybackStateChangedImpl = DoPlaybackStateChanged,
-                OnQueueChangedImpl = DoQueueChanged,
-                OnQueueTitleChangedImpl = DoQueueTitleChanged
+                OnConnectedImpl = DoConnected,
+                OnConnectionSuspendedImpl = DoConnectionSuspended,
+                OnConnectionFailedImpl = DoConnectionFailed
             };
+
+            this.context = context;
+
+            state = ConnectionState.NotConnected;
+            mediaBrowserService = null;
+            mediaBrowser = new MediaBrowserCompat(context, componentName, callbacks, Bundle.Empty);
+            connectCallbacks = new List<IConnectCallback>();
         }
 
-        public void Connect(IConnectCallback callback) => connectExecutor.Connect(callback);
-
-        public void GetAudioBooks(IAudioBooksResultCallback callback) => connectExecutor.GetAudioBooks(callback);
-
-        void IConnectCallback.OnConnected()
+        public void Connect(IConnectCallback callback)
         {
-            MediaController = new MediaControllerCompat(context, connectExecutor.SessionToken);
+            EnsureNotDisposed();
+
+            if (null == callback)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            switch (state)
+            {
+                case ConnectionState.NotConnected:
+                {
+                    if (false == connectCallbacks.Contains(callback))
+                    {
+                        connectCallbacks.Add(callback);
+                    }
+
+                    state = ConnectionState.Connecting;
+                    mediaBrowser.Connect();
+
+                    break;
+                }
+
+                case ConnectionState.Connecting:
+                {
+                    if (false == connectCallbacks.Contains(callback))
+                    {
+                        connectCallbacks.Add(callback);
+                    }
+
+                    break;
+                }
+
+                case ConnectionState.Connected:
+                {
+                    callback.OnConnected(mediaBrowserService);
+
+                    break;
+                }
+
+                case ConnectionState.Failed:
+                {
+                    callback.OnFailed();
+
+                    break;
+                }
+
+                case ConnectionState.Suspended:
+                {
+                    callback.OnSuspended();
+
+                    break;
+                }
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -76,7 +103,7 @@ namespace AudioBookPlayer.App.Core
             {
                 if (disposing)
                 {
-                    connectExecutor.Disconnect();
+                    DoDispose();
                 }
             }
             finally
@@ -85,39 +112,75 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
-        private void DoMetadataChanged(MediaMetadataCompat obj)
+        private void DoConnected()
         {
-            throw new System.NotImplementedException();
+            EnsureNotDisposed();
+
+            state = ConnectionState.Connected;
+            mediaBrowserService = new MediaBrowserServiceImpl(context, mediaBrowser);
+            
+            var callbacks = connectCallbacks.ToArray();
+
+            for (var index = 0; index < callbacks.Length; index++)
+            {
+                var callback = callbacks[index];
+                callback.OnConnected(mediaBrowserService);
+            }
         }
 
-        private void DoPlaybackStateChanged(PlaybackStateCompat obj)
+        private void DoConnectionSuspended()
         {
-            throw new System.NotImplementedException();
+            EnsureNotDisposed();
+
+            state = ConnectionState.Suspended;
+            //mediaBrowserService = new MediaBrowserServiceImpl(context, mediaBrowser.SessionToken);
+
+            var callbacks = connectCallbacks.ToArray();
+
+            for (var index = 0; index < callbacks.Length; index++)
+            {
+                var callback = callbacks[index];
+                callback.OnSuspended();
+            }
         }
 
-        private void DoQueueChanged(IList<MediaSessionCompat.QueueItem> obj)
+        private void DoConnectionFailed()
         {
-            throw new System.NotImplementedException();
+            EnsureNotDisposed();
+
+            state = ConnectionState.Failed;
+            mediaBrowserService = null;
+
+            var callbacks = connectCallbacks.ToArray();
+
+            for (var index = 0; index < callbacks.Length; index++)
+            {
+                var callback = callbacks[index];
+                callback.OnFailed();
+            }
         }
 
-        private void DoQueueTitleChanged(ICharSequence obj)
+        private void DoDispose()
         {
-            throw new System.NotImplementedException();
+            ;
         }
 
-        //
-
-        public interface IConnectCallback
+        private void EnsureNotDisposed()
         {
-            void OnConnected();
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(MediaBrowserServiceConnector));
+            }
         }
 
-        //
-        public interface IAudioBooksResultCallback
+        // Enum
+        private enum ConnectionState
         {
-            void OnAudioBooksResult(IReadOnlyList<AudioBookDescription> list);
-
-            void OnAudioBooksError();
+            Failed = -1,
+            NotConnected,
+            Connecting,
+            Connected,
+            Suspended
         }
     }
 }

@@ -6,24 +6,26 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Core.Extensions;
+using AudioBookPlayer.App.ViewModels;
 using AudioBookPlayer.App.Views.Activities;
-using AudioBookPlayer.Domain;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using AudioBookPlayer.App.ViewModels;
+using System.Linq;
 using Fragment = AndroidX.Fragment.App.Fragment;
 using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
-    public class AllBooksFragment : Fragment, MediaBrowserServiceConnector.IAudioBooksResultCallback
+    public class AllBooksFragment : Fragment
     {
         private ListView? listView;
-        
-        public MainActivity MainActivity => (MainActivity)Activity;
-        
-        private AudioBookDescriptionAdapter? BooksAdapter => (AudioBookDescriptionAdapter?)listView?.Adapter;
+        private IDisposable? subscription;
+
+        private MainActivity MainActivity => (MainActivity)Activity;
+
+        private BooksListViewAdapter? BooksAdapter => (BooksListViewAdapter?)listView?.Adapter;
 
         private AllBooksViewModel ViewModel => AllBooksViewModel.Instance();
 
@@ -41,9 +43,9 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             base.OnCreate(savedInstanceState);
 
-            if (ViewModel is { HasBookItems: false})
+            if (ViewModel is { HasBookItems: false } && null != MainActivity.ServiceConnector)
             {
-                MainActivity.ServiceConnector?.GetAudioBooks(this);
+                MainActivity.ServiceConnector.Connect(ViewModel);
             }
         }
 
@@ -58,65 +60,39 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 if (null != listView)
                 {
-                    var bookItems = ViewModel.BookItems ?? Array.Empty<AudioBookDescription>();
-
+                    var adapter = new BooksListViewAdapter(Application.Context, ViewModel.BookItems);
                     listView.OnItemClickListener = new ItemClickListener(Activity.SupportFragmentManager);
-                    listView.Adapter = new AudioBookDescriptionAdapter(Application.Context, bookItems);
+                    listView.Adapter = adapter;
+                    subscription = ViewModel.BookItems.Subscribe(adapter);
                 }
             }
 
             return view;
         }
 
-        /*public override void OnStart()
+        public override void OnDestroy()
         {
-            base.OnStart();
+            base.OnDestroy();
 
-            MainActivity.ServiceConnector?.Connect(this);
-        }*/
-
-        /*#region MediaBrowserServiceConnector.IConnectCallback
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnConnected()
-        {
-            MainActivity.ServiceConnector?.GetAudioBooks(this);
+            subscription?.Dispose();
         }
-
-        #endregion*/
-
-        #region MediaBrowserServiceConnector.IAudioBooksResultCallback
-
-        void MediaBrowserServiceConnector.IAudioBooksResultCallback.OnAudioBooksResult(IReadOnlyList<AudioBookDescription> list)
-        {
-            if (null != BooksAdapter)
-            {
-                ViewModel.SetBookItems(list);
-                BooksAdapter.SetItems(list);
-            }
-        }
-
-        void MediaBrowserServiceConnector.IAudioBooksResultCallback.OnAudioBooksError()
-        {
-            ;
-        }
-
-        #endregion
 
         //
-        private sealed class AudioBookDescriptionAdapter : BaseAdapter<AudioBookDescription>
+        private sealed class BooksListViewAdapter : BaseAdapter<AudioBookViewModel>, IListObserver<AudioBookViewModel>
         {
             private readonly Context context;
             private readonly LayoutInflater? inflater;
-            private IList<AudioBookDescription> list;
+            private List<AudioBookViewModel> list;
 
             public override int Count => list.Count;
 
-            public override AudioBookDescription this[int position] => list[position];
+            public override AudioBookViewModel this[int position] => list[position];
 
-            public AudioBookDescriptionAdapter(Context context, IReadOnlyList<AudioBookDescription> list)
+            public BooksListViewAdapter(Context context, IList<AudioBookViewModel> list)
             {
                 this.context = context;
-                this.list = new List<AudioBookDescription>(list);
+                this.list = new List<AudioBookViewModel>(list);
+
                 inflater = LayoutInflater.From(Application.Context);
             }
 
@@ -124,8 +100,6 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             public override View? GetView(int position, View? convertView, ViewGroup? parent)
             {
-                // var view = convertView ?? inflater?.Inflate(Android.Resource.Layout.conSimpleListItem1, null);
-                // var textView = view?.FindViewById<TextView>(Android.Resource.Id.Text1);
                 var view = convertView ?? inflater?.Inflate(Resource.Layout.content_book_list_item, null);
                 var coverImage = view?.FindViewById<ImageView>(Resource.Id.book_item_cover);
                 var titleView = view?.FindViewById<TextView>(Resource.Id.book_item_title);
@@ -152,17 +126,45 @@ namespace AudioBookPlayer.App.Views.Fragments
                 return view;
             }
 
-            public void SetItems(IReadOnlyList<AudioBookDescription> items)
+            /*public void SetItems(IReadOnlyList<AudioBookViewModel> items)
             {
                 if (ReferenceEquals(list, items))
                 {
                     return;
                 }
 
-                list = new List<AudioBookDescription>(items);
+                list = items.ToArray();
 
                 NotifyDataSetChanged();
+            }*/
+
+            #region IListObserver<AudioBookViewModel>
+
+            void IListObserver<AudioBookViewModel>.OnAdded(int position, AudioBookViewModel item)
+            {
+                list.Insert(position, item);
+                NotifyDataSetChanged();
             }
+
+            void IListObserver<AudioBookViewModel>.OnReplace(int position, AudioBookViewModel item)
+            {
+                list[position] = item;
+                NotifyDataSetChanged();
+            }
+
+            void IListObserver<AudioBookViewModel>.OnRemove(int position)
+            {
+                list.RemoveAt(position);
+                NotifyDataSetChanged();
+            }
+
+            void IListObserver<AudioBookViewModel>.OnClear()
+            {
+                list.Clear();
+                NotifyDataSetChanged();
+            }
+
+            #endregion
         }
 
         //
@@ -177,15 +179,19 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             public void OnItemClick(AdapterView? parent, View? view, int position, long id)
             {
-                var mediaId = "book:0/0/1";
-                var fragment = NowPlayingFragment.NewInstance(mediaId);
+                var item = (AudioBookViewModel?)parent?.GetItemAtPosition(position);
 
-                fragmentManager
-                    .BeginTransaction()
-                    .Replace(Resource.Id.nav_host_frame, fragment)
-                    .AddToBackStack(null)
-                    .SetTransition(FragmentTransaction.TransitFragmentFade)
-                    .Commit();
+                if (null != item)
+                {
+                    var fragment = NowPlayingFragment.NewInstance(item.MediaId);
+
+                    fragmentManager
+                        .BeginTransaction()
+                        .Replace(Resource.Id.nav_host_frame, fragment)
+                        .AddToBackStack(null)
+                        .SetTransition(FragmentTransaction.TransitFragmentFade)
+                        .Commit();
+                }
             }
         }
     }

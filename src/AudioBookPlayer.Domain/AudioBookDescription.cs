@@ -14,9 +14,16 @@ namespace AudioBookPlayer.Domain
             get;
         }
 
-        public AudioBookDescription(string title, TimeSpan duration)
+        public string MediaId
         {
+            get;
+        }
+
+        public AudioBookDescription(string mediaId, string title, TimeSpan duration)
+        {
+            MediaId = mediaId;
             Title = title;
+            Duration = duration;
         }
     }
 }

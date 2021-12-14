@@ -13,6 +13,7 @@ using Void = Java.Lang.Void;
 
 namespace AudioBookPlayer.App.Core.Tasks
 {
+    /*
     internal sealed class LoadBooksTask : AsyncTask<Void, Void, IReadOnlyList<AudioBookDescription>>,
         MediaBrowserServiceConnector.IConnectCallback,
         MediaBrowserServiceConnector.IAudioBooksResultCallback
@@ -73,4 +74,5 @@ namespace AudioBookPlayer.App.Core.Tasks
             tcs.SetCanceled();
         }
     }
+*/
 }
