@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Internal\PackageValidator.cs" />
+    <Compile Include="Core\Internal\Stub.cs" />
+    <Compile Include="MediaBrowserService.Callback.cs" />
     <Compile Include="MediaBrowserService.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,10 +71,6 @@
     <ProjectReference Include="..\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj">
       <Project>{17363e39-92c5-4781-bf54-e5ff7cbc7ada}</Project>
       <Name>AudioBookPlayer.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AudioBookPlayer.Persistent\AudioBookPlayer.Persistent.csproj">
-      <Project>{8b039b8c-c1e4-45cf-ab4b-2cd175577147}</Project>
-      <Name>AudioBookPlayer.Persistent</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

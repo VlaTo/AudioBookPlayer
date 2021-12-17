@@ -1,12 +1,16 @@
-﻿namespace AudioBookPlayer.App.Core
+﻿using System.Collections.Generic;
+
+namespace AudioBookPlayer.App.Core
 {
     public interface IListObserver<in T>
     {
-        void OnAdded(int position, T item);
+        void OnAdded(int position, T value);
         
-        void OnReplace(int position, T item);
+        void OnRangeAdded(int position, IEnumerable<T> values);
+        
+        void OnReplace(int position, T oldValue, T newValue);
 
-        void OnRemove(int position);
+        void OnRemove(int position, T value);
 
         void OnClear();
     }

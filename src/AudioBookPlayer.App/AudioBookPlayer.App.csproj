@@ -69,6 +69,7 @@
     <Compile Include="Core\BookItem.cs" />
     <Compile Include="Core\ConnectExecutor.cs" />
     <Compile Include="Core\Extensions\JavaObjectExtensions.cs" />
+    <Compile Include="Core\Extensions\ListExtensions.cs" />
     <Compile Include="Core\Extensions\ObservableListExtensions.cs" />
     <Compile Include="Core\IListObserver.cs" />
     <Compile Include="Core\IObservableList.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="Core\MediaBrowserServiceConnector.CustomActionCallback.cs" />
     <Compile Include="Core\MediaBrowserServiceConnector.IConnectCallback.cs" />
     <Compile Include="Core\MediaBrowserServiceConnector.MediaBrowserServiceImpl.cs" />
+    <Compile Include="Core\MediaBrowserServiceConnector.MediaBrowserServiceImpl.CustomActionCallback.cs" />
     <Compile Include="Core\MediaBrowserSubscriptionCallback.cs" />
     <Compile Include="Core\ObservableList.cs" />
     <Compile Include="Core\Services\IMediaBrowserService.cs" />
@@ -179,10 +181,6 @@
     <ProjectReference Include="..\AudioBookPlayer.MediaBrowserService\AudioBookPlayer.MediaBrowserService.csproj">
       <Project>{7518d836-bd79-41c1-840d-83a77e39bdb1}</Project>
       <Name>AudioBookPlayer.MediaBrowserService</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AudioBookPlayer.Persistent\AudioBookPlayer.Persistent.csproj">
-      <Project>{8b039b8c-c1e4-45cf-ab4b-2cd175577147}</Project>
-      <Name>AudioBookPlayer.Persistent</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

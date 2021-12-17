@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AudioBookPlayer.App.Core
 {
@@ -31,14 +32,15 @@ namespace AudioBookPlayer.App.Core
                     throw new IndexOutOfRangeException();
                 }
 
-                list[index] = value;
-
+                var oldValue = (T)list[index];
                 var temp = subscriptions.ToArray();
+                
+                list[index] = value;
 
                 for (var position = 0; position < temp.Length; position++)
                 {
                     var observer = temp[position].Observer;
-                    observer.OnReplace(index, value);
+                    observer.OnReplace(index, oldValue, value);
                 }
             }
         }
@@ -62,6 +64,11 @@ namespace AudioBookPlayer.App.Core
 
             subscription = new Subscription(this, observer);
             subscriptions.Add(subscription);
+
+            if (0 < list.Count)
+            {
+                observer.OnRangeAdded(0, this);
+            }
 
             return subscription;
         }
@@ -93,6 +100,8 @@ namespace AudioBookPlayer.App.Core
                 throw new IndexOutOfRangeException();
             }
 
+            var item = (T)list[index];
+
             list.RemoveAt(index);
 
             var temp = subscriptions.ToArray();
@@ -100,7 +109,7 @@ namespace AudioBookPlayer.App.Core
             for (var position = 0; position < temp.Length; position++)
             {
                 var observer = temp[position].Observer;
-                observer.OnRemove(index);
+                observer.OnRemove(index, item);
             }
         }
 
@@ -121,6 +130,26 @@ namespace AudioBookPlayer.App.Core
             {
                 var observer = temp[index].Observer;
                 observer.OnAdded(position, item);
+            }
+        }
+
+        public void AddRange(IEnumerable<T> items)
+        {
+            if (null == items)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var position = list.Count;
+            var array = items.ToArray();
+            var temp = subscriptions.ToArray();
+
+            list.AddRange(array);
+            
+            for (var index = 0; index < temp.Length; index++)
+            {
+                var observer = temp[index].Observer;
+                observer.OnRangeAdded(position, array);
             }
         }
 
@@ -149,7 +178,7 @@ namespace AudioBookPlayer.App.Core
             {
                 return false;
             }
-
+            
             list.RemoveAt(position);
 
             var temp = subscriptions.ToArray();
@@ -157,22 +186,36 @@ namespace AudioBookPlayer.App.Core
             for (var index = 0; index < temp.Length; index++)
             {
                 var observer = temp[index].Observer;
-                observer.OnRemove(position);
+                observer.OnRemove(position, item);
             }
 
             return true;
         }
 
+        private void RemoveObserver(IListObserver<T> observer)
+        {
+            var index = subscriptions.FindIndex(x => ReferenceEquals(x.Observer, observer));
+
+            if (0 > index)
+            {
+                return;
+            }
+
+            subscriptions.RemoveAt(index);
+        }
+
         /// <summary>
-        /// 
+        /// Internal class Subscription.
         /// </summary>
         private sealed  class Subscription : IDisposable
         {
-            private readonly ObservableList<T> owner;
+            private ObservableList<T> owner;
+            private bool disposed;
 
             public IListObserver<T> Observer
             {
-                get; 
+                get;
+                private set;
             }
 
             public Subscription(ObservableList<T> owner, IListObserver<T> observer)
@@ -183,7 +226,29 @@ namespace AudioBookPlayer.App.Core
 
             public void Dispose()
             {
-                throw new NotImplementedException();
+                Dispose(true);
+            }
+
+            private void Dispose(bool dispose)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (dispose)
+                    {
+                        owner.RemoveObserver(Observer);
+                        Observer = null;
+                        owner = null;
+                    }
+                }
+                finally
+                {
+                    disposed = true;
+                }
             }
         }
     }

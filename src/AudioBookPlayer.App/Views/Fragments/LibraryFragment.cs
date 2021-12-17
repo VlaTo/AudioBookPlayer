@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Android.OS;
+using Android.Support.V4.Media;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Annotations;
@@ -9,14 +10,16 @@ using AndroidX.ViewPager2.Adapter;
 using AndroidX.ViewPager2.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Activities;
-using AudioBookPlayer.Domain;
+using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.ProgressIndicator;
+using Google.Android.Material.Snackbar;
 using Google.Android.Material.Tabs;
-using System;
-using System.Collections.Generic;
-using Android.Support.V4.Media;
 using Java.Util;
 using Java.Util.Concurrent;
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using AudioBookPlayer.Domain;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
@@ -25,15 +28,16 @@ namespace AudioBookPlayer.App.Views.Fragments
         MediaBrowserServiceConnector.IConnectCallback,
         MediaBrowserServiceConnector.IAudioBooksCallback
     {
-        private static readonly Func<Fragment>[] fragmentCreators;
         private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
 
-        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
+        private FloatingActionButton? fab;
         private ViewPager2? viewPager;
         private TabLayout? tabsLayout;
         private CircularProgressIndicator? busyIndicator;
         private FrameLayout? overlayLayout;
         private TabLayoutMediator? layoutMediator;
+        private IDisposable? fabClickSubscription;
+        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
         private Timer? preloaderTimer;
 
         internal MainActivity MainActivity => (MainActivity)Activity;
@@ -46,23 +50,6 @@ namespace AudioBookPlayer.App.Views.Fragments
             return new LibraryFragment
             {
                 Arguments = bundle
-            };
-        }
-
-        static LibraryFragment()
-        {
-            fragmentCreators = new Func<Fragment>[]
-            {
-                () =>
-                {
-                    var fragment = AllBooksFragment.NewInstance();
-                    return fragment;
-                },
-                () =>
-                {
-                    var fragment = RecentBooksFragment.NewInstance();
-                    return fragment;
-                }
             };
         }
 
@@ -79,33 +66,36 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             viewPager = view?.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
             tabsLayout = view?.FindViewById<TabLayout>(Resource.Id.tabs_layout);
+            fab = view?.FindViewById<FloatingActionButton>(Resource.Id.fab);
             busyIndicator = view?.FindViewById<CircularProgressIndicator>(Resource.Id.busy_indicator);
             overlayLayout = view?.FindViewById<FrameLayout>(Resource.Id.overlay_layout);
 
             if (null != viewPager)
             {
-                viewPager.Adapter = new ViewsAdapter(this, fragmentCreators);
-                viewPager.SetPageTransformer(new ZoomOutPageTransformer());
+                viewPager.Adapter = new ViewsAdapter(this);
+                // viewPager.SetPageTransformer(new ZoomOutPageTransformer());
+            }
+
+            if (null != fab)
+            {
+                /*Snackbar
+                    .Make((View?)pattern.Sender, "Replace with your own action", Snackbar.LengthLong)
+                    .SetAction(Resource.String.fab_library_action, this)
+                    .Show()*/
+
+                fabClickSubscription = System.Reactive.Linq.Observable
+                    .FromEventPattern(
+                        handler => fab.Click += handler,
+                        handler => fab.Click -= handler)
+                    .Subscribe(
+                        pattern => OnFabClick((EventArgs)pattern.EventArgs)
+                    );
             }
 
             if (null != tabsLayout)
             {
-                //tabsLayout.AddOnTabSelectedListener(new TabSelectedListener());
                 layoutMediator = new TabLayoutMediator(tabsLayout, viewPager, true, true, this);
                 layoutMediator.Attach();
-            }
-
-            if (null != overlayLayout)
-            {
-                ;
-
-                if (null != busyIndicator)
-                {
-                    //busyIndicator.ShowAnimationBehavior = BaseProgressIndicator.ShowInward;
-                    //busyIndicator.HideAnimationBehavior = BaseProgressIndicator.HideOutward;
-                    //busyIndicator.Show();
-                    //busyIndicator.Visibility = ViewStates.Visible;
-                }
             }
 
             MainActivity.SupportActionBar.SetTitle(Resource.String.title_library);
@@ -131,29 +121,44 @@ namespace AudioBookPlayer.App.Views.Fragments
             }
         }
 
-        public override void OnResume()
-        {
-            base.OnResume();
-        }
-
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
             var id = item.ItemId;
 
             if (id == Resource.Id.action_library_update)
             {
-                // ServiceConnector?.UpdateLibrary();
+                if (null != browserService)
+                {
+                    browserService.UpdateLibrary();
+                }
+
                 return true;
             }
 
             return base.OnOptionsItemSelected(item);
         }
 
+        private void OnFabClick(EventArgs _)
+        {
+            var fragment = NowPlayingFragment.NewInstance(MediaID.Root);
+            Activity.SupportFragmentManager
+                .BeginTransaction()
+                .Replace(Resource.Id.nav_host_frame, fragment)
+                .AddToBackStack(null)
+                .SetTransition(FragmentTransaction.TransitFragmentFade)
+                .Commit();
+        }
+
         #region TabLayoutMediator.ITabConfigurationStrategy
 
         void TabLayoutMediator.ITabConfigurationStrategy.OnConfigureTab(TabLayout.Tab tab, int index)
         {
-            var resourceIds = new[] { Resource.String.tab_all_books, Resource.String.tab_recent_books };
+            var resourceIds = new[]
+            {
+                Resource.String.tab_all_books,
+                Resource.String.tab_recent_books
+            };
+
             tab.SetText(resourceIds[index]);
         }
 
@@ -207,7 +212,7 @@ namespace AudioBookPlayer.App.Views.Fragments
         }
 
         #endregion
-
+        
         private void ShowPreloader()
         {
             if (null != overlayLayout)
@@ -224,26 +229,31 @@ namespace AudioBookPlayer.App.Views.Fragments
             }
         }
 
-        // 
+        /// <summary>
+        /// ViewsAdapter
+        /// </summary>
         private sealed class ViewsAdapter : FragmentStateAdapter
         {
-            private readonly Func<Fragment>[] fragmentCreators;
+            private readonly Func<Fragment>[] creators;
 
-            public override int ItemCount => fragmentCreators.Length;
+            public override int ItemCount => creators.Length;
 
-            public ViewsAdapter(Fragment fragment, Func<Fragment>[] fragmentCreators)
+            public ViewsAdapter(Fragment fragment)
                 : base(fragment)
             {
-                this.fragmentCreators = fragmentCreators;
+                creators = new Func<Fragment>[]
+                {
+                    AllBooksFragment.NewInstance,
+                    RecentBooksFragment.NewInstance
+                };
             }
 
-            public override Fragment CreateFragment(int index)
-            {
-                return fragmentCreators[index].Invoke();
-            }
+            public override Fragment CreateFragment(int index) => creators[index].Invoke();
         }
 
-        //
+        /// <summary>
+        /// ZoomOutPageTransformer
+        /// </summary>
         [RequiresApi(Api = 21)]
         private sealed class ZoomOutPageTransformer : Java.Lang.Object, ViewPager2.IPageTransformer
         {

@@ -30,8 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{5BBC1515-7
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.MediaBrowserService", "src\AudioBookPlayer.MediaBrowserService\AudioBookPlayer.MediaBrowserService.csproj", "{7518D836-BD79-41C1-840D-83A77E39BDB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.Persistent", "src\AudioBookPlayer.Persistent\AudioBookPlayer.Persistent.csproj", "{8B039B8C-C1E4-45CF-AB4B-2CD175577147}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioBookPlayer.Domain", "src\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj", "{17363E39-92C5-4781-BF54-E5FF7CBC7ADA}"
 EndProject
 Global
@@ -50,10 +48,6 @@ Global
 		{7518D836-BD79-41C1-840D-83A77E39BDB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7518D836-BD79-41C1-840D-83A77E39BDB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7518D836-BD79-41C1-840D-83A77E39BDB1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8B039B8C-C1E4-45CF-AB4B-2CD175577147}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B039B8C-C1E4-45CF-AB4B-2CD175577147}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B039B8C-C1E4-45CF-AB4B-2CD175577147}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B039B8C-C1E4-45CF-AB4B-2CD175577147}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17363E39-92C5-4781-BF54-E5FF7CBC7ADA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17363E39-92C5-4781-BF54-E5FF7CBC7ADA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17363E39-92C5-4781-BF54-E5FF7CBC7ADA}.Release|Any CPU.ActiveCfg = Release|Any CPU

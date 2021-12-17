@@ -12,15 +12,11 @@ namespace AudioBookPlayer.App.ViewModels
     {
         private static AllBooksViewModel? instance;
 
+        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
+
         public ObservableList<AudioBookViewModel> BookItems
         {
             get;
-        }
-
-        public MediaBrowserServiceConnector.IMediaBrowserService? BrowserService
-        {
-            get;
-            private set;
         }
 
         public bool HasBookItems => false;
@@ -28,7 +24,7 @@ namespace AudioBookPlayer.App.ViewModels
         private AllBooksViewModel()
         {
             BookItems = new ObservableList<AudioBookViewModel>();
-            BrowserService = null;
+            browserService = null;
         }
 
         public static AllBooksViewModel Instance()
@@ -41,12 +37,14 @@ namespace AudioBookPlayer.App.ViewModels
             return instance;
         }
 
+        public MediaBrowserServiceConnector.IMediaBrowserService? GetBrowserService() => browserService;
+
         #region MediaBrowserServiceConnector.IConnectCallback
 
         void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
         {
-            BrowserService = service;
-            BrowserService.GetAudioBooks(this);
+            browserService = service;
+            browserService.GetAudioBooks(this);
         }
 
         void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
@@ -65,16 +63,16 @@ namespace AudioBookPlayer.App.ViewModels
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
         {
-            BookItems.Clear();
+            var models = new AudioBookViewModel[list.Count];
 
             for (var index = 0; index < list.Count; index++)
             {
                 var book = list[index];
-                BookItems.Add(AudioBookViewModel.From(book));
+                models[index] = AudioBookViewModel.From(book);
             }
 
-            //ViewModel.SetBookItems(list);
-            //BooksAdapter.SetItems(list);
+            BookItems.Clear();
+            BookItems.AddRange(models);
         }
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)

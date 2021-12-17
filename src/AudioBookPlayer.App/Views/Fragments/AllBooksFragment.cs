@@ -12,7 +12,6 @@ using AudioBookPlayer.App.Views.Activities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Fragment = AndroidX.Fragment.App.Fragment;
 using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
 
@@ -43,6 +42,13 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             base.OnCreate(savedInstanceState);
 
+            // Plural test
+            for (var count = 0; count < 22; count++)
+            {
+                var text = Resources.GetQuantityString(Resource.Plurals.plural_test, count, count);
+                System.Diagnostics.Debug.WriteLine($"[PluralTest] {text}");
+            }
+
             if (ViewModel is { HasBookItems: false } && null != MainActivity.ServiceConnector)
             {
                 MainActivity.ServiceConnector.Connect(ViewModel);
@@ -60,7 +66,12 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 if (null != listView)
                 {
-                    var adapter = new BooksListViewAdapter(Application.Context, ViewModel.BookItems);
+                    var adapter = new BooksListViewAdapter(Application.Context)
+                    {
+                        SortOrderFunc = (x, y) =>
+                            String.Compare(x.Title, y.Title, CultureInfo.CurrentUICulture, CompareOptions.StringSort)
+                    };
+                    
                     listView.OnItemClickListener = new ItemClickListener(Activity.SupportFragmentManager);
                     listView.Adapter = adapter;
                     subscription = ViewModel.BookItems.Subscribe(adapter);
@@ -82,17 +93,39 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             private readonly Context context;
             private readonly LayoutInflater? inflater;
-            private List<AudioBookViewModel> list;
+            private readonly List<AudioBookViewModel> list;
+            private Func<AudioBookViewModel, AudioBookViewModel, int>? sortOrderFunc;
 
             public override int Count => list.Count;
 
+            public Func<AudioBookViewModel, AudioBookViewModel, int>? SortOrderFunc
+            {
+                get => sortOrderFunc;
+                set
+                {
+                    if (ReferenceEquals(sortOrderFunc, value))
+                    {
+                        return;
+                    }
+
+                    sortOrderFunc = value;
+
+                    if (null != sortOrderFunc)
+                    {
+                        list.Sort(new Comparison<AudioBookViewModel>(sortOrderFunc));
+                    }
+
+                    NotifyDataSetChanged();
+                }
+            }
+
             public override AudioBookViewModel this[int position] => list[position];
 
-            public BooksListViewAdapter(Context context, IList<AudioBookViewModel> list)
+            public BooksListViewAdapter(Context context)
             {
                 this.context = context;
-                this.list = new List<AudioBookViewModel>(list);
 
+                list = new List<AudioBookViewModel>();
                 inflater = LayoutInflater.From(Application.Context);
             }
 
@@ -126,35 +159,63 @@ namespace AudioBookPlayer.App.Views.Fragments
                 return view;
             }
 
-            /*public void SetItems(IReadOnlyList<AudioBookViewModel> items)
+            #region IListObserver<AudioBookViewModel>
+
+            void IListObserver<AudioBookViewModel>.OnAdded(int position, AudioBookViewModel value)
             {
-                if (ReferenceEquals(list, items))
+                if (null != sortOrderFunc)
+                {
+                    position = list.FindIndex(value, sortOrderFunc);
+                }
+
+                list.Insert(position, value);
+
+                NotifyDataSetChanged();
+            }
+
+            void IListObserver<AudioBookViewModel>.OnRangeAdded(int position, IEnumerable<AudioBookViewModel> values)
+            {
+                if (null != sortOrderFunc)
+                {
+                    foreach (var item in values)
+                    {
+                        var index = list.FindIndex(item, sortOrderFunc);
+                        list.Insert(index, item);
+                    }
+                }
+                else
+                {
+                    list.AddRange(values);
+                }
+
+                NotifyDataSetChanged();
+            }
+
+            void IListObserver<AudioBookViewModel>.OnReplace(int position, AudioBookViewModel oldValue, AudioBookViewModel newValue)
+            {
+                position = list.IndexOf(oldValue);
+
+                if (0 > position)
                 {
                     return;
                 }
 
-                list = items.ToArray();
+                list[position] = newValue;
 
-                NotifyDataSetChanged();
-            }*/
-
-            #region IListObserver<AudioBookViewModel>
-
-            void IListObserver<AudioBookViewModel>.OnAdded(int position, AudioBookViewModel item)
-            {
-                list.Insert(position, item);
                 NotifyDataSetChanged();
             }
 
-            void IListObserver<AudioBookViewModel>.OnReplace(int position, AudioBookViewModel item)
+            void IListObserver<AudioBookViewModel>.OnRemove(int position, AudioBookViewModel value)
             {
-                list[position] = item;
-                NotifyDataSetChanged();
-            }
+                position = list.IndexOf(value);
 
-            void IListObserver<AudioBookViewModel>.OnRemove(int position)
-            {
+                if (0 > position)
+                {
+                    return;
+                }
+
                 list.RemoveAt(position);
+
                 NotifyDataSetChanged();
             }
 

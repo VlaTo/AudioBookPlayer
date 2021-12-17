@@ -5,18 +5,22 @@ using Android.Views;
 using Android.Widget;
 using System;
 using System.Reactive.Linq;
+using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Activities;
 using Fragment = AndroidX.Fragment.App.Fragment;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
-    public sealed class NowPlayingFragment : Fragment, NowPlayingFragment.IArgumentKeys
+    public sealed class NowPlayingFragment : Fragment, NowPlayingFragment.IArgumentKeys, MediaBrowserServiceConnector.IConnectCallback
     {
         public const string BookMediaIdArgumentKey = "Book.MediaID";
 
         private IDisposable? button1ClickSubscription;
+        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
 
         public string? MediaId => Arguments?.GetString(IArgumentKeys.BookId);
+
+        public MainActivity MainActivity => (MainActivity)Activity;
 
         public static NowPlayingFragment NewInstance(string mediaId)
         {
@@ -30,19 +34,19 @@ namespace AudioBookPlayer.App.Views.Fragments
             };
         }
 
-        public override void OnDestroy()
-        {
-            button1ClickSubscription?.Dispose();
-            base.OnDestroy();
-        }
-
         public override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
 
             HasOptionsMenu = true;
+            MainActivity.SupportActionBar.Title = null;
+            MainActivity.ServiceConnector?.Connect(this);
+        }
 
-            ((MainActivity)Activity).SupportActionBar.Title = null;
+        public override void OnDestroy()
+        {
+            button1ClickSubscription?.Dispose();
+            base.OnDestroy();
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
@@ -93,5 +97,25 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             public const string BookId = BookMediaIdArgumentKey;
         }
+
+        #region MediaBrowserServiceConnector.IConnectCallback
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
+        {
+            browserService = service;
+            browserService.PrepareFromMediaId(MediaId, Bundle.Empty);
+        }
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
+        {
+            throw new NotImplementedException();
+        }
+
+        void MediaBrowserServiceConnector.IConnectCallback.OnFailed()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

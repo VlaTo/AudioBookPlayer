@@ -17,7 +17,7 @@ namespace AudioBookPlayer.MediaBrowserService
 {
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    public class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions
+    public partial class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions
     {
         private const string SupportSearch = "android.media.browse.SEARCH_SUPPORTED";
         private const string LibraryUpdateAction = "com.libraprogramming.audioplayer.library.update";
@@ -25,6 +25,7 @@ namespace AudioBookPlayer.MediaBrowserService
         private const string ExtraRecent = "__RECENT__";
 
         private PackageValidator? packageValidator;
+        private Callback? mediaSessionCallback;
         //private AudioBookDatabase? database;
         private MediaSessionCompat? mediaSession;
         //private MediaSessionCallback? mediaSessionCallback;
@@ -44,22 +45,22 @@ namespace AudioBookPlayer.MediaBrowserService
             mediaSession = new MediaSessionCompat(Application.Context, nameof(MediaBrowserService), componentName, pendingIntent);
             mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
 
-            /*mediaSessionCallback = new MediaSessionCallback
+            mediaSessionCallback = new Callback
             {
                 //OnCommandImpl = DoMediaSessionCommand,
                 // OnCustomActionImpl = DoMediaSessionCustomAction,
                 OnPrepareFromMediaIdImpl = DoPrepareFromMediaId,
-                OnPlayImpl = DoPlay,        // android 10+ playback resumption
-                OnPauseImpl = DoPause,
-                OnStopImpl = DoStop,
-                OnSkipToQueueItemImpl = DoSkipToQueueItem,
-                OnSkipToNextImpl = DoSkipToNext,
-                OnSkipToPreviousImpl = DoSkipToPrevious,
-                OnFastForwardImpl = DoFastForward,
-                OnRewindImpl = DoRewind,
-                OnSeekToImpl = DoSeekTo
+                // OnPlayImpl = DoPlay,        // android 10+ playback resumption
+                // OnPauseImpl = DoPause,
+                // OnStopImpl = DoStop,
+                // OnSkipToQueueItemImpl = DoSkipToQueueItem,
+                // OnSkipToNextImpl = DoSkipToNext,
+                // OnSkipToPreviousImpl = DoSkipToPrevious,
+                // OnFastForwardImpl = DoFastForward,
+                // OnRewindImpl = DoRewind,
+                // OnSeekToImpl = DoSeekTo
             };
-            mediaSession.SetCallback(mediaSessionCallback);*/
+            mediaSession.SetCallback(mediaSessionCallback);
             mediaSession.SetMediaButtonReceiver(pendingIntent);
 
             // Установить активити, которая откроется, когда пользователь заинтерисуется подробностями этой сессии
@@ -129,10 +130,32 @@ namespace AudioBookPlayer.MediaBrowserService
         {
             if (String.Equals(IMediaLibraryActions.Update, action))
             {
-                ;
+                var data = new Bundle();
+
+                data.PutString("Test.Result", "Dolor Sit Amet");
+
+                result.SendResult(data);
+
+                return;
             }
 
             base.OnCustomAction(action, extras, result);
+        }
+
+        private void DoPrepareFromMediaId(string mediaId, Bundle extra)
+        {
+            if (null == mediaSession)
+            {
+                return;
+            }
+
+            mediaSession.Active = true;
+
+            var temp = new PlaybackStateCompat.Builder();
+            temp.SetState((int)PlaybackStateCode.Stopped, 0L, 1.0f);
+
+            mediaSession.SetPlaybackState(temp.Build());
+            mediaSession.SetQueueTitle("Lorem Ipsum");
         }
 
         private void ProvideExtraRecent(Result result)
@@ -147,13 +170,15 @@ namespace AudioBookPlayer.MediaBrowserService
 
             if (mediaId == MediaID.Root)
             {
-                for (var index = 0; index < 10; index++)
+                const int count = 10;
+
+                for (var index = 0; index < count; index++)
                 {
                     var itemId = new MediaID(101, index + 12);
                     var builder = new MediaDescriptionCompat.Builder();
 
                     builder.SetMediaId(itemId);
-                    builder.SetTitle($"Audiobook #{index}");
+                    builder.SetTitle($"Audiobook #{count - index}");
 
                     var item = new MediaBrowserCompat.MediaItem(builder.Build(), (int)MediaItemFlags.Playable);
 

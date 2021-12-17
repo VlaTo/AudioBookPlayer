@@ -30,7 +30,7 @@ namespace AudioBookPlayer.App.Views.Activities
         private Toolbar? toolbar;
         private DrawerLayout? drawer;
         private NavigationView? navigationView;
-        private FloatingActionButton? fab;
+        // private FloatingActionButton? fab;
         private IDisposable? fabClickSubscription;
 
         internal MediaBrowserServiceConnector? ServiceConnector
@@ -95,11 +95,11 @@ namespace AudioBookPlayer.App.Views.Activities
                 SupportActionBar.SetHomeButtonEnabled(true);
             }
 
-            fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            //fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
             navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
             
-            if (null != fab)
+            /*if (null != fab)
             {
                 fabClickSubscription = Observable
                     .FromEventPattern(
@@ -110,7 +110,7 @@ namespace AudioBookPlayer.App.Views.Activities
                         .SetAction("Action", this)
                         .Show()
                     );
-            }
+            }*/
 
             if (null != drawer)
             {
