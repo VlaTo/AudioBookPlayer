@@ -12,6 +12,8 @@ namespace AudioBookPlayer.App.Core
         
         public static Action<T1, T2, T3> Nop<T1, T2, T3>() => InnerEmpty;
 
+        public static Action<T1, T2, T3, T4> Nop<T1, T2, T3, T4>() => InnerEmpty;
+
         #region Functions
 
         private static void InnerEmpty()
@@ -27,6 +29,9 @@ namespace AudioBookPlayer.App.Core
         }
 
         private static void InnerEmpty<T1, T2, T3>(T1 p1, T2 p2, T3 p3)
+        {
+        }
+        private static void InnerEmpty<T1, T2, T3, T4>(T1 p1, T2 p2, T3 p3, T4 p4)
         {
         }
 

@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using Android;
+using Android.Content.PM;
 using Android.OS;
 using Android.Support.V4.Media;
 using Android.Views;
@@ -10,35 +12,40 @@ using AndroidX.ViewPager2.Adapter;
 using AndroidX.ViewPager2.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Activities;
+using AudioBookPlayer.Domain;
 using Google.Android.Material.FloatingActionButton;
 using Google.Android.Material.ProgressIndicator;
-using Google.Android.Material.Snackbar;
 using Google.Android.Material.Tabs;
 using Java.Util;
 using Java.Util.Concurrent;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using AudioBookPlayer.Domain;
+using AndroidX.ConstraintLayout.Widget;
+using PermissionChecker = AudioBookPlayer.Core.PermissionChecker;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
     public class LibraryFragment : Fragment,
         TabLayoutMediator.ITabConfigurationStrategy,
         MediaBrowserServiceConnector.IConnectCallback,
-        MediaBrowserServiceConnector.IAudioBooksCallback
+        MediaBrowserServiceConnector.IAudioBooksCallback,
+        MediaBrowserServiceConnector.IUpdateCallback
     {
         private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
 
         private FloatingActionButton? fab;
         private ViewPager2? viewPager;
         private TabLayout? tabsLayout;
-        private CircularProgressIndicator? busyIndicator;
-        private FrameLayout? overlayLayout;
+        //private CircularProgressIndicator? busyIndicator;
+        //private LinearLayout? busyIndicatorLayout;
+        //private FrameLayout? overlayLayout;
         private TabLayoutMediator? layoutMediator;
+        // private TextView? busyIndicatorText;
         private IDisposable? fabClickSubscription;
         private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
-        private Timer? preloaderTimer;
+        private WaitIndicator? indicator;
+        //private Timer? preloaderTimer;
 
         internal MainActivity MainActivity => (MainActivity)Activity;
 
@@ -56,51 +63,66 @@ namespace AudioBookPlayer.App.Views.Fragments
         public override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+            
+            indicator = new WaitIndicator();
             HasOptionsMenu = true;
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            var _ = base.OnCreateView(inflater, container, savedInstanceState);
+            var old = base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.fragment_library, container, false);
 
-            viewPager = view?.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
-            tabsLayout = view?.FindViewById<TabLayout>(Resource.Id.tabs_layout);
-            fab = view?.FindViewById<FloatingActionButton>(Resource.Id.fab);
-            busyIndicator = view?.FindViewById<CircularProgressIndicator>(Resource.Id.busy_indicator);
-            overlayLayout = view?.FindViewById<FrameLayout>(Resource.Id.overlay_layout);
-
-            if (null != viewPager)
+            if (null != view)
             {
-                viewPager.Adapter = new ViewsAdapter(this);
-                // viewPager.SetPageTransformer(new ZoomOutPageTransformer());
-            }
+                viewPager = view.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
+                tabsLayout = view.FindViewById<TabLayout>(Resource.Id.tabs_layout);
+                fab = view.FindViewById<FloatingActionButton>(Resource.Id.fab);
+                //overlayLayout = view.FindViewById<FrameLayout>(Resource.Id.overlay_layout);
 
-            if (null != fab)
-            {
-                /*Snackbar
-                    .Make((View?)pattern.Sender, "Replace with your own action", Snackbar.LengthLong)
-                    .SetAction(Resource.String.fab_library_action, this)
-                    .Show()*/
+                if (null != indicator)
+                {
+                    indicator.ParseLayout(view);
+                }
 
-                fabClickSubscription = System.Reactive.Linq.Observable
-                    .FromEventPattern(
-                        handler => fab.Click += handler,
-                        handler => fab.Click -= handler)
-                    .Subscribe(
-                        pattern => OnFabClick((EventArgs)pattern.EventArgs)
-                    );
-            }
+                if (null != viewPager)
+                {
+                    viewPager.Adapter = new ViewsAdapter(this);
+                    // viewPager.SetPageTransformer(new ZoomOutPageTransformer());
+                }
 
-            if (null != tabsLayout)
-            {
-                layoutMediator = new TabLayoutMediator(tabsLayout, viewPager, true, true, this);
-                layoutMediator.Attach();
+                /*if (null != overlayLayout)
+                {
+                    busyIndicatorLayout = view.FindViewById<LinearLayout>(Resource.Id.busy_indicator_layout);
+
+                    if (null != busyIndicatorLayout)
+                    {
+                        //busyIndicator = view.FindViewById<CircularProgressIndicator>(Resource.Id.busy_indicator);
+                        busyIndicatorText = view.FindViewById<TextView>(Resource.Id.busy_indicator_text);
+                    }
+                }*/
+
+                if (null != fab)
+                {
+                    fabClickSubscription = System.Reactive.Linq.Observable
+                        .FromEventPattern(
+                            handler => fab.Click += handler,
+                            handler => fab.Click -= handler)
+                        .Subscribe(
+                            pattern => OnFabClick((EventArgs)pattern.EventArgs)
+                        );
+                }
+
+                if (null != tabsLayout)
+                {
+                    layoutMediator = new TabLayoutMediator(tabsLayout, viewPager, true, true, this);
+                    layoutMediator.Attach();
+                }
             }
 
             MainActivity.SupportActionBar.SetTitle(Resource.String.title_library);
 
-            return view;
+            return view ?? old;
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
@@ -112,8 +134,8 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             base.OnStart();
 
-            preloaderTimer = new Timer();
-            preloaderTimer.Schedule(new PreloaderTimerTask(preloaderTimer, ShowPreloader), PreloaderDelay);
+            /*preloaderTimer = new Timer();
+            preloaderTimer.Schedule(new PreloaderTimerTask(preloaderTimer, ShowPreloader), PreloaderDelay);*/
 
             if (null != ServiceConnector)
             {
@@ -127,10 +149,12 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             if (id == Resource.Id.action_library_update)
             {
-                if (null != browserService)
+                if (null == browserService)
                 {
-                    browserService.UpdateLibrary();
+                    return false;
                 }
+
+                PermissionChecker.CheckPermissions(View, new[] { Manifest.Permission.ReadExternalStorage }, OnRequestPermissionsResult);
 
                 return true;
             }
@@ -147,6 +171,12 @@ namespace AudioBookPlayer.App.Views.Fragments
                 .AddToBackStack(null)
                 .SetTransition(FragmentTransaction.TransitFragmentFade)
                 .Commit();
+        }
+
+        private void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            ShowPreloader();
+            browserService.UpdateLibrary(this);
         }
 
         #region TabLayoutMediator.ITabConfigurationStrategy
@@ -212,12 +242,54 @@ namespace AudioBookPlayer.App.Views.Fragments
         }
 
         #endregion
-        
+
+        #region MediaBrawserServiceConnector.IUpdateCallback
+
+        void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateProgress(int step, float progress)
+        {
+            if (overlayLayout is { Visibility: ViewStates.Visible })
+            {
+                int textId = Resource.String.library_update_collecting;
+
+                switch (step)
+                {
+                    case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Collecting:
+                    {
+                        textId = Resource.String.library_update_collecting;
+                        break;
+                    }
+
+                    case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Processing:
+                    {
+                        textId = Resource.String.library_update_processing;
+                        break;
+                    }
+                }
+
+                Activity.RunOnUiThread(() =>
+                {
+                    var text = GetString(textId, progress * 100.0f);
+                    busyIndicatorText.Text = text;
+                });
+            }
+        }
+
+        void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateResult()
+        {
+            ;
+        }
+
+        #endregion
+
         private void ShowPreloader()
         {
             if (null != overlayLayout)
             {
-                Activity.RunOnUiThread(() => overlayLayout.Visibility = ViewStates.Visible);
+                Activity.RunOnUiThread(() =>
+                {
+                    busyIndicatorText.Text = String.Empty;
+                    overlayLayout.Visibility = ViewStates.Visible;
+                });
             }
         }
 

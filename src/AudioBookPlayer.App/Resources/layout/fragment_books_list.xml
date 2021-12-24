@@ -10,4 +10,12 @@
       android:layout_height="match_parent"
   />
 
+  <ViewStub
+      android:id="@+id/empty_books_list"
+	  android:inflatedId="@+id/content_books_empty"
+      android:layout="@layout/content_books_empty"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+  />
+
 </LinearLayout>

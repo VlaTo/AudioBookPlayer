@@ -9,21 +9,28 @@ using Android.Runtime;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
 using AndroidX.Media;
+using AudioBookPlayer.Core;
+using AudioBookPlayer.Data.Persistence;
 using AudioBookPlayer.Domain;
+using AudioBookPlayer.MediaBrowserService.Core;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
-using System;
+using Java.Lang;
+using Java.Util.Concurrent;
+using String = System.String;
 
 namespace AudioBookPlayer.MediaBrowserService
 {
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
-    public partial class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions
+    public partial class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions, MediaBrowserService.IUpdateLibrarySteps
     {
         private const string SupportSearch = "android.media.browse.SEARCH_SUPPORTED";
         private const string LibraryUpdateAction = "com.libraprogramming.audioplayer.library.update";
-        private const string NoRoot = "@empty@";
+        private const int UpdateStepCollecting = 1;
+        private const int UpdateStepProcessing = 2;
         private const string ExtraRecent = "__RECENT__";
 
+        private LiteDbContext? dbContext;
         private PackageValidator? packageValidator;
         private Callback? mediaSessionCallback;
         //private AudioBookDatabase? database;
@@ -34,7 +41,7 @@ namespace AudioBookPlayer.MediaBrowserService
         {
             base.OnCreate();
 
-            //database = AudioBookDatabase.GetDatabase(Application.Context);
+            dbContext = LiteDbContext.GetInstance(new PathProvider());
 
             var componentName = new ComponentName(Application.Context, Class);
             var intent = PackageManager?.GetLaunchIntentForPackage(componentName.PackageName);
@@ -94,6 +101,15 @@ namespace AudioBookPlayer.MediaBrowserService
                     return new BrowserRoot(ExtraRecent, bundle);
                 }
 
+                /*var exists = 0 < GetBooksCount();
+
+                if (exists)
+                {
+                    return new BrowserRoot(MediaID.Root, Bundle.Empty);
+                }
+
+                return new BrowserRoot(MediaID.Empty, Bundle.Empty);*/
+
                 return new BrowserRoot(MediaID.Root, Bundle.Empty);
             }
 
@@ -102,7 +118,7 @@ namespace AudioBookPlayer.MediaBrowserService
 
         public override void OnLoadChildren(string parentId, Result result)
         {
-            if (String.Equals(NoRoot, parentId))
+            if (String.Equals(MediaID.Empty, parentId))
             {
                 result.SendResult(new JavaList<MediaBrowserCompat.MediaItem>());
 
@@ -130,11 +146,20 @@ namespace AudioBookPlayer.MediaBrowserService
         {
             if (String.Equals(IMediaLibraryActions.Update, action))
             {
-                var data = new Bundle();
+                if (null == dbContext)
+                {
+                    var error = new Bundle(extras);
 
-                data.PutString("Test.Result", "Dolor Sit Amet");
+                    error.PutString("Error.Message", "");
+                    result.SendError(error);
 
-                result.SendResult(data);
+                    return;
+                }
+
+                var manager = WorkLoadManager.Current();
+
+                result.Detach();
+                manager.Enqueue(new UpdateLibraryRunnable(this, dbContext, result), extras);
 
                 return;
             }
@@ -170,15 +195,22 @@ namespace AudioBookPlayer.MediaBrowserService
 
             if (mediaId == MediaID.Root)
             {
-                const int count = 10;
-
-                for (var index = 0; index < count; index++)
+                if (null == dbContext)
                 {
-                    var itemId = new MediaID(101, index + 12);
+                    result.SendError(Bundle.Empty);
+                    return;
+                }
+
+                using var scope = new UnitOfWork(dbContext);
+                var books = scope.Books.All();
+
+                foreach (var book in books)
+                {
+                    var itemId = new MediaID(book.Id);
                     var builder = new MediaDescriptionCompat.Builder();
 
                     builder.SetMediaId(itemId);
-                    builder.SetTitle($"Audiobook #{count - index}");
+                    builder.SetTitle(book.Title);
 
                     var item = new MediaBrowserCompat.MediaItem(builder.Build(), (int)MediaItemFlags.Playable);
 
@@ -189,9 +221,96 @@ namespace AudioBookPlayer.MediaBrowserService
             result.SendResult(list);
         }
 
+        private int GetBooksCount()
+        {
+            if (null == dbContext)
+            {
+                return 0;
+            }
+
+            using var scope = new UnitOfWork(dbContext);
+            
+            return scope.Books.Count();
+        }
+
         public interface IMediaLibraryActions
         {
             public const string Update = LibraryUpdateAction;
+        }
+
+        public interface IUpdateLibrarySteps
+        {
+            public const int Collecting = UpdateStepCollecting;
+            public const int Processing = UpdateStepProcessing;
+        }
+
+        private sealed class PathProvider : IPathProvider
+        {
+            public string GetPath(string filename)
+            {
+                var file = Application.Context.GetDatabasePath(filename);
+                return file.AbsolutePath;
+            }
+        }
+
+        /// <summary>
+        /// UpdateLibraryRunnable class.
+        /// </summary>
+        private sealed class UpdateLibraryRunnable : Object, IRunnable
+        {
+            private readonly MediaBrowserService service;
+            private readonly LiteDbContext dbContext;
+            private readonly Result result;
+
+            public UpdateLibraryRunnable(MediaBrowserService service, LiteDbContext dbContext, Result result)
+            {
+                this.service = service;
+                this.dbContext = dbContext;
+                this.result = result;
+
+            }
+
+            public void Run()
+            {
+                var reporter = new MultiStepProgress(new[]
+                {
+                    new ProgressStep(IUpdateLibrarySteps.Collecting, 0.7f),
+                    new ProgressStep(IUpdateLibrarySteps.Processing, 0.3f)
+                });
+
+                var token = reporter.Subscribe((step, progress) =>
+                {
+                    var bundle = new Bundle();
+
+                    bundle.PutInt("Update.Step", step);
+                    bundle.PutFloat("Update.Progress", progress);
+
+                    result.SendProgressUpdate(bundle);
+                });
+
+                try
+                {
+                    var millis = TimeUnit.Seconds.ToMillis(1L);
+                    var booksProvider = new BooksProvider();
+                    var sourceBooks = booksProvider.QueryBooks(reporter[IUpdateLibrarySteps.Collecting]);
+
+                    const float total = 10.0f;
+                    var processing = reporter[IUpdateLibrarySteps.Processing];
+
+                    for (var position = 0; position < total; position++)
+                    {
+                        processing.Report((position + 1) / total);
+                        Thread.Sleep(millis);
+                    }
+
+                    service.NotifyChildrenChanged(MediaID.Root, Bundle.Empty);
+                    result.SendResult(Bundle.Empty);
+                }
+                finally
+                {
+                    token.Dispose();
+                }
+            }
         }
     }
 }

@@ -86,7 +86,6 @@
     <Compile Include="Core\Services\IMediaBrowserService.cs" />
     <Compile Include="Core\Stub.cs" />
     <Compile Include="Core\Tasks\LoadBooksTask.cs" />
-    <Compile Include="Core\WorkLoadManager.cs" />
     <Compile Include="ViewModels\AllBooksViewModel.cs" />
     <Compile Include="ViewModels\AudioBookViewModel.cs" />
     <Compile Include="Views\Activities\SplashActivity.cs" />
@@ -101,6 +100,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Activities\ShareActivity.cs" />
     <Compile Include="Views\Fragments\SettingsFragment.cs" />
+    <Compile Include="Views\WaitIndicator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -174,6 +174,10 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AudioBookPlayer.Core\AudioBookPlayer.Core.csproj">
+      <Project>{b3c58a08-3e67-4c85-ae9f-15798fbd75b1}</Project>
+      <Name>AudioBookPlayer.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj">
       <Project>{17363e39-92c5-4781-bf54-e5ff7cbc7ada}</Project>
       <Name>AudioBookPlayer.Domain</Name>
@@ -290,6 +294,16 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-v21\ic_no_book.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\content_books_empty.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\round_rect_shape.xml">
+      <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

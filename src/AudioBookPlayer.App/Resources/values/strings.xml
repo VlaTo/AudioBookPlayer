@@ -25,10 +25,15 @@
 	<string name="tab_recent_books">Recent</string>
 
 	<string name="fab_library_action">Now Playing</string>
+
+	<string name="empty_content_title">There is no books yet</string>
 	
 	<string name="preference_play_group">Player</string>
 	<string name="preference_title_play_on_headset_connected">Continue Playing</string>
 	<string name="preference_description_play_on_headset_connected">Continue playing after headset are connected again</string>
+
+	<string name="library_update_collecting">Collecting info (%1$.0f %%) ...</string>
+	<string name="library_update_processing">Processing info (%1$.0f %%) ...</string>
 
 	<plurals name="plural_test">
 		<item quantity="zero">%1$d items</item>

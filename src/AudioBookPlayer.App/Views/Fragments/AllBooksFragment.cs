@@ -71,7 +71,8 @@ namespace AudioBookPlayer.App.Views.Fragments
                         SortOrderFunc = (x, y) =>
                             String.Compare(x.Title, y.Title, CultureInfo.CurrentUICulture, CompareOptions.StringSort)
                     };
-                    
+
+                    listView.EmptyView = view.FindViewById<ViewStub>(Resource.Id.empty_books_list);
                     listView.OnItemClickListener = new ItemClickListener(Activity.SupportFragmentManager);
                     listView.Adapter = adapter;
                     subscription = ViewModel.BookItems.Subscribe(adapter);

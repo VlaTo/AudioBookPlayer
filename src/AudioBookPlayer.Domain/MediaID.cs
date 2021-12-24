@@ -7,6 +7,7 @@ namespace AudioBookPlayer.Domain
     public sealed class MediaID : IEquatable<MediaID>
     {
         private const string RootStr = "//";
+        private const string EmptyStr = "@empty@";
         private const char ChapterDelimiter = '/';
         private const char BookDelimiter = ':';
         private const string BookPrefix = "book";
@@ -83,7 +84,7 @@ namespace AudioBookPlayer.Domain
 
         public static bool TryParse(string str, out MediaID mediaId)
         {
-            if (String.IsNullOrEmpty(str))
+            if (String.Equals(EmptyStr, str))
             {
                 mediaId = Empty;
                 return true;
@@ -146,7 +147,7 @@ namespace AudioBookPlayer.Domain
         {
             if (mediaId == Empty)
             {
-                return String.Empty;
+                return EmptyStr;
             }
 
             if (mediaId == Root)

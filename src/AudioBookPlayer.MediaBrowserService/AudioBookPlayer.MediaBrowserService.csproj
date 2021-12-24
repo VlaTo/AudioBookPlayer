@@ -47,8 +47,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Attributes\ColumnAttribute.cs" />
+    <Compile Include="Core\BooksProvider.cs" />
+    <Compile Include="Core\Extensions\ReadOnlyListExtensions.cs" />
+    <Compile Include="Core\Extensions\TypeExtensions.cs" />
+    <Compile Include="Core\Internal\AudioBookScanner.cs" />
     <Compile Include="Core\Internal\PackageValidator.cs" />
     <Compile Include="Core\Internal\Stub.cs" />
+    <Compile Include="Core\IProgressEx.cs" />
+    <Compile Include="Core\MediaInfoProvider.cs" />
+    <Compile Include="Core\MediaInfoProviderFactory.cs" />
+    <Compile Include="Core\MultiStepProgress.cs" />
+    <Compile Include="Core\QuickTimeMediaInfoProvider.cs" />
     <Compile Include="MediaBrowserService.Callback.cs" />
     <Compile Include="MediaBrowserService.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -68,9 +78,25 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\AudioBookPlayer.Core\AudioBookPlayer.Core.csproj">
+      <Project>{b3c58a08-3e67-4c85-ae9f-15798fbd75b1}</Project>
+      <Name>AudioBookPlayer.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.Data.Persistence\AudioBookPlayer.Data.Persistence.csproj">
+      <Project>{0b88d0c6-4621-4920-b24f-71b6313c1e62}</Project>
+      <Name>AudioBookPlayer.Data.Persistence</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj">
       <Project>{17363e39-92c5-4781-bf54-e5ff7cbc7ada}</Project>
       <Name>AudioBookPlayer.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibraProgramming.Media.Common\LibraProgramming.Media.Common.csproj">
+      <Project>{73355855-b4b1-465a-88c6-e82744948e0c}</Project>
+      <Name>LibraProgramming.Media.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj">
+      <Project>{6b2f62a2-75cc-4d46-b85f-74ab6e625ff6}</Project>
+      <Name>LibraProgramming.Media.QuickTime</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

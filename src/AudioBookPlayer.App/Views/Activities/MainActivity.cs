@@ -11,11 +11,9 @@ using AndroidX.Core.View;
 using AndroidX.DrawerLayout.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Fragments;
-using Google.Android.Material.FloatingActionButton;
+using AudioBookPlayer.Core;
 using Google.Android.Material.Navigation;
-using Google.Android.Material.Snackbar;
 using System;
-using System.Reactive.Linq;
 using Xamarin.Essentials;
 
 namespace AudioBookPlayer.App.Views.Activities
@@ -39,12 +37,14 @@ namespace AudioBookPlayer.App.Views.Activities
             private set;
         }
 
+
         public override void OnRequestPermissionsResult(
             int requestCode,
             string[] permissions,
             [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
-            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            //Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            PermissionChecker.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
@@ -83,6 +83,7 @@ namespace AudioBookPlayer.App.Views.Activities
             base.OnCreate(savedInstanceState);
 
             Platform.Init(this, savedInstanceState);
+            PermissionChecker.Init(this);
             
             SetContentView(Resource.Layout.activity_main);
 

@@ -1,7 +1,7 @@
-﻿using System;
-using Android.Support.V4.Media;
+﻿using Android.Support.V4.Media;
 using AndroidX.MediaRouter.Media;
 using AudioBookPlayer.Domain;
+using System;
 
 namespace AudioBookPlayer.App.Core
 {

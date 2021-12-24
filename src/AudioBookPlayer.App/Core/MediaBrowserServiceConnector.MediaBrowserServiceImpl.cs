@@ -18,6 +18,13 @@ namespace AudioBookPlayer.App.Core
             void OnAudioBooksError(Bundle options);
         }
 
+        internal interface IUpdateCallback
+        {
+            void OnUpdateProgress(int step, float progress);
+
+            void OnUpdateResult();
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -25,7 +32,7 @@ namespace AudioBookPlayer.App.Core
         {
             void GetAudioBooks(IAudioBooksCallback callback);
 
-            void UpdateLibrary();
+            void UpdateLibrary(IUpdateCallback callback);
 
             void PrepareFromMediaId(string mediaId, Bundle extra);
         }
@@ -93,7 +100,7 @@ namespace AudioBookPlayer.App.Core
                 mediaBrowser.Subscribe(mediaId, Bundle.Empty, subscriptionCallbacks);
             }
 
-            public void UpdateLibrary()
+            public void UpdateLibrary(IUpdateCallback callback)
             {
                 var extras = new Bundle();
 
@@ -103,11 +110,11 @@ namespace AudioBookPlayer.App.Core
                 mediaBrowser.SendCustomAction(
                     MediaBrowserService.MediaBrowserService.IMediaLibraryActions.Update,
                     extras,
-                    new CustomActionCallback
+                    new CustomActionCallback<IUpdateCallback>(callback)
                     {
                         OnResultImpl = DoUpdateLibraryResult,
+                        OnProgressUpdateImpl = DoUpdateLibraryProgress
                         // OnErrorImpl = 
-                        // OnProgressUpdateImpl = 
                     }
                 );
             }
@@ -118,19 +125,34 @@ namespace AudioBookPlayer.App.Core
                 transport.PrepareFromMediaId(mediaId, extra);
             }
 
-            private void DoUpdateLibraryResult(string action, Bundle options, Bundle result)
+            private void DoUpdateLibraryResult(IUpdateCallback callback, string action, Bundle options, Bundle result)
             {
-                var callbacks = booksCallbacks.ToArray();
+                System.Diagnostics.Debug.WriteLine("[DoUpdateLibraryResult] Execute");
+
+                callback.OnUpdateResult();
+
+                /*var callbacks = booksCallbacks.ToArray();
 
                 for (var index = 0; index < callbacks.Length; index++)
                 {
                     var callback = callbacks[index];
                     callback.OnAudioBooksReady(books, result);
-                }
+                }*/
+            }
+
+            private static void DoUpdateLibraryProgress(IUpdateCallback callback, string action, Bundle options, Bundle progress)
+            {
+                //var test1 = options.GetInt("Test1");
+                var step = progress.GetInt("Update.Step");
+                var percentage = progress.GetFloat("Update.Progress");
+
+                callback.OnUpdateProgress(step, percentage);
             }
 
             private void DoOnChildrenLoaded(string arg1, IList<MediaBrowserCompat.MediaItem> arg2, Bundle arg3)
             {
+                System.Diagnostics.Debug.WriteLine("[DoOnChildrenLoaded] Execute");
+
                 books = arg2;
 
                 var callbacks = booksCallbacks.ToArray();

@@ -3,9 +3,9 @@
 using Android.OS;
 using Java.Lang;
 
-namespace AudioBookPlayer.App.Core
+namespace AudioBookPlayer.Core
 {
-    internal sealed class WorkLoadManager
+    public sealed class WorkLoadManager
     {
         private static WorkLoadManager? instance;
         private WorkLoadThread? thread;
