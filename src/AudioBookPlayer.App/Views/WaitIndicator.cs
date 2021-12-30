@@ -12,7 +12,9 @@ namespace AudioBookPlayer.App.Views
     internal class WaitIndicator
     {
         private readonly Activity activity;
-        private Timer? timer;
+        private Timer timer;
+        private long delay;
+        private string? label;
         private TextView? description;
         //private LinearLayout? indicatorLayout;
         private FrameLayout? overlay;
@@ -22,6 +24,8 @@ namespace AudioBookPlayer.App.Views
             this.activity = activity;
 
             timer = new Timer();
+            label = null;
+            delay = TimeUnit.Milliseconds?.ToMillis(200L) ?? 200L;
         }
 
         public void ParseLayout(View view)
@@ -32,12 +36,16 @@ namespace AudioBookPlayer.App.Views
 
         public void Show(string? text = null)
         {
-            timer.Schedule(new Task(timer, Show), TimeUnit.Milliseconds?.ToMillis(200L));
-            activity.RunOnUiThread(() =>
+            label = String.IsNullOrEmpty(text) ? String.Empty : text;
+
+            if (null == overlay)
             {
-                description.Text = String.IsNullOrEmpty(text) ? String.Empty : text;
-                overlay.Visibility = ViewStates.Visible;
-            });
+                timer.Schedule(new PendingTask(timer, DoShow), delay);
+            }
+            else
+            {
+                activity.RunOnUiThread(() => description.Text = label);
+            }
         }
 
         public void Hide()
@@ -47,13 +55,22 @@ namespace AudioBookPlayer.App.Views
                 activity.RunOnUiThread(() => overlay.Visibility = ViewStates.Gone);
             }
         }
-        
-        private sealed class Task : TimerTask
+
+        private void DoShow()
+        {
+            activity.RunOnUiThread(() =>
+            {
+                description.Text = label;
+                overlay.Visibility = ViewStates.Visible;
+            });
+        }
+
+        private sealed class PendingTask : TimerTask
         {
             private readonly Timer timer;
             private readonly Action action;
 
-            public Task(Timer timer, Action action)
+            public PendingTask(Timer timer, Action action)
             {
                 this.timer = timer;
                 this.action = action;

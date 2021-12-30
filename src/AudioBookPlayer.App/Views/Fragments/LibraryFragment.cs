@@ -63,8 +63,8 @@ namespace AudioBookPlayer.App.Views.Fragments
         public override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            
-            indicator = new WaitIndicator();
+
+            indicator = new WaitIndicator(Activity);
             HasOptionsMenu = true;
         }
 
@@ -78,6 +78,7 @@ namespace AudioBookPlayer.App.Views.Fragments
                 viewPager = view.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
                 tabsLayout = view.FindViewById<TabLayout>(Resource.Id.tabs_layout);
                 fab = view.FindViewById<FloatingActionButton>(Resource.Id.fab);
+
                 //overlayLayout = view.FindViewById<FrameLayout>(Resource.Id.overlay_layout);
 
                 if (null != indicator)
@@ -154,7 +155,7 @@ namespace AudioBookPlayer.App.Views.Fragments
                     return false;
                 }
 
-                PermissionChecker.CheckPermissions(View, new[] { Manifest.Permission.ReadExternalStorage }, OnRequestPermissionsResult);
+                PermissionChecker.CheckPermissions(View, new[] { Manifest.Permission.ReadExternalStorage }, DoRequestPermissionsResult);
 
                 return true;
             }
@@ -173,10 +174,10 @@ namespace AudioBookPlayer.App.Views.Fragments
                 .Commit();
         }
 
-        private void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        private void DoRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
-            ShowPreloader();
-            browserService.UpdateLibrary(this);
+            indicator?.Show();
+            browserService?.UpdateLibrary(this);
         }
 
         #region TabLayoutMediator.ITabConfigurationStrategy
@@ -198,27 +199,17 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
         {
-            if (null != preloaderTimer)
-            {
-                preloaderTimer.Cancel();
-            }
+            indicator?.Hide();
 
             for (var index = 0; index < list.Count; index++)
             {
                 var book = list[index];
             }
-
-            HidePreloader();
         }
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)
         {
-            if (null != preloaderTimer)
-            {
-                preloaderTimer.Cancel();
-            }
-
-            HidePreloader();
+            indicator?.Hide();
         }
 
         #endregion
@@ -247,31 +238,28 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateProgress(int step, float progress)
         {
-            if (overlayLayout is { Visibility: ViewStates.Visible })
+            var textId = Resource.String.library_update_collecting;
+
+            switch (step)
             {
-                int textId = Resource.String.library_update_collecting;
-
-                switch (step)
+                case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Collecting:
                 {
-                    case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Collecting:
-                    {
-                        textId = Resource.String.library_update_collecting;
-                        break;
-                    }
-
-                    case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Processing:
-                    {
-                        textId = Resource.String.library_update_processing;
-                        break;
-                    }
+                    textId = Resource.String.library_update_collecting;
+                    break;
                 }
 
-                Activity.RunOnUiThread(() =>
+                case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Processing:
                 {
-                    var text = GetString(textId, progress * 100.0f);
-                    busyIndicatorText.Text = text;
-                });
+                    textId = Resource.String.library_update_processing;
+                    break;
+                }
             }
+
+            Activity.RunOnUiThread(() =>
+            {
+                var text = GetString(textId, progress * 100.0f);
+                indicator?.Show(text);
+            });
         }
 
         void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateResult()
@@ -281,7 +269,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         #endregion
 
-        private void ShowPreloader()
+        /*private void ShowPreloader()
         {
             if (null != overlayLayout)
             {
@@ -299,7 +287,7 @@ namespace AudioBookPlayer.App.Views.Fragments
             {
                 Activity.RunOnUiThread(() => overlayLayout.Visibility = ViewStates.Gone);
             }
-        }
+        }*/
 
         /// <summary>
         /// ViewsAdapter
