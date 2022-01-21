@@ -1,6 +1,4 @@
 ﻿using System;
-using Android.OS;
-using Android.Support.V4.Media;
 
 namespace AudioBookPlayer.App.ViewModels
 {
@@ -11,7 +9,22 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
+        public string Subtitle
+        {
+            get;
+        }
+
+        public string Description
+        {
+            get;
+        }
+
         public TimeSpan Duration
+        {
+            get;
+        }
+
+        public string Authors
         {
             get;
         }
@@ -21,19 +34,21 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public AudioBookViewModel(string mediaId, string title, TimeSpan duration)
+        public AudioBookViewModel(
+            string mediaId,
+            string title,
+            string subtitle,
+            string description,
+            string authors,
+            TimeSpan duration,
+            DateTime created)
         {
             MediaId = mediaId;
             Title = title;
+            Subtitle = subtitle;
+            Description = description;
             Duration = duration;
-        }
-
-        public static AudioBookViewModel From(MediaBrowserCompat.MediaItem mediaItem)
-        {
-            var mediaId = mediaItem.MediaId;
-            var title = mediaItem.Description.Title;
-            var duration = (mediaItem.Description?.Extras ?? Bundle.Empty).GetDouble("Book.Duration", 0.0d);
-            return new AudioBookViewModel(mediaId, title, TimeSpan.FromMilliseconds(duration));
+            Authors = authors;
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿#nullable enable
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Android.App;
 using Android.Content;
 using Android.Media.Browse;
@@ -11,11 +14,16 @@ using Android.Support.V4.Media.Session;
 using AndroidX.Media;
 using AudioBookPlayer.Core;
 using AudioBookPlayer.Data.Persistence;
+using AudioBookPlayer.Data.Persistence.Services;
 using AudioBookPlayer.Domain;
+using AudioBookPlayer.Domain.Models;
+using AudioBookPlayer.Domain.Providers;
+using AudioBookPlayer.Domain.Services;
 using AudioBookPlayer.MediaBrowserService.Core;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
 using Java.Lang;
 using Java.Util.Concurrent;
+using Object = Java.Lang.Object;
 using String = System.String;
 
 namespace AudioBookPlayer.MediaBrowserService
@@ -33,15 +41,15 @@ namespace AudioBookPlayer.MediaBrowserService
         private LiteDbContext? dbContext;
         private PackageValidator? packageValidator;
         private Callback? mediaSessionCallback;
-        //private AudioBookDatabase? database;
+        private BooksService? booksService;
         private MediaSessionCompat? mediaSession;
-        //private MediaSessionCallback? mediaSessionCallback;
 
         public override void OnCreate()
         {
             base.OnCreate();
 
             dbContext = LiteDbContext.GetInstance(new PathProvider());
+            booksService = new BooksService(dbContext);
 
             var componentName = new ComponentName(Application.Context, Class);
             var intent = PackageManager?.GetLaunchIntentForPackage(componentName.PackageName);
@@ -101,26 +109,17 @@ namespace AudioBookPlayer.MediaBrowserService
                     return new BrowserRoot(ExtraRecent, bundle);
                 }
 
-                /*var exists = 0 < GetBooksCount();
-
-                if (exists)
-                {
-                    return new BrowserRoot(MediaID.Root, Bundle.Empty);
-                }
-
-                return new BrowserRoot(MediaID.Empty, Bundle.Empty);*/
-
                 return new BrowserRoot(MediaID.Root, Bundle.Empty);
             }
 
-            return new BrowserRoot(null, null);
+            return new BrowserRoot(MediaID.Empty, null);
         }
 
         public override void OnLoadChildren(string parentId, Result result)
         {
-            if (String.Equals(MediaID.Empty, parentId))
+            if (String.Equals(MediaID.Root, parentId))
             {
-                result.SendResult(new JavaList<MediaBrowserCompat.MediaItem>());
+                ProvideRoot(result);
 
                 return;
             }
@@ -156,10 +155,13 @@ namespace AudioBookPlayer.MediaBrowserService
                     return;
                 }
 
-                var manager = WorkLoadManager.Current();
-
                 result.Detach();
-                manager.Enqueue(new UpdateLibraryRunnable(this, dbContext, result), extras);
+
+                var manager = WorkLoadManager.Current();
+                var booksProvider = new BooksProvider();
+                var runnable = new UpdateLibraryRunnable(this, booksProvider, booksService, result);
+                
+                manager.Enqueue(runnable, extras);
 
                 return;
             }
@@ -189,48 +191,32 @@ namespace AudioBookPlayer.MediaBrowserService
             result.SendResult(list);
         }
 
-        private void ProvideChildren(MediaID mediaId, Result result)
+        private void ProvideRoot(Result result)
         {
             var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
-            if (mediaId == MediaID.Root)
+            if (null == booksService)
             {
-                if (null == dbContext)
-                {
-                    result.SendError(Bundle.Empty);
-                    return;
-                }
+                result.SendError(Bundle.Empty);
+                return;
+            }
 
-                using var scope = new UnitOfWork(dbContext);
-                var books = scope.Books.All();
+            var builder = new MediaItemBuilder();
 
-                foreach (var book in books)
-                {
-                    var itemId = new MediaID(book.Id);
-                    var builder = new MediaDescriptionCompat.Builder();
-
-                    builder.SetMediaId(itemId);
-                    builder.SetTitle(book.Title);
-
-                    var item = new MediaBrowserCompat.MediaItem(builder.Build(), (int)MediaItemFlags.Playable);
-
-                    list.Add(item);
-                }
+            foreach (var book in booksService.QueryBooks())
+            {
+                var mediaItem = builder.CreateItem(book);
+                list.Add(mediaItem);
             }
 
             result.SendResult(list);
         }
 
-        private int GetBooksCount()
+        private void ProvideChildren(MediaID mediaId, Result result)
         {
-            if (null == dbContext)
-            {
-                return 0;
-            }
+            var list = new JavaList<MediaBrowserCompat.MediaItem>();
 
-            using var scope = new UnitOfWork(dbContext);
-            
-            return scope.Books.Count();
+            result.SendResult(list);
         }
 
         public interface IMediaLibraryActions
@@ -240,7 +226,8 @@ namespace AudioBookPlayer.MediaBrowserService
 
         public interface IUpdateLibrarySteps
         {
-            public const int Collecting = UpdateStepCollecting;
+            public const int Scanning = UpdateStepCollecting;
+            public const int Reading = UpdateStepCollecting;
             public const int Processing = UpdateStepProcessing;
         }
 
@@ -259,13 +246,19 @@ namespace AudioBookPlayer.MediaBrowserService
         private sealed class UpdateLibraryRunnable : Object, IRunnable
         {
             private readonly MediaBrowserService service;
-            private readonly LiteDbContext dbContext;
+            private readonly IBooksProvider booksProvider;
+            private readonly IBooksService booksService;
             private readonly Result result;
 
-            public UpdateLibraryRunnable(MediaBrowserService service, LiteDbContext dbContext, Result result)
+            public UpdateLibraryRunnable(
+                MediaBrowserService service,
+                IBooksProvider booksProvider,
+                IBooksService booksService,
+                Result result)
             {
                 this.service = service;
-                this.dbContext = dbContext;
+                this.booksProvider = booksProvider;
+                this.booksService = booksService;
                 this.result = result;
 
             }
@@ -274,11 +267,12 @@ namespace AudioBookPlayer.MediaBrowserService
             {
                 var reporter = new MultiStepProgress(new[]
                 {
-                    new ProgressStep(IUpdateLibrarySteps.Collecting, 0.7f),
+                    new ProgressStep(IUpdateLibrarySteps.Scanning, 0.6f),
+                    new ProgressStep(IUpdateLibrarySteps.Reading, 0.1f),
                     new ProgressStep(IUpdateLibrarySteps.Processing, 0.3f)
                 });
 
-                var token = reporter.Subscribe((step, progress) =>
+                var disposable = reporter.Subscribe((step, progress) =>
                 {
                     var bundle = new Bundle();
 
@@ -290,25 +284,140 @@ namespace AudioBookPlayer.MediaBrowserService
 
                 try
                 {
-                    var millis = TimeUnit.Seconds.ToMillis(1L);
-                    var booksProvider = new BooksProvider();
-                    var sourceBooks = booksProvider.QueryBooks(reporter[IUpdateLibrarySteps.Collecting]);
+                    //var sourceBooks = booksProvider.QueryBooks(reporter[IUpdateLibrarySteps.Scanning]);
+                    var sourceBooks = booksProvider.QueryBooks();
+                    var targetBooks = booksService.QueryBooks();
 
-                    const float total = 10.0f;
-                    var processing = reporter[IUpdateLibrarySteps.Processing];
+                    var changes = GetLibraryChanges(sourceBooks, targetBooks);
 
-                    for (var position = 0; position < total; position++)
-                    {
-                        processing.Report((position + 1) / total);
-                        Thread.Sleep(millis);
-                    }
+                    ApplyLibraryChanges(changes, reporter[IUpdateLibrarySteps.Processing]);
 
                     service.NotifyChildrenChanged(MediaID.Root, Bundle.Empty);
                     result.SendResult(Bundle.Empty);
                 }
                 finally
                 {
-                    token.Dispose();
+                    disposable.Dispose();
+                }
+            }
+
+            private IReadOnlyList<ChangeInfo> GetLibraryChanges(IReadOnlyList<AudioBook> sourceBooks, IReadOnlyList<AudioBook> libraryBooks)
+            {
+                var changes = new List<ChangeInfo>();
+                var delete = libraryBooks.ToList();
+
+                for (var sourceIndex = 0; sourceIndex < sourceBooks.Count; sourceIndex++)
+                {
+                    var sourceBook = sourceBooks[sourceIndex];
+                    var libraryIndex = FindLibraryIndex(libraryBooks, sourceBook);
+
+                    if (-1 < libraryIndex)
+                    {
+                        var actualBook = libraryBooks[libraryIndex];
+                        changes.Add(new ChangeInfo(ChangeAction.Update, sourceBook, actualBook));
+                        delete.Remove(actualBook);
+                    }
+                    else
+                    {
+                        changes.Add(new ChangeInfo(ChangeAction.Add, sourceBook));
+                    }
+                }
+
+                foreach (var audioBook in delete)
+                {
+                    changes.Add(new ChangeInfo(ChangeAction.Remove, audioBook));
+                }
+
+                return changes.AsReadOnly();
+            }
+
+            private void ApplyLibraryChanges(IReadOnlyList<ChangeInfo> changes, IProgress<float> progress)
+            {
+                for (var index = 0; index < changes.Count; index++)
+                {
+                    var change = changes[index];
+
+                    switch (change.Action)
+                    {
+                        case ChangeAction.Add:
+                        {
+                            booksService.SaveBook(change.Source);
+
+                            break;
+                        }
+
+                        case ChangeAction.Remove:
+                        {
+                            break;
+                        }
+
+                        case ChangeAction.Update:
+                        {
+                            break;
+                        }
+                    }
+
+                    progress.Report((float)(index + 1) / changes.Count);
+                }
+            }
+
+            private static int FindLibraryIndex(IReadOnlyList<AudioBook> books, AudioBook book)
+            {
+                for (var index = 0; index < books.Count; index++)
+                {
+                    var actual = books[index];
+
+                    if (actual.Id.HasValue)
+                    {
+                        if (book.Id.HasValue)
+                        {
+                            if (actual.Id.Value == book.Id.Value)
+                            {
+                                return index;
+                            }
+
+                            continue;
+                        }
+                        else
+                        {
+                            
+                        }
+
+                    }
+                }
+
+                return -1;
+            }
+
+            private enum ChangeAction
+            {
+                Add,
+                Remove,
+                Update
+            }
+
+            private readonly struct ChangeInfo
+            {
+                public ChangeAction Action
+                {
+                    get;
+                }
+
+                public AudioBook Source
+                {
+                    get;
+                }
+
+                public AudioBook? Target
+                {
+                    get;
+                }
+
+                public ChangeInfo(ChangeAction action, AudioBook source, AudioBook? target = null)
+                {
+                    Action = action;
+                    Source = source;
+                    Target = target;
                 }
             }
         }

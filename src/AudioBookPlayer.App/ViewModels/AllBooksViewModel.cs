@@ -61,18 +61,23 @@ namespace AudioBookPlayer.App.ViewModels
 
         #region MediaBrowserServiceConnector.IAudioBooksResultCallback
 
-        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
+        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> mediaItems, Bundle options)
         {
-            var models = new AudioBookViewModel[list.Count];
+            var books = new List<AudioBookViewModel>();
+            var builder = new AudioBookViewModelBuilder();
 
-            for (var index = 0; index < list.Count; index++)
+            for (var index = 0; index < mediaItems.Count; index++)
             {
-                var book = list[index];
-                models[index] = AudioBookViewModel.From(book);
+                var mediaItem = mediaItems[index];
+
+                if (mediaItem.IsBrowsable)
+                {
+                    books.Add(builder.Create(mediaItem));
+                }
             }
 
             BookItems.Clear();
-            BookItems.AddRange(models);
+            BookItems.AddRange(books);
         }
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)

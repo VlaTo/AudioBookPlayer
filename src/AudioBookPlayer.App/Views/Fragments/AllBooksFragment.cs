@@ -140,21 +140,21 @@ namespace AudioBookPlayer.App.Views.Fragments
                 var subtitleView = view?.FindViewById<TextView>(Resource.Id.book_item_subtitle);
                 var descriptionView = view?.FindViewById<TextView>(Resource.Id.book_item_description);
 
-                var item = list[position];
+                var model = list[position];
 
                 if (null != titleView)
                 {
-                    titleView.Text = item.Title;
+                    titleView.Text = model.Title;
                 }
 
                 if (null != subtitleView)
                 {
-                    subtitleView.Text = "Author Some";
+                    subtitleView.Text = model.Authors;
                 }
 
                 if (null != descriptionView)
                 {
-                    descriptionView.Text = item.Duration.ToString("t", CultureInfo.CurrentUICulture);
+                    descriptionView.Text = model.Duration.ToString("g", CultureInfo.CurrentUICulture);
                 }
 
                 return view;

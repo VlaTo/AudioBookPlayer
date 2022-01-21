@@ -11,6 +11,12 @@ namespace AudioBookPlayer.Domain.Models
             set;
         }
 
+        public long BookId
+        {
+            get;
+            set;
+        }
+
         public string Title
         {
             get;
@@ -59,12 +65,19 @@ namespace AudioBookPlayer.Domain.Models
             set;
         }
 
+        public IReadOnlyList<AudioBookImage> Images
+        {
+            get;
+            set;
+        }
+
         public AudioBook()
         {
             Authors = new ArrayList<AudioBookAuthor>();
             Sections = new ArrayList<AudioBookSection>();
             Chapters = new ArrayList<AudioBookChapter>();
             SourceFiles = new ArrayList<AudioBookSourceFile>();
+            Images = new ArrayList<AudioBookImage>();
         }
     }
 }

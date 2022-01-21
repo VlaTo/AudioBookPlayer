@@ -1,21 +1,21 @@
 ﻿namespace AudioBookPlayer.Domain.Models
 {
-    public sealed class AudioBookAuthor
+    public sealed class AudioBookImage
     {
         public AudioBook AudioBook
         {
             get;
         }
 
-        public string Name
+        public string SourceFile
         {
             get;
         }
 
-        public AudioBookAuthor(AudioBook audioBook, string name)
+        public AudioBookImage(AudioBook audioBook, string sourceFile)
         {
             AudioBook = audioBook;
-            Name = name;
+            SourceFile = sourceFile;
         }
     }
 }

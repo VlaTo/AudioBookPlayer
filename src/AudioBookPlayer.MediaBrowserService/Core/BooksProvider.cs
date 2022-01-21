@@ -3,21 +3,21 @@ using Android.Content;
 using Android.Content.Res;
 using Android.OS;
 using Android.Provider;
-using AudioBookPlayer.Domain;
 using AudioBookPlayer.Domain.Models;
+using AudioBookPlayer.MediaBrowserService.Core.Extensions;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
 using LibraProgramming.Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using AudioBookPlayer.MediaBrowserService.Core.Extensions;
+using AudioBookPlayer.Domain.Providers;
 using Exception = Java.Lang.Exception;
 using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.MediaBrowserService.Core
 {
-    internal sealed class BooksProvider
+    internal sealed class BooksProvider : IBooksProvider
     {
         private readonly StringComparer comparer;
         private readonly ContentResolver contentResolver;
@@ -32,7 +32,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core
             factory = new MediaInfoProviderFactory();
         }
 
-        public IReadOnlyList<AudioBook> QueryBooks(IProgress<float> progress)
+        public IReadOnlyList<AudioBook> QueryBooks(/*IProgress<float> progress*/)
         {
             var scanner = new AudioBookFileScanner(contentResolver, contentUri);
             var files = scanner.QueryFiles();
@@ -40,7 +40,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core
             var audioBooks = new List<AudioBook>();
             var count = (float)files.Length;
 
-            progress.Report(0.0f);
+            //progress.Report(0.0f);
 
             for (var index = 0; index < files.Length; index++)
             {
@@ -49,10 +49,10 @@ namespace AudioBookPlayer.MediaBrowserService.Core
 
                 ProcessAudioFile(scanner, audioBooks, audioFile, mimeType);
 
-                progress.Report((index + 1) / count);
+                //progress.Report((index + 1) / count);
             }
 
-            progress.Report(1.0f);
+            //progress.Report(1.0f);
 
             return audioBooks.AsReadOnly();
         }
@@ -111,8 +111,14 @@ namespace AudioBookPlayer.MediaBrowserService.Core
 
             audioBook = new AudioBook
             {
+                BookId = audioFile.Id,
                 Title = audioFile.Album,
-                Authors = new[] { new AudioBookAuthor(audioFile.Artist) }
+                Duration = TimeSpan.Zero
+            };
+
+            audioBook.Authors = new[]
+            {
+                new AudioBookAuthor(audioBook, audioFile.Artist)
             };
 
             foreach (var (key, tags) in info.Meta)
@@ -187,6 +193,8 @@ namespace AudioBookPlayer.MediaBrowserService.Core
                 audioBook.SourceFiles = audioBook.SourceFiles.Append(sourceFile);
 
                 sourceFiles[sectionUri] = duration + track.Duration;
+
+                audioBook.Duration += track.Duration;
             }
         }
 

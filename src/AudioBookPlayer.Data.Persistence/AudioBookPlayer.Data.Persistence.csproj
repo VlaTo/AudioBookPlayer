@@ -13,8 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\" />
     <Folder Include="Repositories\" />
+    <Folder Include="Services\" />
+    <Folder Include="Builders\" />
   </ItemGroup>
 
 </Project>

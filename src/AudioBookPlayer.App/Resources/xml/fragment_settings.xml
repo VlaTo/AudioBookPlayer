@@ -10,6 +10,14 @@
 			android:title="@string/preference_title_play_on_headset_connected"
 			android:summary="@string/preference_description_play_on_headset_connected"
 		/>
+		<SeekBarPreference
+			android:key="preference_rewind_offset"
+			android:title="@string/preference_title_rewind_offset"
+			android:summary="@string/preference_description_rewind_offset"
+			android:min="5"
+			android:max="20"
+			android:defaultValue="5"
+		/>
 
 	</PreferenceCategory>
 

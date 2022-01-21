@@ -20139,37 +20139,43 @@ namespace AudioBookPlayer.App
 			public const int preference_description_play_on_headset_connected = 2131689629;
 			
 			// aapt resource value: 0x7F0F009E
-			public const int preference_play_group = 2131689630;
+			public const int preference_description_rewind_offset = 2131689630;
 			
 			// aapt resource value: 0x7F0F009F
-			public const int preference_title_play_on_headset_connected = 2131689631;
+			public const int preference_play_group = 2131689631;
 			
 			// aapt resource value: 0x7F0F00A0
-			public const int search_menu_title = 2131689632;
+			public const int preference_title_play_on_headset_connected = 2131689632;
 			
 			// aapt resource value: 0x7F0F00A1
-			public const int status_bar_notification_info_overflow = 2131689633;
+			public const int preference_title_rewind_offset = 2131689633;
 			
 			// aapt resource value: 0x7F0F00A2
-			public const int summary_collapsed_preference_list = 2131689634;
+			public const int search_menu_title = 2131689634;
 			
 			// aapt resource value: 0x7F0F00A3
-			public const int tab_all_books = 2131689635;
+			public const int status_bar_notification_info_overflow = 2131689635;
 			
 			// aapt resource value: 0x7F0F00A4
-			public const int tab_recent_books = 2131689636;
+			public const int summary_collapsed_preference_list = 2131689636;
 			
 			// aapt resource value: 0x7F0F00A5
-			public const int title_library = 2131689637;
+			public const int tab_all_books = 2131689637;
 			
 			// aapt resource value: 0x7F0F00A6
-			public const int title_settings = 2131689638;
+			public const int tab_recent_books = 2131689638;
 			
 			// aapt resource value: 0x7F0F00A7
-			public const int v7_preference_off = 2131689639;
+			public const int title_library = 2131689639;
 			
 			// aapt resource value: 0x7F0F00A8
-			public const int v7_preference_on = 2131689640;
+			public const int title_settings = 2131689640;
+			
+			// aapt resource value: 0x7F0F00A9
+			public const int v7_preference_off = 2131689641;
+			
+			// aapt resource value: 0x7F0F00AA
+			public const int v7_preference_on = 2131689642;
 			
 			static String()
 			{

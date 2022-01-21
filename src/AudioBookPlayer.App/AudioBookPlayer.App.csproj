@@ -65,6 +65,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\AudioBookViewModelBuilder.cs" />
     <Compile Include="Core\AudioBookDescriptionBuilder.cs" />
     <Compile Include="Core\BookItem.cs" />
     <Compile Include="Core\ConnectExecutor.cs" />

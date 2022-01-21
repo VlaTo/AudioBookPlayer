@@ -1,11 +1,14 @@
-﻿using Android.OS;
+﻿using System;
+using Android.OS;
 using Android.Views;
 using AndroidX.Preference;
 using AudioBookPlayer.App.Views.Activities;
+using Debug = System.Diagnostics.Debug;
+using Object = Java.Lang.Object;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
-    public class SettingsFragment : PreferenceFragmentCompat
+    public class SettingsFragment : PreferenceFragmentCompat, Preference.IOnPreferenceChangeListener
     {
         public static SettingsFragment NewInstance()
         {
@@ -24,10 +27,29 @@ namespace AudioBookPlayer.App.Views.Fragments
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = base.OnCreateView(inflater, container, savedInstanceState);
-            
+
+            if (null != view)
+            {
+                var seekBar = (SeekBarPreference)FindPreference("preference_rewind_offset");
+
+                seekBar.SeekBarIncrement = 5;
+                seekBar.ShowSeekBarValue = true;
+                seekBar.OnPreferenceChangeListener = this;
+            }
+
             ((MainActivity)Activity).SupportActionBar.SetTitle(Resource.String.title_settings);
 
             return view;
         }
+
+        #region IOnPreferenceChangeListener
+
+        bool Preference.IOnPreferenceChangeListener.OnPreferenceChange(Preference preference, Object newValue)
+        {
+            Debug.WriteLine($"Rewind value: {newValue}");
+            return true;
+        }
+
+        #endregion
     }
 }

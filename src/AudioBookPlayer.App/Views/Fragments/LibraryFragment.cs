@@ -242,7 +242,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             switch (step)
             {
-                case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Collecting:
+                case MediaBrowserService.MediaBrowserService.IUpdateLibrarySteps.Reading:
                 {
                     textId = Resource.String.library_update_collecting;
                     break;

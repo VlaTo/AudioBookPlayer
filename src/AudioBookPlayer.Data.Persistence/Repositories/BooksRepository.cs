@@ -5,7 +5,7 @@ using AudioBookPlayer.Data.Persistence.Entities;
 
 namespace AudioBookPlayer.Data.Persistence.Repositories
 {
-    public class BooksRepository : IBooksRepository
+    internal class BooksRepository : IBooksRepository
     {
         private readonly LiteDbContext context;
 
@@ -16,7 +16,8 @@ namespace AudioBookPlayer.Data.Persistence.Repositories
 
         public void Add(Book entity)
         {
-            throw new NotImplementedException();
+            var collection = context.Books();
+            collection.Insert(entity);
         }
 
         public Book Get(long key)

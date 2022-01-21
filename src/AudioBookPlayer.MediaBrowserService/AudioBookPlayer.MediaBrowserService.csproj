@@ -49,9 +49,11 @@
   <ItemGroup>
     <Compile Include="Core\Attributes\ColumnAttribute.cs" />
     <Compile Include="Core\BooksProvider.cs" />
+    <Compile Include="Core\Extensions\MediaIDExtensions.cs" />
     <Compile Include="Core\Extensions\ReadOnlyListExtensions.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
     <Compile Include="Core\Internal\AudioBookScanner.cs" />
+    <Compile Include="Core\Internal\MediaItemBuilder.cs" />
     <Compile Include="Core\Internal\PackageValidator.cs" />
     <Compile Include="Core\Internal\Stub.cs" />
     <Compile Include="Core\IProgressEx.cs" />
