@@ -52,6 +52,7 @@
     <Compile Include="Core\Extensions\MediaIDExtensions.cs" />
     <Compile Include="Core\Extensions\ReadOnlyListExtensions.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
+    <Compile Include="Core\ImageService.cs" />
     <Compile Include="Core\Internal\AudioBookScanner.cs" />
     <Compile Include="Core\Internal\MediaItemBuilder.cs" />
     <Compile Include="Core\Internal\PackageValidator.cs" />

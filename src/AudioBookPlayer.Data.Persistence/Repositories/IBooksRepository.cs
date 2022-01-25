@@ -5,8 +5,10 @@ namespace AudioBookPlayer.Data.Persistence.Repositories
 {
     public interface IBooksRepository : IRepository<long, Book>
     {
-        int Count();
+        bool Update(long key, Book book);
 
+        bool Remove(long key);
+        
         IEnumerable<Book> All();
     }
 }

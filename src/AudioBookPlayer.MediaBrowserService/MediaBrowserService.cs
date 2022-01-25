@@ -1,11 +1,7 @@
 ﻿#nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Android.App;
 using Android.Content;
-using Android.Media.Browse;
 using Android.Media.Session;
 using Android.OS;
 using Android.Runtime;
@@ -22,7 +18,9 @@ using AudioBookPlayer.Domain.Services;
 using AudioBookPlayer.MediaBrowserService.Core;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
 using Java.Lang;
-using Java.Util.Concurrent;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Object = Java.Lang.Object;
 using String = System.String;
 
@@ -42,6 +40,7 @@ namespace AudioBookPlayer.MediaBrowserService
         private PackageValidator? packageValidator;
         private Callback? mediaSessionCallback;
         private BooksService? booksService;
+        private ImageService? imageService;
         private MediaSessionCompat? mediaSession;
 
         public override void OnCreate()
@@ -49,7 +48,8 @@ namespace AudioBookPlayer.MediaBrowserService
             base.OnCreate();
 
             dbContext = LiteDbContext.GetInstance(new PathProvider());
-            booksService = new BooksService(dbContext);
+            imageService = new ImageService(ImageContentService.Instance);
+            booksService = new BooksService(dbContext, imageService);
 
             var componentName = new ComponentName(Application.Context, Class);
             var intent = PackageManager?.GetLaunchIntentForPackage(componentName.PackageName);
@@ -193,14 +193,13 @@ namespace AudioBookPlayer.MediaBrowserService
 
         private void ProvideRoot(Result result)
         {
-            var list = new JavaList<MediaBrowserCompat.MediaItem>();
-
             if (null == booksService)
             {
                 result.SendError(Bundle.Empty);
                 return;
             }
 
+            var list = new JavaList<MediaBrowserCompat.MediaItem>();
             var builder = new MediaItemBuilder();
 
             foreach (var book in booksService.QueryBooks())
@@ -214,7 +213,20 @@ namespace AudioBookPlayer.MediaBrowserService
 
         private void ProvideChildren(MediaID mediaId, Result result)
         {
+            if (null == booksService)
+            {
+                result.SendError(Bundle.Empty);
+                return;
+            }
+
             var list = new JavaList<MediaBrowserCompat.MediaItem>();
+            /*var builder = new MediaItemBuilder();
+            
+            foreach (var book in booksService.QueryBooks())
+            {
+                var mediaItem = builder.CreateItem(book);
+                list.Add(mediaItem);
+            }*/
 
             result.SendResult(list);
         }
@@ -309,12 +321,17 @@ namespace AudioBookPlayer.MediaBrowserService
                 for (var sourceIndex = 0; sourceIndex < sourceBooks.Count; sourceIndex++)
                 {
                     var sourceBook = sourceBooks[sourceIndex];
-                    var libraryIndex = FindLibraryIndex(libraryBooks, sourceBook);
+                    var libraryIndex = FindIndex(libraryBooks, sourceBook);
 
                     if (-1 < libraryIndex)
                     {
                         var actualBook = libraryBooks[libraryIndex];
-                        changes.Add(new ChangeInfo(ChangeAction.Update, sourceBook, actualBook));
+
+                        if (HasChanges(sourceBook, actualBook))
+                        {
+                            changes.Add(new ChangeInfo(ChangeAction.Update, sourceBook, actualBook));
+                        }
+
                         delete.Remove(actualBook);
                     }
                     else
@@ -348,11 +365,20 @@ namespace AudioBookPlayer.MediaBrowserService
 
                         case ChangeAction.Remove:
                         {
+                            booksService.RemoveBook(change.Source);
+
                             break;
                         }
 
                         case ChangeAction.Update:
                         {
+                            var bookId = change.Source.Id;
+
+                            if (bookId.HasValue)
+                            {
+                                booksService.UpdateBook(bookId.Value, change.Target);
+                            }
+
                             break;
                         }
                     }
@@ -361,33 +387,23 @@ namespace AudioBookPlayer.MediaBrowserService
                 }
             }
 
-            private static int FindLibraryIndex(IReadOnlyList<AudioBook> books, AudioBook book)
+            private static int FindIndex(IReadOnlyList<AudioBook> books, AudioBook book)
             {
                 for (var index = 0; index < books.Count; index++)
                 {
                     var actual = books[index];
 
-                    if (actual.Id.HasValue)
+                    if (actual.MediaId == book.MediaId)
                     {
-                        if (book.Id.HasValue)
-                        {
-                            if (actual.Id.Value == book.Id.Value)
-                            {
-                                return index;
-                            }
-
-                            continue;
-                        }
-                        else
-                        {
-                            
-                        }
-
+                        return index;
                     }
                 }
 
                 return -1;
             }
+
+            private static bool HasChanges(AudioBook sourceBook, AudioBook actualBook) =>
+                sourceBook.Version != actualBook.Version;
 
             private enum ChangeAction
             {

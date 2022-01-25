@@ -2,26 +2,49 @@
 using AudioBookPlayer.Domain.Models;
 using System;
 using System.Linq;
+using AudioBookPlayer.Domain.Services;
 
 namespace AudioBookPlayer.Data.Persistence.Builders
 {
     internal sealed class AudioBookBuilder
     {
+        private readonly IImageService imageService;
+
+        public AudioBookBuilder(IImageService imageService)
+        {
+            this.imageService = imageService;
+        }
+
         public AudioBook CreateAudioBook(Book source)
         {
             var book = new AudioBook
             {
                 Id = source.Id,
+                MediaId = source.BookId,
                 Title = source.Title,
                 Description = source.Description,
                 Created = source.Created,
-                Duration = source.Duration
+                Duration = source.Duration,
+                Version = source.Version
             };
 
             MapAuthors(book, source.Authors);
             MapChapters(book, source.Sections);
+            MapImages(book, source.Images);
 
             return book;
+        }
+
+        private void MapImages(AudioBook audioBook, string[] images)
+        {
+            var temp = new IAudioBookImage[images.Length];
+
+            for (var index = 0; index < images.Length; index++)
+            {
+                temp[index] = new ContentProviderImage(audioBook, imageService, images[index]);
+            }
+
+            audioBook.Images = temp;
         }
 
         private static void MapAuthors(AudioBook audioBook, Author[] authors)

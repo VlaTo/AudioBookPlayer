@@ -9,7 +9,7 @@
 		android:id="@+id/book_item_cover"
 		android:src="@drawable/ic_no_book"
         android:layout_width="48dp"
-        android:layout_height="64dp"
+        android:layout_height="76dp"
         android:layout_alignParentLeft="true"
 		android:layout_alignParentTop="true"
     />

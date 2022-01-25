@@ -18,7 +18,7 @@ namespace AudioBookPlayer.App.Core
             var duration = GetDuration(mediaItem.Description.Extras);
             var created = GetCreated(mediaItem.Description.Extras);
 
-            return new AudioBookViewModel(mediaId, title, subtitle, description, authors, duration, created);
+            return new AudioBookViewModel(mediaId, title, subtitle, description, authors, duration, created, mediaItem.Description.IconUri);
         }
 
         private static string GetAuthors(Bundle extra)

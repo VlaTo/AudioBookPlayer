@@ -10,8 +10,7 @@ namespace AudioBookPlayer.Domain.Models
             get;
             set;
         }
-
-        public long BookId
+        public long MediaId
         {
             get;
             set;
@@ -41,6 +40,12 @@ namespace AudioBookPlayer.Domain.Models
             set;
         }
 
+        public int Version
+        {
+            get;
+            set;
+        }
+
         public IReadOnlyList<AudioBookAuthor> Authors
         {
             get;
@@ -65,7 +70,7 @@ namespace AudioBookPlayer.Domain.Models
             set;
         }
 
-        public IReadOnlyList<AudioBookImage> Images
+        public IReadOnlyList<IAudioBookImage> Images
         {
             get;
             set;
@@ -77,7 +82,7 @@ namespace AudioBookPlayer.Domain.Models
             Sections = new ArrayList<AudioBookSection>();
             Chapters = new ArrayList<AudioBookChapter>();
             SourceFiles = new ArrayList<AudioBookSourceFile>();
-            Images = new ArrayList<AudioBookImage>();
+            Images = new ArrayList<IAudioBookImage>();
         }
     }
 }

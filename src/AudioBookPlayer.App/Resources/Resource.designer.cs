@@ -19655,10 +19655,13 @@ namespace AudioBookPlayer.App
 		{
 			
 			// aapt resource value: 0x7F0E0000
-			public const int mtrl_badge_content_description = 2131623936;
+			public const int duration_hours_plural = 2131623936;
 			
 			// aapt resource value: 0x7F0E0001
-			public const int plural_test = 2131623937;
+			public const int duration_minutes_plural = 2131623937;
+			
+			// aapt resource value: 0x7F0E0002
+			public const int mtrl_badge_content_description = 2131623938;
 			
 			static Plurals()
 			{

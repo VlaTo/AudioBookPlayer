@@ -1,9 +1,15 @@
 ﻿using System;
+using Uri = Android.Net.Uri;
 
 namespace AudioBookPlayer.App.ViewModels
 {
     internal sealed class AudioBookViewModel : Java.Lang.Object
     {
+        public string MediaId
+        {
+            get;
+        }
+
         public string Title
         {
             get;
@@ -29,7 +35,7 @@ namespace AudioBookPlayer.App.ViewModels
             get;
         }
 
-        public string MediaId
+        public Uri ImageUri
         {
             get;
         }
@@ -41,7 +47,8 @@ namespace AudioBookPlayer.App.ViewModels
             string description,
             string authors,
             TimeSpan duration,
-            DateTime created)
+            DateTime created,
+            Uri imageUri)
         {
             MediaId = mediaId;
             Title = title;
@@ -49,6 +56,7 @@ namespace AudioBookPlayer.App.ViewModels
             Description = description;
             Duration = duration;
             Authors = authors;
+            ImageUri = imageUri;
         }
     }
 }

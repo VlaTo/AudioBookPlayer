@@ -38,7 +38,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core
             var files = scanner.QueryFiles();
 
             var audioBooks = new List<AudioBook>();
-            var count = (float)files.Length;
+            //var count = (float)files.Length;
 
             //progress.Report(0.0f);
 
@@ -50,6 +50,11 @@ namespace AudioBookPlayer.MediaBrowserService.Core
                 ProcessAudioFile(scanner, audioBooks, audioFile, mimeType);
 
                 //progress.Report((index + 1) / count);
+            }
+
+            for (var index = 0; index < audioBooks.Count; index++)
+            {
+                UpdateVersion(audioBooks[index]);
             }
 
             //progress.Report(1.0f);
@@ -111,7 +116,8 @@ namespace AudioBookPlayer.MediaBrowserService.Core
 
             audioBook = new AudioBook
             {
-                BookId = audioFile.Id,
+                Id = null,
+                MediaId = audioFile.Id,
                 Title = audioFile.Album,
                 Duration = TimeSpan.Zero
             };
@@ -134,13 +140,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core
 
                     case WellKnownMediaTags.Cover:
                     {
-                        foreach (var item in tags)
-                        {
-                            if (item is StreamValue _)
-                            {
-                                // streamItem.Stream
-                            }
-                        }
+                        UpdateBookImages(audioBook, tags);
 
                         break;
                     }
@@ -235,9 +235,82 @@ namespace AudioBookPlayer.MediaBrowserService.Core
                 : String.Empty;
         }
 
+        private static void UpdateBookImages(AudioBook audioBook, TagsCollection tags)
+        {
+            var images = new List<IAudioBookImage>();
+
+            foreach (var item in tags)
+            {
+                if (item is MemoryValue memoryValue)
+                {
+                    images.Add(new InMemoryImage(audioBook, memoryValue.Memory));
+                    continue;
+                }
+
+                // skip non-stream tags
+                ;
+            }
+
+            audioBook.Images = images.AsReadOnly();
+        }
+
         private static Uri GetExternalContentUri() => (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
             ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
             : MediaStore.Audio.Media.ExternalContentUri;
 
+        private static void UpdateVersion(AudioBook audioBook)
+        {
+            unchecked
+            {
+                var hashCode = audioBook.MediaId.GetHashCode();
+                
+                //hashCode = (hashCode * 397) ^ MediaId.GetHashCode();
+                hashCode = (hashCode * 397) ^ (audioBook.Title?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ audioBook.Duration.GetHashCode();
+                hashCode = (hashCode * 397) ^ (audioBook.Description?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ audioBook.Created.GetHashCode();
+                hashCode = (hashCode * 397) ^ GetHashCodeForAuthors(audioBook.Authors);
+                //hashCode = (hashCode * 397) ^ (Sections != null ? Sections.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ GetHashCodeForChapters(audioBook.Chapters);
+                //hashCode = (hashCode * 397) ^ (SourceFiles != null ? SourceFiles.GetHashCode() : 0);
+                //hashCode = (hashCode * 397) ^ (Images != null ? Images.GetHashCode() : 0);
+
+                audioBook.Version = hashCode;
+            }
+        }
+        
+        private static int GetHashCodeForAuthors(IReadOnlyList<AudioBookAuthor> authors)
+        {
+            unchecked
+            {
+                var hashCode = 0;
+
+                for (var index = 0; index < authors.Count; index++)
+                {
+                    hashCode = (hashCode * 397) ^ authors[index].Name.GetHashCode();
+                }
+                
+                return hashCode;
+            }
+        }
+        
+        private static int GetHashCodeForChapters(IReadOnlyList<AudioBookChapter> chapters)
+        {
+            unchecked
+            {
+                var hashCode = 0;
+
+                for (var index = 0; index < chapters.Count; index++)
+                {
+                    var chapter = chapters[index];
+
+                    hashCode = (hashCode * 397) ^ chapter.Offset.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (chapter.Title?.GetHashCode() ?? 0);
+                    hashCode = (hashCode * 397) ^ chapter.Duration.GetHashCode();
+                }
+                
+                return hashCode;
+            }
+        }
     }
 }

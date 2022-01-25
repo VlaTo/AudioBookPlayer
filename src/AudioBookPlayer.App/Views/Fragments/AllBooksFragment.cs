@@ -12,6 +12,10 @@ using AudioBookPlayer.App.Views.Activities;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Android.Content.Res;
+using Android.Graphics;
+using AndroidX.Core.Graphics;
+using AudioBookPlayer.Core;
 using Fragment = AndroidX.Fragment.App.Fragment;
 using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
 
@@ -21,6 +25,7 @@ namespace AudioBookPlayer.App.Views.Fragments
     {
         private ListView? listView;
         private IDisposable? subscription;
+        private BookImageTask<ImageView>? imageTask;
 
         private MainActivity MainActivity => (MainActivity)Activity;
 
@@ -42,12 +47,9 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             base.OnCreate(savedInstanceState);
 
-            // Plural test
-            for (var count = 0; count < 22; count++)
-            {
-                var text = Resources.GetQuantityString(Resource.Plurals.plural_test, count, count);
-                System.Diagnostics.Debug.WriteLine($"[PluralTest] {text}");
-            }
+            imageTask = new BookImageTask<ImageView>(ImageContentService.Instance, new ImageCache(12));
+            imageTask.Start();
+            var _ = imageTask.Looper;
 
             if (ViewModel is { HasBookItems: false } && null != MainActivity.ServiceConnector)
             {
@@ -66,7 +68,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 if (null != listView)
                 {
-                    var adapter = new BooksListViewAdapter(Application.Context)
+                    var adapter = new BooksListViewAdapter(Application.Context, Resources, imageTask)
                     {
                         SortOrderFunc = (x, y) =>
                             String.Compare(x.Title, y.Title, CultureInfo.CurrentUICulture, CompareOptions.StringSort)
@@ -90,9 +92,11 @@ namespace AudioBookPlayer.App.Views.Fragments
         }
 
         //
-        private sealed class BooksListViewAdapter : BaseAdapter<AudioBookViewModel>, IListObserver<AudioBookViewModel>
+        private sealed class BooksListViewAdapter : BaseAdapter<AudioBookViewModel>, IListObserver<AudioBookViewModel>, BookImageTask<ImageView>.IBookImageListener
         {
             private readonly Context context;
+            private readonly Resources resources;
+            private readonly BookImageTask<ImageView> imageTask;
             private readonly LayoutInflater? inflater;
             private readonly List<AudioBookViewModel> list;
             private Func<AudioBookViewModel, AudioBookViewModel, int>? sortOrderFunc;
@@ -122,12 +126,16 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             public override AudioBookViewModel this[int position] => list[position];
 
-            public BooksListViewAdapter(Context context)
+            public BooksListViewAdapter(Context context, Resources resources, BookImageTask<ImageView> imageTask)
             {
                 this.context = context;
+                this.resources = resources;
+                this.imageTask = imageTask;
 
                 list = new List<AudioBookViewModel>();
                 inflater = LayoutInflater.From(Application.Context);
+
+                imageTask.Listener = this;
             }
 
             public override long GetItemId(int position) => position;
@@ -142,6 +150,14 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 var model = list[position];
 
+                if (null != coverImage)
+                {
+                    if (null != model.ImageUri)
+                    {
+                        imageTask.QueueImage(coverImage, model.ImageUri);
+                    }
+                }
+
                 if (null != titleView)
                 {
                     titleView.Text = model.Title;
@@ -154,7 +170,20 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 if (null != descriptionView)
                 {
-                    descriptionView.Text = model.Duration.ToString("g", CultureInfo.CurrentUICulture);
+                    /*var hours = String.Empty;
+                    var value = model.Duration.Hours;
+
+                    if (0 < value)
+                    {
+                        hours = resources.GetQuantityString(Resource.Plurals.duration_hours_plural, value, value) + ' ';
+                    }
+
+                    value = model.Duration.Minutes;
+                    var minutes = resources.GetQuantityString(Resource.Plurals.duration_minutes_plural, value, value);
+
+                    descriptionView.Text = $"{hours}{minutes}";*/
+
+                    descriptionView.Text = model.Duration.ToString(@"h\:mm", CultureInfo.CurrentUICulture);
                 }
 
                 return view;
@@ -227,6 +256,11 @@ namespace AudioBookPlayer.App.Views.Fragments
             }
 
             #endregion
+
+            void BookImageTask<ImageView>.IBookImageListener.OnImageLoaded(ImageView target, Bitmap? bitmap)
+            {
+                target.SetImageBitmap(bitmap);
+            }
         }
 
         //

@@ -67,13 +67,16 @@
   <ItemGroup>
     <Compile Include="Core\AudioBookViewModelBuilder.cs" />
     <Compile Include="Core\AudioBookDescriptionBuilder.cs" />
+    <Compile Include="Core\BookImageTask.cs" />
     <Compile Include="Core\BookItem.cs" />
     <Compile Include="Core\ConnectExecutor.cs" />
     <Compile Include="Core\Extensions\JavaObjectExtensions.cs" />
     <Compile Include="Core\Extensions\ListExtensions.cs" />
     <Compile Include="Core\Extensions\ObservableListExtensions.cs" />
     <Compile Include="Core\IListObserver.cs" />
+    <Compile Include="Core\ImageCache.cs" />
     <Compile Include="Core\IObservableList.cs" />
+    <Compile Include="Core\LruCache.cs" />
     <Compile Include="Core\MediaBrowserServiceConnector.ControllerCallback.cs" />
     <Compile Include="Core\MediaBrowserServiceConnectionCallback.cs" />
     <Compile Include="Core\Extensions\TaskExtensions.cs" />
@@ -227,9 +230,7 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\splash_logo.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <AndroidResource Include="Resources\xml\fragment_settings.xml">
       <SubType>Designer</SubType>

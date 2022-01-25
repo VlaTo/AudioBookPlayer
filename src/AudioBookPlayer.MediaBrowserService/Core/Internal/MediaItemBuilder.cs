@@ -1,13 +1,13 @@
 ﻿using Android.Media.Browse;
+using Android.Net;
 using Android.OS;
 using Android.Support.V4.Media;
 using AudioBookPlayer.Domain;
 using AudioBookPlayer.Domain.Models;
+using AudioBookPlayer.MediaBrowserService.Core.Extensions;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Android.Net;
-using AudioBookPlayer.MediaBrowserService.Core.Extensions;
 
 namespace AudioBookPlayer.MediaBrowserService.Core.Internal
 {
@@ -46,15 +46,17 @@ namespace AudioBookPlayer.MediaBrowserService.Core.Internal
         private static string[] GetAuthors(IReadOnlyList<AudioBookAuthor> authors) =>
             authors.Select(x => x.Name).ToArray();
 
-        private static bool TryGetIconUri(IReadOnlyList<AudioBookImage> images, out Uri iconUri)
+        private static bool TryGetIconUri(IReadOnlyList<IAudioBookImage> images, out Uri iconUri)
         {
             if (0 < images.Count)
             {
                 var audioBookImage = images[0];
-                
-                iconUri = Uri.Parse(audioBookImage.SourceFile);
 
-                return true;
+                if (audioBookImage is IHasContentUri holder)
+                {
+                    iconUri = Uri.Parse(holder.ContentUri);
+                    return true;
+                }
             }
 
             iconUri = null;

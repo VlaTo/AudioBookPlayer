@@ -13,6 +13,13 @@ namespace AudioBookPlayer.Data.Persistence.Entities
             set;
         }
 
+        [BsonField("bid")]
+        public long BookId
+        {
+            get;
+            set;
+        }
+
         [BsonField("title")]
         public string Title
         {
@@ -41,6 +48,13 @@ namespace AudioBookPlayer.Data.Persistence.Entities
             set;
         }
 
+        [BsonField("version")]
+        public int Version
+        {
+            get;
+            set;
+        }
+
         [BsonField("authors")]
         public Author[] Authors
         {
@@ -55,7 +69,7 @@ namespace AudioBookPlayer.Data.Persistence.Entities
             set;
         }
 
-        [BsonField("sections")]
+        [BsonField("images")]
         public string[] Images
         {
             get;
