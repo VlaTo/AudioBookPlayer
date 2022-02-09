@@ -1,27 +1,34 @@
 ﻿#nullable enable
 
+using System.Collections.Generic;
 using Android.App;
 using Android.OS;
+using Android.Support.V4.Media.Session;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.View;
 using AndroidX.RecyclerView.Widget;
+using AudioBookPlayer.App.Core.Extensions;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Shape;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
+    // https://medium.com/snapp-mobile/draggable-bottom-navigation-drawer-c56aba594f1e
+    // https://habr.com/ru/post/567828/
     public class ChapterSelectionFragment : BottomSheetDialogFragment
     {
+        private const string QueueArgumentName = "Queue.Items";
+
         private RecyclerView? recyclerView;
 
-        public int Count => Arguments?.GetInt("Chapters.Count", 0) ?? 0;
+        public IList<MediaSessionCompat.QueueItem>? Queue => Arguments?.GetQueue(QueueArgumentName);
 
-        public static ChapterSelectionFragment NewInstance(int count)
+        public static ChapterSelectionFragment NewInstance(IList<MediaSessionCompat.QueueItem> queue)
         {
             var bundle = new Bundle();
-
-            bundle.PutInt("Chapters.Count", count);
+            
+            bundle.PutQueue(QueueArgumentName, queue);
 
             return new ChapterSelectionFragment
             {
@@ -68,7 +75,7 @@ namespace AudioBookPlayer.App.Views.Fragments
             if (null != recyclerView)
             {
                 recyclerView.SetLayoutManager(new LinearLayoutManager(Application.Context));
-                recyclerView.SetAdapter(new ItemAdapter(10));
+                recyclerView.SetAdapter(new ItemAdapter(Queue));
             }
         }
 
@@ -77,15 +84,52 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             public override void OnSlide(View bottomSheet, float newState)
             {
+                //System.Diagnostics.Debug.WriteLine($"[MyBottomSheetBehaviorCallback.OnSlide] newState: {newState}");
             }
 
             public override void OnStateChanged(View bottomSheet, int newState)
             {
-                if (BottomSheetBehavior.StateExpanded == newState)
+                switch (newState)
                 {
-                    //In the EXPANDED STATE apply a new MaterialShapeDrawable with rounded cornes
-                    MaterialShapeDrawable newMaterialShapeDrawable = CreateMaterialShapeDrawable(bottomSheet);
-                    ViewCompat.SetBackground(bottomSheet, newMaterialShapeDrawable);
+                    case BottomSheetBehavior.StateDragging:
+                    {
+                        // System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateDragging");
+                        break;
+                    }
+
+                    case BottomSheetBehavior.StateSettling:
+                    {
+                        // System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateSettling");
+                        break;
+                    }
+
+                    case BottomSheetBehavior.StateExpanded:
+                    {
+                        System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateExpanded");
+                        //In the EXPANDED STATE apply a new MaterialShapeDrawable with rounded cornes
+                        var newMaterialShapeDrawable = CreateMaterialShapeDrawable(bottomSheet);
+                        ViewCompat.SetBackground(bottomSheet, newMaterialShapeDrawable);
+
+                        break;
+                    }
+
+                    case BottomSheetBehavior.StateCollapsed:
+                    {
+                        System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateCollapsed");
+                        break;
+                    }
+
+                    case BottomSheetBehavior.StateHidden:
+                    {
+                        System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateHidden");
+                        break;
+                    }
+
+                    case BottomSheetBehavior.StateHalfExpanded:
+                    {
+                        System.Diagnostics.Debug.WriteLine("[MyBottomSheetBehaviorCallback.OnStateChanged] State = BottomSheetBehavior.StateHalfExpanded");
+                        break;
+                    }
                 }
             }
 
@@ -116,39 +160,48 @@ namespace AudioBookPlayer.App.Views.Fragments
             }
         }
 
-        //
+        /// <summary>
+        /// 
+        /// </summary>
         private sealed class ViewHolder : RecyclerView.ViewHolder
         {
-            public TextView? TextView
-            {
-                get;
-            }
+            private readonly TextView? textView;
 
             public ViewHolder(View? itemView)
                 : base(itemView)
             {
-                TextView = itemView?.FindViewById<TextView>(Resource.Id.text);
+                textView = itemView?.FindViewById<TextView>(Resource.Id.text);
+            }
+
+            public void SetTitle(string value)
+            {
+                if (null != textView)
+                {
+                    textView.Text = value;
+                }
             }
         }
 
-//
+        /// <summary>
+        /// 
+        /// </summary>
         private sealed class ItemAdapter : RecyclerView.Adapter
         {
-            public override int ItemCount
-            {
-                get;
-            }
+            private readonly IList<MediaSessionCompat.QueueItem>? queue;
 
-            public ItemAdapter(int itemCount)
+            public override int ItemCount => (queue?.Count ?? 0) + 10;
+
+            public ItemAdapter(IList<MediaSessionCompat.QueueItem>? queue)
             {
-                ItemCount = itemCount;
+                this.queue = queue;
             }
 
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
-                if (holder is ViewHolder textView)
+                if (null != queue && holder is ViewHolder textView)
                 {
-                    textView.TextView.Text = $"Item {position}";
+                    var index = position % queue.Count;
+                    textView.SetTitle(queue[index].Description.Title);
                 }
             }
 

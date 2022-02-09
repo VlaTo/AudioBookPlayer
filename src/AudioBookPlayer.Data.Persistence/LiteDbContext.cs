@@ -36,6 +36,8 @@ namespace AudioBookPlayer.Data.Persistence
 
         public ILiteCollection<Book> Books() => database.GetCollection<Book>();
 
+        public ILiteCollection<History> History() => database.GetCollection<History>();
+
         public bool BeginTransaction() => database.BeginTrans();
 
         public void Rollback() => database.Rollback();

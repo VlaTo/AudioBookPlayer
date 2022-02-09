@@ -6,18 +6,19 @@
     android:layout_height="wrap_content">
 
     <ImageView
-		android:id="@+id/book_item_cover"
-		android:src="@drawable/ic_no_book"
-        android:layout_width="48dp"
-        android:layout_height="76dp"
+        android:id="@+id/book_item_cover"
+        android:src="@drawable/ic_no_book"
+        android:layout_width="60dp"
+        android:layout_height="82dp"
         android:layout_alignParentLeft="true"
-		android:layout_alignParentTop="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="description" 
     />
 
     <TextView
 	    android:id="@+id/book_item_title"
 	    style="@style/BookItemPrimaryTextView"
-	    android:textSize="14dip"
+	    android:textSize="16dip"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentRight="true"
@@ -27,8 +28,8 @@
     />
 
     <TextView
-	    android:id="@+id/book_item_subtitle"
-	    android:textSize="14dip"
+	    android:id="@+id/book_item_author"
+	    android:textSize="16dip"
 	    android:textColor="@android:color/darker_gray"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
@@ -36,18 +37,42 @@
 	    android:layout_toRightOf="@id/book_item_cover"
 	    android:layout_below="@id/book_item_title"
 	    android:layout_marginLeft="8dp"
+	    android:layout_marginTop="2dp"
     />
 
-    <TextView
-	    android:id="@+id/book_item_description"
-	    android:textSize="14dip"
-	    android:textColor="@android:color/darker_gray"
+    <LinearLayout
+	    android:id="@+id/book_item_duration"
+	    android:orientation="horizontal"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentRight="true"
 	    android:layout_toRightOf="@id/book_item_cover"
-	    android:layout_below="@id/book_item_subtitle"
-	    android:layout_marginLeft="8dp"
-    />
+	    android:layout_below="@id/book_item_author">
+
+	    <ImageView
+		    android:id="@+id/book_item_duration_icon"
+		    android:src="@drawable/ic_time"
+		    android:layout_width="16dp"
+		    android:layout_height="16dp"
+		    android:layout_alignParentLeft="true"
+		    android:layout_centerHorizontal="true"
+		    android:contentDescription="description" 
+		    android:layout_marginLeft="8dp"
+		    android:layout_marginTop="3dp"
+	    />
+
+	    <TextView
+		    android:id="@+id/book_item_duration_time"
+		    android:textSize="16dip"
+		    android:textColor="@android:color/darker_gray"
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_alignParentRight="true"
+		    android:layout_toRightOf="@id/book_item_duration_icon"
+		    android:layout_centerHorizontal="true"
+		    android:layout_marginLeft="4dp"
+	    />
+
+    </LinearLayout>
 
 </RelativeLayout>

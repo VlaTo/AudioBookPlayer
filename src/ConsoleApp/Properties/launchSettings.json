@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "\"D:\\Temp\\AudioBooks\\Сергей Лукьяненко\\Звездная тень\\01 Звездная тень, Part 1.m4b\""
+    }
+  }
+}

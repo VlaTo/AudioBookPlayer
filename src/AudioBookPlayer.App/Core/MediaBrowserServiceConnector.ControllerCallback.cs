@@ -29,7 +29,7 @@ namespace AudioBookPlayer.App.Core
                 set;
             }
 
-            public Action<ICharSequence> OnQueueTitleChangedImpl
+            public Action<string> OnQueueTitleChangedImpl
             {
                 get;
                 set;
@@ -52,7 +52,7 @@ namespace AudioBookPlayer.App.Core
                 OnPlaybackStateChangedImpl = Stub.Nop<PlaybackStateCompat>();
                 OnMetadataChangedImpl = Stub.Nop<MediaMetadataCompat>();
                 OnQueueChangedImpl = Stub.Nop<IList<MediaSessionCompat.QueueItem>>();
-                OnQueueTitleChangedImpl = Stub.Nop<ICharSequence>();
+                OnQueueTitleChangedImpl = Stub.Nop<string>();
                 OnAudioInfoChangedImpl = Stub.Nop<MediaControllerCompat.PlaybackInfo>();
                 OnExtrasChangedImpl = Stub.Nop<Bundle>();
             }
@@ -72,7 +72,7 @@ namespace AudioBookPlayer.App.Core
 
             public override void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue) => OnQueueChangedImpl.Invoke(queue);
 
-            public override void OnQueueTitleChanged(ICharSequence title) => OnQueueTitleChangedImpl.Invoke(title);
+            public override void OnQueueTitleChanged(ICharSequence title) => OnQueueTitleChangedImpl.Invoke(title.ToString());
 
             public override void OnRepeatModeChanged(int repeatMode)
             {

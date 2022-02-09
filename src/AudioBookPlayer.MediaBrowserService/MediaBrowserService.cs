@@ -17,12 +17,12 @@ using AudioBookPlayer.Domain.Providers;
 using AudioBookPlayer.Domain.Services;
 using AudioBookPlayer.MediaBrowserService.Core;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
-using Java.Lang;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using Object = Java.Lang.Object;
-using String = System.String;
+using System.Text;
+using AudioBookPlayer.MediaBrowserService.Core.Extensions;
 
 namespace AudioBookPlayer.MediaBrowserService
 {
@@ -32,23 +32,27 @@ namespace AudioBookPlayer.MediaBrowserService
     {
         private const string SupportSearch = "android.media.browse.SEARCH_SUPPORTED";
         private const string LibraryUpdateAction = "com.libraprogramming.audioplayer.library.update";
+        private const string LibraryGetHistoryAction = "com.libraprogramming.audioplayer.library.get_history";
         private const int UpdateStepCollecting = 1;
         private const int UpdateStepProcessing = 2;
         private const string ExtraRecent = "__RECENT__";
 
-        private LiteDbContext? dbContext;
+        //private LiteDbContext? dbContext;
         private PackageValidator? packageValidator;
         private Callback? mediaSessionCallback;
         private BooksService? booksService;
         private ImageService? imageService;
         private MediaSessionCompat? mediaSession;
+        private PlaybackStateCompat.Builder? playbackStateBuilder;
+        private Playback? playback;
+        private PlaybackQueue? playbackQueue;
 
         public override void OnCreate()
         {
             base.OnCreate();
 
-            dbContext = LiteDbContext.GetInstance(new PathProvider());
-            imageService = new ImageService(ImageContentService.Instance);
+            var dbContext = LiteDbContext.GetInstance(new PathProvider());
+            imageService = new ImageService(ImageContentService.GetInstance());
             booksService = new BooksService(dbContext, imageService);
 
             var componentName = new ComponentName(Application.Context, Class);
@@ -83,11 +87,30 @@ namespace AudioBookPlayer.MediaBrowserService
             // mediaSession.SetSessionActivity(PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent));
 
             SessionToken = mediaSession.SessionToken;
+
+            var playbackCallback = new PlaybackCallback
+            {
+                OnStateChanged = DoPlaybackStateChanged,
+                OnPositionChanged = DoPlaybackPositionChanged
+            };
+
+            playbackStateBuilder = new PlaybackStateCompat.Builder();
+            playback = new Playback(this, mediaSession, playbackCallback);
+            playbackQueue = new PlaybackQueue();
+
+            mediaSession.Active = true;
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
+
+            if (null != mediaSession)
+            {
+                mediaSession.Active = false;
+                mediaSession.Dispose();
+                mediaSession = null;
+            }
         }
 
         public override StartCommandResult OnStartCommand(Intent? intent, StartCommandFlags flags, int startId)
@@ -145,7 +168,7 @@ namespace AudioBookPlayer.MediaBrowserService
         {
             if (String.Equals(IMediaLibraryActions.Update, action))
             {
-                if (null == dbContext)
+                if (null == booksService)
                 {
                     var error = new Bundle(extras);
 
@@ -166,23 +189,86 @@ namespace AudioBookPlayer.MediaBrowserService
                 return;
             }
 
+            if (String.Equals(IMediaLibraryActions.GetHistory, action))
+            {
+                if (null == booksService)
+                {
+                    var error = new Bundle(extras);
+
+                    error.PutString("Error.Message", "");
+                    result.SendError(error);
+
+                    return;
+                }
+
+                //booksService.QueryHistory()
+
+                return;
+            }
+
             base.OnCustomAction(action, extras, result);
         }
 
-        private void DoPrepareFromMediaId(string mediaId, Bundle extra)
+        private void DoPrepareFromMediaId(string query, Bundle extra)
         {
             if (null == mediaSession)
             {
                 return;
             }
 
-            mediaSession.Active = true;
+            if (false == MediaID.TryParse(query, out var mediaId))
+            {
+                return;
+            }
 
-            var temp = new PlaybackStateCompat.Builder();
-            temp.SetState((int)PlaybackStateCode.Stopped, 0L, 1.0f);
+            var audioBook = booksService?.GetBook(mediaId.BookId);
 
-            mediaSession.SetPlaybackState(temp.Build());
-            mediaSession.SetQueueTitle("Lorem Ipsum");
+            if (null != audioBook && null != playbackQueue)
+            {
+                var queue = QueueHelper.BuildQueue(audioBook);
+
+                playbackQueue.SetQueue(queue);
+
+                if (null != mediaSession)
+                {
+                    mediaSession.SetQueueTitle(audioBook.Title);
+                    mediaSession.SetQueue(playbackQueue.AsQueue());
+
+                    UpdateSessionMetadata(audioBook);
+
+                    //mediaSession.SetPlaybackState(temp.Build());
+                }
+
+                var metadata = new MediaMetadataCompat.Builder();
+
+                if (0 < audioBook.Authors.Count)
+                {
+                    var delimiter = CultureInfo.CurrentUICulture.TextInfo.ListSeparator;
+                    var text = new StringBuilder();
+
+                    for (var index = 0; index < audioBook.Authors.Count; index++)
+                    {
+                        var author = audioBook.Authors[index];
+
+                        if (0 < index)
+                        {
+                            text.Append(delimiter);
+                        }
+
+                        text.Append(author.Name);
+                    }
+
+                    metadata.PutString(MediaMetadataCompat.MetadataKeyAlbumArtist, text.ToString());
+                    metadata.PutString(MediaMetadataCompat.MetadataKeyArtist, text.ToString());
+                }
+
+                if (0 < audioBook.Images.Count && audioBook.Images[0] is IHasContentUri provider)
+                {
+                    metadata.PutString(MediaMetadataCompat.MetadataKeyAlbumArtUri, provider.ContentUri);
+                }
+
+                mediaSession?.SetMetadata(metadata.Build());
+            }
         }
 
         private void ProvideExtraRecent(Result result)
@@ -231,11 +317,108 @@ namespace AudioBookPlayer.MediaBrowserService
             result.SendResult(list);
         }
 
+        private void UpdateSessionMetadata(AudioBook audioBook)
+        {
+            if (null == playbackQueue || null == mediaSession)
+            {
+                return;
+            }
+
+            var metadata = BuildAudioBookMetadata(audioBook);
+
+            mediaSession.SetMetadata(metadata);
+
+            if (null != playbackStateBuilder && null != playbackQueue)
+            {
+                var extra = BuildMediaFragmentBundle(playbackQueue.Current);
+                playbackStateBuilder.SetExtras(extra);
+                //UpdatePlaybackState(-1, null);
+            }
+
+            if (null == metadata.Description.IconBitmap && null != metadata.Description.IconUri)
+            {
+                var artUri = metadata.Description.IconUri.ToString();
+
+                if (false == String.IsNullOrEmpty(artUri))
+                {
+                    /*AlbumArtCache.Instance.Fetch(coverService, artUri, new FetchListener
+                    {
+                        OnFetched = (uri, bitmap, icon) =>
+                        {
+                            var metadataBuilder = new MediaMetadataCompat.Builder(metadata);
+
+                            metadataBuilder.PutBitmap(MediaMetadataCompat.MetadataKeyAlbumArt, bitmap);
+                            metadataBuilder.PutBitmap(MediaMetadataCompat.MetadataKeyDisplayIcon, icon);
+
+                            mediaSession.SetMetadata(metadataBuilder.Build());
+                        }
+                    });*/
+                }
+            }
+        }
+
+        private static MediaMetadataCompat BuildAudioBookMetadata(AudioBook audioBook)
+        {
+            var mediaMetadata = new MediaMetadataCompat.Builder();
+            var mediaId = new MediaID(audioBook.MediaId);
+
+            mediaMetadata.PutString(MediaMetadataCompat.MetadataKeyMediaId, mediaId.ToString());
+            mediaMetadata.PutString(MediaMetadataCompat.MetadataKeyTitle, audioBook.Title);
+            mediaMetadata.PutAuthors(audioBook.Authors);
+            mediaMetadata.PutLong(MediaMetadataCompat.MetadataKeyDuration, (long)audioBook.Duration.TotalMilliseconds);
+
+            for (var index = 0; index < audioBook.Images.Count; index++)
+            {
+                var audioBookImage = audioBook.Images[index];
+
+                if (audioBookImage is IHasContentUri hcu)
+                {
+                    mediaMetadata.PutString(MediaMetadataCompat.MetadataKeyAlbumArtUri, hcu.ContentUri);
+                    break;
+                }
+            }
+
+            return mediaMetadata.Build();
+        }
+        
+        private static Bundle BuildMediaFragmentBundle(MediaSessionCompat.QueueItem queueItem)
+        {
+            var source = queueItem.Description.Extras;
+            var start = source.GetLong("Chapter.Start");
+            var duration = source.GetLong("Chapter.Duration");
+
+            var bundle = new Bundle();
+
+            bundle.PutLong("Queue.ID", queueItem.QueueId);
+            bundle.PutLong("Chapter.Start", start);
+            bundle.PutLong("Chapter.Duration", duration);
+
+            return bundle;
+        }
+
+        #region IPlaybackCallback callbacks
+
+        private void DoPlaybackPositionChanged()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DoPlaybackStateChanged()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         public interface IMediaLibraryActions
         {
             public const string Update = LibraryUpdateAction;
+            public const string GetHistory = LibraryGetHistoryAction;
         }
 
+        /// <summary>
+        /// IUpdateLibrarySteps interface.
+        /// </summary>
         public interface IUpdateLibrarySteps
         {
             public const int Scanning = UpdateStepCollecting;
@@ -243,6 +426,9 @@ namespace AudioBookPlayer.MediaBrowserService
             public const int Processing = UpdateStepProcessing;
         }
 
+        /// <summary>
+        /// PathProvider class.
+        /// </summary>
         private sealed class PathProvider : IPathProvider
         {
             public string GetPath(string filename)
@@ -255,7 +441,7 @@ namespace AudioBookPlayer.MediaBrowserService
         /// <summary>
         /// UpdateLibraryRunnable class.
         /// </summary>
-        private sealed class UpdateLibraryRunnable : Object, IRunnable
+        private sealed class UpdateLibraryRunnable : Java.Lang.Object, Java.Lang.IRunnable
         {
             private readonly MediaBrowserService service;
             private readonly IBooksProvider booksProvider;
@@ -402,9 +588,10 @@ namespace AudioBookPlayer.MediaBrowserService
                 return -1;
             }
 
-            private static bool HasChanges(AudioBook sourceBook, AudioBook actualBook) =>
-                sourceBook.Version != actualBook.Version;
+            private static bool HasChanges(AudioBook sourceBook, AudioBook actualBook) => sourceBook.Hash != actualBook.Hash;
 
+            //
+            // enum ChangeAction
             private enum ChangeAction
             {
                 Add,
@@ -412,6 +599,8 @@ namespace AudioBookPlayer.MediaBrowserService
                 Update
             }
 
+            //
+            // ChangeInfo
             private readonly struct ChangeInfo
             {
                 public ChangeAction Action
@@ -437,5 +626,34 @@ namespace AudioBookPlayer.MediaBrowserService
                 }
             }
         }
+        
+        /// <summary>
+        /// PlaybackCallback class.
+        /// </summary>
+        private sealed class PlaybackCallback : Playback.IPlaybackCallback
+        {
+            public Action OnStateChanged
+            {
+                get;
+                set;
+            }
+
+            public Action OnPositionChanged
+            {
+                get;
+                set;
+            }
+
+            public PlaybackCallback()
+            {
+                OnStateChanged = Stub.Nop();
+                OnPositionChanged = Stub.Nop();
+            }
+
+            void Playback.IPlaybackCallback.StateChanged() => OnStateChanged.Invoke();
+
+            void Playback.IPlaybackCallback.PositionChanged() => OnPositionChanged.Invoke();
+        }
+
     }
 }

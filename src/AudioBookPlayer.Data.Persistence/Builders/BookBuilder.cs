@@ -25,7 +25,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
                 Description = source.Description,
                 Duration = source.Duration,
                 Created = source.Created,
-                Version = source.Version
+                Hash = source.Hash
             };
 
             MapAuthors(book, source.Authors);
@@ -72,7 +72,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
             book.Authors = bookAuthors;
         }
 
-        private void MapChapters(Book book, IReadOnlyList<AudioBookSection> sections)
+        private static void MapChapters(Book book, IReadOnlyList<AudioBookSection> sections)
         {
             book.Sections = new Section[sections.Count];
             var order = 0;
@@ -83,7 +83,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
                 var section = new Section
                 {
                     Title = audioBookSection.Title,
-                    //ContentUri = audioBookSection.
+                    ContentUri = audioBookSection.SourceFileUri,
                     Chapters = new Chapter[audioBookSection.Chapters.Count]
                 };
 

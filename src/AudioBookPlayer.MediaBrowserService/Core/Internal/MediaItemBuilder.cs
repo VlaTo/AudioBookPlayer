@@ -34,6 +34,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core.Internal
             extra.PutStringArray("Book.Authors", GetAuthors(audioBook.Authors));
             extra.PutDouble("Book.Duration", audioBook.Duration.TotalMilliseconds);
             extra.PutLong("Book.Created", audioBook.Created.ToBinary());
+            extra.PutLong("Book.RecentActionTime", audioBook.Created.ToBinary());
 
             builder.SetExtras(extra);
 

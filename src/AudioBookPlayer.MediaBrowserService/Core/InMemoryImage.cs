@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using AudioBookPlayer.Domain.Models;
+using MemoryStream = LibraProgramming.Memory.MemoryStream;
 
-namespace AudioBookPlayer.Domain.Models
+namespace AudioBookPlayer.MediaBrowserService.Core
 {
     public sealed class InMemoryImage : IAudioBookImage
     {
@@ -20,8 +22,7 @@ namespace AudioBookPlayer.Domain.Models
 
         public Stream GetImageStream()
         {
-            var bytes = memory.ToArray();
-            return new MemoryStream(bytes);
+            return MemoryStream.Create(memory, true);
         }
     }
 }

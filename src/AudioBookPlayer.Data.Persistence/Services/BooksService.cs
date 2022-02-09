@@ -1,4 +1,5 @@
 ﻿using AudioBookPlayer.Data.Persistence.Builders;
+using AudioBookPlayer.Data.Persistence.Entities;
 using AudioBookPlayer.Domain.Models;
 using AudioBookPlayer.Domain.Services;
 using System.Collections.Generic;
@@ -19,11 +20,11 @@ namespace AudioBookPlayer.Data.Persistence.Services
 
         public IReadOnlyList<AudioBook> QueryBooks()
         {
+            var builder = new AudioBookBuilder(imageService);
             var books = new List<AudioBook>();
 
             using (var scope = new UnitOfWork(context))
             {
-                var builder = new AudioBookBuilder(imageService);
                 var source = scope.Books.All();
 
                 foreach (var book in source)
@@ -34,6 +35,21 @@ namespace AudioBookPlayer.Data.Persistence.Services
             }
 
             return books.AsReadOnly();
+        }
+
+        public AudioBook GetBook(long bookId)
+        {
+            Book book;
+
+            using (var scope = new UnitOfWork(context))
+            {
+                book = scope.Books.Get(bookId);
+            }
+
+            var builder = new AudioBookBuilder(imageService);
+            var audioBook = builder.CreateAudioBook(book);
+
+            return audioBook;
         }
 
         public void SaveBook(AudioBook audioBook)
@@ -49,13 +65,13 @@ namespace AudioBookPlayer.Data.Persistence.Services
             }
         }
 
-        public bool UpdateBook(long id, AudioBook audioBook)
+        public bool UpdateBook(long bookId, AudioBook audioBook)
         {
             var builder = new BookBuilder(imageService);
 
             using (var scope = new UnitOfWork(context))
             {
-                var source = scope.Books.Find(x => x.Id == id).FirstOrDefault();
+                var source = scope.Books.Find(x => x.Id == bookId).FirstOrDefault();
 
                 if (null != source)
                 {
@@ -86,6 +102,28 @@ namespace AudioBookPlayer.Data.Persistence.Services
             }
 
             return false;
+        }
+
+        public IReadOnlyList<HistoryItem> QueryHistory(long bookId)
+        {
+            var builder = new HistoryItemBuilder();
+            var items = new List<HistoryItem>();
+
+            using (var scope = new UnitOfWork(context))
+            {
+                var history = scope.History.Get(bookId);
+
+                if (null != history)
+                {
+                    foreach (var entry in history.Entries)
+                    {
+                        var item = builder.CreateHistoryItem(entry);
+                        items.Add(item);
+                    }
+                }
+            }
+
+            return items.AsReadOnly();
         }
     }
 }

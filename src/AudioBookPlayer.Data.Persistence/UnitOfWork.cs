@@ -13,11 +13,17 @@ namespace AudioBookPlayer.Data.Persistence
             get;
         }
 
+        public IHistoryRepository History
+        {
+            get;
+        }
+
         public UnitOfWork(LiteDbContext context, bool useTransaction = false)
         {
             this.context = context;
 
             Books = new BooksRepository(context);
+            History = new HistoryRepository(context);
 
             if (useTransaction)
             {

@@ -48,8 +48,8 @@ namespace AudioBookPlayer.Data.Persistence.Entities
             set;
         }
 
-        [BsonField("version")]
-        public int Version
+        [BsonField("hash")]
+        public int Hash
         {
             get;
             set;

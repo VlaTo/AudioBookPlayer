@@ -1,7 +1,9 @@
-﻿using AudioBookPlayer.Domain.Services;
-using System.IO;
+﻿using System.IO;
+using AudioBookPlayer.Domain;
+using AudioBookPlayer.Domain.Models;
+using AudioBookPlayer.Domain.Services;
 
-namespace AudioBookPlayer.Domain.Models
+namespace AudioBookPlayer.Data.Persistence
 {
     public sealed class ContentProviderImage : IAudioBookImage, IHasContentUri
     {

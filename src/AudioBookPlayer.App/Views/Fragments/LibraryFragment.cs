@@ -6,7 +6,6 @@ using Android.OS;
 using Android.Support.V4.Media;
 using Android.Views;
 using Android.Widget;
-using AndroidX.Annotations;
 using AndroidX.Fragment.App;
 using AndroidX.ViewPager2.Adapter;
 using AndroidX.ViewPager2.Widget;
@@ -14,14 +13,11 @@ using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Views.Activities;
 using AudioBookPlayer.Domain;
 using Google.Android.Material.FloatingActionButton;
-using Google.Android.Material.ProgressIndicator;
 using Google.Android.Material.Tabs;
-using Java.Util;
 using Java.Util.Concurrent;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using AndroidX.ConstraintLayout.Widget;
 using PermissionChecker = AudioBookPlayer.Core.PermissionChecker;
 
 namespace AudioBookPlayer.App.Views.Fragments
@@ -32,7 +28,7 @@ namespace AudioBookPlayer.App.Views.Fragments
         MediaBrowserServiceConnector.IAudioBooksCallback,
         MediaBrowserServiceConnector.IUpdateCallback
     {
-        private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
+        //private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
 
         private FloatingActionButton? fab;
         private ViewPager2? viewPager;
@@ -44,7 +40,7 @@ namespace AudioBookPlayer.App.Views.Fragments
         // private TextView? busyIndicatorText;
         private IDisposable? fabClickSubscription;
         private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
-        private WaitIndicator? indicator;
+        //private WaitIndicator? indicator;
         //private Timer? preloaderTimer;
 
         internal MainActivity MainActivity => (MainActivity)Activity;
@@ -64,13 +60,18 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             base.OnCreate(savedInstanceState);
 
-            indicator = new WaitIndicator(Activity);
+            //indicator = new WaitIndicator(Activity);
             HasOptionsMenu = true;
+
+            /*var loader = BookImageTask<ImageView>()
+
+            loader.Start();
+            var _ = loader.Looper;*/
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            var old = base.OnCreateView(inflater, container, savedInstanceState);
+            //var old = base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.fragment_library, container, false);
 
             if (null != view)
@@ -81,15 +82,14 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 //overlayLayout = view.FindViewById<FrameLayout>(Resource.Id.overlay_layout);
 
-                if (null != indicator)
+                /*if (null != indicator)
                 {
                     indicator.ParseLayout(view);
-                }
+                }*/
 
                 if (null != viewPager)
                 {
                     viewPager.Adapter = new ViewsAdapter(this);
-                    // viewPager.SetPageTransformer(new ZoomOutPageTransformer());
                 }
 
                 /*if (null != overlayLayout)
@@ -105,7 +105,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
                 if (null != fab)
                 {
-                    fabClickSubscription = System.Reactive.Linq.Observable
+                    fabClickSubscription = Observable
                         .FromEventPattern(
                             handler => fab.Click += handler,
                             handler => fab.Click -= handler)
@@ -123,7 +123,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             MainActivity.SupportActionBar.SetTitle(Resource.String.title_library);
 
-            return view ?? old;
+            return view; //?? old;
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
@@ -176,7 +176,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         private void DoRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
-            indicator?.Show();
+            //indicator?.Show();
             browserService?.UpdateLibrary(this);
         }
 
@@ -199,17 +199,17 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
         {
-            indicator?.Hide();
+            /*indicator?.Hide();
 
             for (var index = 0; index < list.Count; index++)
             {
                 var book = list[index];
-            }
+            }*/
         }
 
         void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)
         {
-            indicator?.Hide();
+            //indicator?.Hide();
         }
 
         #endregion
@@ -238,7 +238,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateProgress(int step, float progress)
         {
-            var textId = Resource.String.library_update_collecting;
+            /*var textId = Resource.String.library_update_collecting;
 
             switch (step)
             {
@@ -259,7 +259,7 @@ namespace AudioBookPlayer.App.Views.Fragments
             {
                 var text = GetString(textId, progress * 100.0f);
                 indicator?.Show(text);
-            });
+            });*/
         }
 
         void MediaBrowserServiceConnector.IUpdateCallback.OnUpdateResult()
@@ -309,77 +309,6 @@ namespace AudioBookPlayer.App.Views.Fragments
             }
 
             public override Fragment CreateFragment(int index) => creators[index].Invoke();
-        }
-
-        /// <summary>
-        /// ZoomOutPageTransformer
-        /// </summary>
-        [RequiresApi(Api = 21)]
-        private sealed class ZoomOutPageTransformer : Java.Lang.Object, ViewPager2.IPageTransformer
-        {
-            private const float MIN_SCALE = 0.85f;
-            private const float MIN_ALPHA = 0.5f;
-
-            public void TransformPage(View view, float position)
-            {
-                var pageWidth = view.Width;
-                var pageHeight = view.Height;
-
-                if (position < -1)
-                { // [-Infinity,-1)
-                    // This page is way off-screen to the left.
-                    view.Alpha = 0.0f;
-
-                }
-                else if (position <= 1)
-                { // [-1,1]
-                    // Modify the default slide transition to shrink the page as well
-                    var scaleFactor = MathF.Max(MIN_SCALE, 1 - MathF.Abs(position));
-                    var vertMargin = pageHeight * (1.0f - scaleFactor) / 2.0f;
-                    var horzMargin = pageWidth * (1.0f - scaleFactor) / 2.0f;
-
-                    if (position < 0)
-                    {
-                        view.TranslationX = horzMargin - vertMargin / 2;
-                    }
-                    else
-                    {
-                        view.TranslationX = -horzMargin + vertMargin / 2;
-                    }
-
-                    // Scale the page down (between MIN_SCALE and 1)
-                    view.ScaleX = scaleFactor;
-                    view.ScaleY = scaleFactor;
-
-                    // Fade the page relative to its size.
-                    view.Alpha = (MIN_ALPHA + (scaleFactor - MIN_SCALE) / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
-
-                }
-                else
-                { // (1,+Infinity]
-                    // This page is way off-screen to the right.
-                    view.Alpha = 0.0f;
-                }
-            }
-        }
-
-        //
-        private sealed class PreloaderTimerTask : TimerTask
-        {
-            private readonly Timer timer;
-            private readonly Action action;
-
-            public PreloaderTimerTask(Timer timer, Action action)
-            {
-                this.timer = timer;
-                this.action = action;
-            }
-
-            public override void Run()
-            {
-                timer.Cancel();
-                action.Invoke();
-            }
         }
     }
 }

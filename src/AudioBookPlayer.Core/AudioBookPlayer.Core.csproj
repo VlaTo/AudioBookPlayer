@@ -47,7 +47,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AlbumArt.cs" />
+    <Compile Include="LoadImageFor.cs" />
+    <Compile Include="ImageCache.cs" />
     <Compile Include="ImageContentService.cs" />
+    <Compile Include="LruCache.cs" />
     <Compile Include="PermissionChecker.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

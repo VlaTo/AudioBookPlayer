@@ -40,7 +40,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Media.Quic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioBookPlayer.Core", "src\AudioBookPlayer.Core\AudioBookPlayer.Core.csproj", "{B3C58A08-3E67-4C85-AE9F-15798FBD75B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraProgramming.Memory", "src\LibraProgramming.Memory\LibraProgramming.Memory.csproj", "{B6A7077D-A464-43BF-8143-C76C07EA22E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraProgramming.Memory", "src\LibraProgramming.Memory\LibraProgramming.Memory.csproj", "{B6A7077D-A464-43BF-8143-C76C07EA22E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "src\ConsoleApp\ConsoleApp.csproj", "{8D616355-7174-490F-8AE5-7E9CCC804E7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,6 +84,10 @@ Global
 		{B6A7077D-A464-43BF-8143-C76C07EA22E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6A7077D-A464-43BF-8143-C76C07EA22E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6A7077D-A464-43BF-8143-C76C07EA22E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D616355-7174-490F-8AE5-7E9CCC804E7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D616355-7174-490F-8AE5-7E9CCC804E7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D616355-7174-490F-8AE5-7E9CCC804E7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D616355-7174-490F-8AE5-7E9CCC804E7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -96,8 +96,26 @@ namespace AudioBookPlayer.Domain
                 return true;
             }
 
-            var delimiter = str.IndexOf(ChapterDelimiter);
-            long? chapterId = null;
+            if (str.StartsWith(RootStr))
+            {
+                str = str.Substring(RootStr.Length);
+
+                if (str.StartsWith(BookPrefix))
+                {
+                    if (BookDelimiter == str[BookPrefix.Length])
+                    {
+                        var number = str.Substring(BookPrefix.Length + 1);
+
+                        if (long.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out var bookId))
+                        {
+                            mediaId = new MediaID(bookId);
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            /*var delimiter = str.IndexOf(ChapterDelimiter);
 
             if (-1 < delimiter)
             {
@@ -109,26 +127,7 @@ namespace AudioBookPlayer.Domain
                 }
 
                 str = str.Substring(0, delimiter - 1);
-            }
-
-            if (str.StartsWith(RootStr))
-            {
-                str = str.Substring(RootStr.Length);
-
-                if (str.StartsWith( BookPrefix))
-                {
-                    if (BookDelimiter == str[BookPrefix.Length])
-                    {
-                        var number = str.Substring(BookPrefix.Length + 1);
-
-                        if (long.TryParse(number, NumberStyles.Integer, CultureInfo.InvariantCulture, out var bookId))
-                        {
-                            mediaId = new MediaID(bookId, chapterId);
-                            return true;
-                        }
-                    }
-                }
-            }
+            }*/
 
             mediaId = Empty;
 

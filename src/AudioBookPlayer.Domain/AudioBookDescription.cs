@@ -2,7 +2,7 @@
 
 namespace AudioBookPlayer.Domain
 {
-    public sealed class AudioBookDescription
+    /*public sealed class AudioBookDescription
     {
         public string Title
         {
@@ -25,5 +25,5 @@ namespace AudioBookPlayer.Domain
             Title = title;
             Duration = duration;
         }
-    }
+    }*/
 }

@@ -1,26 +1,19 @@
-﻿#nullable enable
-
-using Android.OS;
+﻿using Android.OS;
 using Android.Views;
-using Android.Widget;
-using System;
-using System.Reactive.Linq;
-using AudioBookPlayer.App.Core;
+using AudioBookPlayer.App.Presenters;
 using AudioBookPlayer.App.Views.Activities;
 using Fragment = AndroidX.Fragment.App.Fragment;
 
+#nullable enable
+
 namespace AudioBookPlayer.App.Views.Fragments
 {
-    public sealed class NowPlayingFragment : Fragment, NowPlayingFragment.IArgumentKeys, MediaBrowserServiceConnector.IConnectCallback
+    // https://stackoverflow.com/questions/41693154/custom-seekbar-thumb-size-color-and-background
+    public sealed class NowPlayingFragment : Fragment, NowPlayingFragment.IArgumentKeys
     {
         public const string BookMediaIdArgumentKey = "Book.MediaID";
 
-        private IDisposable? button1ClickSubscription;
-        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
-
-        public string? MediaId => Arguments?.GetString(IArgumentKeys.BookId);
-
-        public MainActivity MainActivity => (MainActivity)Activity;
+        private NowPlayingPresenter? presenter;
 
         public static NowPlayingFragment NewInstance(string mediaId)
         {
@@ -36,17 +29,20 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         public override void OnCreate(Bundle savedInstanceState)
         {
+            var activity = (MainActivity)Activity;
+
             base.OnCreate(savedInstanceState);
 
-            HasOptionsMenu = true;
-            MainActivity.SupportActionBar.Title = null;
-            MainActivity.ServiceConnector?.Connect(this);
-        }
+            if (null != activity.SupportActionBar)
+            {
+                activity.SupportActionBar.Title = null;
+            }
 
-        public override void OnDestroy()
-        {
-            button1ClickSubscription?.Dispose();
-            base.OnDestroy();
+            HasOptionsMenu = true;
+
+            var mediaId = Arguments?.GetString(IArgumentKeys.BookId);
+
+            presenter = new NowPlayingPresenter(mediaId, activity);
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
@@ -56,40 +52,21 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            var _ = base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.fragment_now_playing, container, false);
 
             if (null != view)
             {
-                var button1 = view.FindViewById<Button>(Resource.Id.button1);
-                var hint = view.FindViewById<TextView>(Resource.Id.hint_text_1);
-
-                // var preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
-                // var flag = preferences.GetBoolean("checkbox_preference", false);
-                // System.Diagnostics.Debug.WriteLine($"[NowPlayingFragment] [OnCreateView] Preference Flag: {flag}");
-
-                if (null != hint)
-                {
-                    hint.Text = MediaId;
-                }
-
-                if (null != button1)
-                {
-                    button1.Text = "bottom";
-
-                    button1ClickSubscription = Observable.FromEventPattern(
-                            handler => button1.Click += handler,
-                            handler => button1.Click -= handler
-                        )
-                        .Subscribe(pattern =>
-                        {
-                            var fragment = ChapterSelectionFragment.NewInstance(10);
-                            fragment.Show(Activity.SupportFragmentManager, "dialog");
-                        });
-                }
+                presenter?.AttachView(view);
+                return view;
             }
 
-            return view;
+            return base.OnCreateView(inflater, container, savedInstanceState);
+        }
+
+        public override void OnDestroyView()
+        {
+            base.OnDestroyView();
+            presenter?.DetachView();
         }
 
         //
@@ -97,25 +74,7 @@ namespace AudioBookPlayer.App.Views.Fragments
         {
             public const string BookId = BookMediaIdArgumentKey;
         }
-
-        #region MediaBrowserServiceConnector.IConnectCallback
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
-        {
-            browserService = service;
-            browserService.PrepareFromMediaId(MediaId, Bundle.Empty);
-        }
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
-        {
-            throw new NotImplementedException();
-        }
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnFailed()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
     }
 }
+
+#nullable restore

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace AudioBookPlayer.Domain.Models
 {
@@ -12,19 +11,19 @@ namespace AudioBookPlayer.Domain.Models
 
         public string Title
         {
-            get;
+            get; 
             set;
         }
 
         public TimeSpan Offset
         {
-            get;
+            get; 
             set;
         }
 
         public TimeSpan Duration
         {
-            get;
+            get; 
             set;
         }
 
@@ -35,17 +34,25 @@ namespace AudioBookPlayer.Domain.Models
             get;
         }
 
-        public IReadOnlyList<AudioBookFragment> Fragments
-        {
-            get;
-            set;
-        }
-
         public AudioBookChapter(AudioBook audioBook, AudioBookSection section)
         {
             AudioBook = audioBook;
             Section = section;
-            Fragments = new ArrayList<AudioBookFragment>();
+            Offset = TimeSpan.Zero;
+            Duration = TimeSpan.Zero;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Offset.GetHashCode();
+
+                hashCode = (hashCode * 397) ^ (Title?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ Duration.GetHashCode();
+
+                return hashCode;
+            }
         }
     }
 }

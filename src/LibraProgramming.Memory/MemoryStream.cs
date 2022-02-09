@@ -37,7 +37,7 @@ namespace LibraProgramming.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ValidateDisposed(bool disposed)
+        internal static void ValidateDisposed(bool disposed)
         {
             if (disposed)
             {
@@ -46,7 +46,7 @@ namespace LibraProgramming.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ValidatePosition(long position, int length)
+        internal static void ValidatePosition(long position, int length)
         {
             if ((ulong)position > (ulong)length)
             {
@@ -55,7 +55,7 @@ namespace LibraProgramming.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ValidateBuffer(byte[] buffer, int offset, int count)
+        internal static void ValidateBuffer(byte[] buffer, int offset, int count)
         {
             if (offset < 0)
             {
@@ -74,7 +74,7 @@ namespace LibraProgramming.Memory
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ValidateCanWrite(bool canWrite)
+        internal static void ValidateCanWrite(bool canWrite)
         {
             if (!canWrite)
             {

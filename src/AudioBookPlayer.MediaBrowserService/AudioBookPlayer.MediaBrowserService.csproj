@@ -48,19 +48,26 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Attributes\ColumnAttribute.cs" />
+    <Compile Include="Core\AudioBookBuilder.cs" />
+    <Compile Include="Core\AudioBookList.cs" />
     <Compile Include="Core\BooksProvider.cs" />
     <Compile Include="Core\Extensions\MediaIDExtensions.cs" />
+    <Compile Include="Core\Extensions\MediaMetadataCompatBuilderExtensions.cs" />
     <Compile Include="Core\Extensions\ReadOnlyListExtensions.cs" />
     <Compile Include="Core\Extensions\TypeExtensions.cs" />
     <Compile Include="Core\ImageService.cs" />
+    <Compile Include="Core\InMemoryImage.cs" />
     <Compile Include="Core\Internal\AudioBookScanner.cs" />
     <Compile Include="Core\Internal\MediaItemBuilder.cs" />
     <Compile Include="Core\Internal\PackageValidator.cs" />
+    <Compile Include="Core\Internal\PlaybackQueue.cs" />
+    <Compile Include="Core\Internal\QueueHelper.cs" />
     <Compile Include="Core\Internal\Stub.cs" />
     <Compile Include="Core\IProgressEx.cs" />
     <Compile Include="Core\MediaInfoProvider.cs" />
     <Compile Include="Core\MediaInfoProviderFactory.cs" />
     <Compile Include="Core\MultiStepProgress.cs" />
+    <Compile Include="Core\Playback.cs" />
     <Compile Include="Core\QuickTimeMediaInfoProvider.cs" />
     <Compile Include="MediaBrowserService.Callback.cs" />
     <Compile Include="MediaBrowserService.cs" />
@@ -100,6 +107,10 @@
     <ProjectReference Include="..\LibraProgramming.Media.QuickTime\LibraProgramming.Media.QuickTime.csproj">
       <Project>{6b2f62a2-75cc-4d46-b85f-74ab6e625ff6}</Project>
       <Name>LibraProgramming.Media.QuickTime</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibraProgramming.Memory\LibraProgramming.Memory.csproj">
+      <Project>{b6a7077d-a464-43bf-8143-c76c07ea22e7}</Project>
+      <Name>LibraProgramming.Memory</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

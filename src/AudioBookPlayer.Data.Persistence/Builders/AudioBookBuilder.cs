@@ -25,7 +25,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
                 Description = source.Description,
                 Created = source.Created,
                 Duration = source.Duration,
-                Version = source.Version
+                Hash = source.Hash
             };
 
             MapAuthors(book, source.Authors);
@@ -37,14 +37,14 @@ namespace AudioBookPlayer.Data.Persistence.Builders
 
         private void MapImages(AudioBook audioBook, string[] images)
         {
-            var temp = new IAudioBookImage[images.Length];
+            var bookImages = new IAudioBookImage[images.Length];
 
             for (var index = 0; index < images.Length; index++)
             {
-                temp[index] = new ContentProviderImage(audioBook, imageService, images[index]);
+                bookImages[index] = new ContentProviderImage(audioBook, imageService, images[index]);
             }
 
-            audioBook.Images = temp;
+            audioBook.Images = bookImages;
         }
 
         private static void MapAuthors(AudioBook audioBook, Author[] authors)
@@ -72,6 +72,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
                 var audioBookSection = new AudioBookSection(audioBook)
                 {
                     Title = section.Title,
+                    SourceFileUri = section.ContentUri,
                     Chapters = chapters
                 };
 
@@ -83,7 +84,7 @@ namespace AudioBookPlayer.Data.Persistence.Builders
                         Title = chapter.Title,
                         Offset = chapter.Offset,
                         Duration = chapter.Duration,
-                        Fragments = Array.Empty<AudioBookFragment>()
+                        // Fragments = Array.Empty<AudioBookFragment>()
                     };
 
                     audioBookChapters[chapter.Order] = audioBookChapter;

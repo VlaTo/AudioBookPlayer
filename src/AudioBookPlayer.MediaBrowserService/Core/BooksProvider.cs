@@ -4,14 +4,11 @@ using Android.Content.Res;
 using Android.OS;
 using Android.Provider;
 using AudioBookPlayer.Domain.Models;
-using AudioBookPlayer.MediaBrowserService.Core.Extensions;
+using AudioBookPlayer.Domain.Providers;
 using AudioBookPlayer.MediaBrowserService.Core.Internal;
 using LibraProgramming.Media.Common;
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using AudioBookPlayer.Domain.Providers;
 using Exception = Java.Lang.Exception;
 using Uri = Android.Net.Uri;
 
@@ -19,14 +16,12 @@ namespace AudioBookPlayer.MediaBrowserService.Core
 {
     internal sealed class BooksProvider : IBooksProvider
     {
-        private readonly StringComparer comparer;
         private readonly ContentResolver contentResolver;
         private readonly Uri contentUri;
         private readonly MediaInfoProviderFactory factory;
 
         public BooksProvider()
         {
-            comparer = StringComparer.CurrentCultureIgnoreCase;
             contentUri = GetExternalContentUri();
             contentResolver = Application.Context.ContentResolver;
             factory = new MediaInfoProviderFactory();
@@ -37,7 +32,7 @@ namespace AudioBookPlayer.MediaBrowserService.Core
             var scanner = new AudioBookFileScanner(contentResolver, contentUri);
             var files = scanner.QueryFiles();
 
-            var audioBooks = new List<AudioBook>();
+            var audioBooks = new AudioBookList();
             //var count = (float)files.Length;
 
             //progress.Report(0.0f);
@@ -52,17 +47,12 @@ namespace AudioBookPlayer.MediaBrowserService.Core
                 //progress.Report((index + 1) / count);
             }
 
-            for (var index = 0; index < audioBooks.Count; index++)
-            {
-                UpdateVersion(audioBooks[index]);
-            }
-
             //progress.Report(1.0f);
 
-            return audioBooks.AsReadOnly();
+            return audioBooks.Build();
         }
 
-        private void ProcessAudioFile(AudioBookFileScanner scanner, List<AudioBook> audioBooks, AudioBookFile audioBookFile, string mimeType)
+        private void ProcessAudioFile(AudioBookFileScanner scanner, AudioBookList audioBooks, AudioBookFile audioBookFile, string mimeType)
         {
             try
             {
@@ -80,13 +70,13 @@ namespace AudioBookPlayer.MediaBrowserService.Core
                     ScanAudioFile(provider, audioBooks, descriptor, audioBookFile);
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
                 ;
             }
         }
 
-        private void ScanAudioFile(MediaInfoProvider provider, List<AudioBook> audioBooks, AssetFileDescriptor descriptor, AudioBookFile audioBookFile)
+        private static void ScanAudioFile(MediaInfoProvider provider, AudioBookList audioBooks, AssetFileDescriptor descriptor, AudioBookFile audioBookFile)
         {
             var inputStream = descriptor.CreateInputStream();
 
@@ -98,219 +88,86 @@ namespace AudioBookPlayer.MediaBrowserService.Core
             using (var stream = new BufferedStream(inputStream, 20480))
             {
                 var mediaInfo = provider.ExtractMediaInfo(stream);
-                var audioBook = GetOrCreateAudioBook(audioBooks, audioBookFile, mediaInfo);
-                var sourceFiles = new Dictionary<string, TimeSpan>();
+                var audioBook = audioBooks.GetAudioBook(audioBookFile.Album);
 
-                ScanAudioTracks(sourceFiles, audioBookFile, mediaInfo, audioBook);
-            }
-        }
-
-        private AudioBook GetOrCreateAudioBook(List<AudioBook> audioBooks, AudioBookFile audioFile, MediaInfo info)
-        {
-            var audioBook = audioBooks.Find(book => comparer.Equals(book.Title, audioFile.Album));
-
-            if (null != audioBook)
-            {
-                return audioBook;
-            }
-
-            audioBook = new AudioBook
-            {
-                Id = null,
-                MediaId = audioFile.Id,
-                Title = audioFile.Album,
-                Duration = TimeSpan.Zero
-            };
-
-            audioBook.Authors = new[]
-            {
-                new AudioBookAuthor(audioBook, audioFile.Artist)
-            };
-
-            foreach (var (key, tags) in info.Meta)
-            {
-                switch (key)
+                if (null == audioBook)
                 {
-                    case WellKnownMediaTags.Subtitle:
+                    audioBook = audioBooks.NewAudioBook()
+                        .SetMediaId(audioBookFile.Id)
+                        .SetTitle(audioBookFile.Album)
+                        .AddAuthor(audioBookFile.Artist);
+
+                    foreach (var (key, tags) in mediaInfo.Meta)
                     {
-                        UpdateBookDescription(audioBook, tags);
+                        switch (key)
+                        {
+                            case WellKnownMediaTags.Subtitle:
+                            {
+                                UpdateBookDescription(audioBook, tags);
 
-                        break;
-                    }
+                                break;
+                            }
 
-                    case WellKnownMediaTags.Cover:
-                    {
-                        UpdateBookImages(audioBook, tags);
+                            case WellKnownMediaTags.Cover:
+                            {
+                                UpdateBookImages(audioBook, tags);
 
-                        break;
+                                break;
+                            }
+                        }
                     }
                 }
+
+                var audioBookSection = audioBook.NewSection()
+                    .SetTitle(audioBookFile.Title)
+                    .SetSourceFileUri(audioBookFile.ContentUri.ToString());
+
+                ScanAudioTracks(audioBookSection, mediaInfo);
             }
-
-            audioBooks.Add(audioBook);
-
-            return audioBook;
         }
 
-        private void ScanAudioTracks(
-            IDictionary<string, TimeSpan> sourceFiles,
-            AudioBookFile audioBookFile,
-            MediaInfo mediaInfo,
-            AudioBook audioBook)
+        private static void ScanAudioTracks(AudioBookSectionBuilder audioBookSection, MediaInfo mediaInfo)
         {
-            var sectionUri = audioBookFile.ContentUri.ToString();
-            var section = GetOrCreateSection(audioBook, audioBookFile.Title);
-
             foreach (var track in mediaInfo.Tracks)
             {
-                var chapter = new AudioBookChapter(audioBook, section)
-                {
-                    Title = track.Title,
-                    Offset = audioBook.Duration,
-                    Duration = track.Duration
-                };
-
-                //var chapter = new AudioBookChapter(audioBook, track.Title, bookBuilder.Duration, part);
-                //var chapter = audioBook.CreateChapter(track.Title, part);
-                var sourceFile = new AudioBookSourceFile(audioBook)
-                {
-                    ContentUri = sectionUri
-                };
-
-                if (false == sourceFiles.TryGetValue(sectionUri, out var duration))
-                {
-                    duration = TimeSpan.Zero;
-                }
-
-                var fragment = new AudioBookFragment(audioBook, sourceFile)
-                {
-                    Offset = duration,
-                    Duration = track.Duration
-                };
-
-                chapter.Fragments = chapter.Fragments.Append(fragment);
-                audioBook.Chapters = audioBook.Chapters.Append(chapter);
-                audioBook.SourceFiles = audioBook.SourceFiles.Append(sourceFile);
-
-                sourceFiles[sectionUri] = duration + track.Duration;
-
-                audioBook.Duration += track.Duration;
+                audioBookSection.NewChapter()
+                    .SetTitle(track.Title)
+                    .SetDuration(track.Duration);
             }
         }
 
-        private AudioBookSection GetOrCreateSection(AudioBook audioBook, string title)
+        private static void UpdateBookDescription(AudioBookBuilder audioBook, TagsCollection tags)
         {
-            for (var index = 0; index < audioBook.Sections.Count; index++)
-            {
-                if (comparer.Equals(audioBook.Sections[index].Title, title))
-                {
-                    return audioBook.Sections[index];
-                }
-            }
-
-            var section = new AudioBookSection(audioBook)
-            {
-                Title = title
-            };
-
-            audioBook.Sections = audioBook.Sections.Append(section);
-
-            return section;
-        }
-
-        private static void UpdateBookDescription(AudioBook audioBook, TagsCollection tags)
-        {
-            var lines = new List<string>();
-
             foreach (var item in tags)
             {
                 if (item is TextValue value)
                 {
-                    lines.Add(value.Text);
+                    audioBook.AddDescription(value.Text);
+                    continue;
                 }
-            }
 
-            audioBook.Description = 0 < lines.Count
-                ? String.Join(CultureInfo.CurrentUICulture.TextInfo.ListSeparator, lines)
-                : String.Empty;
+                // skip non-text tags
+                ;
+            }
         }
 
-        private static void UpdateBookImages(AudioBook audioBook, TagsCollection tags)
+        private static void UpdateBookImages(AudioBookBuilder audioBook, TagsCollection tags)
         {
-            var images = new List<IAudioBookImage>();
-
             foreach (var item in tags)
             {
                 if (item is MemoryValue memoryValue)
                 {
-                    images.Add(new InMemoryImage(audioBook, memoryValue.Memory));
+                    audioBook.AddImage(memoryValue.Memory);
                     continue;
                 }
 
                 // skip non-stream tags
                 ;
             }
-
-            audioBook.Images = images.AsReadOnly();
         }
 
         private static Uri GetExternalContentUri() => (Build.VERSION.SdkInt >= BuildVersionCodes.Q)
             ? MediaStore.Audio.Media.GetContentUri(MediaStore.VolumeExternal)
             : MediaStore.Audio.Media.ExternalContentUri;
-
-        private static void UpdateVersion(AudioBook audioBook)
-        {
-            unchecked
-            {
-                var hashCode = audioBook.MediaId.GetHashCode();
-                
-                //hashCode = (hashCode * 397) ^ MediaId.GetHashCode();
-                hashCode = (hashCode * 397) ^ (audioBook.Title?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ audioBook.Duration.GetHashCode();
-                hashCode = (hashCode * 397) ^ (audioBook.Description?.GetHashCode() ?? 0);
-                hashCode = (hashCode * 397) ^ audioBook.Created.GetHashCode();
-                hashCode = (hashCode * 397) ^ GetHashCodeForAuthors(audioBook.Authors);
-                //hashCode = (hashCode * 397) ^ (Sections != null ? Sections.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ GetHashCodeForChapters(audioBook.Chapters);
-                //hashCode = (hashCode * 397) ^ (SourceFiles != null ? SourceFiles.GetHashCode() : 0);
-                //hashCode = (hashCode * 397) ^ (Images != null ? Images.GetHashCode() : 0);
-
-                audioBook.Version = hashCode;
-            }
-        }
-        
-        private static int GetHashCodeForAuthors(IReadOnlyList<AudioBookAuthor> authors)
-        {
-            unchecked
-            {
-                var hashCode = 0;
-
-                for (var index = 0; index < authors.Count; index++)
-                {
-                    hashCode = (hashCode * 397) ^ authors[index].Name.GetHashCode();
-                }
-                
-                return hashCode;
-            }
-        }
-        
-        private static int GetHashCodeForChapters(IReadOnlyList<AudioBookChapter> chapters)
-        {
-            unchecked
-            {
-                var hashCode = 0;
-
-                for (var index = 0; index < chapters.Count; index++)
-                {
-                    var chapter = chapters[index];
-
-                    hashCode = (hashCode * 397) ^ chapter.Offset.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (chapter.Title?.GetHashCode() ?? 0);
-                    hashCode = (hashCode * 397) ^ chapter.Duration.GetHashCode();
-                }
-                
-                return hashCode;
-            }
-        }
     }
 }

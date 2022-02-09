@@ -42,6 +42,7 @@
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <BundleAssemblies>false</BundleAssemblies>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -65,18 +66,12 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\AudioBookViewModelBuilder.cs" />
-    <Compile Include="Core\AudioBookDescriptionBuilder.cs" />
-    <Compile Include="Core\BookImageTask.cs" />
-    <Compile Include="Core\BookItem.cs" />
     <Compile Include="Core\ConnectExecutor.cs" />
+    <Compile Include="Core\Extensions\BundleExtensions.cs" />
     <Compile Include="Core\Extensions\JavaObjectExtensions.cs" />
-    <Compile Include="Core\Extensions\ListExtensions.cs" />
     <Compile Include="Core\Extensions\ObservableListExtensions.cs" />
     <Compile Include="Core\IListObserver.cs" />
-    <Compile Include="Core\ImageCache.cs" />
     <Compile Include="Core\IObservableList.cs" />
-    <Compile Include="Core\LruCache.cs" />
     <Compile Include="Core\MediaBrowserServiceConnector.ControllerCallback.cs" />
     <Compile Include="Core\MediaBrowserServiceConnectionCallback.cs" />
     <Compile Include="Core\Extensions\TaskExtensions.cs" />
@@ -90,8 +85,14 @@
     <Compile Include="Core\Services\IMediaBrowserService.cs" />
     <Compile Include="Core\Stub.cs" />
     <Compile Include="Core\Tasks\LoadBooksTask.cs" />
-    <Compile Include="ViewModels\AllBooksViewModel.cs" />
-    <Compile Include="ViewModels\AudioBookViewModel.cs" />
+    <Compile Include="Models\BaseItem.cs" />
+    <Compile Include="Presenters\AllBooksPresenter.cs" />
+    <Compile Include="Presenters\BooksPresenter.cs" />
+    <Compile Include="Presenters\NowPlayingPresenter.cs" />
+    <Compile Include="Presenters\RecentBooksPresenter.cs" />
+    <Compile Include="Views\AllBooksListAdapter.cs" />
+    <Compile Include="Views\BooksListAdapter.cs" />
+    <Compile Include="Models\BookItem.cs" />
     <Compile Include="Views\Activities\SplashActivity.cs" />
     <Compile Include="Views\Fragments\AllBooksFragment.cs" />
     <Compile Include="Views\Fragments\ChapterSelectionFragment.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Activities\ShareActivity.cs" />
     <Compile Include="Views\Fragments\SettingsFragment.cs" />
+    <Compile Include="Views\RecentBookListAdapter.cs" />
     <Compile Include="Views\WaitIndicator.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -230,7 +232,9 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\splash_logo.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-v21\ic_time.xml" />
+  </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\xml\fragment_settings.xml">
       <SubType>Designer</SubType>
@@ -305,6 +309,33 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\round_rect_shape.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\content_book_list_header.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-v21\ic_more_vert.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-v21\ic_play.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-v21\ic_rewind.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-v21\ic_fast_forward.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\play_button_background.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\gutter_background.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>

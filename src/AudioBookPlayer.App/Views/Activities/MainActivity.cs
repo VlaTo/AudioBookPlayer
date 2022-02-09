@@ -131,6 +131,8 @@ namespace AudioBookPlayer.App.Views.Activities
                 navigationView.SetNavigationItemSelectedListener(this);
             }
 
+            AlbumArt.GetInstance().Initialize();
+
             AppActions.OnAppAction += OnAppActionsAction;
 
             if (null == savedInstanceState)

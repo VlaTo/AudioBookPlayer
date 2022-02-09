@@ -1,20 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/hint_text_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-    />
-
-    <Button
-        android:id="@+id/button1"
+        android:id="@+id/book_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/abc_action_bar_content_inset_material"
+		android:text="Sample Title"
+		android:layout_marginTop="12dp"
+		android:layout_marginBottom="8dp"
+		android:textSize="18dp"
+		android:textAlignment="center"
+		android:textColor="@color/colorPrimary"
     />
 
+    <TextView
+        android:id="@+id/book_authors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+		android:layout_marginTop="0dp"
+		android:layout_marginBottom="8dp"
+		android:textSize="14dp"
+		android:textAlignment="center"
+		android:textColor="@color/colorAccent"
+    />
+
+    <ImageView
+		android:id="@+id/book_image"
+		android:contentDescription="Test"
+		android:scaleType="fitCenter"
+        android:layout_width="280dp"
+        android:layout_height="392dp"
+		android:layout_gravity="center_horizontal"
+		android:elevation="10dp"
+    />
+
+	<RelativeLayout
+		android:id="@+id/chapter_selection_layout"
+		android:layout_marginTop="8dp"
+		android:layout_gravity="center_horizontal"
+		android:layout_width="280dp"
+        android:layout_height="wrap_content">
+
+		<ImageButton
+			android:id="@+id/chapter_selection_button"
+			android:src="@drawable/ic_more_vert"
+			android:background="@android:color/white"
+			android:contentDescription="Options"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+		/>
+
+		<TextView
+			android:id="@+id/chapter_title"
+			android:textSize="14dp"
+			android:textStyle="bold"
+			android:text="00. Sample Chapter title 001"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentTop="true"
+			android:layout_alignParentLeft="true"
+			android:layout_toLeftOf="@id/chapter_selection_button"
+		/>
+
+		<TextView
+			android:id="@+id/chapter_section"
+			android:textSize="12dp"
+			android:textStyle="normal"
+			android:text="Book file - 1"
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:layout_below="@id/chapter_title"
+			android:layout_alignParentLeft="true"
+			android:layout_toLeftOf="@id/chapter_selection_button"
+		/>
+
+	</RelativeLayout>
+
+	<Space
+        android:layout_width="match_parent"
+        android:layout_height="12dp"
+    />
+
+    <SeekBar
+	    android:id="@+id/chapter_position"
+	    android:splitTrack="false"
+	    android:layout_below="@id/chapter_selection_layout"
+	    android:layout_gravity="center_horizontal"
+	    android:layout_width="308dp"
+	    android:layout_height="20dp"
+    />
+
+	<LinearLayout
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:src="@drawable/ic_rewind"
+                android:background="@android:color/white"
+                android:contentDescription="Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:layout_marginRight="12dp"
+			/>
+
+            <ImageButton
+                android:src="@drawable/ic_play"
+				android:background="@drawable/play_button_background"
+                android:contentDescription="Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+			/>
+
+            <ImageButton
+                android:src="@drawable/ic_fast_forward"
+                android:padding="8dp"
+                android:background="@android:color/white"
+                android:contentDescription="Play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+			/>
+
+        </LinearLayout>
+
+	</LinearLayout>
+	
 </LinearLayout>

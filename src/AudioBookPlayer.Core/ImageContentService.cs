@@ -16,23 +16,25 @@ namespace AudioBookPlayer.Core
         private const string WriteMode = "w";
         private const string ReadMode = "r";
 
+        public static ImageContentService? instance;
+
         private readonly Uri? collectionUri;
         private readonly ContentResolver? resolver;
 
-        public static ImageContentService Instance
+        public static ImageContentService GetInstance()
         {
-            get;
+            if (null == instance)
+            {
+                instance = new ImageContentService();
+            }
+
+            return instance;
         }
-        
-        public ImageContentService()
+
+        private ImageContentService()
         {
             collectionUri = GetExternalContentUri();
             resolver = Application.Context.ContentResolver;
-        }
-
-        static ImageContentService()
-        {
-            Instance = new ImageContentService();
         }
 
         public Stream GetImageStream(string? contentUri)

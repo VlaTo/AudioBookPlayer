@@ -1,37 +1,16 @@
-﻿#nullable enable
-
-using Android.App;
-using Android.Content;
-using Android.OS;
+﻿using Android.OS;
 using Android.Views;
-using Android.Widget;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Core.Extensions;
-using AudioBookPlayer.App.ViewModels;
+using AudioBookPlayer.App.Presenters;
 using AudioBookPlayer.App.Views.Activities;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using Android.Content.Res;
-using Android.Graphics;
-using AndroidX.Core.Graphics;
-using AudioBookPlayer.Core;
 using Fragment = AndroidX.Fragment.App.Fragment;
-using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
+
+#nullable enable
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
     public class AllBooksFragment : Fragment
     {
-        private ListView? listView;
-        private IDisposable? subscription;
-        private BookImageTask<ImageView>? imageTask;
-
-        private MainActivity MainActivity => (MainActivity)Activity;
-
-        private BooksListViewAdapter? BooksAdapter => (BooksListViewAdapter?)listView?.Adapter;
-
-        private AllBooksViewModel ViewModel => AllBooksViewModel.Instance();
+        private AllBooksPresenter? presenter;
 
         public static AllBooksFragment NewInstance()
         {
@@ -46,249 +25,28 @@ namespace AudioBookPlayer.App.Views.Fragments
         public override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-
-            imageTask = new BookImageTask<ImageView>(ImageContentService.Instance, new ImageCache(12));
-            imageTask.Start();
-            var _ = imageTask.Looper;
-
-            if (ViewModel is { HasBookItems: false } && null != MainActivity.ServiceConnector)
-            {
-                MainActivity.ServiceConnector.Connect(ViewModel);
-            }
+            presenter = new AllBooksPresenter((MainActivity)Activity);
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            var _ = base.OnCreateView(inflater, container, savedInstanceState);
             var view = inflater.Inflate(Resource.Layout.fragment_books_list, container, false);
 
             if (null != view)
             {
-                listView = view.FindViewById<ListView>(Resource.Id.books_list);
-
-                if (null != listView)
-                {
-                    var adapter = new BooksListViewAdapter(Application.Context, Resources, imageTask)
-                    {
-                        SortOrderFunc = (x, y) =>
-                            String.Compare(x.Title, y.Title, CultureInfo.CurrentUICulture, CompareOptions.StringSort)
-                    };
-
-                    listView.EmptyView = view.FindViewById<ViewStub>(Resource.Id.empty_books_list);
-                    listView.OnItemClickListener = new ItemClickListener(Activity.SupportFragmentManager);
-                    listView.Adapter = adapter;
-                    subscription = ViewModel.BookItems.Subscribe(adapter);
-                }
+                presenter?.AttachView(view);
+                return view;
             }
 
-            return view;
+            return base.OnCreateView(inflater, container, savedInstanceState);
         }
 
         public override void OnDestroy()
         {
             base.OnDestroy();
-
-            subscription?.Dispose();
-        }
-
-        //
-        private sealed class BooksListViewAdapter : BaseAdapter<AudioBookViewModel>, IListObserver<AudioBookViewModel>, BookImageTask<ImageView>.IBookImageListener
-        {
-            private readonly Context context;
-            private readonly Resources resources;
-            private readonly BookImageTask<ImageView> imageTask;
-            private readonly LayoutInflater? inflater;
-            private readonly List<AudioBookViewModel> list;
-            private Func<AudioBookViewModel, AudioBookViewModel, int>? sortOrderFunc;
-
-            public override int Count => list.Count;
-
-            public Func<AudioBookViewModel, AudioBookViewModel, int>? SortOrderFunc
-            {
-                get => sortOrderFunc;
-                set
-                {
-                    if (ReferenceEquals(sortOrderFunc, value))
-                    {
-                        return;
-                    }
-
-                    sortOrderFunc = value;
-
-                    if (null != sortOrderFunc)
-                    {
-                        list.Sort(new Comparison<AudioBookViewModel>(sortOrderFunc));
-                    }
-
-                    NotifyDataSetChanged();
-                }
-            }
-
-            public override AudioBookViewModel this[int position] => list[position];
-
-            public BooksListViewAdapter(Context context, Resources resources, BookImageTask<ImageView> imageTask)
-            {
-                this.context = context;
-                this.resources = resources;
-                this.imageTask = imageTask;
-
-                list = new List<AudioBookViewModel>();
-                inflater = LayoutInflater.From(Application.Context);
-
-                imageTask.Listener = this;
-            }
-
-            public override long GetItemId(int position) => position;
-
-            public override View? GetView(int position, View? convertView, ViewGroup? parent)
-            {
-                var view = convertView ?? inflater?.Inflate(Resource.Layout.content_book_list_item, null);
-                var coverImage = view?.FindViewById<ImageView>(Resource.Id.book_item_cover);
-                var titleView = view?.FindViewById<TextView>(Resource.Id.book_item_title);
-                var subtitleView = view?.FindViewById<TextView>(Resource.Id.book_item_subtitle);
-                var descriptionView = view?.FindViewById<TextView>(Resource.Id.book_item_description);
-
-                var model = list[position];
-
-                if (null != coverImage)
-                {
-                    if (null != model.ImageUri)
-                    {
-                        imageTask.QueueImage(coverImage, model.ImageUri);
-                    }
-                }
-
-                if (null != titleView)
-                {
-                    titleView.Text = model.Title;
-                }
-
-                if (null != subtitleView)
-                {
-                    subtitleView.Text = model.Authors;
-                }
-
-                if (null != descriptionView)
-                {
-                    /*var hours = String.Empty;
-                    var value = model.Duration.Hours;
-
-                    if (0 < value)
-                    {
-                        hours = resources.GetQuantityString(Resource.Plurals.duration_hours_plural, value, value) + ' ';
-                    }
-
-                    value = model.Duration.Minutes;
-                    var minutes = resources.GetQuantityString(Resource.Plurals.duration_minutes_plural, value, value);
-
-                    descriptionView.Text = $"{hours}{minutes}";*/
-
-                    descriptionView.Text = model.Duration.ToString(@"h\:mm", CultureInfo.CurrentUICulture);
-                }
-
-                return view;
-            }
-
-            #region IListObserver<AudioBookViewModel>
-
-            void IListObserver<AudioBookViewModel>.OnAdded(int position, AudioBookViewModel value)
-            {
-                if (null != sortOrderFunc)
-                {
-                    position = list.FindIndex(value, sortOrderFunc);
-                }
-
-                list.Insert(position, value);
-
-                NotifyDataSetChanged();
-            }
-
-            void IListObserver<AudioBookViewModel>.OnRangeAdded(int position, IEnumerable<AudioBookViewModel> values)
-            {
-                if (null != sortOrderFunc)
-                {
-                    foreach (var item in values)
-                    {
-                        var index = list.FindIndex(item, sortOrderFunc);
-                        list.Insert(index, item);
-                    }
-                }
-                else
-                {
-                    list.AddRange(values);
-                }
-
-                NotifyDataSetChanged();
-            }
-
-            void IListObserver<AudioBookViewModel>.OnReplace(int position, AudioBookViewModel oldValue, AudioBookViewModel newValue)
-            {
-                position = list.IndexOf(oldValue);
-
-                if (0 > position)
-                {
-                    return;
-                }
-
-                list[position] = newValue;
-
-                NotifyDataSetChanged();
-            }
-
-            void IListObserver<AudioBookViewModel>.OnRemove(int position, AudioBookViewModel value)
-            {
-                position = list.IndexOf(value);
-
-                if (0 > position)
-                {
-                    return;
-                }
-
-                list.RemoveAt(position);
-
-                NotifyDataSetChanged();
-            }
-
-            void IListObserver<AudioBookViewModel>.OnClear()
-            {
-                list.Clear();
-                NotifyDataSetChanged();
-            }
-
-            #endregion
-
-            void BookImageTask<ImageView>.IBookImageListener.OnImageLoaded(ImageView target, Bitmap? bitmap)
-            {
-                target.SetImageBitmap(bitmap);
-            }
-        }
-
-        //
-        private sealed class ItemClickListener : Java.Lang.Object, AdapterView.IOnItemClickListener
-        {
-            private readonly AndroidX.Fragment.App.FragmentManager fragmentManager;
-
-            public ItemClickListener(AndroidX.Fragment.App.FragmentManager fragmentManager)
-            {
-                this.fragmentManager = fragmentManager;
-            }
-
-            public void OnItemClick(AdapterView? parent, View? view, int position, long id)
-            {
-                var item = (AudioBookViewModel?)parent?.GetItemAtPosition(position);
-
-                if (null != item)
-                {
-                    var fragment = NowPlayingFragment.NewInstance(item.MediaId);
-
-                    fragmentManager
-                        .BeginTransaction()
-                        .Replace(Resource.Id.nav_host_frame, fragment)
-                        .AddToBackStack(null)
-                        .SetTransition(FragmentTransaction.TransitFragmentFade)
-                        .Commit();
-                }
-            }
+            presenter?.DetachView();
         }
     }
 }
+
+#nullable restore

@@ -15,6 +15,12 @@ namespace AudioBookPlayer.Domain.Models
             set;
         }
 
+        public string SourceFileUri
+        {
+            get;
+            set;
+        }
+
         public IReadOnlyList<AudioBookChapter> Chapters
         {
             get;

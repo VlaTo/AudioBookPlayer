@@ -167,6 +167,26 @@ namespace LibraProgramming.Media.QuickTime
             return (atomType, size, length);
         }
 
+        public static void ToLittleEndian(byte[] buffer, int offset, int count)
+        {
+            if (false == BitConverter.IsLittleEndian)
+            {
+                return;
+            }
+
+            var iterations = count >> 1;
+            var start = offset;
+            var end = offset + count - 1;
+
+            for (var index = 0; index < iterations; index++)
+            {
+                var temp = buffer[start];
+
+                buffer[start++] = buffer[end];
+                buffer[end--] = temp;
+            }
+        }
+
         private static void ReadBytesInternal(Stream stream, byte[] buffer, int offset, int count)
         {
             var actualCount = stream.Read(buffer, offset, count);
@@ -181,7 +201,12 @@ namespace LibraProgramming.Media.QuickTime
         {
             ReadBytesInternal(stream, buffer, offset, count);
 
-            if (forceEndian && BitConverter.IsLittleEndian)
+            if (forceEndian)
+            {
+                ToLittleEndian(buffer, offset, count);
+            }
+
+            /*if (forceEndian && BitConverter.IsLittleEndian)
             {
                 var iterations = count >> 1;
                 int start = offset;
@@ -194,7 +219,7 @@ namespace LibraProgramming.Media.QuickTime
                     buffer[start++] = buffer[end];
                     buffer[end--] = temp;
                 }
-            }
+            }*/
         }
     }
 }

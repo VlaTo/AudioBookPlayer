@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace AudioBookPlayer.App.Core
+namespace AudioBookPlayer.Core
 {
-    internal class LruCache<TKey, TValue>
+    public class LruCache<TKey, TValue>
     {
         private readonly IEqualityComparer<TKey> comparer;
         private readonly CacheEntry[] entries;
@@ -20,6 +20,12 @@ namespace AudioBookPlayer.App.Core
             private set;
         }
 
+        public int EvictionCount
+        {
+            get;
+            private set;
+        }
+
         protected LruCache(int maxSize)
         {
             comparer = EqualityComparer<TKey>.Default;
@@ -28,6 +34,7 @@ namespace AudioBookPlayer.App.Core
 
             HitCount = 0;
             MissCount = 0;
+            EvictionCount = 0;
         }
 
         public TValue Get(TKey key)
@@ -37,7 +44,7 @@ namespace AudioBookPlayer.App.Core
             if (0 > position)
             {
                 MissCount++;
-                return default;
+                return default!;
             }
 
             var entry = entries[position];
@@ -51,7 +58,7 @@ namespace AudioBookPlayer.App.Core
 
             HitCount++;
 
-            return entry.Value;
+            return entry!.Value;
         }
 
         public void Put(TKey key, TValue value)
@@ -76,12 +83,16 @@ namespace AudioBookPlayer.App.Core
 
             if (count == entries.Length)
             {
-                Release(entries[count - 1].Value);
+                var last = count - 1;
 
-                for (var index = (count - 1); index > 0; index--)
+                Release(entries[last].Value);
+
+                for (var index = last; index > 0; index--)
                 {
                     entries[index] = entries[index - 1];
                 }
+
+                EvictionCount++;
             }
             else
             {
@@ -94,6 +105,20 @@ namespace AudioBookPlayer.App.Core
             }
 
             entries[0] = new CacheEntry(key, value);
+        }
+
+        public void EvictAll()
+        {
+            for (var index = (count - 1); index >= 0; index--)
+            {
+                Release(entries[index].Value);
+                
+                entries[index] = default;
+
+                EvictionCount++;
+            }
+
+            count = 0;
         }
 
         protected virtual void Release(TValue value)

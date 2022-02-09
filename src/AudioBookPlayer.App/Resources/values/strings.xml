@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AudioBookPlayer.App</string>
+    <string name="app_name">Audio books player</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -36,6 +36,10 @@
 
 	<string name="library_update_collecting">Collecting info (%1$.0f %%) ...</string>
 	<string name="library_update_processing">Processing info (%1$.0f %%) ...</string>
+
+	<string name="book_item_duration_format">{0:h\\:mm\\:ss}</string>
+	<string name="book_header_recent">Latest</string>
+	<string name="book_header_today">Today</string>
 
 	<plurals name="duration_hours_plural">
 		<item quantity="one">%1$d hr</item>

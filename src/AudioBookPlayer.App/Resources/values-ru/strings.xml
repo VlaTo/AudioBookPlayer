@@ -1,18 +1,61 @@
 <resources>
-    <string name="app_name">AudioBookPlayer.App</string>
+	<string name="app_name">Проигрыватель аудио-книг</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+	<string name="navigation_drawer_open">Открыть панель навигации</string>
+	<string name="navigation_drawer_close">Закрыть панель навигации</string>
 
-    <string name="action_settings">Settings</string>
-  
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-  
-    <string name="menu_library">Библиотека</string>
-    <string name="menu_import">Import</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
-    <string name="menu_tools">Tools</string>
+	<string name="action_settings">Настройки</string>
+	<string name="action_snooze">Snooze</string>
+	<string name="action_bookmark">Закладки</string>
+	<string name="action_library_update">Обновить библиотеку</string>
+	<string name="action_player_options">Опции</string>
+
+	<string name="nav_header_title">Проигрыватель аудио-книг</string>
+	<string name="nav_header_subtitle">от LibraProgramming</string>
+	<string name="nav_header_desc">Заголовок</string>
+
+	<string name="menu_library">Библиотека</string>
+	<string name="menu_gallery">Галерея</string>
+	<string name="menu_settings">Настройки</string>
+
+	<string name="title_library">Библиотека</string>
+	<string name="title_settings">Настройки</string>
+
+	<string name="tab_all_books">Все книги</string>
+	<string name="tab_recent_books">Недавние</string>
+
+	<string name="fab_library_action">Now Playing</string>
+
+	<string name="empty_content_title">Пока нет книг</string>
+
+	<string name="preference_play_group">Проигрыватель</string>
+	<string name="preference_title_play_on_headset_connected">Воспроизведение</string>
+	<string name="preference_description_play_on_headset_connected">Продолжить воспроизведение после подключения наушников</string>
+	<string name="preference_title_rewind_offset">Перемотка</string>
+	<string name="preference_description_rewind_offset">Относительное время для перемотки</string>
+
+	<string name="library_update_collecting">Collecting info (%1$.0f %%) ...</string>
+	<string name="library_update_processing">Processing info (%1$.0f %%) ...</string>
+
+	<string name="book_item_duration_format">{0:h\\:mm\\:ss}</string>
+	<string name="book_header_recent">Последние</string>
+	<string name="book_header_today">Сегодня</string>
+
+	<plurals name="duration_hours_plural">
+		<item quantity="one">%1$d hr</item>
+		<item quantity="two">%1$d hrs</item>
+		<item quantity="few">%1$d hrs</item>
+		<item quantity="many">%1$d hrs</item>
+		<item quantity="other">%1$d hrs</item>
+	</plurals>
+
+	<plurals name="duration_minutes_plural">
+		<item quantity="zero">%1$d min</item>
+		<item quantity="one">%1$d mins</item>
+		<item quantity="two">%1$d mins</item>
+		<item quantity="few">%1$d mins</item>
+		<item quantity="many">%1$d mins</item>
+		<item quantity="other">%1$d mins</item>
+	</plurals>
+
 </resources>
