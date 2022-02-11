@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Android;
 using Android.App;
-using Android.Content;
 using Android.Content.PM;
 using Android.Views;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using Google.Android.Material.Snackbar;
 
-namespace AudioBookPlayer.Core
+namespace AudioBookPlayer.App.Core
 {
     public sealed class PermissionChecker
     {

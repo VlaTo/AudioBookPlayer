@@ -1,29 +1,55 @@
-﻿#nullable enable
-
+﻿using System;
+using System.Collections.Generic;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Support.V4.Media;
+using AudioBookPlayer.Core;
 using Java.Lang;
-using System;
-using System.Collections.Generic;
-using Object = Java.Lang.Object;
 
-namespace AudioBookPlayer.App.Core
+#nullable enable
+
+namespace AudioBookPlayer.MediaBrowserConnector
 {
-    internal sealed partial class MediaBrowserServiceConnector : Object
+    public sealed partial class MediaBrowserServiceConnector : Java.Lang.Object
     {
+        private static MediaBrowserServiceConnector? instance;
+
         private readonly Context context;
         private ConnectionState state;
         private bool disposed;
-        private MediaBrowserServiceImpl? mediaBrowserService;
+        private MediaService? mediaBrowserService;
         private readonly MediaBrowserCompat mediaBrowser;
         private readonly List<IConnectCallback> connectCallbacks;
 
-        public MediaBrowserServiceConnector(Context context)
+        public static MediaBrowserServiceConnector GetInstance()
         {
-            var serviceName = Class.FromType(typeof(MediaBrowserService.MediaBrowserService));
-            var componentName = new ComponentName(context, serviceName);
-            var callbacks = new MediaBrowserServiceConnectionCallback
+            if (null == instance)
+            {
+                var serviceName = Class.FromType(typeof(MediaBrowserService.MediaBrowserService));
+                var componentName = new ComponentName(Application.Context, serviceName);
+
+                instance = new MediaBrowserServiceConnector(Application.Context, componentName);
+            }
+
+            return instance;
+        }
+
+        /// <summary>
+        /// The <see cref="IConnectCallback" /> interface.
+        /// </summary>
+        public interface IConnectCallback
+        {
+            void OnConnected(MediaService service);
+
+            void OnSuspended();
+
+            void OnFailed();
+        }
+        
+        private MediaBrowserServiceConnector(Context context, ComponentName componentName)
+        {
+            var connectionCallback = new ConnectionCallback
             {
                 OnConnectedImpl = DoConnected,
                 OnConnectionSuspendedImpl = DoConnectionSuspended,
@@ -34,7 +60,7 @@ namespace AudioBookPlayer.App.Core
 
             state = ConnectionState.NotConnected;
             mediaBrowserService = null;
-            mediaBrowser = new MediaBrowserCompat(context, componentName, callbacks, Bundle.Empty);
+            mediaBrowser = new MediaBrowserCompat(context, componentName, connectionCallback, Bundle.Empty);
             connectCallbacks = new List<IConnectCallback>();
         }
 
@@ -117,7 +143,7 @@ namespace AudioBookPlayer.App.Core
             EnsureNotDisposed();
 
             state = ConnectionState.Connected;
-            mediaBrowserService = new MediaBrowserServiceImpl(context, mediaBrowser);
+            mediaBrowserService = new MediaService(context, mediaBrowser);
             
             var callbacks = connectCallbacks.ToArray();
 
@@ -173,7 +199,8 @@ namespace AudioBookPlayer.App.Core
             }
         }
 
-        // Enum
+        #region ConnectionState
+
         private enum ConnectionState
         {
             Failed = -1,
@@ -182,5 +209,48 @@ namespace AudioBookPlayer.App.Core
             Connected,
             Suspended
         }
+
+        #endregion
+
+        #region ConnectionCallback
+
+        private sealed class ConnectionCallback : MediaBrowserCompat.ConnectionCallback
+        {
+            public Action OnConnectedImpl
+            {
+                get;
+                set;
+            }
+
+            public Action OnConnectionFailedImpl
+            {
+                get;
+                set;
+            }
+
+            public Action OnConnectionSuspendedImpl
+            {
+                get;
+                set;
+            }
+
+            public ConnectionCallback()
+            {
+                OnConnectedImpl = Stub.Nop();
+                OnConnectionFailedImpl = Stub.Nop();
+                OnConnectionSuspendedImpl = Stub.Nop();
+            }
+
+            public override void OnConnected() => OnConnectedImpl.Invoke();
+
+            public override void OnConnectionFailed() => OnConnectionFailedImpl.Invoke();
+
+            public override void OnConnectionSuspended() => OnConnectionSuspendedImpl.Invoke();
+        }
+
+        #endregion
+
     }
 }
+
+#nullable restore

@@ -5,13 +5,13 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B3C58A08-3E67-4C85-AE9F-15798FBD75B1}</ProjectGuid>
+    <ProjectGuid>{A356841B-8773-4DE7-B947-7D8B1A0FFD6E}</ProjectGuid>
     <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TemplateGuid>{9ef11e43-1701-4396-8835-8392d57abb70}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioBookPlayer.Core</RootNamespace>
-    <AssemblyName>AudioBookPlayer.Core</AssemblyName>
+    <RootNamespace>AudioBookPlayer.MediaBrowserConnector</RootNamespace>
+    <AssemblyName>AudioBookPlayer.MediaBrowserConnector</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>True</Deterministic>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
@@ -47,23 +47,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AlbumArt.cs" />
-    <Compile Include="LoadImageFor.cs" />
-    <Compile Include="ImageCache.cs" />
-    <Compile Include="ImageContentService.cs" />
-    <Compile Include="LruCache.cs" />
+    <Compile Include="MediaBrowserServiceConnector.cs" />
+    <Compile Include="MediaBrowserServiceConnector.MediaBrowserServiceImpl.cs" />
+    <Compile Include="MediaService.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Stub.cs" />
-    <Compile Include="WorkLoadManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.AppCompat" Version="1.3.1.3" />
-    <PackageReference Include="Xamarin.Google.Android.Material">
-      <Version>1.4.0.4</Version>
+    <PackageReference Include="Xamarin.AndroidX.Media">
+      <Version>1.4.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -71,6 +67,24 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioBookPlayer.Core\AudioBookPlayer.Core.csproj">
+      <Project>{b3c58a08-3e67-4c85-ae9f-15798fbd75b1}</Project>
+      <Name>AudioBookPlayer.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj">
+      <Project>{17363e39-92c5-4781-bf54-e5ff7cbc7ada}</Project>
+      <Name>AudioBookPlayer.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.MediaBrowserService\AudioBookPlayer.MediaBrowserService.csproj">
+      <Project>{7518d836-bd79-41c1-840d-83a77e39bdb1}</Project>
+      <Name>AudioBookPlayer.MediaBrowserService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LibraProgramming.Memory\LibraProgramming.Memory.csproj">
+      <Project>{b6a7077d-a464-43bf-8143-c76c07ea22e7}</Project>
+      <Name>LibraProgramming.Memory</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

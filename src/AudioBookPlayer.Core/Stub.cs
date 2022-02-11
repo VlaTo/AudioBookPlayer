@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace AudioBookPlayer.App.Core
+namespace AudioBookPlayer.Core
 {
-    internal sealed class Stub
+    public sealed class Stub
     {
         public static Action Nop() => InnerEmpty;
 

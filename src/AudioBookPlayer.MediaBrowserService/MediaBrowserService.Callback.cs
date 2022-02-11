@@ -1,7 +1,7 @@
-﻿using System;
-using Android.OS;
+﻿using Android.OS;
 using Android.Support.V4.Media.Session;
-using AudioBookPlayer.MediaBrowserService.Core.Internal;
+using AudioBookPlayer.Core;
+using System;
 
 namespace AudioBookPlayer.MediaBrowserService
 {

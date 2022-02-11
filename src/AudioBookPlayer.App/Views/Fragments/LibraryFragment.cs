@@ -18,14 +18,16 @@ using Java.Util.Concurrent;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using PermissionChecker = AudioBookPlayer.Core.PermissionChecker;
+using AudioBookPlayer.MediaBrowserConnector;
+using MediaBrowserServiceConnector = AudioBookPlayer.MediaBrowserConnector.MediaBrowserServiceConnector;
+using PermissionChecker = AudioBookPlayer.App.Core.PermissionChecker;
 
 namespace AudioBookPlayer.App.Views.Fragments
 {
     public class LibraryFragment : Fragment,
         TabLayoutMediator.ITabConfigurationStrategy,
         MediaBrowserServiceConnector.IConnectCallback,
-        MediaBrowserServiceConnector.IAudioBooksCallback,
+        MediaService.IAudioBooksListener,
         MediaBrowserServiceConnector.IUpdateCallback
     {
         //private static readonly long PreloaderDelay = TimeUnit.Milliseconds.ToMillis(200L);
@@ -45,7 +47,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         internal MainActivity MainActivity => (MainActivity)Activity;
 
-        internal MediaBrowserServiceConnector? ServiceConnector => MainActivity.ServiceConnector;
+        internal MediaBrowserServiceConnector? ServiceConnector => null;
 
         public static LibraryFragment NewInstance()
         {
@@ -128,7 +130,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            inflater.Inflate(Resource.Menu.fragment_menu_options, menu);
+            //inflater.Inflate(Resource.Menu.fragment_menu_options, menu);
         }
 
         public override void OnStart()
@@ -146,7 +148,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            var id = item.ItemId;
+            /*var id = item.ItemId;
 
             if (id == Resource.Id.action_library_update)
             {
@@ -158,20 +160,20 @@ namespace AudioBookPlayer.App.Views.Fragments
                 PermissionChecker.CheckPermissions(View, new[] { Manifest.Permission.ReadExternalStorage }, DoRequestPermissionsResult);
 
                 return true;
-            }
+            }*/
 
             return base.OnOptionsItemSelected(item);
         }
 
         private void OnFabClick(EventArgs _)
         {
-            var fragment = NowPlayingFragment.NewInstance(MediaID.Root);
+            /*var fragment = NowPlayingFragment.NewInstance(MediaID.Root);
             Activity.SupportFragmentManager
                 .BeginTransaction()
                 .Replace(Resource.Id.nav_host_frame, fragment)
                 .AddToBackStack(null)
                 .SetTransition(FragmentTransaction.TransitFragmentFade)
-                .Commit();
+                .Commit();*/
         }
 
         private void DoRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
@@ -197,7 +199,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
         #region MediaBrowserServiceConnector.IAudioBooksResultCallback
 
-        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
+        void MediaService.IAudioBooksListener.OnReady(IList<MediaBrowserCompat.MediaItem> list, Bundle options)
         {
             /*indicator?.Hide();
 
@@ -207,7 +209,7 @@ namespace AudioBookPlayer.App.Views.Fragments
             }*/
         }
 
-        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)
+        void MediaService.IAudioBooksListener.OnError(Bundle options)
         {
             //indicator?.Hide();
         }
@@ -294,21 +296,17 @@ namespace AudioBookPlayer.App.Views.Fragments
         /// </summary>
         private sealed class ViewsAdapter : FragmentStateAdapter
         {
-            private readonly Func<Fragment>[] creators;
+            private readonly Func<Fragment>[] builders;
 
-            public override int ItemCount => creators.Length;
+            public override int ItemCount => builders.Length;
 
-            public ViewsAdapter(Fragment fragment)
+            public ViewsAdapter(Fragment fragment, params Func<Fragment>[] builders)
                 : base(fragment)
             {
-                creators = new Func<Fragment>[]
-                {
-                    AllBooksFragment.NewInstance,
-                    RecentBooksFragment.NewInstance
-                };
+                this.builders = builders;
             }
 
-            public override Fragment CreateFragment(int index) => creators[index].Invoke();
+            public override Fragment CreateFragment(int index) => builders[index].Invoke();
         }
     }
 }

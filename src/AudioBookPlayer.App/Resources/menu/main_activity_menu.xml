@@ -1,9 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu
+	xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn="navigation_view">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	tools:showIn="navigation_view">
+	
+	<item
+		android:id="@+id/action_bookmark"
+		android:title="@string/action_bookmark"
+		android:icon="@drawable/ic_action_bookmark"
+		app:showAsAction="always"
+    />
 
-    <group android:checkableBehavior="single">
+	<item
+		android:id="@+id/action_library_update"
+		android:title="@string/action_library_update"
+		app:showAsAction="never"
+	/>
+
+	<item
+		android:id="@+id/action_settings"
+		android:title="@string/action_settings"
+		app:showAsAction="never"
+	/>
+
+	<!--
+	<group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_library"
             android:icon="@drawable/ic_menu_books"
@@ -11,7 +33,6 @@
         />
         <item
             android:id="@+id/nav_settings"
-            android:icon="@drawable/ic_menu_settings"
             android:title="@string/menu_settings"
         />
     </group>
@@ -28,5 +49,6 @@
                 android:title="Send" />
         </menu>
     </item>
+	-->
 
 </menu>

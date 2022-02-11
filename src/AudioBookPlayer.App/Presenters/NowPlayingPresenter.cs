@@ -1,75 +1,75 @@
 ﻿using Android.Graphics;
-using Android.OS;
 using Android.Support.V4.Media;
-using Android.Views;
-using Android.Widget;
-using AudioBookPlayer.App.Core;
-using AudioBookPlayer.App.Views.Activities;
-using AudioBookPlayer.App.Views.Fragments;
-using AudioBookPlayer.Core;
-using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
 using Android.Support.V4.Media.Session;
+using Android.Widget;
+using AndroidX.AppCompat.App;
+using AudioBookPlayer.Core;
+using AudioBookPlayer.MediaBrowserConnector;
+using System.Collections.Generic;
+using Android.Views;
+using AudioBookPlayer.App.Core.Internal;
 using Uri = Android.Net.Uri;
 
 #nullable enable
 
 namespace AudioBookPlayer.App.Presenters
 {
-    internal sealed class NowPlayingPresenter: MediaBrowserServiceConnector.IConnectCallback, MediaBrowserServiceConnector.IMediaServiceObserver
+    internal sealed class NowPlayingPresenter : MediaService.IMediaServiceListener
     {
-        private readonly string? mediaId;
-        private readonly MainActivity mainActivity;
+        private readonly MainActivityPresenter ownerPresenter;
+        private TextView? collapsedBookTitle;
+        private TextView? collapsedChapterTitle;
+        private TextView? expandedBookTitle;
+        private TextView? expandedBookAuthor;
+        private ImageView? coverImage;
+        private ImageButton? playButton;
+        private ImageButton? playPauseButton;
         private ImageButton? chapterSelectionButton;
-        private TextView? titleView;
-        private TextView? authorsView;
-        private ImageView? bookImage;
-        private MediaBrowserServiceConnector.IMediaBrowserService? browserService;
-        private IDisposable? chapterSelectionButtonSubscription;
-        private IList<MediaSessionCompat.QueueItem> queueItems;
+        private ImageButton? rewindButton;
+        private ImageButton? fastForwardButton;
 
-        public NowPlayingPresenter(string? mediaId, MainActivity mainActivity)
+        public NowPlayingPresenter(MainActivityPresenter ownerPresenter)
         {
-            this.mediaId = mediaId;
-            this.mainActivity = mainActivity;
-
-            chapterSelectionButton = null;
+            this.ownerPresenter = ownerPresenter;
         }
 
-        public void AttachView(View? view)
+        public void AttachView(AppCompatActivity activity)
         {
-            chapterSelectionButton = view?.FindViewById<ImageButton>(Resource.Id.chapter_selection_button);
+            playPauseButton = activity.FindViewById<ImageButton>(Resource.Id.play_pause_button);
+            chapterSelectionButton = activity.FindViewById<ImageButton>(Resource.Id.chapter_selection_button);
+            collapsedBookTitle = activity.FindViewById<TextView>(Resource.Id.collapsed_book_title);
+            collapsedChapterTitle = activity.FindViewById<TextView>(Resource.Id.collapsed_chapter_title);
+            expandedBookTitle = activity.FindViewById<TextView>(Resource.Id.expanded_book_title);
+            expandedBookAuthor = activity.FindViewById<TextView>(Resource.Id.expanded_book_author);
+            coverImage = activity.FindViewById<ImageView>(Resource.Id.book_cover_image);
+            
+            rewindButton = activity.FindViewById<ImageButton>(Resource.Id.rewind_button);
+            playButton = activity.FindViewById<ImageButton>(Resource.Id.play_button);
+            fastForwardButton = activity.FindViewById<ImageButton>(Resource.Id.fast_forward_button);
 
-            titleView = view?.FindViewById<TextView>(Resource.Id.book_title);
-            authorsView = view?.FindViewById<TextView>(Resource.Id.book_authors);
-            bookImage = view?.FindViewById<ImageView>(Resource.Id.book_image);
-
-            //var hint = view.FindViewById<TextView>(Resource.Id.hint_text_1);
-
-            // var preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
-            // var flag = preferences.GetBoolean("checkbox_preference", false);
-            // System.Diagnostics.Debug.WriteLine($"[NowPlayingFragment] [OnCreateView] Preference Flag: {flag}");
-
-            if (null != chapterSelectionButton)
+            if (null != playPauseButton)
             {
-                chapterSelectionButtonSubscription = Observable.FromEventPattern(
-                        handler => chapterSelectionButton.Click += handler,
-                        handler => chapterSelectionButton.Click -= handler
-                    )
-                    .Subscribe(pattern =>
-                    {
-                        var fragment = ChapterSelectionFragment.NewInstance(queueItems);
-                        fragment.Show(mainActivity.SupportFragmentManager, "dialog");
-                    });
+                var listener = ClickListener.Create(OnStartPlayButtonClick);
+                playPauseButton.SetOnClickListener(listener);
             }
 
-            var connector = mainActivity.ServiceConnector;
-
-            if (null != connector)
+            // playback controls
+            if (null != rewindButton)
             {
-                connector.Connect(this);
-                ;
+                var listener = ClickListener.Create(OnStartPlayButtonClick);
+                rewindButton.SetOnClickListener(listener);
+            }
+
+            if (null != playButton)
+            {
+                var listener = ClickListener.Create(OnStartPlayButtonClick);
+                playButton.SetOnClickListener(listener);
+            }
+
+            if (null != fastForwardButton)
+            {
+                var listener = ClickListener.Create(OnStartPlayButtonClick);
+                fastForwardButton.SetOnClickListener(listener);
             }
         }
 
@@ -79,59 +79,54 @@ namespace AudioBookPlayer.App.Presenters
             //button1ClickSubscription?.Dispose();
         }
 
-        #region MediaBrowserServiceConnector.IConnectCallback
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
+        private void OnStartPlayButtonClick(View? button)
         {
-            browserService = service;
-            var subscription = browserService.Subscribe(this);
-            browserService.PrepareFromMediaId(mediaId, Bundle.Empty);
+            //playbackToast?.Show();
         }
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
-        {
-            throw new NotImplementedException();
-        }
-
-        void MediaBrowserServiceConnector.IConnectCallback.OnFailed()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
 
         #region MediaBrowserServiceConnector.IMediaServiceObserver
 
-        void MediaBrowserServiceConnector.IMediaServiceObserver.OnMetadataChanged(MediaMetadataCompat metadata)
+        void MediaService.IMediaServiceListener.OnMetadataChanged(MediaMetadataCompat metadata)
         {
-            if (null != authorsView)
+            if (null != expandedBookAuthor)
             {
-               authorsView.Text = metadata.GetString(MediaMetadataCompat.MetadataKeyAlbumArtist);
+                expandedBookAuthor.Text = metadata.GetString(MediaMetadataCompat.MetadataKeyAlbumArtist);
             }
 
-            if (null != bookImage)
+            if (null != coverImage)
             {
                 var contentUri = metadata.GetString(MediaMetadataCompat.MetadataKeyAlbumArtUri);
                 var imageUri = Uri.Parse(contentUri);
 
                 if (null != imageUri)
                 {
-                    AlbumArt.GetInstance().Fetch(imageUri, bookImage, OnImageLoaded);
+                    AlbumArt.GetInstance().Fetch(imageUri, coverImage, OnImageLoaded);
                 }
             }
         }
 
-        void MediaBrowserServiceConnector.IMediaServiceObserver.OnQueueTitleChanged(string title)
+        void MediaService.IMediaServiceListener.OnQueueTitleChanged(string title)
         {
-            if (null != titleView)
+            if (null != collapsedBookTitle)
             {
-                titleView.Text = title;
+                collapsedBookTitle.Text = title;
+            }
+
+            if (null != expandedBookTitle)
+            {
+                expandedBookTitle.Text = title;
             }
         }
 
-        void MediaBrowserServiceConnector.IMediaServiceObserver.OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
+        void MediaService.IMediaServiceListener.OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
         {
-            queueItems = queue;
+            if (0 < queue.Count)
+            {
+                if (null != collapsedChapterTitle)
+                {
+                    collapsedChapterTitle.Text = queue[0].Description.Title;
+                }
+            }
         }
 
         #endregion

@@ -42,12 +42,12 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             var mediaId = Arguments?.GetString(IArgumentKeys.BookId);
 
-            presenter = new NowPlayingPresenter(mediaId, activity);
+            presenter = new NowPlayingPresenter(null);
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            inflater.Inflate(Resource.Menu.fragment_menu_now_playing, menu);
+            //inflater.Inflate(Resource.Menu.fragment_menu_now_playing, menu);
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -56,7 +56,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             if (null != view)
             {
-                presenter?.AttachView(view);
+                //presenter?.AttachView(view);
                 return view;
             }
 

@@ -6,24 +6,26 @@ using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.App.Views;
 using AudioBookPlayer.App.Views.Activities;
-using AudioBookPlayer.App.Views.Fragments;
 using System;
 using System.Collections.Generic;
-using FragmentManager = AndroidX.Fragment.App.FragmentManager;
-using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
+using AudioBookPlayer.MediaBrowserConnector;
+using MediaBrowserServiceConnector = AudioBookPlayer.MediaBrowserConnector.MediaBrowserServiceConnector;
 
 #nullable enable
 
 namespace AudioBookPlayer.App.Presenters
 {
-    internal abstract class BooksPresenter : MediaBrowserServiceConnector.IConnectCallback, MediaBrowserServiceConnector.IAudioBooksCallback
+    internal abstract class BooksPresenter : MediaBrowserServiceConnector.IConnectCallback, MediaService.IAudioBooksListener
     {
         protected MainActivity MainActivity
         {
             get;
         }
 
-        protected MediaBrowserServiceConnector? ServiceConnector => MainActivity.ServiceConnector;
+        public MediaBrowserServiceConnector? Connector
+        {
+            get;
+        }
 
         protected BooksListAdapter? Adapter
         {
@@ -31,7 +33,7 @@ namespace AudioBookPlayer.App.Presenters
             private set;
         }
 
-        protected MediaBrowserServiceConnector.IMediaBrowserService? BrowserService
+        protected MediaService? BrowserService
         {
             get;
             private set;
@@ -46,6 +48,7 @@ namespace AudioBookPlayer.App.Presenters
         protected BooksPresenter(MainActivity mainActivity)
         {
             MainActivity = mainActivity;
+            Connector = MediaBrowserServiceConnector.GetInstance();
 
             BrowserService = null;
             ListView = null;
@@ -66,11 +69,10 @@ namespace AudioBookPlayer.App.Presenters
                 }
 
                 ListView.EmptyView = view?.FindViewById<ViewStub>(Resource.Id.empty_books_list);
-                ListView.OnItemClickListener = new ItemClickListener(MainActivity.SupportFragmentManager);
                 ListView.Adapter = Adapter;
             }
 
-            ServiceConnector?.Connect(this);
+            Connector?.Connect(this);
         }
 
         public virtual void DetachView()
@@ -78,14 +80,19 @@ namespace AudioBookPlayer.App.Presenters
             Adapter?.Detach();
         }
 
+        protected abstract BooksListAdapter? CreateBookListAdapter();
+
         #region MediaBrowserServiceConnector.IConnectCallback
 
-        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaBrowserServiceConnector.IMediaBrowserService service)
+        void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaService service)
         {
             BrowserService = service;
             BrowserService.GetAudioBooks(this);
-            
-            DoBrowserServiceConnected();
+
+            if (null != ListView)
+            {
+                ListView.OnItemClickListener = new ItemClickListener(BrowserService);
+            }
         }
 
         void MediaBrowserServiceConnector.IConnectCallback.OnSuspended()
@@ -102,7 +109,7 @@ namespace AudioBookPlayer.App.Presenters
 
         #region MediaBrowserServiceConnector.IAudioBooksCallback
 
-        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksReady(IList<MediaBrowserCompat.MediaItem> mediaItems, Bundle options)
+        void MediaService.IAudioBooksListener.OnReady(IList<MediaBrowserCompat.MediaItem> mediaItems, Bundle options)
         {
             if (null == Adapter)
             {
@@ -125,27 +132,20 @@ namespace AudioBookPlayer.App.Presenters
             Adapter.AddRange(books);
         }
 
-        void MediaBrowserServiceConnector.IAudioBooksCallback.OnAudioBooksError(Bundle options)
+        void MediaService.IAudioBooksListener.OnError(Bundle options)
         {
             throw new NotImplementedException();
         }
 
         #endregion
 
-        protected virtual void DoBrowserServiceConnected()
-        {
-            ;
-        }
-
-        protected abstract BooksListAdapter? CreateBookListAdapter();
-
         protected sealed class ItemClickListener : Java.Lang.Object, AdapterView.IOnItemClickListener
         {
-            private readonly FragmentManager fragmentManager;
+            private readonly MediaService browserService;
 
-            public ItemClickListener(FragmentManager fragmentManager)
+            public ItemClickListener(MediaService browserService)
             {
-                this.fragmentManager = fragmentManager;
+                this.browserService = browserService;
             }
 
             public void OnItemClick(AdapterView? parent, View? view, int position, long id)
@@ -154,14 +154,7 @@ namespace AudioBookPlayer.App.Presenters
 
                 if (null != item)
                 {
-                    var fragment = NowPlayingFragment.NewInstance(item.MediaId);
-
-                    fragmentManager
-                        .BeginTransaction()
-                        .Replace(Resource.Id.nav_host_frame, fragment)
-                        .AddToBackStack(null)
-                        .SetTransition(FragmentTransaction.TransitFragmentOpen)
-                        .Commit();
+                    browserService.PrepareFromMediaId(item.MediaId, Bundle.Empty);
                 }
             }
         }

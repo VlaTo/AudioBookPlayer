@@ -21,8 +21,6 @@ namespace AudioBookPlayer.App.Views.Activities
 
         private async Task DoWork()
         {
-            // await Task.Delay(TimeSpan.FromSeconds(1.0d));
-
             try
             {
                 await AppActions.SetAsync(

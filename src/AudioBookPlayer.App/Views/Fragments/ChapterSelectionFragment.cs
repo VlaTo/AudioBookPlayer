@@ -9,6 +9,7 @@ using Android.Widget;
 using AndroidX.Core.View;
 using AndroidX.RecyclerView.Widget;
 using AudioBookPlayer.App.Core.Extensions;
+using Google.Android.Material.BottomAppBar;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Shape;
 
@@ -50,6 +51,9 @@ namespace AudioBookPlayer.App.Views.Fragments
             if (dialog is BottomSheetDialog bottom)
             {
                 bottom.Behavior.AddBottomSheetCallback(new MyBottomSheetBehaviorCallback());
+                bottom.Behavior.SetPeekHeight(140, true);
+                bottom.Behavior.Hideable = true;
+                //bottom.Behavior.HalfExpandedRatio = 0.65f;
             }
 
             return dialog;

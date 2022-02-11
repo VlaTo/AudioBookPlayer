@@ -1,15 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/app_bar_main">
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	app:layout_behavior="@string/appbar_scrolling_view_behavior"
+	tools:showIn="@layout/activity_main">
 
-    <FrameLayout
-        android:id="@+id/nav_host_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-    />
-</RelativeLayout>
+	<RelativeLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent">
+
+		<LinearLayout
+	        android:id="@+id/content_layout"
+	        android:orientation="vertical"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_alignParentTop="true"
+	        android:layout_above="@id/bottom_spacer">
+
+	        <com.google.android.material.tabs.TabLayout
+	            android:id="@+id/tabs_layout"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+	        />
+
+	        <androidx.viewpager2.widget.ViewPager2
+	            android:id="@+id/tabs_pager"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	        />
+
+		</LinearLayout>
+
+		<Space
+			android:id="@+id/bottom_spacer"
+			android:visibility="gone"
+			android:layout_width="match_parent"
+			android:layout_height="52dp"
+			android:layout_alignParentBottom="true"
+		/>
+
+	    <FrameLayout
+	        android:id="@+id/overlay_layout"
+	        android:background="#88000000"
+	        android:animateLayoutChanges="true"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:clickable="true"
+	        android:visibility="invisible">
+	        
+	        <LinearLayout
+		        android:orientation="vertical"
+				android:background="@drawable/round_rect_shape"
+		        android:layout_gravity="center"
+		        android:padding="16dp"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content">
+	            
+	            <com.google.android.material.progressindicator.CircularProgressIndicator
+		            android:layout_marginBottom="16dp"
+		            android:layout_gravity="center"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:indeterminate="true"
+	            />
+
+	            <TextView
+					android:id="@+id/busy_indicator_text"
+	                android:layout_width="180dp"
+	                android:layout_height="wrap_content"
+					android:textAlignment="center"
+	            />
+
+	        </LinearLayout>
+
+	    </FrameLayout>
+
+	</RelativeLayout>
+
+</LinearLayout>

@@ -66,28 +66,24 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Internal\ClickListener.cs" />
     <Compile Include="Core\ConnectExecutor.cs" />
     <Compile Include="Core\Extensions\BundleExtensions.cs" />
     <Compile Include="Core\Extensions\JavaObjectExtensions.cs" />
     <Compile Include="Core\Extensions\ObservableListExtensions.cs" />
     <Compile Include="Core\IListObserver.cs" />
+    <Compile Include="Core\Internal\ToastCallback.cs" />
     <Compile Include="Core\IObservableList.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.ControllerCallback.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnectionCallback.cs" />
     <Compile Include="Core\Extensions\TaskExtensions.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.CustomActionCallback.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.IConnectCallback.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.MediaBrowserServiceImpl.cs" />
-    <Compile Include="Core\MediaBrowserServiceConnector.MediaBrowserServiceImpl.CustomActionCallback.cs" />
     <Compile Include="Core\MediaBrowserSubscriptionCallback.cs" />
     <Compile Include="Core\ObservableList.cs" />
+    <Compile Include="Core\PermissionChecker.cs" />
     <Compile Include="Core\Services\IMediaBrowserService.cs" />
-    <Compile Include="Core\Stub.cs" />
     <Compile Include="Core\Tasks\LoadBooksTask.cs" />
     <Compile Include="Models\BaseItem.cs" />
     <Compile Include="Presenters\AllBooksPresenter.cs" />
     <Compile Include="Presenters\BooksPresenter.cs" />
+    <Compile Include="Presenters\MainActivityPresenter.cs" />
     <Compile Include="Presenters\NowPlayingPresenter.cs" />
     <Compile Include="Presenters\RecentBooksPresenter.cs" />
     <Compile Include="Views\AllBooksListAdapter.cs" />
@@ -97,13 +93,12 @@
     <Compile Include="Views\Fragments\AllBooksFragment.cs" />
     <Compile Include="Views\Fragments\ChapterSelectionFragment.cs" />
     <Compile Include="Views\Fragments\GalleryFragment.cs" />
-    <Compile Include="Views\Fragments\LibraryFragment.cs" />
+    <None Include="Views\Fragments\LibraryFragment.cs" />
     <Compile Include="Views\Activities\MainActivity.cs" />
     <Compile Include="Views\Fragments\NowPlayingFragment.cs" />
     <Compile Include="Views\Fragments\RecentBooksFragment.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Views\Activities\ShareActivity.cs" />
     <Compile Include="Views\Fragments\SettingsFragment.cs" />
     <Compile Include="Views\RecentBookListAdapter.cs" />
     <Compile Include="Views\WaitIndicator.cs" />
@@ -117,26 +112,18 @@
     <AndroidResource Include="Resources\layout\activity_main.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
-    <AndroidResource Include="Resources\layout\app_bar_main.xml">
-      <SubType>Designer</SubType>
-    </AndroidResource>
     <AndroidResource Include="Resources\layout\content_main.xml">
-      <SubType>Designer</SubType>
-    </AndroidResource>
-    <AndroidResource Include="Resources\layout\nav_header_main.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
     <AndroidResource Include="Resources\values\colors.xml" />
     <AndroidResource Include="Resources\values\dimens.xml" />
     <AndroidResource Include="Resources\values\drawables.xml" />
-    <AndroidResource Include="Resources\values\ic_launcher_background.xml" />
     <AndroidResource Include="Resources\values\strings.xml" />
     <AndroidResource Include="Resources\values\styles.xml" />
     <AndroidResource Include="Resources\drawable\side_nav_bar.xml" />
-    <AndroidResource Include="Resources\drawable-v21\ic_menu_send.xml" />
-    <AndroidResource Include="Resources\drawable-v21\ic_menu_share.xml" />
-    <AndroidResource Include="Resources\menu\activity_main_drawer.xml" />
-    <AndroidResource Include="Resources\menu\fragment_menu_options.xml" />
+    <AndroidResource Include="Resources\drawable\ic_menu_send.xml" />
+    <AndroidResource Include="Resources\drawable\ic_menu_share.xml" />
+    <AndroidResource Include="Resources\menu\main_activity_menu.xml" />
     <AndroidResource Include="Resources\mipmap-anydpi-v26\ic_launcher.xml" />
     <AndroidResource Include="Resources\mipmap-anydpi-v26\ic_launcher_round.xml" />
     <AndroidResource Include="Resources\mipmap-hdpi\ic_launcher.png" />
@@ -165,16 +152,10 @@
       <Version>1.1.1.11</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Google.Android.Material" Version="1.4.0.4" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.1" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\fragment_library.xml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\activity_share.xml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
@@ -187,6 +168,10 @@
     <ProjectReference Include="..\AudioBookPlayer.Domain\AudioBookPlayer.Domain.csproj">
       <Project>{17363e39-92c5-4781-bf54-e5ff7cbc7ada}</Project>
       <Name>AudioBookPlayer.Domain</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AudioBookPlayer.MediaBrowserConnector\AudioBookPlayer.MediaBrowserConnector.csproj">
+      <Project>{a356841b-8773-4de7-b947-7d8b1a0ffd6e}</Project>
+      <Name>AudioBookPlayer.MediaBrowserConnector</Name>
     </ProjectReference>
     <ProjectReference Include="..\AudioBookPlayer.MediaBrowserService\AudioBookPlayer.MediaBrowserService.csproj">
       <Project>{7518d836-bd79-41c1-840d-83a77e39bdb1}</Project>
@@ -233,7 +218,7 @@
     <AndroidResource Include="Resources\drawable\splash_logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_time.xml" />
+    <AndroidResource Include="Resources\drawable\ic_time.xml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\xml\fragment_settings.xml">
@@ -242,12 +227,12 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_menu_books.xml">
+    <AndroidResource Include="Resources\drawable\ic_menu_books.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_menu_settings.xml">
+    <AndroidResource Include="Resources\drawable\ic_menu_settings.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
@@ -280,15 +265,12 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\menu\fragment_menu_now_playing.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_action_bookmark.xml">
+    <AndroidResource Include="Resources\drawable\ic_action_bookmark.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_action_snooze.xml">
+    <AndroidResource Include="Resources\drawable\ic_action_snooze.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
@@ -298,7 +280,7 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_no_book.xml">
+    <AndroidResource Include="Resources\drawable\ic_no_book.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
@@ -318,16 +300,16 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_more_vert.xml" />
+    <AndroidResource Include="Resources\drawable\ic_more_vert.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_play.xml" />
+    <AndroidResource Include="Resources\drawable\ic_play.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_rewind.xml" />
+    <AndroidResource Include="Resources\drawable\ic_rewind.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable-v21\ic_fast_forward.xml" />
+    <AndroidResource Include="Resources\drawable\ic_fast_forward.xml" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\play_button_background.xml">
@@ -338,6 +320,38 @@
     <AndroidResource Include="Resources\drawable\gutter_background.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\bottom_drawer.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-hdpi\ic_logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-mdpi\ic_logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xhdpi\ic_logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxhdpi\ic_logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable-xxxhdpi\ic_logo_small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ic_play_circle.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ic_forward_10.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ic_replay_10.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

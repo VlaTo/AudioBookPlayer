@@ -62,7 +62,6 @@
     <Compile Include="Core\Internal\PackageValidator.cs" />
     <Compile Include="Core\Internal\PlaybackQueue.cs" />
     <Compile Include="Core\Internal\QueueHelper.cs" />
-    <Compile Include="Core\Internal\Stub.cs" />
     <Compile Include="Core\IProgressEx.cs" />
     <Compile Include="Core\MediaInfoProvider.cs" />
     <Compile Include="Core\MediaInfoProviderFactory.cs" />
