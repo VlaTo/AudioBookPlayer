@@ -91,11 +91,11 @@
     <Compile Include="Models\BookItem.cs" />
     <Compile Include="Views\Activities\SplashActivity.cs" />
     <Compile Include="Views\Fragments\AllBooksFragment.cs" />
+    <Compile Include="Views\Fragments\ChapterDialogFragment.cs" />
     <Compile Include="Views\Fragments\ChapterSelectionFragment.cs" />
     <Compile Include="Views\Fragments\GalleryFragment.cs" />
     <None Include="Views\Fragments\LibraryFragment.cs" />
     <Compile Include="Views\Activities\MainActivity.cs" />
-    <Compile Include="Views\Fragments\NowPlayingFragment.cs" />
     <Compile Include="Views\Fragments\RecentBooksFragment.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -188,12 +188,6 @@
     <AndroidResource Include="Resources\values-ru\strings.xml">
       <Generator>MSBuild:UpdateGeneratedFiles</Generator>
       <SubType>Designer</SubType>
-    </AndroidResource>
-  </ItemGroup>
-  <ItemGroup>
-    <AndroidResource Include="Resources\layout\fragment_now_playing.xml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
@@ -312,7 +306,7 @@
     <AndroidResource Include="Resources\drawable\ic_fast_forward.xml" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\play_button_background.xml">
+    <AndroidResource Include="Resources\drawable\big_play_button_background.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
   </ItemGroup>
@@ -352,6 +346,16 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\ic_replay_10.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\small_play_button_background.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\dialog_rounded_background.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

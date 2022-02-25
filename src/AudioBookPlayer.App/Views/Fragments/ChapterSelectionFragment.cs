@@ -17,7 +17,7 @@ namespace AudioBookPlayer.App.Views.Fragments
 {
     // https://medium.com/snapp-mobile/draggable-bottom-navigation-drawer-c56aba594f1e
     // https://habr.com/ru/post/567828/
-    public class ChapterSelectionFragment : BottomSheetDialogFragment
+    /*public class ChapterSelectionFragment : BottomSheetDialogFragment
     {
         private const string QueueArgumentName = "Queue.Items";
 
@@ -217,5 +217,5 @@ namespace AudioBookPlayer.App.Views.Fragments
                 return new ViewHolder(itemView);
             }
         }
-    }
+    }*/
 }

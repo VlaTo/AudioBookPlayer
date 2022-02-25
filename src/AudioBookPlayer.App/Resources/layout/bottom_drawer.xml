@@ -5,7 +5,7 @@
 	xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_navigation_container"
 	android:orientation="vertical"
-	android:background="#FF7A7978"
+	android:background="#FF4F4037"
     android:elevation="4dp"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
@@ -25,11 +25,12 @@
 		<ImageButton
 			android:id="@+id/play_pause_button"
 			android:src="@drawable/ic_play"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:background="@drawable/small_play_button_background"
+			android:layout_width="38dp"
+			android:layout_height="38dp"
 			android:layout_alignParentRight="true"
-			android:layout_alignParentTop="true"
-			android:layout_alignParentBottom="true"
+			android:layout_centerVertical="true"
+			android:layout_marginRight="8dp"
 		/>
 
 		<TextView
@@ -42,6 +43,7 @@
 			android:layout_alignParentLeft="true"
 			android:layout_alignParentTop="true"
 			android:layout_marginLeft="16dp"
+			android:layout_marginRight="8dp"
 			android:layout_toLeftOf="@id/play_pause_button"
 		/>
 
@@ -53,6 +55,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="16dp"
+			android:layout_marginRight="8dp"
 			android:layout_alignParentLeft="true"
 			android:layout_below="@id/collapsed_book_title"
 			android:layout_toLeftOf="@id/play_pause_button"
@@ -122,15 +125,14 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_alignParentRight="true"
-				android:layout_alignParentTop="true"
+				android:layout_centerVertical="true"
 			/>
 
 			<TextView
 				android:id="@+id/chapter_title"
 				android:textColor="@android:color/white"
-				android:textSize="14dp"
-				android:textStyle="bold"
-				android:text="00. Sample Chapter title 001"
+				android:textSize="15dp"
+				android:textStyle="normal"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_alignParentTop="true"
@@ -140,10 +142,9 @@
 
 			<TextView
 				android:id="@+id/chapter_section"
-				android:textColor="@android:color/white"
-				android:textSize="12dp"
-				android:textStyle="normal"
+				android:textColor="@android:color/darker_gray"
 				android:text="Book file - 1"
+				android:textAppearance="@style/TextAppearance.AppCompat.Small"
 				android:layout_height="wrap_content"
 				android:layout_width="match_parent"
 				android:layout_below="@id/chapter_title"
@@ -153,6 +154,16 @@
 
 		</RelativeLayout>
 
+		<SeekBar
+			android:id="@+id/chapter_seek_bar"
+			android:layout_width="298dp"
+			android:layout_height="wrap_content"
+			android:layout_below="@id/chapter_section"
+			android:layout_alignParentLeft="true"
+			android:layout_marginTop="8dp"
+			android:layout_gravity="center_horizontal"
+		/>
+
 		<RelativeLayout
 			android:gravity="center"
             android:layout_width="match_parent"
@@ -161,7 +172,7 @@
 
 			<ImageButton
 				android:id="@+id/rewind_button"
-				android:src="@drawable/ic_replay_10"
+				android:src="@drawable/ic_rewind"
 				android:background="@android:color/transparent"
 				android:contentDescription="Play"
 				android:layout_width="wrap_content"
@@ -178,6 +189,7 @@
 				android:src="@drawable/ic_play_circle"
 				android:background="@android:color/transparent"
 				android:tint="@android:color/white"
+				android:tintMode="src_in"
 				android:contentDescription="Play"
 				android:layout_width="62dp"
 				android:layout_height="62dp"
@@ -187,7 +199,7 @@
 
 			<ImageButton
 				android:id="@+id/fast_forward_button"
-				android:src="@drawable/ic_forward_10"
+				android:src="@drawable/ic_fast_forward"
 				android:background="@android:color/transparent"
 				android:contentDescription="Play"
 				android:scaleType="center"

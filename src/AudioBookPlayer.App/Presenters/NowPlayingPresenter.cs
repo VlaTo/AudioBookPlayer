@@ -7,7 +7,9 @@ using AudioBookPlayer.Core;
 using AudioBookPlayer.MediaBrowserConnector;
 using System.Collections.Generic;
 using Android.Views;
+using AndroidX.Core.App;
 using AudioBookPlayer.App.Core.Internal;
+using AudioBookPlayer.App.Views.Fragments;
 using Uri = Android.Net.Uri;
 
 #nullable enable
@@ -21,6 +23,7 @@ namespace AudioBookPlayer.App.Presenters
         private TextView? collapsedChapterTitle;
         private TextView? expandedBookTitle;
         private TextView? expandedBookAuthor;
+        private TextView? expandedChapterTitle;
         private ImageView? coverImage;
         private ImageButton? playButton;
         private ImageButton? playPauseButton;
@@ -42,10 +45,17 @@ namespace AudioBookPlayer.App.Presenters
             expandedBookTitle = activity.FindViewById<TextView>(Resource.Id.expanded_book_title);
             expandedBookAuthor = activity.FindViewById<TextView>(Resource.Id.expanded_book_author);
             coverImage = activity.FindViewById<ImageView>(Resource.Id.book_cover_image);
-            
+            expandedChapterTitle = activity.FindViewById<TextView>(Resource.Id.chapter_title);
+
             rewindButton = activity.FindViewById<ImageButton>(Resource.Id.rewind_button);
             playButton = activity.FindViewById<ImageButton>(Resource.Id.play_button);
             fastForwardButton = activity.FindViewById<ImageButton>(Resource.Id.fast_forward_button);
+
+            if (null != chapterSelectionButton)
+            {
+                var listener = ClickListener.Create(OnChapterSelectionButtonClick);
+                chapterSelectionButton.SetOnClickListener(listener);
+            }
 
             if (null != playPauseButton)
             {
@@ -77,6 +87,13 @@ namespace AudioBookPlayer.App.Presenters
         {
             //imageLoadingTask.ClearQueue();
             //button1ClickSubscription?.Dispose();
+        }
+
+        private void OnChapterSelectionButtonClick(View? button)
+        {
+            var dialog = ChapterDialogFragment.NewInstance();
+
+            dialog.Show(ownerPresenter.SupportFragmentManager, null);
         }
 
         private void OnStartPlayButtonClick(View? button)
@@ -125,6 +142,11 @@ namespace AudioBookPlayer.App.Presenters
                 if (null != collapsedChapterTitle)
                 {
                     collapsedChapterTitle.Text = queue[0].Description.Title;
+                }
+
+                if (null != expandedChapterTitle)
+                {
+                    expandedChapterTitle.Text = queue[0].Description.Title;
                 }
             }
         }

@@ -18,6 +18,7 @@ using Google.Android.Material.Tabs;
 using System;
 using System.Collections.Generic;
 using Fragment = AndroidX.Fragment.App.Fragment;
+using FragmentManager = AndroidX.Fragment.App.FragmentManager;
 using MediaBrowserServiceConnector = AudioBookPlayer.MediaBrowserConnector.MediaBrowserServiceConnector;
 using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
@@ -48,6 +49,8 @@ namespace AudioBookPlayer.App.Presenters
         {
             get;
         }
+
+        public FragmentManager? SupportFragmentManager => activityCompat?.SupportFragmentManager;
 
         public MainActivityPresenter()
         {
