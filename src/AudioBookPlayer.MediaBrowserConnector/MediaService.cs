@@ -6,6 +6,8 @@ using AudioBookPlayer.Core;
 using Java.Lang;
 using System;
 using System.Collections.Generic;
+using Android.Hardware.Camera2;
+using Android.Media.Session;
 using Debug = System.Diagnostics.Debug;
 
 namespace AudioBookPlayer.MediaBrowserConnector
@@ -34,7 +36,9 @@ namespace AudioBookPlayer.MediaBrowserConnector
 
             void OnQueueTitleChanged(string title);
 
-            void OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue);
+            void OnQueueChanged();
+
+            void OnPlaybackStateChanged();
         }
 
         #endregion
@@ -63,7 +67,30 @@ namespace AudioBookPlayer.MediaBrowserConnector
         }
 
         #endregion
-        
+
+        public long ActiveQueueItemId
+        {
+            get
+            {
+                var playbackState = mediaController.PlaybackState;
+                return playbackState.ActiveQueueItemId;
+            }
+            set
+            {
+                var transport = mediaController.GetTransportControls();
+                transport.SkipToQueueItem(value);
+            }
+        }
+
+        public IList<MediaSessionCompat.QueueItem> MediaQueue
+        {
+            get
+            {
+                var queue = mediaController.Queue;
+                return queue;
+            }
+        }
+
         public MediaService(Context context, MediaBrowserCompat mediaBrowser)
         {
             this.mediaBrowser = mediaBrowser;
@@ -81,7 +108,7 @@ namespace AudioBookPlayer.MediaBrowserConnector
             var callbacks = new MediaControllerCallback
             {
                 OnMetadataChangedImpl = DoMetadataChanged,
-                // OnPlaybackStateChangedImpl = DoPlaybackStateChanged,
+                OnPlaybackStateChangedImpl = DoPlaybackStateChanged,
                 OnQueueChangedImpl = DoQueueChanged,
                 OnQueueTitleChangedImpl = DoQueueTitleChanged
             };
@@ -260,7 +287,28 @@ namespace AudioBookPlayer.MediaBrowserConnector
 
             for (var index = 0; index < handlers.Length; index++)
             {
-                handlers[index].OnQueueChanged(queue);
+                handlers[index].OnQueueChanged();
+            }
+        }
+
+        private void DoPlaybackStateChanged(PlaybackStateCompat state)
+        {
+            var playbackState = mediaController.PlaybackState;
+
+            switch (playbackState.State)
+            {
+                case PlaybackStateCompat.StateStopped:
+                {
+
+                    break;
+                }
+            }
+
+            var handlers = listeners.ToArray();
+
+            for (var index = 0; index < handlers.Length; index++)
+            {
+                handlers[index].OnPlaybackStateChanged();
             }
         }
 

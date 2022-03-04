@@ -1,6 +1,8 @@
 ﻿using System;
 using Android.Views;
 
+#nullable enable
+
 namespace AudioBookPlayer.App.Core.Internal
 {
     internal class ClickListener : Java.Lang.Object, View.IOnClickListener
@@ -63,3 +65,5 @@ namespace AudioBookPlayer.App.Core.Internal
         }
     }
 }
+
+#nullable restore

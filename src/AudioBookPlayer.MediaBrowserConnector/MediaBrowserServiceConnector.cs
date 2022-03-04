@@ -18,7 +18,7 @@ namespace AudioBookPlayer.MediaBrowserConnector
         private readonly Context context;
         private ConnectionState state;
         private bool disposed;
-        private MediaService? mediaBrowserService;
+        private MediaService? mediaService;
         private readonly MediaBrowserCompat mediaBrowser;
         private readonly List<IConnectCallback> connectCallbacks;
 
@@ -59,7 +59,7 @@ namespace AudioBookPlayer.MediaBrowserConnector
             this.context = context;
 
             state = ConnectionState.NotConnected;
-            mediaBrowserService = null;
+            mediaService = null;
             mediaBrowser = new MediaBrowserCompat(context, componentName, connectionCallback, Bundle.Empty);
             connectCallbacks = new List<IConnectCallback>();
         }
@@ -100,7 +100,10 @@ namespace AudioBookPlayer.MediaBrowserConnector
 
                 case ConnectionState.Connected:
                 {
-                    callback.OnConnected(mediaBrowserService);
+                    if (null != mediaService)
+                    {
+                        callback.OnConnected(mediaService);
+                    }
 
                     break;
                 }
@@ -118,6 +121,14 @@ namespace AudioBookPlayer.MediaBrowserConnector
 
                     break;
                 }
+            }
+        }
+
+        public void Disconnect(IConnectCallback callback)
+        {
+            if (connectCallbacks.Remove(callback))
+            {
+                ;
             }
         }
 
@@ -143,14 +154,14 @@ namespace AudioBookPlayer.MediaBrowserConnector
             EnsureNotDisposed();
 
             state = ConnectionState.Connected;
-            mediaBrowserService = new MediaService(context, mediaBrowser);
+            mediaService = new MediaService(context, mediaBrowser);
             
             var callbacks = connectCallbacks.ToArray();
 
             for (var index = 0; index < callbacks.Length; index++)
             {
                 var callback = callbacks[index];
-                callback.OnConnected(mediaBrowserService);
+                callback.OnConnected(mediaService);
             }
         }
 
@@ -175,7 +186,7 @@ namespace AudioBookPlayer.MediaBrowserConnector
             EnsureNotDisposed();
 
             state = ConnectionState.Failed;
-            mediaBrowserService = null;
+            mediaService = null;
 
             var callbacks = connectCallbacks.ToArray();
 

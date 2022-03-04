@@ -30,14 +30,14 @@ namespace AudioBookPlayer.App.Views.Fragments
 
             if (null != view)
             {
-                var seekBar = (SeekBarPreference)FindPreference("preference_rewind_offset");
+                var seekBar = (SeekBarPreference)FindPreference("Playback.SeekStep");
 
                 seekBar.SeekBarIncrement = 5;
                 seekBar.ShowSeekBarValue = true;
                 seekBar.OnPreferenceChangeListener = this;
             }
 
-            ((MainActivity)Activity).SupportActionBar.SetTitle(Resource.String.title_settings);
+            //((MainActivity)Activity).SupportActionBar.SetTitle(Resource.String.title_settings);
 
             return view;
         }

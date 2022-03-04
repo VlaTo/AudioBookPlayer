@@ -26,6 +26,9 @@ using AudioBookPlayer.MediaBrowserService.Core.Extensions;
 
 namespace AudioBookPlayer.MediaBrowserService
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Service(Enabled = true, Exported = true)]
     [IntentFilter(new []{ ServiceInterface })]
     public partial class MediaBrowserService : MediaBrowserServiceCompat, MediaBrowserService.IMediaLibraryActions, MediaBrowserService.IUpdateLibrarySteps
@@ -37,7 +40,6 @@ namespace AudioBookPlayer.MediaBrowserService
         private const int UpdateStepProcessing = 2;
         private const string ExtraRecent = "__RECENT__";
 
-        //private LiteDbContext? dbContext;
         private PackageValidator? packageValidator;
         private Callback? mediaSessionCallback;
         private BooksService? booksService;
@@ -59,7 +61,6 @@ namespace AudioBookPlayer.MediaBrowserService
             var intent = PackageManager?.GetLaunchIntentForPackage(componentName.PackageName);
             var pendingIntent = PendingIntent.GetActivity(Application.Context, 0, intent, PendingIntentFlags.UpdateCurrent);
 
-            //playbackQueue = new PlaybackQueue();
             packageValidator = PackageValidator.Create(Application.Context);
             mediaSession = new MediaSessionCompat(Application.Context, nameof(MediaBrowserService), componentName, pendingIntent);
             mediaSession.SetFlags((int)(MediaSessionFlags.HandlesMediaButtons | MediaSessionFlags.HandlesTransportControls));
@@ -72,7 +73,7 @@ namespace AudioBookPlayer.MediaBrowserService
                 // OnPlayImpl = DoPlay,        // android 10+ playback resumption
                 // OnPauseImpl = DoPause,
                 // OnStopImpl = DoStop,
-                // OnSkipToQueueItemImpl = DoSkipToQueueItem,
+                OnSkipToQueueItemImpl = DoSkipToQueueItem,
                 // OnSkipToNextImpl = DoSkipToNext,
                 // OnSkipToPreviousImpl = DoSkipToPrevious,
                 // OnFastForwardImpl = DoFastForward,
@@ -271,6 +272,27 @@ namespace AudioBookPlayer.MediaBrowserService
             }
         }
 
+        private void DoSkipToQueueItem(long queueId)
+        {
+            if (null != playbackQueue)
+            {
+                var index = playbackQueue.FindIndex(queueId);
+
+                if (playbackQueue.IsValidIndex(index))
+                {
+                    playbackQueue.CurrentIndex = index;
+                    
+                    if (null != playbackStateBuilder)
+                    {
+                        var extra = BuildMediaFragmentBundle(playbackQueue.Current);
+
+                        playbackStateBuilder.SetExtras(extra);
+                        UpdatePlaybackState(-1, null);
+                    }
+                }
+            }
+        }
+
         private void ProvideExtraRecent(Result result)
         {
             var list = new JavaList<MediaBrowserCompat.MediaItem>();
@@ -332,7 +354,7 @@ namespace AudioBookPlayer.MediaBrowserService
             {
                 var extra = BuildMediaFragmentBundle(playbackQueue.Current);
                 playbackStateBuilder.SetExtras(extra);
-                //UpdatePlaybackState(-1, null);
+                UpdatePlaybackState(-1, null);
             }
 
             if (null == metadata.Description.IconBitmap && null != metadata.Description.IconUri)
@@ -357,6 +379,32 @@ namespace AudioBookPlayer.MediaBrowserService
             }
         }
 
+        private void UpdatePlaybackState(int mediaPosition, object o)
+        {
+            var mediaItem = playbackQueue.Current;
+
+            if (null != mediaItem)
+            {
+                playbackStateBuilder.SetActiveQueueItemId(mediaItem.QueueId);
+            }
+
+            mediaSession.SetPlaybackState(playbackStateBuilder.Build());
+        }
+
+        #region IPlaybackCallback callbacks
+
+        private void DoPlaybackPositionChanged()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DoPlaybackStateChanged()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         private static MediaMetadataCompat BuildAudioBookMetadata(AudioBook audioBook)
         {
             var mediaMetadata = new MediaMetadataCompat.Builder();
@@ -380,7 +428,7 @@ namespace AudioBookPlayer.MediaBrowserService
 
             return mediaMetadata.Build();
         }
-        
+
         private static Bundle BuildMediaFragmentBundle(MediaSessionCompat.QueueItem queueItem)
         {
             var source = queueItem.Description.Extras;
@@ -395,20 +443,6 @@ namespace AudioBookPlayer.MediaBrowserService
 
             return bundle;
         }
-
-        #region IPlaybackCallback callbacks
-
-        private void DoPlaybackPositionChanged()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void DoPlaybackStateChanged()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
 
         public interface IMediaLibraryActions
         {

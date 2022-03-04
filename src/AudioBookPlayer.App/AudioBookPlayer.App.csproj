@@ -83,6 +83,8 @@
     <Compile Include="Models\BaseItem.cs" />
     <Compile Include="Presenters\AllBooksPresenter.cs" />
     <Compile Include="Presenters\BooksPresenter.cs" />
+    <Compile Include="Presenters\ChapterDialogPresenter.cs" />
+    <Compile Include="Presenters\LibraryPresenter.cs" />
     <Compile Include="Presenters\MainActivityPresenter.cs" />
     <Compile Include="Presenters\NowPlayingPresenter.cs" />
     <Compile Include="Presenters\RecentBooksPresenter.cs" />
@@ -92,9 +94,7 @@
     <Compile Include="Views\Activities\SplashActivity.cs" />
     <Compile Include="Views\Fragments\AllBooksFragment.cs" />
     <Compile Include="Views\Fragments\ChapterDialogFragment.cs" />
-    <Compile Include="Views\Fragments\ChapterSelectionFragment.cs" />
-    <Compile Include="Views\Fragments\GalleryFragment.cs" />
-    <None Include="Views\Fragments\LibraryFragment.cs" />
+    <Compile Include="Views\Fragments\LibraryFragment.cs" />
     <Compile Include="Views\Activities\MainActivity.cs" />
     <Compile Include="Views\Fragments\RecentBooksFragment.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
@@ -147,6 +147,9 @@
     </PackageReference>
     <PackageReference Include="Xamarin.AndroidX.MediaRouter">
       <Version>1.2.5.2</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.Navigation.Fragment">
+      <Version>2.3.5.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.AndroidX.Preference">
       <Version>1.1.1.11</Version>
@@ -355,6 +358,25 @@
   <ItemGroup>
     <AndroidResource Include="Resources\drawable\dialog_rounded_background.xml">
       <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\ic_bar_chart.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\shadow_top_background.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\shadow_rect_background.xml">
+      <SubType>Designer</SubType>
+    </AndroidResource>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\content_chapter_selection_header.xml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:UpdateGeneratedFiles</Generator>
     </AndroidResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

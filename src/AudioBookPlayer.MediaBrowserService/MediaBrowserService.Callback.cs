@@ -15,13 +15,22 @@ namespace AudioBookPlayer.MediaBrowserService
                 set;
             }
 
+            public Action<long> OnSkipToQueueItemImpl
+            {
+                get; 
+                set;
+            }
+
             public Callback()
             {
                 OnPrepareFromMediaIdImpl = Stub.Nop<string, Bundle>();
+                OnSkipToQueueItemImpl = Stub.Nop<long>();
             }
 
             public override void OnPrepareFromMediaId(string mediaId, Bundle extras) =>
                 OnPrepareFromMediaIdImpl.Invoke(mediaId, extras);
+
+            public override void OnSkipToQueueItem(long id) => OnSkipToQueueItemImpl.Invoke(id);
         }
     }
 }

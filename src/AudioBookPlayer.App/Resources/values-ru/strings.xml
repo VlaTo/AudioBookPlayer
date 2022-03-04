@@ -40,6 +40,9 @@
 	<string name="book_item_duration_format">{0:h\\:mm\\:ss}</string>
 	<string name="book_header_recent">Последние</string>
 	<string name="book_header_today">Сегодня</string>
+	
+	<string name="chapter_dialog_item_format">{0}. {1}</string>
+
 
 	<plurals name="duration_hours_plural">
 		<item quantity="one">%1$d hr</item>

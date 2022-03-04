@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -10,6 +8,8 @@ using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Presenters;
 using AudioBookPlayer.Core;
 using Xamarin.Essentials;
+
+#nullable enable
 
 namespace AudioBookPlayer.App.Views.Activities
 {
@@ -112,3 +112,4 @@ namespace AudioBookPlayer.App.Views.Activities
     }
 }
 
+#nullable restore

@@ -1,24 +1,20 @@
 ﻿using Android;
 using Android.App;
 using Android.Content.PM;
+using Android.Graphics;
 using Android.Support.V4.Media;
-using Android.Support.V4.Media.Session;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
-using AndroidX.Fragment.App;
-using AndroidX.ViewPager2.Adapter;
-using AndroidX.ViewPager2.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Core.Internal;
 using AudioBookPlayer.App.Views.Fragments;
 using AudioBookPlayer.MediaBrowserConnector;
 using Google.Android.Material.BottomSheet;
-using Google.Android.Material.Tabs;
 using System;
-using System.Collections.Generic;
-using Fragment = AndroidX.Fragment.App.Fragment;
 using FragmentManager = AndroidX.Fragment.App.FragmentManager;
+using FragmentTransaction = AndroidX.Fragment.App.FragmentTransaction;
 using MediaBrowserServiceConnector = AudioBookPlayer.MediaBrowserConnector.MediaBrowserServiceConnector;
 using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
@@ -26,46 +22,44 @@ using Toolbar = AndroidX.AppCompat.Widget.Toolbar;
 
 namespace AudioBookPlayer.App.Presenters
 {
-    internal sealed class MainActivityPresenter
-        : MediaBrowserServiceConnector.IConnectCallback, 
-        MediaService.IMediaServiceListener, 
-        MediaService.IUpdateListener
+    internal sealed class MainActivityPresenter : MediaBrowserServiceConnector.IConnectCallback, MediaService.IMediaServiceListener, MediaService.IUpdateListener
     {
-        private readonly Toast? settingsToast;
-        //private readonly Toast? playbackToast;
         private readonly Toast? exitHintToast;
         private readonly NowPlayingPresenter nowPlayingPresenter;
         private AppCompatActivity? activityCompat;
-        private MediaService? browserService;
         private Toolbar? toolbar;
         private BottomSheetBehavior? bottomBehavior;
         private Space? bottomSpacer;
-        private TabLayout? tabsLayout;
-        private TabLayoutMediator? layoutMediator;
-        private ViewPager2? viewPager;
+        //private TabLayout? tabsLayout;
+        //private TabLayoutMediator? layoutMediator;
+        //private ViewPager2? viewPager;
         private bool isExitHintShown;
+
+        public FragmentManager? SupportFragmentManager => activityCompat?.SupportFragmentManager;
 
         public MediaBrowserServiceConnector Connector
         {
             get;
         }
 
-        public FragmentManager? SupportFragmentManager => activityCompat?.SupportFragmentManager;
+        public MediaService? MediaService
+        {
+            get;
+            private set;
+        }
 
         public MainActivityPresenter()
         {
-            Connector = MediaBrowserServiceConnector.GetInstance();
-
             nowPlayingPresenter = new NowPlayingPresenter(this);
-            settingsToast = Toast.MakeText(Application.Context, "Settings was selected", ToastLength.Short);
-            //playbackToast = Toast.MakeText(Application.Context, "You started a playback", ToastLength.Short);
-            
             exitHintToast = Toast.MakeText(Application.Context, Resource.String.exit_hint, ToastLength.Short);
 
             if (null != exitHintToast)
             {
                 exitHintToast.AddCallback(new ToastCallback(OnExitHintShown, OnExitHintHidden));
             }
+
+            Connector = MediaBrowserServiceConnector.GetInstance();
+            MediaService = null;
         }
 
         public void AttachView(AppCompatActivity activity)
@@ -76,24 +70,30 @@ namespace AudioBookPlayer.App.Presenters
 
             toolbar = activity.FindViewById<Toolbar>(Resource.Id.toolbar);
             bottomSpacer = activity.FindViewById<Space>(Resource.Id.bottom_spacer);
-            viewPager = activity.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
-            tabsLayout = activity.FindViewById<TabLayout>(Resource.Id.tabs_layout);
+            //viewPager = activity.FindViewById<ViewPager2>(Resource.Id.tabs_pager);
+            //tabsLayout = activity.FindViewById<TabLayout>(Resource.Id.tabs_layout);
 
             nowPlayingPresenter.AttachView(activity);
 
+            //var appBarLayout = activity.FindViewById<AppBarLayout>(Resource.Id.app_bar_layout);
             var bottomContainer = activity.FindViewById<RelativeLayout>(Resource.Id.bottom_navigation_container);
-            var density = activity.Resources.DisplayMetrics.Density;
-
-            bottomBehavior = BottomSheetBehavior.From(bottomContainer);
-            bottomBehavior.PeekHeight = Convert.ToInt32(52 * density);
-
-            var drawerOverlay = activity.FindViewById<FrameLayout>(Resource.Id.drawer_overlay);
+            //var drawerOverlay = activity.FindViewById<FrameLayout>(Resource.Id.drawer_overlay);
             var collapsedDrawer = activity.FindViewById<RelativeLayout>(Resource.Id.collapsed_drawer);
             var expandedDrawer = activity.FindViewById<LinearLayout>(Resource.Id.expanded_drawer);
-            var behaviorCallback = new BehaviorCallback(collapsedDrawer, expandedDrawer, drawerOverlay);
+            var behaviorCallback = new BehaviorCallback(collapsedDrawer, expandedDrawer);
+            var peekHeight = TypedValue.ApplyDimension(ComplexUnitType.Dip, 52.0f, activity.Resources?.DisplayMetrics);
 
+            bottomBehavior = BottomSheetBehavior.From(bottomContainer);
             bottomBehavior.AddBottomSheetCallback(behaviorCallback);
+            bottomBehavior.SetPeekHeight((int)peekHeight, true);
             bottomBehavior.State = BottomSheetBehavior.StateHidden;
+
+            if (null != bottomContainer)
+            {
+                bottomContainer.BackgroundTintBlendMode = BlendMode.Src;
+                bottomContainer.BackgroundTintMode = PorterDuff.Mode.Overlay;
+                //bottomContainer.BackgroundTintList = ColorStateList.ValueOf(Color.Aquamarine);
+            }
 
             if (null != toolbar)
             {
@@ -103,7 +103,7 @@ namespace AudioBookPlayer.App.Presenters
                 activity.SupportActionBar.SetLogo(Resource.Drawable.ic_logo_small);
             }
 
-            if (null != viewPager)
+            /*if (null != viewPager)
             {
                  viewPager.Adapter = new ViewsAdapter(
                      activity,
@@ -118,8 +118,18 @@ namespace AudioBookPlayer.App.Presenters
 
                 layoutMediator = new TabLayoutMediator(tabsLayout, viewPager, true, true, configurator);
                 layoutMediator.Attach();
-            }
+            }*/
 
+            if (null != SupportFragmentManager)
+            {
+                var navigation = SupportFragmentManager.BeginTransaction();
+                navigation
+                    .SetReorderingAllowed(true)
+                    .AddToBackStack(null)
+                    .Add(Resource.Id.navigation_host, LibraryFragment.NewInstance())
+                    .Commit();
+            }
+            
             Connector.Connect(this);
         }
 
@@ -134,6 +144,17 @@ namespace AudioBookPlayer.App.Presenters
             {
                 bottomBehavior.State = BottomSheetBehavior.StateCollapsed;
                 return;
+            }
+
+            if (null != SupportFragmentManager)
+            {
+                var count = SupportFragmentManager.BackStackEntryCount;
+
+                if (1 < count)
+                {
+                    SupportFragmentManager.PopBackStack();
+                    return;
+                }
             }
 
             if (isExitHintShown)
@@ -151,7 +172,7 @@ namespace AudioBookPlayer.App.Presenters
         {
             void DoRequestPermissionsResult(int arg1, string[] arg2, Permission[] arg3)
             {
-                browserService.UpdateLibrary(this);
+                MediaService.UpdateLibrary(this);
             }
 
             switch (menuItem.ItemId)
@@ -163,7 +184,7 @@ namespace AudioBookPlayer.App.Presenters
 
                 case Resource.Id.action_library_update:
                 {
-                    if (null != browserService)
+                    if (null != MediaService)
                     {
                         var view = activityCompat?.Window?.DecorView.RootView;
                         var permissions = new[] { Manifest.Permission.ReadExternalStorage };
@@ -176,8 +197,21 @@ namespace AudioBookPlayer.App.Presenters
 
                 case Resource.Id.action_settings:
                 {
-                    settingsToast?.Show();
-                    return true;
+                    var fragmentManager = activityCompat?.SupportFragmentManager;
+
+                    if (null != fragmentManager)
+                    {
+                        fragmentManager.BeginTransaction()
+                            .SetReorderingAllowed(true)
+                            .AddToBackStack(null)
+                            .Replace(Resource.Id.navigation_host, SettingsFragment.NewInstance())
+                            .SetTransition(FragmentTransaction.TransitFragmentOpen)
+                            .Commit();
+
+                        return true;
+                    }
+
+                    return false;
                 }
             }
 
@@ -198,12 +232,12 @@ namespace AudioBookPlayer.App.Presenters
 
         void MediaBrowserServiceConnector.IConnectCallback.OnConnected(MediaService service)
         {
-            browserService = service;
+            MediaService = service;
 
-            if (null != browserService)
+            if (null != MediaService)
             {
-                browserService.AddListener(this);
-                browserService.AddListener(nowPlayingPresenter);
+                MediaService.AddListener(this);
+                nowPlayingPresenter.AddListener(MediaService);
             }
         }
 
@@ -226,9 +260,9 @@ namespace AudioBookPlayer.App.Presenters
             ;
         }
 
-        void MediaService.IMediaServiceListener.OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
+        void MediaService.IMediaServiceListener.OnQueueChanged()
         {
-            if (0 < queue.Count)
+            if (null != MediaService && 0 < MediaService.MediaQueue.Count)
             {
                 if (null != bottomSpacer)
                 {
@@ -259,6 +293,11 @@ namespace AudioBookPlayer.App.Presenters
             ;
         }
 
+        void MediaService.IMediaServiceListener.OnPlaybackStateChanged()
+        {
+            ;
+        }
+
         #endregion
 
         #region MediaService.IUpdateListener
@@ -275,20 +314,21 @@ namespace AudioBookPlayer.App.Presenters
 
         #endregion
 
+        #region BehaviorCallback
+
         private sealed class BehaviorCallback : BottomSheetBehavior.BottomSheetCallback
         {
             private readonly ViewGroup? collapsedDrawer;
             private readonly ViewGroup? expandedDrawer;
-            private readonly ViewGroup? drawerOverlay;
+            //private readonly ViewGroup? drawerOverlay;
 
             public BehaviorCallback(
                 ViewGroup? collapsedDrawer,
-                ViewGroup? expandedDrawer,
-                ViewGroup? drawerOverlay)
+                ViewGroup? expandedDrawer)
             {
                 this.collapsedDrawer = collapsedDrawer;
                 this.expandedDrawer = expandedDrawer;
-                this.drawerOverlay = drawerOverlay;
+                //this.drawerOverlay = drawerOverlay;
             }
 
             public override void OnSlide(View _, float slideOffset)
@@ -304,14 +344,14 @@ namespace AudioBookPlayer.App.Presenters
 
                 collapsedDrawer.Alpha = 1 - 2 * slideOffset;
                 expandedDrawer.Alpha = slideOffset * slideOffset;
-                drawerOverlay.Alpha = slideOffset * slideOffset;
+                //drawerOverlay.Alpha = slideOffset * slideOffset;
 
                 // Когда оффсет превышает половину, мы скрываем collapsed layout и делаем видимым expanded
                 if (0.15f < slideOffset)
                 {
                     collapsedDrawer.Visibility = ViewStates.Gone;
                     expandedDrawer.Visibility = ViewStates.Visible;
-                    drawerOverlay.Visibility = ViewStates.Visible;
+                    //drawerOverlay.Visibility = ViewStates.Visible;
                 }
 
                 // Если же оффсет меньше половины, а expanded layout всё ещё виден, то нужно скрывать его и показывать collapsed
@@ -319,7 +359,7 @@ namespace AudioBookPlayer.App.Presenters
                 {
                     collapsedDrawer.Visibility = ViewStates.Visible;
                     expandedDrawer.Visibility = ViewStates.Invisible;
-                    drawerOverlay.Visibility = ViewStates.Invisible;
+                    //drawerOverlay.Visibility = ViewStates.Invisible;
                 }
             }
 
@@ -337,38 +377,7 @@ namespace AudioBookPlayer.App.Presenters
             }
         }
 
-        private sealed class ViewsAdapter : FragmentStateAdapter
-        {
-            private readonly Func<Fragment>[] builders;
-
-            public override int ItemCount => builders.Length;
-
-            public ViewsAdapter(FragmentActivity activity, params Func<Fragment>[] builders)
-                : base(activity)
-            {
-                this.builders = builders;
-            }
-
-            public override Fragment CreateFragment(int index) => builders[index].Invoke();
-        }
-
-        private sealed class TabLayoutConfigurator : Java.Lang.Object, TabLayoutMediator.ITabConfigurationStrategy
-        {
-            public TabLayoutConfigurator()
-            {
-            }
-
-            public void OnConfigureTab(TabLayout.Tab p0, int p1)
-            {
-                var resourceIds = new[]
-                {
-                    Resource.String.tab_all_books,
-                    Resource.String.tab_recent_books
-                };
-
-                p0.SetText(resourceIds[p1]);
-            }
-        }
+        #endregion
     }
 }
 

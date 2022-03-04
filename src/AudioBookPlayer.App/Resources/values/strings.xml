@@ -27,11 +27,15 @@
 
 	<string name="empty_content_title">There is no books yet</string>
 	
+	<!-- Preferences -->
 	<string name="preference_play_group">Player</string>
+	<string name="preference_chapters_group">Chapters</string>
 	<string name="preference_title_play_on_headset_connected">Continue Playing</string>
 	<string name="preference_description_play_on_headset_connected">Continue playing after headset are connected again</string>
 	<string name="preference_title_rewind_offset">Rewind offset</string>
 	<string name="preference_description_rewind_offset">Rewind amount of time in seconds to rewind or fast forward to move</string>
+	<string name="preference_title_close_dialog_after_tap">Close chapters dialog</string>
+	<string name="preference_description_close_dialog_after_tap">Close dialog of chapters immediately after selection done</string>
 
 	<string name="library_update_collecting">Collecting info (%1$.0f %%) ...</string>
 	<string name="library_update_processing">Processing info (%1$.0f %%) ...</string>
@@ -39,6 +43,8 @@
 	<string name="book_item_duration_format">{0:h\\:mm\\:ss}</string>
 	<string name="book_header_recent">Latest</string>
 	<string name="book_header_today">Today</string>
+	
+	<string name="chapter_dialog_item_format">{0} - {1}</string>
 
 	<plurals name="duration_hours_plural">
 		<item quantity="one">%1$d hr</item>

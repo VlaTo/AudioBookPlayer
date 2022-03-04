@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--android:background="@drawable/top_shadow_background"-->
 <RelativeLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/bottom_navigation_container"
+	android:background="#FF636363"
 	android:orientation="vertical"
-	android:background="#FF4F4037"
-    android:elevation="4dp"
     android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:behavior_hideable="true"
+    app:behavior_draggable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
 	<!-- -->
@@ -44,6 +45,7 @@
 			android:layout_alignParentTop="true"
 			android:layout_marginLeft="16dp"
 			android:layout_marginRight="8dp"
+			android:layout_marginTop="4dp"
 			android:layout_toLeftOf="@id/play_pause_button"
 		/>
 
@@ -96,17 +98,15 @@
 		    android:textColor="@android:color/darker_gray"
 	    />
 
-	    <ImageView
+		<ImageView
 			android:id="@+id/book_cover_image"
-			android:scaleType="fitCenter"
-			android:layout_width="280dp"
-			android:layout_height="392dp"
+			android:background="@drawable/shadow_rect_background"
+			android:scaleType="fitXY"
+			android:layout_width="282dp"
+			android:layout_height="394dp"
 			android:layout_marginTop="8dp"
 			android:layout_gravity="center_horizontal"
-			android:elevation="8dp"
-			android:padding="4dp"
-			android:outlineAmbientShadowColor="@android:color/black"
-	    />
+		/>
 
 		<RelativeLayout
 			android:id="@+id/chapter_selection_layout"

@@ -1,15 +1,14 @@
 ﻿using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.Support.V4.Media;
-using Android.Support.V4.Media.Session;
+using Android.Views;
 using Android.Widget;
 using AndroidX.AppCompat.App;
-using AudioBookPlayer.Core;
-using AudioBookPlayer.MediaBrowserConnector;
-using System.Collections.Generic;
-using Android.Views;
-using AndroidX.Core.App;
+using AndroidX.Palette.Graphics;
 using AudioBookPlayer.App.Core.Internal;
 using AudioBookPlayer.App.Views.Fragments;
+using AudioBookPlayer.Core;
+using AudioBookPlayer.MediaBrowserConnector;
 using Uri = Android.Net.Uri;
 
 #nullable enable
@@ -19,6 +18,8 @@ namespace AudioBookPlayer.App.Presenters
     internal sealed class NowPlayingPresenter : MediaService.IMediaServiceListener
     {
         private readonly MainActivityPresenter ownerPresenter;
+        private MediaService? mediaService;
+        private RelativeLayout? containerLayout;
         private TextView? collapsedBookTitle;
         private TextView? collapsedChapterTitle;
         private TextView? expandedBookTitle;
@@ -38,6 +39,7 @@ namespace AudioBookPlayer.App.Presenters
 
         public void AttachView(AppCompatActivity activity)
         {
+            containerLayout = activity.FindViewById<RelativeLayout>(Resource.Id.bottom_navigation_container);
             playPauseButton = activity.FindViewById<ImageButton>(Resource.Id.play_pause_button);
             chapterSelectionButton = activity.FindViewById<ImageButton>(Resource.Id.chapter_selection_button);
             collapsedBookTitle = activity.FindViewById<TextView>(Resource.Id.collapsed_book_title);
@@ -89,6 +91,12 @@ namespace AudioBookPlayer.App.Presenters
             //button1ClickSubscription?.Dispose();
         }
 
+        public void AddListener(MediaService service)
+        {
+            mediaService = service;
+            mediaService.AddListener(this);
+        }
+
         private void OnChapterSelectionButtonClick(View? button)
         {
             var dialog = ChapterDialogFragment.NewInstance();
@@ -101,7 +109,7 @@ namespace AudioBookPlayer.App.Presenters
             //playbackToast?.Show();
         }
 
-        #region MediaBrowserServiceConnector.IMediaServiceObserver
+        #region MediaService.IMediaServiceListener
 
         void MediaService.IMediaServiceListener.OnMetadataChanged(MediaMetadataCompat metadata)
         {
@@ -135,27 +143,75 @@ namespace AudioBookPlayer.App.Presenters
             }
         }
 
-        void MediaService.IMediaServiceListener.OnQueueChanged(IList<MediaSessionCompat.QueueItem> queue)
+        void MediaService.IMediaServiceListener.OnQueueChanged()
         {
-            if (0 < queue.Count)
-            {
-                if (null != collapsedChapterTitle)
-                {
-                    collapsedChapterTitle.Text = queue[0].Description.Title;
-                }
+            ;
+        }
 
-                if (null != expandedChapterTitle)
+        void MediaService.IMediaServiceListener.OnPlaybackStateChanged()
+        {
+            if (null != mediaService && 0 < mediaService.MediaQueue.Count)
+            {
+                var queue = mediaService.MediaQueue;
+
+                for (var index = 0; index < queue.Count; index++)
                 {
-                    expandedChapterTitle.Text = queue[0].Description.Title;
+                    var queueItem = queue[index];
+
+                    if (queueItem.QueueId == mediaService.ActiveQueueItemId)
+                    {
+                        var description = queueItem.Description;
+
+                        if (null != collapsedChapterTitle)
+                        {
+                            collapsedChapterTitle.Text = description.Title;
+                        }
+
+                        if (null != expandedChapterTitle)
+                        {
+                            expandedChapterTitle.Text = description.Title;
+                        }
+
+                        break;
+                    }
                 }
             }
         }
 
         #endregion
 
-        private static void OnImageLoaded(ImageView imageView, Uri imageUri, Bitmap? _, Bitmap? cover)
+        private void OnImageLoaded(ImageView imageView, Uri imageUri, Bitmap? _, Bitmap? cover)
         {
             imageView.SetImageBitmap(cover);
+
+            if (null != containerLayout)
+            {
+                var builder = new Palette.Builder(cover);
+                var listener = new PaletteListener(containerLayout, expandedBookTitle, expandedChapterTitle);
+
+                builder.Generate(listener);
+            }
+        }
+
+        private sealed class PaletteListener : Java.Lang.Object, Palette.IPaletteAsyncListener
+        {
+            private readonly RelativeLayout layout;
+            private readonly TextView? titleView;
+            private readonly TextView? descriptionView;
+
+            public PaletteListener(RelativeLayout layout, TextView? titleView, TextView? descriptionView)
+            {
+                this.layout = layout;
+                this.titleView = titleView;
+                this.descriptionView = descriptionView;
+            }
+
+            public void OnGenerated(Palette palette)
+            {
+                layout.Background = new ColorDrawable(new Color(palette.DarkMutedSwatch.Rgb));
+                titleView?.SetTextColor(new Color(palette.MutedSwatch.TitleTextColor));
+                descriptionView?.SetTextColor(new Color(palette.MutedSwatch.BodyTextColor));
+            }
         }
     }
 }

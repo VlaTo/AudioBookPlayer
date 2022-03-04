@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/title_settings">
+
+	<PreferenceCategory 
+		android:title="@string/preference_chapters_group">
+
+		<CheckBoxPreference
+			android:key="Chapters.CloseDialogAfterTap"
+			android:title="@string/preference_title_close_dialog_after_tap"
+			android:summary="@string/preference_description_close_dialog_after_tap"
+		/>
+
+	</PreferenceCategory>
 
 	<PreferenceCategory 
 		android:title="@string/preference_play_group">
 
 		<CheckBoxPreference
-			android:key="preference_play_on_headset_connected"
+			android:key="Playback.PlayOnHeadsetConnected"
 			android:title="@string/preference_title_play_on_headset_connected"
 			android:summary="@string/preference_description_play_on_headset_connected"
 		/>
 		<SeekBarPreference
-			android:key="preference_rewind_offset"
+			android:key="Playback.SeekStep"
 			android:title="@string/preference_title_rewind_offset"
 			android:summary="@string/preference_description_rewind_offset"
 			android:min="5"
