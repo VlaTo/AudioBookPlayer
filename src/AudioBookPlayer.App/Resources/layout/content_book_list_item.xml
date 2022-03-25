@@ -25,6 +25,7 @@
 	    android:layout_alignParentTop="true"
 	    android:layout_toRightOf="@id/book_item_cover"
 	    android:layout_marginLeft="8dp"
+	    android:layout_marginRight="28dp"
     />
 
     <TextView
@@ -38,6 +39,7 @@
 	    android:layout_below="@id/book_item_title"
 	    android:layout_marginLeft="8dp"
 	    android:layout_marginTop="2dp"
+	    android:layout_marginRight="28dp"
     />
 
     <LinearLayout
@@ -45,9 +47,9 @@
 	    android:orientation="horizontal"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
-	    android:layout_alignParentRight="true"
 	    android:layout_toRightOf="@id/book_item_cover"
-	    android:layout_below="@id/book_item_author">
+	    android:layout_below="@id/book_item_author"
+	    android:layout_marginRight="28dp">
 
 	    <ImageView
 		    android:id="@+id/book_item_duration_icon"
@@ -74,5 +76,14 @@
 	    />
 
     </LinearLayout>
+
+	<ImageView
+		android:id="@+id/book_item_more_action"
+		android:src="@drawable/ic_more_vert"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentTop="true"
+        android:layout_width="32dp"
+        android:layout_height="48dp"
+    />
 
 </RelativeLayout>

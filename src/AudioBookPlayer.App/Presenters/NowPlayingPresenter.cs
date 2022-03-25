@@ -83,6 +83,12 @@ namespace AudioBookPlayer.App.Presenters
                 var listener = ClickListener.Create(OnStartPlayButtonClick);
                 fastForwardButton.SetOnClickListener(listener);
             }
+
+            if (null != coverImage)
+            {
+                var listener = LongClickListener.Create(OnCoverImageLongClick);
+                coverImage.SetOnLongClickListener(listener);
+            }
         }
 
         public void DetachView()
@@ -109,6 +115,15 @@ namespace AudioBookPlayer.App.Presenters
             //playbackToast?.Show();
         }
 
+        private bool OnCoverImageLongClick(View? arg)
+        {
+            var dialog = ChangeCoverDialogFragment.NewInstance();
+
+            dialog.Show(ownerPresenter.SupportFragmentManager, null);
+            
+            return true;
+        }
+        
         #region MediaService.IMediaServiceListener
 
         void MediaService.IMediaServiceListener.OnMetadataChanged(MediaMetadataCompat metadata)

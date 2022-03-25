@@ -1,10 +1,9 @@
-﻿#nullable enable
-
-using Android.Content;
+﻿using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
 using Android.Views;
 using Android.Widget;
+using AudioBookPlayer.App.Core.Internal;
 using AudioBookPlayer.App.Models;
 using AudioBookPlayer.Core;
 using System;
@@ -12,6 +11,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using BookItem = AudioBookPlayer.App.Models.BookItem;
 using Uri = Android.Net.Uri;
+
+#nullable enable
 
 namespace AudioBookPlayer.App.Views
 {
@@ -93,6 +94,7 @@ namespace AudioBookPlayer.App.Views
             var titleView = view?.FindViewById<TextView>(Resource.Id.book_item_title);
             var authorView = view?.FindViewById<TextView>(Resource.Id.book_item_author);
             var durationView = view?.FindViewById<TextView>(Resource.Id.book_item_duration_time);
+            var moreActionView = view?.FindViewById<ImageView>(Resource.Id.book_item_more_action);
             
             if (null != coverImage && null != bookItem.ImageUri)
             {
@@ -113,6 +115,11 @@ namespace AudioBookPlayer.App.Views
             {
                 var format = Resources?.GetString(Resource.String.book_item_duration_format);
                 durationView.Text = String.Format(CultureInfo.CurrentUICulture, format, bookItem.Duration);
+            }
+
+            if (null != moreActionView)
+            {
+                moreActionView.SetOnClickListener(ClickListener.Create(OnBookMoreAction));
             }
 
             return view;
@@ -140,5 +147,12 @@ namespace AudioBookPlayer.App.Views
         {
             imageView.SetImageBitmap(thumbnail);
         }
+
+        protected virtual void OnBookMoreAction(View? view)
+        {
+            ;
+        }
     }
 }
+
+#nullable restore

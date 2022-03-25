@@ -1,39 +1,33 @@
 ﻿using Android.App;
-using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Support.V4.Media;
 using Android.Support.V4.Media.Session;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
-using AudioBookPlayer.Core;
 using AudioBookPlayer.MediaBrowserConnector;
 using System;
 using System.Collections.Generic;
-using Android.Util;
 using Xamarin.Essentials;
-using Object = Java.Lang.Object;
 
 #nullable enable
 
 namespace AudioBookPlayer.App.Presenters
 {
-    internal class ChapterDialogPresenter : MediaBrowserServiceConnector.IConnectCallback, MediaService.IMediaServiceListener
+    internal class ChapterDialogPresenter : DialogPresenter, MediaBrowserServiceConnector.IConnectCallback, MediaService.IMediaServiceListener
     {
-        private readonly MediaBrowserServiceConnector connector;
-        private readonly Func<Dialog> dialogProvider;
         private GroupedAdapter? adapter;
         private MediaService? mediaService;
         private RecyclerView? recyclerView;
 
-        public ChapterDialogPresenter(Func<Dialog> dialogProvider)
+        public ChapterDialogPresenter(DialogAccessor dialogAccessor)
+            : base(dialogAccessor)
         {
-            this.dialogProvider = dialogProvider;
-            connector = MediaBrowserServiceConnector.GetInstance();
         }
 
-        public void AttachView(View? view)
+        public override void AttachView(View? view)
         {
             if (null == view)
             {
@@ -53,18 +47,16 @@ namespace AudioBookPlayer.App.Presenters
                 var offset = TypedValue.ApplyDimension(ComplexUnitType.Dip, 16.0f, view.Resources?.DisplayMetrics);
 
                 adapter = new GroupedAdapter();
-                recyclerView.SetLayoutManager(new LinearLayoutManager(context));
+                //recyclerView.SetLayoutManager(new LinearLayoutManager(context));
                 recyclerView.SetAdapter(adapter);
                 recyclerView.AddOnItemTouchListener(new ItemTouchListener(context, recyclerView, clickListener));
                 recyclerView.AddItemDecoration(new StartOffsetItemDecoration((int)offset));
                 recyclerView.AddItemDecoration(new EndOffsetItemDecoration((int)offset));
             }
 
-            var dialog = dialogProvider.Invoke();
+            Dialog.SetCanceledOnTouchOutside(true);
 
-            dialog.SetCanceledOnTouchOutside(true);
-
-            var window = dialog.Window;
+            var window = Dialog.Window;
 
             if (null != window)
             {
@@ -74,17 +66,17 @@ namespace AudioBookPlayer.App.Presenters
                 window.SetLayout(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
             }
 
-            connector.Connect(this);
+            Connector.Connect(this);
         }
 
-        public void DetachView()
+        public override void DetachView()
         {
             if (null != mediaService)
             {
                 mediaService.RemoveListener(this);
             }
 
-            connector.Disconnect(this);
+            Connector.Disconnect(this);
         }
 
         private void SetMediaQueue()
@@ -117,8 +109,7 @@ namespace AudioBookPlayer.App.Presenters
 
                     if (shouldClose)
                     {
-                        var dialog = dialogProvider.Invoke();
-                        dialog.Cancel();
+                        Dialog.Cancel();
                     }
                 }
             }
@@ -362,7 +353,6 @@ namespace AudioBookPlayer.App.Presenters
                 return items[position];
             }
 
-
             public override int GetItemViewType(int position)
             {
                 return null != items ? items[position].GetItemType() : base.GetItemViewType(position);
@@ -440,188 +430,6 @@ namespace AudioBookPlayer.App.Presenters
                 collection = null!;
 
                 return false;
-            }
-        }
-
-        #endregion
-
-        #region OnItemTouchListener
-
-        private sealed class ItemTouchListener : Object, RecyclerView.IOnItemTouchListener
-        {
-            private readonly IOnItemClickListener clickListener;
-            private readonly GestureDetector gestureDetector;
-
-            public interface IOnItemClickListener
-            {
-                void OnItemClick(View? view, int position);
-
-                void OnLongItemClick(View? view, int position);
-            }
-
-            public ItemTouchListener(Context? context, RecyclerView recyclerView, IOnItemClickListener clickListener)
-            {
-                this.clickListener = clickListener;
-                gestureDetector = new GestureDetector(context, new GestureListener(recyclerView, clickListener));
-            }
-
-            public bool OnInterceptTouchEvent(RecyclerView recyclerView, MotionEvent @event)
-            {
-                var childView = recyclerView.FindChildViewUnder(@event.GetX(), @event.GetY());
-
-                if (null != childView && gestureDetector.OnTouchEvent(@event))
-                {
-                    var position = recyclerView.GetChildAdapterPosition(childView);
-
-                    clickListener.OnItemClick(childView, position);
-                    
-                    return true;
-                }
-
-                return false;
-            }
-
-            public void OnRequestDisallowInterceptTouchEvent(bool disallow)
-            {
-                ;
-            }
-
-            public void OnTouchEvent(RecyclerView recyclerView, MotionEvent @event)
-            {
-                ;
-            }
-
-            private sealed class GestureListener : GestureDetector.SimpleOnGestureListener
-            {
-                private readonly RecyclerView recyclerView;
-                private readonly IOnItemClickListener clickListener;
-
-                public GestureListener(RecyclerView recyclerView, IOnItemClickListener clickListener)
-                {
-                    this.recyclerView = recyclerView;
-                    this.clickListener = clickListener;
-                }
-
-                public override bool OnSingleTapUp(MotionEvent? e) => true;
-
-                public override void OnLongPress(MotionEvent? e)
-                {
-                    var child = null != e ? recyclerView.FindChildViewUnder(e.GetX(), e.GetY()) : null;
-
-                    if (null == child)
-                    {
-                        return;
-                    }
-
-                    var position = recyclerView.GetChildAdapterPosition(child);
-                    
-                    clickListener.OnLongItemClick(child, position);
-                }
-            }
-        }
-
-        #endregion
-
-        #region ItemClickListener
-
-        private sealed class ItemClickListener : ItemTouchListener.IOnItemClickListener
-        {
-            public Action<View?, int> OnItemClickImpl
-            {
-                get;
-                set;
-            }
-            
-            public Action<View?, int> OnLongItemClickImpl
-            {
-                get;
-                set;
-            }
-
-            public ItemClickListener()
-            {
-                OnItemClickImpl = Stub.Nop<View?, int>();
-                OnLongItemClickImpl = Stub.Nop<View?, int>();
-            }
-
-            public void OnItemClick(View? view, int position) => OnItemClickImpl.Invoke(view, position);
-
-            public void OnLongItemClick(View? view, int position) => OnLongItemClickImpl.Invoke(view, position);
-        }
-
-        #endregion
-
-        #region StartOffsetItemDecorator
-
-        private sealed class StartOffsetItemDecoration : RecyclerView.ItemDecoration
-        {
-            private readonly int offset;
-
-            public StartOffsetItemDecoration(int offset)
-            {
-                this.offset = offset;
-            }
-
-            public override void GetItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
-            {
-                base.GetItemOffsets(outRect, view, parent, state);
-
-                if (0 == parent.GetChildAdapterPosition(view) && parent.GetLayoutManager() is LinearLayoutManager layoutManager)
-                {
-                    switch (layoutManager.Orientation)
-                    {
-                        case LinearLayoutManager.Horizontal:
-                        {
-                            outRect.Left = offset;
-                            break;
-                        }
-
-                        case LinearLayoutManager.Vertical:
-                        {
-                            outRect.Top = offset;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        #endregion
-
-        #region EndOffsetItemDecorator
-
-        private sealed class EndOffsetItemDecoration : RecyclerView.ItemDecoration
-        {
-            private readonly int offset;
-
-            public EndOffsetItemDecoration(int offset)
-            {
-                this.offset = offset;
-            }
-
-            public override void GetItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)
-            {
-                base.GetItemOffsets(outRect, view, parent, state);
-
-                var last = state.ItemCount - 1;
-
-                if (last == parent.GetChildAdapterPosition(view) && parent.GetLayoutManager() is LinearLayoutManager layoutManager)
-                {
-                    switch (layoutManager.Orientation)
-                    {
-                        case LinearLayoutManager.Horizontal:
-                        {
-                            outRect.Right = offset;
-                            break;
-                        }
-
-                        case LinearLayoutManager.Vertical:
-                        {
-                            outRect.Bottom = offset;
-                            break;
-                        }
-                    }
-                }
             }
         }
 

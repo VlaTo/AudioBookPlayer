@@ -1,9 +1,11 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
 using AndroidX.AppCompat.App;
+using AndroidX.AppCompat.Widget;
 using AudioBookPlayer.App.Core;
 using AudioBookPlayer.App.Presenters;
 using AudioBookPlayer.Core;
@@ -15,7 +17,7 @@ namespace AudioBookPlayer.App.Views.Activities
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     [IntentFilter(new [] { Intent.ActionView, Platform.Intent.ActionAppAction }, Categories = new []{ Intent.CategoryDefault })]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : AppCompatActivity, SearchView.IOnQueryTextListener, IMenuItemOnActionExpandListener
     {
         private const int SettingsActivityRequest = 100;
 
@@ -33,6 +35,21 @@ namespace AudioBookPlayer.App.Views.Activities
         public override bool OnCreateOptionsMenu(IMenu? menu)
         {
             MenuInflater.Inflate(Resource.Menu.main_activity_menu, menu);
+            
+            var searchItem = menu?.FindItem(Resource.Id.action_search);
+
+            if (null != searchItem)
+            {
+                var searchView = searchItem.ActionView.JavaCast<SearchView>();
+
+                if (null != searchView)
+                {
+                    searchView.SetOnQueryTextListener(this);
+                }
+
+                searchItem.SetOnActionExpandListener(this);
+            }
+
             return true;
         }
 
@@ -109,6 +126,34 @@ namespace AudioBookPlayer.App.Views.Activities
 
             StartActivityForResult(intent, SettingsActivityRequest, options);
         }*/
+
+        #region SearchView.IOnQueryTextListener
+
+        bool SearchView.IOnQueryTextListener.OnQueryTextChange(string newText)
+        {
+            return true;
+        }
+
+        bool SearchView.IOnQueryTextListener.OnQueryTextSubmit(string newText)
+        {
+            return true;
+        }
+
+        #endregion
+        
+        #region IMenuItemOnActionExpandListener
+
+        bool IMenuItemOnActionExpandListener.OnMenuItemActionCollapse(IMenuItem? item)
+        {
+            return true;
+        }
+
+        bool IMenuItemOnActionExpandListener.OnMenuItemActionExpand(IMenuItem? item)
+        {
+            return true;
+        }
+
+        #endregion
     }
 }
 

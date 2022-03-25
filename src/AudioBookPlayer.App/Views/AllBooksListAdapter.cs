@@ -4,6 +4,9 @@ using AudioBookPlayer.App.Models;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Android.Views;
+using AndroidX.Fragment.App;
+using AudioBookPlayer.App.Views.Fragments;
 
 #nullable enable
 
@@ -11,15 +14,30 @@ namespace AudioBookPlayer.App.Views
 {
     internal sealed class AllBooksListAdapter : BooksListAdapter
     {
-        public AllBooksListAdapter(Context context, Resources? resources)
+        private readonly FragmentManager fragmentManager;
+
+        public AllBooksListAdapter(
+            Context context,
+            Resources? resources,
+            FragmentManager fragmentManager)
             : base(new Sorter(), context, resources)
         {
+            this.fragmentManager = fragmentManager;
         }
 
         public override void Detach()
         {
             base.Detach();
         }
+
+        protected override void OnBookMoreAction(View? view)
+        {
+            var dialog = SectionReorderDialogFragment.NewInstance();
+
+            dialog.Show(fragmentManager, null);
+        }
+
+        #region Sorter
 
         private sealed class Sorter : IComparer<BaseItem>
         {
@@ -53,6 +71,8 @@ namespace AudioBookPlayer.App.Views
                 return 1;
             }
         }
+
+        #endregion
     }
 }
 

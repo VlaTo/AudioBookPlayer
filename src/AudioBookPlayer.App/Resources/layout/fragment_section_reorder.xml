@@ -5,17 +5,15 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:background="@drawable/dialog_rounded_background"
 	android:orientation="vertical"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
 	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/list_view_recycler"
+		android:id="@+id/sections_view_recycler"
 		android:orientation="vertical"
 		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:clipToPadding="false"
-		tools:context=".ChapterSelectionFragment"
 	/>
 
 </LinearLayout>

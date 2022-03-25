@@ -14,7 +14,7 @@ namespace AudioBookPlayer.App.Presenters
         }
 
         protected override BooksListAdapter CreateBookListAdapter() =>
-            new AllBooksListAdapter(Application.Context, Application.Context.Resources);
+            new AllBooksListAdapter(Application.Context, Application.Context.Resources, MainActivity.SupportFragmentManager);
     }
 }
 

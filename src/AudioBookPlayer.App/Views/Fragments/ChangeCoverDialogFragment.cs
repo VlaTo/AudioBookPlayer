@@ -5,17 +5,15 @@ using Android.Views;
 using AndroidX.AppCompat.App;
 using AudioBookPlayer.App.Presenters;
 
-#nullable enable
-
 namespace AudioBookPlayer.App.Views.Fragments
 {
-    public sealed class ChapterDialogFragment : AppCompatDialogFragment
+    public class ChangeCoverDialogFragment : AppCompatDialogFragment
     {
-        private readonly ChapterDialogPresenter presenter;
+        private readonly ChangeCoverDialogPresenter presenter;
 
-        public static ChapterDialogFragment NewInstance()
+        public static ChangeCoverDialogFragment NewInstance()
         {
-            var fragment = new ChapterDialogFragment
+            var fragment = new ChangeCoverDialogFragment
             {
                 Arguments = new Bundle()
             };
@@ -23,15 +21,15 @@ namespace AudioBookPlayer.App.Views.Fragments
             return fragment;
         }
 
-        public ChapterDialogFragment()
+        public ChangeCoverDialogFragment()
         {
-            presenter = new ChapterDialogPresenter(() => Dialog);
+            presenter = new ChangeCoverDialogPresenter(() => Dialog);
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var _ = base.OnCreateView(inflater, container, savedInstanceState);
-            var view = inflater.Inflate(Resource.Layout.fragment_chapter_selection, container, false);
+            var view = inflater.Inflate(Resource.Layout.fragment_section_reorder, container, false);
 
             presenter.AttachView(view);
 
@@ -47,7 +45,7 @@ namespace AudioBookPlayer.App.Views.Fragments
         public override void OnStart()
         {
             base.OnStart();
-            
+
             var window = Dialog.Window;
 
             if (null != window)
@@ -64,7 +62,7 @@ namespace AudioBookPlayer.App.Views.Fragments
                     {
                         layoutParams.Width = width;
                         layoutParams.Height = height;
-                        
+
                         window.Attributes = layoutParams;
                     }
                 }
@@ -72,5 +70,3 @@ namespace AudioBookPlayer.App.Views.Fragments
         }
     }
 }
-
-#nullable restore

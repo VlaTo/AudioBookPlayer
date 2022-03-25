@@ -5,6 +5,7 @@
 	<string name="navigation_drawer_close">Закрыть панель навигации</string>
 
 	<string name="action_settings">Настройки</string>
+	<string name="action_search">Поиск</string>
 	<string name="action_snooze">Snooze</string>
 	<string name="action_bookmark">Закладки</string>
 	<string name="action_library_update">Обновить библиотеку</string>
